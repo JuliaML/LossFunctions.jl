@@ -4,6 +4,8 @@ This package is an attempt to provide common interfaces and function definitions
 
 [![Build Status](https://travis-ci.org/Evizero/LearnBase.jl.svg?branch=master)](https://travis-ci.org/Evizero/LearnBase.jl)
 
+Everything here is subject to change. The initial code here is just factored out code that i have currently in use
+
 # Example
 
 Base classes for common types of machine learning entities
