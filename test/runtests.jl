@@ -1,5 +1,29 @@
 using LearnBase
 using Base.Test
 
-# write your own tests here
-@test 1 == 1
+function msg(args...)
+  println("   --> ", args...)
+end
+
+tests = [
+  "tst_classencoding.jl"
+  "tst_datasource.jl"
+]
+
+perf = [
+  #"bm_datasource.jl"
+]
+
+for t in tests
+  println("[->] $t")
+  include(t)
+  println("[OK] $t")
+  println("====================================================================")
+end
+
+for p in perf
+  println("[->] $p")
+  include(p)
+  println("[OK] $p")
+  println("====================================================================")
+end
