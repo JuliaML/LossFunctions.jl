@@ -34,11 +34,6 @@ isconvex(::Cost) = false
 
 abstract Loss <: Cost
 
-value(l::Loss, X::AbstractArray, y::Real, t::Real) = @_not_implemented
-deriv(l::Loss, X::AbstractArray, y::Real, t::Real) = @_not_implemented
-deriv2(l::Loss, X::AbstractArray, y::Real, t::Real) = @_not_implemented
-value_deriv(l::Loss, X::AbstractArray, y::Real, t::Real) = @_not_implemented
-
 isnemitski(l::Loss) = islocallylipschitzcont(l)
 islipschitzcont(::Loss) = false
 islocallylipschitzcont(::Loss) = false
