@@ -7,7 +7,6 @@ end
 
 tests = [
   "tst_classencoding.jl"
-  "tst_datasource.jl"
 ]
 
 perf = [
