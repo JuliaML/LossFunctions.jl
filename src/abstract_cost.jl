@@ -121,7 +121,7 @@ isfishercons(l::MarginBasedLoss) = isunivfishercons(l)
 isnemitski(::MarginBasedLoss) = true
 islocallylipschitzcont(l::MarginBasedLoss) = isconvex(l)
 ismarginbased(::MarginBasedLoss) = true
-isclasscalibrated(::MarginBasedLoss) = true
+isclasscalibrated(l::MarginBasedLoss) = isconvex(l) && isdifferentiable(l) && deriv(l, 0) < 0
 
 # ==========================================================================
 
