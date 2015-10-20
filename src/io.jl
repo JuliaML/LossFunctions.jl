@@ -18,7 +18,7 @@ function show(io::IO, loss::Union{MarginBasedLoss,DistanceBasedLoss})
   print(io, newPlot)
 end
 
-function show(io::IO, loss::SigmoidCrossentropyLoss)
+function show(io::IO, loss::CrossentropyLoss)
   println(io, loss)
   f0(x) = value(loss, 0, x)
   f1(x) = value(loss, 1, x)
@@ -36,9 +36,10 @@ function show(io::IO, loss::SigmoidCrossentropyLoss)
   newPlot = lineplot([g0, g1], 0.000001, 0.99999, ylim=[-1,1], margin = 1, width = 20, height = 5, name = " ")
   xl = xlabel(newPlot)
   ylabel!(newPlot, "L'")
-  xlabel!(newPlot, "σ(x)")
+  xlabel!(newPlot, "σ(wᵀx)")
   annotate!(newPlot, :r, 1, "", :blue)
   annotate!(newPlot, :r, 2, "", :red)
+  annotate!(newPlot, :r, 3, "∂L/∂w")
   print(io, newPlot)
 end
 

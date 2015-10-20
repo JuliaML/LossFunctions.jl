@@ -28,7 +28,7 @@ export
               l2_deriv,
               l2_deriv2,
               l2_loss_deriv,
-          SigmoidCrossentropyLoss,
+          CrossentropyLoss,
         UnsupervisedLoss,
 
     value,
