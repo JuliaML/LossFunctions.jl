@@ -1,6 +1,6 @@
 
 # ==========================================================================
-# L(y, t) = |y - t|
+# L(y, t) = |y - t|^P
 
 immutable LPLoss{P} <: DistanceBasedLoss
   LPLoss() = typeof(P) <: Real ? new() : error()

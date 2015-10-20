@@ -28,6 +28,7 @@ export
               l2_deriv,
               l2_deriv2,
               l2_loss_deriv,
+          SigmoidCrossentropyLoss,
         UnsupervisedLoss,
 
     value,
@@ -61,6 +62,7 @@ include("common.jl")
 include("abstract_cost.jl")
 include("margin_based.jl")
 include("distance_based.jl")
+include("other.jl")
 include("io.jl")
 
 end # module
