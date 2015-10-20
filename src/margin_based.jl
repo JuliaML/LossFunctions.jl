@@ -47,7 +47,7 @@ hinge_loss{T<:Real}(yt::T) = max(zero(T), 1 - yt)
 
 hinge_deriv(y::Real, t::Real) = hinge_deriv(y * t)
 function hinge_deriv{T<:Real}(yt::T)
-  yt > 1 ? zero(T) : -one(T)
+  yt >= 1 ? zero(T) : -one(T)
 end
 
 hinge_deriv2{T<:Real}(y::Real, t::T) = zero(T)
@@ -55,7 +55,7 @@ hinge_deriv2{T<:Real}(yt::T) = zero(T)
 
 hinge_loss_deriv(y::Real, t::Real) = hinge_loss_deriv(y * t)
 function hinge_loss_deriv{T<:Real}(yt::T)
-  yt > 1 ? (zero(T), zero(T)) : (1 - yt, -one(T))
+  yt >= 1 ? (zero(T), zero(T)) : (1 - yt, -one(T))
 end
 
 value(l::HingeLoss, yt::Real) = hinge_loss(yt)
