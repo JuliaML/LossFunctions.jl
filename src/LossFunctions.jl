@@ -17,6 +17,7 @@ export
               logit_deriv2,
               logit_loss_deriv,
           DistanceBasedLoss,
+            LPLoss,
             L1Loss,
               l1_loss,
               l1_deriv,

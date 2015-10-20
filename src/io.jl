@@ -23,7 +23,7 @@ function lineplot(
     args...;
     name = string(typeof(loss).name.name),
     nargs...)
-  newPlot = lineplot(representing_fun(loss), args...; name = name, nargs...)
+  newPlot = lineplot(repr_fun(loss), args...; name = name, nargs...)
   xlabel!(newPlot, "y * f(x)")
   ylabel!(newPlot, "L(y,f(x))")
 end
@@ -33,7 +33,7 @@ function lineplot(
     args...;
     name = string(typeof(loss).name.name),
     nargs...)
-  newPlot = lineplot(representing_fun(loss), args...; name = name, nargs...)
+  newPlot = lineplot(repr_fun(loss), args...; name = name, nargs...)
   xlabel!(newPlot, "y - f(x)")
   ylabel!(newPlot, "L(y,f(x))")
 end
@@ -44,7 +44,7 @@ function lineplot!(
     args...;
     name = string(typeof(loss).name.name),
     nargs...)
-  lineplot!(plot, representing_fun(loss), args...; name = name, nargs...)
+  lineplot!(plot, repr_fun(loss), args...; name = name, nargs...)
 end
 
 function lineplot{T<:Union{MarginBasedLoss,DistanceBasedLoss}}(

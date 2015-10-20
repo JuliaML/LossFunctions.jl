@@ -91,7 +91,7 @@ deriv2(l::MarginBasedLoss, y::Real, t::Real) = deriv2(l, y * t)
 value_deriv(l::MarginBasedLoss, y::Real, t::Real) = value_deriv(l, y * t)
 
 call(l::MarginBasedLoss, yt::Real) = value(l, yt)
-transpose(l::MarginBasedLoss) = representing_deriv_fun(l)
+transpose(l::MarginBasedLoss) = repr_deriv_fun(l)
 value(l::MarginBasedLoss, yt::Real) = @_not_implemented
 deriv(l::MarginBasedLoss, yt::Real) = @_not_implemented
 deriv2(l::MarginBasedLoss, yt::Real) = @_not_implemented
@@ -129,7 +129,7 @@ deriv2(l::DistanceBasedLoss, y::Real, t::Real) = deriv2(l, y - t)
 value_deriv(l::DistanceBasedLoss, y::Real, t::Real) = value_deriv(l, y - t)
 
 call(l::DistanceBasedLoss, r::Real) = value(l, r)
-transpose(l::DistanceBasedLoss) = representing_deriv_fun(l)
+transpose(l::DistanceBasedLoss) = repr_deriv_fun(l)
 value(l::DistanceBasedLoss, r::Real) = @_not_implemented
 deriv(l::DistanceBasedLoss, r::Real) = @_not_implemented
 deriv2(l::DistanceBasedLoss, r::Real) = @_not_implemented
