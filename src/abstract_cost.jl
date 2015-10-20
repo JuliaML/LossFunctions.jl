@@ -39,7 +39,6 @@ isnemitski(l::Loss) = islocallylipschitzcont(l)
 islipschitzcont(::Loss) = false
 islocallylipschitzcont(::Loss) = false
 isclipable(::Loss) = false
-isclipable(l::Loss, M::Real) = M > 0 ? isclipable(l) : false
 
 # ==========================================================================
 
@@ -117,7 +116,7 @@ isfishercons(l::MarginBasedLoss) = isunivfishercons(l)
 isnemitski(::MarginBasedLoss) = true
 islocallylipschitzcont(l::MarginBasedLoss) = isconvex(l)
 ismarginbased(::MarginBasedLoss) = true
-isclasscalibrated(l::MarginBasedLoss) = isconvex(l) && isdifferentiable(l) && deriv(l, 0) < 0
+isclasscalibrated(l::MarginBasedLoss) = isconvex(l) && isdifferentiable(l, 0) && deriv(l, 0) < 0
 
 # ==========================================================================
 

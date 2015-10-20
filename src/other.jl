@@ -4,10 +4,18 @@
 
 immutable CrossentropyLoss <: SupervisedLoss end
 
-crossentropy_loss(y::Real, t::Real) = y > 0 ? -log(t) : -log(1 - t)
+function crossentropy_loss(y::Real, t::Real)
+  if y == 1
+    -log(t)
+  elseif y == 0
+    -log(1 - t)
+  else
+    -y*log(t)-(1-y)*log(1-t)
+  end
+end
 crossentropy_deriv(y::Real, t::Real) = t - y
 crossentropy_deriv2(y::Real, t::Real) = 1
-crossentropy_loss_deriv(y::Real, t::Real) = y > 0 ? (-log(t), t - 1) : (-log(1 - t), t)
+crossentropy_loss_deriv(y::Real, t::Real) = (crossentropy_loss(y,t), crossentropy_deriv(y,t))
 
 value(l::CrossentropyLoss, y::Real, t::Real) = crossentropy_loss(y, t)
 deriv(l::CrossentropyLoss, y::Real, t::Real) = crossentropy_deriv(y, t)
