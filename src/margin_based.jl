@@ -35,7 +35,7 @@ isdifferentiable(::LogitLoss) = true
 isdifferentiable(::LogitLoss, at) = true
 islipschitzcont(::LogitLoss) = true
 isconvex(::LogitLoss) = true
-isclipable(::LogitLoss) = true
+isclipable(::LogitLoss) = false
 
 # ==========================================================================
 # L(y, t) = max(0, 1 - yt)
@@ -75,19 +75,19 @@ isclipable(::HingeLoss) = true
 immutable SqrHingeLoss <: MarginBasedLoss end
 
 sqrhinge_loss(y::Real, t::Real) = sqrhinge_loss(y * t)
-sqrhinge_loss{T<:Real}(yt::T) = yt > 1 ? zero(T) : abs2(1 - yt)
+sqrhinge_loss{T<:Real}(yt::T) = yt >= 1 ? zero(T) : abs2(1 - yt)
 
 sqrhinge_deriv(y::Real, t::Real) = sqrhinge_deriv(y * t)
 function sqrhinge_deriv{T<:Real}(yt::T)
-  yt > 1 ? zero(T) : 2(yt - one(T))
+  yt >= 1 ? zero(T) : 2(yt - one(T))
 end
 
 sqrhinge_deriv2{T<:Real}(y::Real, t::T) = sqrhinge_deriv2(y * t)
-sqrhinge_deriv2{T<:Real}(yt::T) = yt > 1 ? zero(T) : convert(T, -2)
+sqrhinge_deriv2{T<:Real}(yt::T) = yt >= 1 ? zero(T) : convert(T, -2)
 
 sqrhinge_loss_deriv(y::Real, t::Real) = sqrhinge_loss_deriv(y * t)
 function sqrhinge_loss_deriv{T<:Real}(yt::T)
-  yt > 1 ? (zero(T), zero(T)) : (1 - yt, -one(T))
+  yt >= 1 ? (zero(T), zero(T)) : (1 - yt, -one(T))
 end
 
 value(l::SqrHingeLoss, yt::Real) = sqrhinge_loss(yt)
@@ -120,11 +120,20 @@ end
 
 function deriv{T<:Real}(l::SqrSmoothedHingeLoss, yt::T)
   if yt >= 1 - l.γ
-    yt > 1 ? zero(T) : (yt - one(T)) / l.γ
+    yt >= 1 ? zero(T) : (yt - one(T)) / l.γ
   else
     -one(T)
   end
 end
 
-deriv2(l::SqrSmoothedHingeLoss, yt::Real) = sqrhinge_deriv2(yt)
-value_deriv(l::SqrSmoothedHingeLoss, yt::Real) = sqrhinge_loss_deriv(yt)
+function deriv2(l::SqrSmoothedHingeLoss, yt::Real)
+  yt < 1 - l.γ && yt >= 1 ? zero(T) : one(T)
+end
+
+value_deriv(l::SqrSmoothedHingeLoss, yt::Real) = (value(l, yt), deriv(l, yt))
+
+isdifferentiable(::SqrHingeLoss) = true
+isdifferentiable(::SqrHingeLoss, at) = true
+islocallylipschitzcont(::SqrHingeLoss) = true
+isconvex(::SqrHingeLoss) = true
+isclipable(::SqrHingeLoss) = true
