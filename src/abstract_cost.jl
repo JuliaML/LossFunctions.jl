@@ -28,6 +28,7 @@ end
 
 isminimizable(c::Cost) = isconvex(c)
 isdifferentiable(::Cost) = false
+isdifferentiable(c::Cost, at) = isdifferentiable(c)
 isconvex(::Cost) = false
 
 # ==========================================================================
@@ -96,17 +97,17 @@ deriv(l::MarginBasedLoss, yt::Real) = @_not_implemented
 deriv2(l::MarginBasedLoss, yt::Real) = @_not_implemented
 value_deriv(l::MarginBasedLoss, yt::Real) = @_not_implemented
 
-function representing_fun(l::MarginBasedLoss)
+function repr_fun(l::MarginBasedLoss)
   _φ(yt::Real) = value(l, yt)
   _φ
 end
 
-function representing_deriv_fun(l::MarginBasedLoss)
+function repr_deriv_fun(l::MarginBasedLoss)
   _φ_deriv(yt::Real) = deriv(l, yt)
   _φ_deriv
 end
 
-function representing_deriv2_fun(l::MarginBasedLoss)
+function repr_deriv2_fun(l::MarginBasedLoss)
   _φ_deriv2(yt::Real) = deriv2(l, yt)
   _φ_deriv2
 end
@@ -134,17 +135,17 @@ deriv(l::DistanceBasedLoss, r::Real) = @_not_implemented
 deriv2(l::DistanceBasedLoss, r::Real) = @_not_implemented
 value_deriv(l::DistanceBasedLoss, r::Real) = @_not_implemented
 
-function representing_fun(l::DistanceBasedLoss)
+function repr_fun(l::DistanceBasedLoss)
   _ψ(r::Real) = value(l, r)
   _ψ
 end
 
-function representing_deriv_fun(l::DistanceBasedLoss)
+function repr_deriv_fun(l::DistanceBasedLoss)
   _ψ_deriv(r::Real) = deriv(l, r)
   _ψ_deriv
 end
 
-function representing_deriv2_fun(l::DistanceBasedLoss)
+function repr_deriv2_fun(l::DistanceBasedLoss)
   _ψ_deriv2(r::Real) = deriv2(l, r)
   _ψ_deriv2
 end

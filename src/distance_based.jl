@@ -22,7 +22,8 @@ deriv2(l::L1Loss, r::Real) = l1_deriv2(r)
 value_deriv(l::L1Loss, r::Real) = l1_loss_deriv(r)
 
 issymmetric(::L1Loss) = true
-isdifferentiable(::L1Loss) = true
+isdifferentiable(::L1Loss) = false
+isdifferentiable(::L1Loss, at) = at != 0
 islipschitzcont(::L1Loss) = true
 isconvex(::L1Loss) = true
 
@@ -50,5 +51,6 @@ value_deriv(l::L2Loss, r::Real) = l2_loss_deriv(r)
 
 issymmetric(::L2Loss) = true
 isdifferentiable(::L2Loss) = true
+isdifferentiable(::L2Loss, at) = true
 islipschitzcont(::L2Loss) = false
 isconvex(::L2Loss) = true
