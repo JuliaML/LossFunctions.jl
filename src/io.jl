@@ -22,12 +22,13 @@ function show(io::IO, loss::CrossentropyLoss)
   println(io, loss)
   f0(x) = value(loss, 0, x)
   f1(x) = value(loss, 1, x)
-  newPlot = lineplot([f0, f1], 0.000001, 0.99999, ylim=[0,10], margin = 1, width = 20, height = 5, name = " ")
+  newPlot = lineplot([f0, f1], 0.000001, 0.99999, ylim=[0,8], margin = 1, width = 20, height = 5, name = " ")
   xl = xlabel(newPlot)
-  ylabel!(newPlot, "L ")
+  ylabel!(newPlot, "")
   xlabel!(newPlot, "")
   annotate!(newPlot, :r, 2, "y = 0", :blue)
   annotate!(newPlot, :r, 3, "y = 1", :red)
+  annotate!(newPlot, :l, 3, "L(y,σ) ")
   annotate!(newPlot, :br, "")
   annotate!(newPlot, :bl, "")
   print(io, newPlot)
@@ -35,11 +36,11 @@ function show(io::IO, loss::CrossentropyLoss)
   g1(x) = deriv(loss, 1, x)
   newPlot = lineplot([g0, g1], 0.000001, 0.99999, ylim=[-1,1], margin = 1, width = 20, height = 5, name = " ")
   xl = xlabel(newPlot)
-  ylabel!(newPlot, "L'")
+  ylabel!(newPlot, "")
   xlabel!(newPlot, "σ(wᵀx)")
   annotate!(newPlot, :r, 1, "", :blue)
   annotate!(newPlot, :r, 2, "", :red)
-  annotate!(newPlot, :r, 3, "∂L/∂w")
+  annotate!(newPlot, :l, 3, " ∂L/∂w ")
   print(io, newPlot)
 end
 
@@ -61,6 +62,29 @@ function lineplot(
   newPlot = lineplot(repr_fun(loss), args...; name = name, nargs...)
   xlabel!(newPlot, "y - f(x)")
   ylabel!(newPlot, "L(y,f(x))")
+end
+
+function lineplot(
+    loss::CrossentropyLoss,
+    args...;
+    ylim = [0, 5],
+    title = string(typeof(loss).name.name),
+    nargs...)
+  f0(x) = value(loss, 0, x)
+  f05(x) = value(loss, 0.5, x)
+  f1(x) = value(loss, 1, x)
+  newPlot = lineplot([f0, f05, f1], args...; ylim = ylim, title = title, nargs...)
+  xlabel!(newPlot, "t = σ(wᵀx)")
+  ylabel!(newPlot, "L(y,t)")
+  annotate!(newPlot, :r, 1, "y = 0", :blue)
+  annotate!(newPlot, :r, 2, "y = 0.5", :red)
+  annotate!(newPlot, :r, 3, "y = 1", :yellow)
+end
+
+function lineplot(
+    loss::CrossentropyLoss;
+    nargs...)
+  lineplot(loss, .000001, .999999; nargs...)
 end
 
 function lineplot!(
