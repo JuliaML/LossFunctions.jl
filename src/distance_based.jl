@@ -85,3 +85,28 @@ function value_deriv{T<:Real}(l::EpsilonInsLoss, r::T)
   absr <= l.eps ? (zero(T), zero(T)) : (absr - l.eps, sign(r))
 end
 
+# ==========================================================================
+# L(y, t) = -ln(4 * exp(y - t) / (1 + exp(y - t))²)
+
+immutable LogitDistLoss <: DistanceBasedLoss end
+
+function value(l::LogitDistLoss, r::Real)
+  er = exp(r)
+  -log(4 * er / abs2(1 + er))
+end
+
+function deriv(l::LogitDistLoss, r::Real)
+  tanh(r / 2)
+end
+
+function deriv2(l::LogitDistLoss, r::Real)
+  er = exp(r)
+  2*er / abs2(1 + er)
+end
+
+function value_deriv(l::LogitDistLoss, r::Real)
+  er = exp(r)
+  er1 = 1 + er
+  -log(4 * er / abs2(er1)), (er - 1) / (er1)
+end
+

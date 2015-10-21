@@ -20,3 +20,37 @@ value_deriv(l::CrossentropyLoss, y::Real, t::Real) = (value(l,y,t), deriv(l,y,t)
 
 isdifferentiable(::CrossentropyLoss) = true
 isconvex(::CrossentropyLoss) = true
+
+# ==========================================================================
+# L(y, t) = sign(yt) < 0 ? 1 : 0
+
+immutable ZeroOneLoss <: SupervisedLoss end
+
+call(l::ZeroOneLoss, yt::Real) = value(l, yt)
+transpose(l::ZeroOneLoss) = repr_deriv_fun(l)
+value(l::ZeroOneLoss, y::Real, t::Real) = value(l, y * t)
+deriv(l::ZeroOneLoss, y::Real, t::Real) = zero(t)
+deriv2(l::ZeroOneLoss, y::Real, t::Real) = zero(t)
+
+value{T<:Real}(l::ZeroOneLoss, yt::T) = sign(yt) < 0 ? one(T) : zero(T)
+deriv{T<:Real}(l::ZeroOneLoss, yt::T) = zero(T)
+deriv2{T<:Real}(l::ZeroOneLoss, yt::T) = zero(T)
+
+function repr_fun(l::ZeroOneLoss)
+  _φ(yt::Real) = value(l, yt)
+  _φ
+end
+
+function repr_deriv_fun(l::ZeroOneLoss)
+  _φ_deriv(yt::Real) = deriv(l, yt)
+  _φ_deriv
+end
+
+function repr_deriv2_fun(l::ZeroOneLoss)
+  _φ_deriv2(yt::Real) = deriv2(l, yt)
+  _φ_deriv2
+end
+
+isdifferentiable(::ZeroOneLoss) = false
+isconvex(::ZeroOneLoss) = false
+isclasscalibrated(l::ZeroOneLoss) = true

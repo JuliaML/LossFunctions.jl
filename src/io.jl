@@ -1,7 +1,9 @@
 
 print(io::IO, c::Cost, args...) = print(io, typeof(c), args...)
+print(io::IO, l::EpsilonInsLoss, args...) = print(io, typeof(l), " with ɛ = $(l.eps)", args...)
+print(io::IO, l::SqrSmoothedHingeLoss, args...) = print(io, typeof(l), " with γ = $(l.eps)", args...)
 
-function show(io::IO, loss::Union{MarginBasedLoss,DistanceBasedLoss})
+function show(io::IO, loss::Union{MarginBasedLoss,DistanceBasedLoss,ZeroOneLoss})
   println(io, loss)
   newPlot = lineplot(loss, -3, 3, margin = 2, width = 20, height = 5, name = " ")
   xl = xlabel(newPlot)
@@ -45,7 +47,7 @@ function show(io::IO, loss::LogitProbLoss)
 end
 
 function lineplot(
-    loss::MarginBasedLoss,
+    loss::Union{MarginBasedLoss,ZeroOneLoss},
     args...;
     name = string(typeof(loss).name.name),
     nargs...)
@@ -89,7 +91,7 @@ end
 
 function lineplot!(
     plot::Plot,
-    loss::Union{MarginBasedLoss,DistanceBasedLoss},
+    loss::Union{MarginBasedLoss,DistanceBasedLoss,ZeroOneLoss},
     args...;
     name = string(typeof(loss).name.name),
     nargs...)
@@ -109,7 +111,7 @@ end
 
 function lineplot!{T<:Cost}(
     plot::Plot,
-    lossvec::Vector{T},
+    lossvec::AbstractVector{T},
     args...; nargs...)
   n = length(lossvec)
   @assert n > 0
