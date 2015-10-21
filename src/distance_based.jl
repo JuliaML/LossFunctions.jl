@@ -2,14 +2,14 @@
 # ==========================================================================
 # L(y, t) = |y - t|^P
 
-immutable LPLoss{P} <: DistanceBasedLoss
-  LPLoss() = typeof(P) <: Real ? new() : error()
+immutable LPDistLoss{P} <: DistanceBasedLoss
+  LPDistLoss() = typeof(P) <: Real ? new() : error()
 end
 
-LPLoss(p::Real) = LPLoss{p}()
+LPDistLoss(p::Real) = LPDistLoss{p}()
 
-value{P}(l::LPLoss{P}, r::Real) = abs(r)^P
-function deriv{P}(l::LPLoss{P}, r::Real)
+value{P}(l::LPDistLoss{P}, r::Real) = abs(r)^P
+function deriv{P}(l::LPDistLoss{P}, r::Real)
   if r == 0
     zero(r)
   elseif r >= 0
@@ -18,7 +18,7 @@ function deriv{P}(l::LPLoss{P}, r::Real)
     -P * abs(r)^(P-1)
   end
 end
-function deriv2{P}(l::LPLoss{P}, r::Real)
+function deriv2{P}(l::LPDistLoss{P}, r::Real)
   if r == 0
     zero(r)
   elseif r >= 0
@@ -27,64 +27,40 @@ function deriv2{P}(l::LPLoss{P}, r::Real)
     -P * (P-1) * abs(r)^(P-2)
   end
 end
-value_deriv{P}(l::LPLoss{P}, r::Real) = (value(l,r), deriv(l,r))
+value_deriv{P}(l::LPDistLoss{P}, r::Real) = (value(l,r), deriv(l,r))
 
-issymmetric{P}(::LPLoss{P}) = true
-isdifferentiable{P}(::LPLoss{P}) = P > 1
-isdifferentiable{P}(::LPLoss{P}, at) = P > 1 || at != 0
-islipschitzcont{P}(::LPLoss{P}) = P == 1
-isconvex{P}(::LPLoss{P}) = P >= 1
+issymmetric{P}(::LPDistLoss{P}) = true
+isdifferentiable{P}(::LPDistLoss{P}) = P > 1
+isdifferentiable{P}(::LPDistLoss{P}, at) = P > 1 || at != 0
+islipschitzcont{P}(::LPDistLoss{P}) = P == 1
+isconvex{P}(::LPDistLoss{P}) = P >= 1
 
 # ==========================================================================
 # L(y, t) = |y - t|
 
-typealias L1Loss LPLoss{1}
+typealias L1DistLoss LPDistLoss{1}
 
-l1_loss(y::Real, t::Real) = l1_loss(y - t)
-l1_loss(r::Real) = abs(r)
+value(l::L1DistLoss, r::Real) = abs(r)
+deriv(l::L1DistLoss, r::Real) = sign(r)
+deriv2(l::L1DistLoss, r::Real) = zero(r)
+value_deriv(l::L1DistLoss, r::Real) = (abs(r), sign(r))
 
-l1_deriv(y::Real, t::Real) = l1_deriv(y - t)
-l1_deriv(r::Real) = sign(r)
-
-l1_deriv2(y::Real, t::Real) = zero(y)
-l1_deriv2(r::Real) = zero(r)
-
-l1_loss_deriv(y::Real, t::Real) = l1_loss_deriv(y - t)
-l1_loss_deriv(r::Real) = (abs(r), sign(r))
-
-value(l::L1Loss, r::Real) = l1_loss(r)
-deriv(l::L1Loss, r::Real) = l1_deriv(r)
-deriv2(l::L1Loss, r::Real) = l1_deriv2(r)
-value_deriv(l::L1Loss, r::Real) = l1_loss_deriv(r)
-
-isdifferentiable(::L1Loss) = false
-isdifferentiable(::L1Loss, at) = at != 0
-islipschitzcont(::L1Loss) = true
-isconvex(::L1Loss) = true
+isdifferentiable(::L1DistLoss) = false
+isdifferentiable(::L1DistLoss, at) = at != 0
+islipschitzcont(::L1DistLoss) = true
+isconvex(::L1DistLoss) = true
 
 # ==========================================================================
 # L(y, t) = (y - t)^2
 
-typealias L2Loss LPLoss{2}
+typealias L2DistLoss LPDistLoss{2}
 
-l2_loss(y::Real, t::Real) = l2_loss(y - t)
-l2_loss(r::Real) = abs2(r)
+value(l::L2DistLoss, r::Real) = abs2(r)
+deriv(l::L2DistLoss, r::Real) = 2r
+deriv2(l::L2DistLoss, r::Real) = 2
+value_deriv(l::L2DistLoss, r::Real) = (abs2(r), 2r)
 
-l2_deriv(y::Real, t::Real) = l2_deriv(y - t)
-l2_deriv(r::Real) = 2r
-
-l2_deriv2(y::Real, t::Real) = 2
-l2_deriv2(r::Real) = 2
-
-l2_loss_deriv(y::Real, t::Real) = l2_loss_deriv(y - t)
-l2_loss_deriv(r::Real) = (abs2(r), 2r)
-
-value(l::L2Loss, r::Real) = l2_loss(r)
-deriv(l::L2Loss, r::Real) = l2_deriv(r)
-deriv2(l::L2Loss, r::Real) = l2_deriv2(r)
-value_deriv(l::L2Loss, r::Real) = l2_loss_deriv(r)
-
-isdifferentiable(::L2Loss) = true
-isdifferentiable(::L2Loss, at) = true
-islipschitzcont(::L2Loss) = false
-isconvex(::L2Loss) = true
+isdifferentiable(::L2DistLoss) = true
+isdifferentiable(::L2DistLoss, at) = true
+islipschitzcont(::L2DistLoss) = false
+isconvex(::L2DistLoss) = true

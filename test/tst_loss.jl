@@ -1,0 +1,7 @@
+
+
+
+l = LogitLoss()
+
+# test properties
+

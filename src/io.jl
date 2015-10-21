@@ -18,7 +18,7 @@ function show(io::IO, loss::Union{MarginBasedLoss,DistanceBasedLoss})
   print(io, newPlot)
 end
 
-function show(io::IO, loss::CrossentropyLoss)
+function show(io::IO, loss::LogitProbLoss)
   println(io, loss)
   f0(x) = value(loss, 0, x)
   f1(x) = value(loss, 1, x)
@@ -65,7 +65,7 @@ function lineplot(
 end
 
 function lineplot(
-    loss::CrossentropyLoss,
+    loss::LogitProbLoss,
     args...;
     ylim = [0, 5],
     title = string(typeof(loss).name.name),
@@ -82,7 +82,7 @@ function lineplot(
 end
 
 function lineplot(
-    loss::CrossentropyLoss;
+    loss::LogitProbLoss;
     nargs...)
   lineplot(loss, .000001, .999999; nargs...)
 end
