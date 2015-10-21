@@ -1,11 +1,11 @@
 
 print(io::IO, c::Cost, args...) = print(io, typeof(c), args...)
 print(io::IO, l::EpsilonInsLoss, args...) = print(io, typeof(l), " with ɛ = $(l.eps)", args...)
-print(io::IO, l::SqrSmoothedHingeLoss, args...) = print(io, typeof(l), " with γ = $(l.eps)", args...)
+print(io::IO, l::SqrSmoothedHingeLoss, args...) = print(io, typeof(l), " with γ = $(l.gamma)", args...)
 
 function show(io::IO, loss::Union{MarginBasedLoss,DistanceBasedLoss,ZeroOneLoss})
   println(io, loss)
-  newPlot = lineplot(loss, -3, 3, margin = 2, width = 20, height = 5, name = " ")
+  newPlot = lineplot(loss, -3:.001:3, margin = 2, width = 20, height = 5, name = " ")
   xl = xlabel(newPlot)
   ylabel!(newPlot, "")
   xlabel!(newPlot, "")
@@ -13,7 +13,7 @@ function show(io::IO, loss::Union{MarginBasedLoss,DistanceBasedLoss,ZeroOneLoss}
   annotate!(newPlot, :br, "")
   annotate!(newPlot, :bl, "")
   print(io, newPlot)
-  newPlot = lineplot(loss', -3, 3, margin = 1, width = 20, height = 5, color = :red, name = " ")
+  newPlot = lineplot(loss', -3:.001:3, margin = 1, width = 20, height = 5, color = :red, name = " ")
   ylabel!(newPlot, "")
   xlabel!(newPlot, xl)
   annotate!(newPlot, :r, 3, "L'(y,f(x))", :red)
