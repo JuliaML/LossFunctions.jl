@@ -37,10 +37,10 @@ function show(io::IO, loss::CrossentropyLoss)
   newPlot = lineplot([g0, g1], 0.000001, 0.99999, ylim=[-1,1], margin = 1, width = 20, height = 5, name = " ")
   xl = xlabel(newPlot)
   ylabel!(newPlot, "")
-  xlabel!(newPlot, "σ(wᵀx)")
+  xlabel!(newPlot, "σ(z)")
   annotate!(newPlot, :r, 1, "", :blue)
   annotate!(newPlot, :r, 2, "", :red)
-  annotate!(newPlot, :l, 3, " ∂L/∂w ")
+  annotate!(newPlot, :l, 3, " ∂L/∂z ")
   print(io, newPlot)
 end
 
