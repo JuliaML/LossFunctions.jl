@@ -21,6 +21,7 @@ export
             LPDistLoss,
             L1DistLoss,
             L2DistLoss,
+            EpsilonInsLoss,
           LogitProbLoss,
           CrossentropyLoss,
         UnsupervisedLoss,

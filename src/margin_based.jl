@@ -52,8 +52,8 @@ isclipable(::SqrHingeLoss) = true
 # L(y, t) = 0.5 / γ * max(0, 1 - yt)^2   ... yt >= 1 - γ
 #           1 - γ / 2 - yt               ... otherwise
 
-immutable SqrSmoothedHingeLoss <: MarginBasedLoss 
-  γ::Float64
+immutable SqrSmoothedHingeLoss <: MarginBasedLoss
+  gamma::Float64
 
   function SqrSmoothedHingeLoss(γ::Real)
     γ > 0 || error("γ must be strictly positive")
@@ -62,19 +62,19 @@ immutable SqrSmoothedHingeLoss <: MarginBasedLoss
 end
 
 function value{T<:Real}(l::SqrSmoothedHingeLoss, yt::T)
-  yt >= 1 - l.γ ? 0.5 / l.γ * abs2(max(zero(T), 1 - yt)) : one(T) - l.γ / 2 - yt
+  yt >= 1 - l.gamma ? 0.5 / l.gamma * abs2(max(zero(T), 1 - yt)) : one(T) - l.gamma / 2 - yt
 end
 
 function deriv{T<:Real}(l::SqrSmoothedHingeLoss, yt::T)
-  if yt >= 1 - l.γ
-    yt >= 1 ? zero(T) : (yt - one(T)) / l.γ
+  if yt >= 1 - l.gamma
+    yt >= 1 ? zero(T) : (yt - one(T)) / l.gamma
   else
     -one(T)
   end
 end
 
 function deriv2(l::SqrSmoothedHingeLoss, yt::Real)
-  yt < 1 - l.γ && yt >= 1 ? zero(T) : one(T)
+  yt < 1 - l.gamma && yt >= 1 ? zero(T) : one(T)
 end
 
 value_deriv(l::SqrSmoothedHingeLoss, yt::Real) = (value(l, yt), deriv(l, yt))

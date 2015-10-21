@@ -64,3 +64,24 @@ isdifferentiable(::L2DistLoss) = true
 isdifferentiable(::L2DistLoss, at) = true
 islipschitzcont(::L2DistLoss) = false
 isconvex(::L2DistLoss) = true
+
+# ==========================================================================
+# L(y, t) = max(0, |y - t| - ɛ)
+
+immutable EpsilonInsLoss <: DistanceBasedLoss
+  eps::Float64
+
+  function EpsilonInsLoss(ɛ::Real)
+    ɛ > 0 || error("ɛ must be strictly positive")
+    new(convert(Float64, ɛ))
+  end
+end
+
+value{T<:Real}(l::EpsilonInsLoss, r::T) = max(zero(T), abs(r) - l.eps)
+deriv{T<:Real}(l::EpsilonInsLoss, r::T) = abs(r) <= l.eps ? zero(T) : sign(r)
+deriv2{T<:Real}(l::EpsilonInsLoss, r::T) = zero(T)
+function value_deriv{T<:Real}(l::EpsilonInsLoss, r::T)
+  absr = abs(r)
+  absr <= l.eps ? (zero(T), zero(T)) : (absr - l.eps, sign(r))
+end
+
