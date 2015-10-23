@@ -19,53 +19,54 @@ isclipable(::LogitMarginLoss) = false
 # ==========================================================================
 # L(y, t) = max(0, 1 - yt)
 
-immutable HingeLoss <: MarginBasedLoss end
+immutable L1HingeLoss <: MarginBasedLoss end
+typealias HingeLoss L1HingeLoss
 
-value{T<:Real}(l::HingeLoss, yt::T) = max(zero(T), 1 - yt)
-deriv{T<:Real}(l::HingeLoss, yt::T) = yt >= 1 ? zero(T) : -one(T)
-deriv2{T<:Real}(l::HingeLoss, yt::T) = zero(T)
-value_deriv{T<:Real}(l::HingeLoss, yt::T) = yt >= 1 ? (zero(T), zero(T)) : (1 - yt, -one(T))
+value{T<:Real}(l::L1HingeLoss, yt::T) = max(zero(T), 1 - yt)
+deriv{T<:Real}(l::L1HingeLoss, yt::T) = yt >= 1 ? zero(T) : -one(T)
+deriv2{T<:Real}(l::L1HingeLoss, yt::T) = zero(T)
+value_deriv{T<:Real}(l::L1HingeLoss, yt::T) = yt >= 1 ? (zero(T), zero(T)) : (1 - yt, -one(T))
 
-isdifferentiable(::HingeLoss) = false
-isdifferentiable(::HingeLoss, at) = at != 1
-islipschitzcont(::HingeLoss) = true
-isconvex(::HingeLoss) = true
-isclipable(::HingeLoss) = true
+isdifferentiable(::L1HingeLoss) = false
+isdifferentiable(::L1HingeLoss, at) = at != 1
+islipschitzcont(::L1HingeLoss) = true
+isconvex(::L1HingeLoss) = true
+isclipable(::L1HingeLoss) = true
 
 # ==========================================================================
 # L(y, t) = max(0, 1 - yt)^2
 
-immutable SqrHingeLoss <: MarginBasedLoss end
+immutable L2HingeLoss <: MarginBasedLoss end
 
-value{T<:Real}(l::SqrHingeLoss, yt::T) = yt >= 1 ? zero(T) : abs2(1 - yt)
-deriv{T<:Real}(l::SqrHingeLoss, yt::T) = yt >= 1 ? zero(T) : 2(yt - one(T))
-deriv2{T<:Real}(l::SqrHingeLoss, yt::T) = yt >= 1 ? zero(T) : convert(T, -2)
-value_deriv{T<:Real}(l::SqrHingeLoss, yt::T) = yt >= 1 ? (zero(T), zero(T)) : (1 - yt, -one(T))
+value{T<:Real}(l::L2HingeLoss, yt::T) = yt >= 1 ? zero(T) : abs2(1 - yt)
+deriv{T<:Real}(l::L2HingeLoss, yt::T) = yt >= 1 ? zero(T) : 2(yt - one(T))
+deriv2{T<:Real}(l::L2HingeLoss, yt::T) = yt >= 1 ? zero(T) : convert(T, -2)
+value_deriv{T<:Real}(l::L2HingeLoss, yt::T) = yt >= 1 ? (zero(T), zero(T)) : (1 - yt, -one(T))
 
-isdifferentiable(::SqrHingeLoss) = true
-isdifferentiable(::SqrHingeLoss, at) = true
-islocallylipschitzcont(::SqrHingeLoss) = true
-isconvex(::SqrHingeLoss) = true
-isclipable(::SqrHingeLoss) = true
+isdifferentiable(::L2HingeLoss) = true
+isdifferentiable(::L2HingeLoss, at) = true
+islocallylipschitzcont(::L2HingeLoss) = true
+isconvex(::L2HingeLoss) = true
+isclipable(::L2HingeLoss) = true
 
 # ==========================================================================
 # L(y, t) = 0.5 / γ * max(0, 1 - yt)^2   ... yt >= 1 - γ
 #           1 - γ / 2 - yt               ... otherwise
 
-immutable SqrSmoothedHingeLoss <: MarginBasedLoss
+immutable L2SmoothedHingeLoss <: MarginBasedLoss
   gamma::Float64
 
-  function SqrSmoothedHingeLoss(γ::Real)
+  function L2SmoothedHingeLoss(γ::Real)
     γ > 0 || error("γ must be strictly positive")
     new(convert(Float64, γ))
   end
 end
 
-function value{T<:Real}(l::SqrSmoothedHingeLoss, yt::T)
+function value{T<:Real}(l::L2SmoothedHingeLoss, yt::T)
   yt >= 1 - l.gamma ? 0.5 / l.gamma * abs2(max(zero(T), 1 - yt)) : one(T) - l.gamma / 2 - yt
 end
 
-function deriv{T<:Real}(l::SqrSmoothedHingeLoss, yt::T)
+function deriv{T<:Real}(l::L2SmoothedHingeLoss, yt::T)
   if yt >= 1 - l.gamma
     yt >= 1 ? zero(T) : (yt - one(T)) / l.gamma
   else
@@ -73,14 +74,14 @@ function deriv{T<:Real}(l::SqrSmoothedHingeLoss, yt::T)
   end
 end
 
-function deriv2(l::SqrSmoothedHingeLoss, yt::Real)
+function deriv2(l::L2SmoothedHingeLoss, yt::Real)
   yt < 1 - l.gamma && yt >= 1 ? zero(T) : one(T)
 end
 
-value_deriv(l::SqrSmoothedHingeLoss, yt::Real) = (value(l, yt), deriv(l, yt))
+value_deriv(l::L2SmoothedHingeLoss, yt::Real) = (value(l, yt), deriv(l, yt))
 
-isdifferentiable(::SqrSmoothedHingeLoss) = true
-isdifferentiable(::SqrSmoothedHingeLoss, at) = true
-islocallylipschitzcont(::SqrSmoothedHingeLoss) = true
-isconvex(::SqrSmoothedHingeLoss) = true
-isclipable(::SqrSmoothedHingeLoss) = true
+isdifferentiable(::L2SmoothedHingeLoss) = true
+isdifferentiable(::L2SmoothedHingeLoss, at) = true
+islocallylipschitzcont(::L2SmoothedHingeLoss) = true
+isconvex(::L2SmoothedHingeLoss) = true
+isclipable(::L2SmoothedHingeLoss) = true
