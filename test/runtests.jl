@@ -1,11 +1,19 @@
 using LearnBase
+using DualNumbers
 using Base.Test
 
-function msg(args...)
-  println("   --> ", args...)
+function msg(args...; newline = true)
+  print("   --> ", args...)
+  newline && println()
+end
+
+function msg2(args...; newline = false)
+  print("       - ", args...)
+  newline && println()
 end
 
 tests = [
+  "tst_loss.jl"
   "tst_classencoding.jl"
 ]
 
