@@ -12,6 +12,8 @@ value_deriv(l::LogitMarginLoss, yt::Number) = (eᵗ = exp(-yt); (log1p(eᵗ), -e
 isunivfishercons(::LogitMarginLoss) = true
 isdifferentiable(::LogitMarginLoss) = true
 isdifferentiable(::LogitMarginLoss, at) = true
+istwicedifferentiable(::LogitMarginLoss) = true
+istwicedifferentiable(::LogitMarginLoss, at) = true
 islipschitzcont(::LogitMarginLoss) = true
 isconvex(::LogitMarginLoss) = true
 isclipable(::LogitMarginLoss) = false
@@ -29,6 +31,8 @@ value_deriv{T<:Number}(l::L1HingeLoss, yt::T) = yt >= 1 ? (zero(T), zero(T)) : (
 
 isdifferentiable(::L1HingeLoss) = false
 isdifferentiable(::L1HingeLoss, at) = at != 1
+istwicedifferentiable(::L1HingeLoss) = false
+istwicedifferentiable(::L1HingeLoss, at) = at != 1
 islipschitzcont(::L1HingeLoss) = true
 isconvex(::L1HingeLoss) = true
 isclipable(::L1HingeLoss) = true
@@ -40,11 +44,13 @@ immutable L2HingeLoss <: MarginBasedLoss end
 
 value{T<:Number}(l::L2HingeLoss, yt::T) = yt >= 1 ? zero(T) : abs2(1 - yt)
 deriv{T<:Number}(l::L2HingeLoss, yt::T) = yt >= 1 ? zero(T) : 2(yt - one(T))
-deriv2{T<:Number}(l::L2HingeLoss, yt::T) = yt >= 1 ? zero(T) : convert(T, -2)
+deriv2{T<:Number}(l::L2HingeLoss, yt::T) = yt >= 1 ? zero(T) : convert(T, 2)
 value_deriv{T<:Number}(l::L2HingeLoss, yt::T) = yt >= 1 ? (zero(T), zero(T)) : (abs2(1 - yt), 2(yt - one(T)))
 
 isdifferentiable(::L2HingeLoss) = true
 isdifferentiable(::L2HingeLoss, at) = true
+istwicedifferentiable(::L2HingeLoss) = false
+istwicedifferentiable(::L2HingeLoss, at) = at != 1
 islocallylipschitzcont(::L2HingeLoss) = true
 isconvex(::L2HingeLoss) = true
 isclipable(::L2HingeLoss) = true
@@ -63,25 +69,30 @@ immutable L2SmoothedHingeLoss <: MarginBasedLoss
 end
 
 function value{T<:Number}(l::L2SmoothedHingeLoss, yt::T)
-  yt >= 1 - l.gamma ? 0.5 / l.gamma * abs2(max(zero(T), 1 - yt)) : one(T) - l.gamma / 2 - yt
+  gamma = convert(T, l.gamma)
+  yt >= 1 - gamma ? 0.5 / gamma * abs2(max(zero(T), 1 - yt)) : one(T) - gamma / 2 - yt
 end
 
 function deriv{T<:Number}(l::L2SmoothedHingeLoss, yt::T)
-  if yt >= 1 - l.gamma
-    yt >= 1 ? zero(T) : (yt - one(T)) / l.gamma
+  gamma = convert(T, l.gamma)
+  if yt >= 1 - gamma
+    yt >= 1 ? zero(T) : (yt - one(T)) / gamma
   else
     -one(T)
   end
 end
 
-function deriv2(l::L2SmoothedHingeLoss, yt::Number)
-  yt < 1 - l.gamma && yt >= 1 ? zero(T) : one(T)
+function deriv2{T<:Number}(l::L2SmoothedHingeLoss, yt::T)
+  gamma = convert(T, l.gamma)
+  yt < 1 - gamma || yt > 1 ? zero(T) : one(T) / gamma
 end
 
 value_deriv(l::L2SmoothedHingeLoss, yt::Number) = (value(l, yt), deriv(l, yt))
 
 isdifferentiable(::L2SmoothedHingeLoss) = true
 isdifferentiable(::L2SmoothedHingeLoss, at) = true
+istwicedifferentiable(::L2SmoothedHingeLoss) = false
+istwicedifferentiable(l::L2SmoothedHingeLoss, at) = at != 1 && at != 1 - l.gamma
 islocallylipschitzcont(::L2SmoothedHingeLoss) = true
 isconvex(::L2SmoothedHingeLoss) = true
 isclipable(::L2SmoothedHingeLoss) = true

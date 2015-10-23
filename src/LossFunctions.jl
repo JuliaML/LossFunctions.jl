@@ -44,6 +44,7 @@ export
 
     isminimizable,
     isdifferentiable,
+    istwicedifferentiable,
     isconvex,
     isnemitski,
     isunivfishercons,

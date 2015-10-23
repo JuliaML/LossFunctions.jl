@@ -26,16 +26,45 @@ function test_margin_deriv(l::SupervisedLoss, t_vec)
       @test_approx_eq d_comp repr_deriv_fun(l)(y*t)
       @test_approx_eq d_comp l'(y*t)
     else
-      print("(no deriv at $y * $t) ")
+      print("(no $(y)*$(t)) ")
     end
   end
   println("ok")
 end
 
-msg("Test first derivatives of margin based losses")
+function test_margin_deriv2(l::SupervisedLoss, t_vec)
+  for y in [-1., 1], t in t_vec
+    if istwicedifferentiable(l, y*t)
+      d2_dual = y * epsilon(deriv(l, dual(y, 0), dual(t, 1)))
+      d2_comp = deriv2(l, y, t)
+      @test abs(d2_dual - d2_comp) < 1e-14
+      @test_approx_eq d2_comp deriv2(l, y*t)
+      @test_approx_eq d2_comp deriv2(l, [2,3], y, t)
+      @test_approx_eq d2_comp deriv2_fun(l)(y, t)
+    else
+      print("(no $(y)*$(t)) ")
+    end
+  end
+  println("ok")
+end
 
-for loss in [LogitMarginLoss(), L1HingeLoss(), L2HingeLoss(),
-             L2SmoothedHingeLoss(.5), L2SmoothedHingeLoss(1), L2SmoothedHingeLoss(2)]
+# ==========================================================================
+
+margin_losses = [LogitMarginLoss(), L1HingeLoss(), L2HingeLoss(),
+                 L2SmoothedHingeLoss(.5), L2SmoothedHingeLoss(1), L2SmoothedHingeLoss(2)]
+
+msg("Test first derivatives of margin-based losses")
+
+for loss in margin_losses
   msg2("$(loss): ")
   test_margin_deriv(loss, -10:0.1:10)
 end
+
+msg("Test second derivatives of margin-based losses")
+
+for loss in margin_losses
+  msg2("$(loss): ")
+  test_margin_deriv2(loss, -10:0.1:10)
+end
+
+# ==========================================================================

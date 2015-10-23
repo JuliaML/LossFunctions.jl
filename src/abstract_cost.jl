@@ -27,8 +27,10 @@ function value_deriv_fun(c::Cost)
 end
 
 isminimizable(c::Cost) = isconvex(c)
-isdifferentiable(::Cost) = false
+isdifferentiable(c::Cost) = istwicedifferentiable(c)
+istwicedifferentiable(::Cost) = false
 isdifferentiable(c::Cost, at) = isdifferentiable(c)
+istwicedifferentiable(c::Cost, at) = istwicedifferentiable(c)
 isconvex(::Cost) = false
 
 # ==========================================================================
