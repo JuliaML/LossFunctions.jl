@@ -69,22 +69,19 @@ immutable SmoothedL2HingeLoss <: MarginBasedLoss
 end
 
 function value{T<:Number}(l::SmoothedL2HingeLoss, yt::T)
-  gamma = convert(T, l.gamma)
-  yt >= 1 - gamma ? 0.5 / gamma * abs2(max(zero(T), 1 - yt)) : one(T) - gamma / 2 - yt
+  yt >= 1 - l.gamma ? 0.5 / l.gamma * abs2(max(zero(T), 1 - yt)) : one(T) - l.gamma / 2 - yt
 end
 
 function deriv{T<:Number}(l::SmoothedL2HingeLoss, yt::T)
-  gamma = convert(T, l.gamma)
-  if yt >= 1 - gamma
-    yt >= 1 ? zero(T) : (yt - one(T)) / gamma
+  if yt >= 1 - l.gamma
+    yt >= 1 ? zero(T) : (yt - one(T)) / l.gamma
   else
     -one(T)
   end
 end
 
 function deriv2{T<:Number}(l::SmoothedL2HingeLoss, yt::T)
-  gamma = convert(T, l.gamma)
-  yt < 1 - gamma || yt > 1 ? zero(T) : one(T) / gamma
+  yt < 1 - l.gamma || yt > 1 ? zero(T) : one(T) / l.gamma
 end
 
 value_deriv(l::SmoothedL2HingeLoss, yt::Number) = (value(l, yt), deriv(l, yt))

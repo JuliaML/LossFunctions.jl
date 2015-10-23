@@ -10,19 +10,17 @@ LPDistLoss(p::Number) = LPDistLoss{p}()
 
 value{P}(l::LPDistLoss{P}, r::Number) = abs(r)^P
 function deriv{P,T<:Number}(l::LPDistLoss{P}, r::T)
-  p = convert(T, P)
   if r == 0
     zero(r)
   else
-    p * r * abs(r)^(p-2)
+    P * r * abs(r)^(P-2)
   end
 end
 function deriv2{P,T<:Number}(l::LPDistLoss{P}, r::T)
-  p = convert(T, P)
   if r == 0
     zero(r)
   else
-    (p^2-p) * abs(r)^p / r^2
+    (P^2-P) * abs(r)^P / r^2
   end
 end
 value_deriv{P}(l::LPDistLoss{P}, r::Number) = (value(l,r), deriv(l,r))
