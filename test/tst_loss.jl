@@ -108,7 +108,8 @@ end
 # ==========================================================================
 
 margin_losses = [LogitMarginLoss(), L1HingeLoss(), L2HingeLoss(), PerceptronLoss(),
-                 SmoothedL1HingeLoss(.5), SmoothedL1HingeLoss(1), SmoothedL1HingeLoss(2)]
+                 SmoothedL1HingeLoss(.5), SmoothedL1HingeLoss(1), SmoothedL1HingeLoss(2),
+                 ModifiedHuberLoss()]
 
 msg("Test first derivatives of margin-based losses")
 

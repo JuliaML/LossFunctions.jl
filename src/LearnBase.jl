@@ -29,6 +29,7 @@ export
             L1HingeLoss,
             L2HingeLoss,
             SmoothedL1HingeLoss,
+            ModifiedHuberLoss,
           DistanceBasedLoss,
             LPDistLoss,
             L1DistLoss,
