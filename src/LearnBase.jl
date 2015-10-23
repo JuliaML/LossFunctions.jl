@@ -27,7 +27,7 @@ export
             HingeLoss,
             L1HingeLoss,
             L2HingeLoss,
-            SmoothedL2HingeLoss,
+            SmoothedL1HingeLoss,
           DistanceBasedLoss,
             LPDistLoss,
             L1DistLoss,

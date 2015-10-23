@@ -59,20 +59,20 @@ isclipable(::L2HingeLoss) = true
 # L(y, t) = 0.5 / γ * max(0, 1 - yt)^2   ... yt >= 1 - γ
 #           1 - γ / 2 - yt               ... otherwise
 
-immutable SmoothedL2HingeLoss <: MarginBasedLoss
+immutable SmoothedL1HingeLoss <: MarginBasedLoss
   gamma::Float64
 
-  function SmoothedL2HingeLoss(γ::Number)
+  function SmoothedL1HingeLoss(γ::Number)
     γ > 0 || error("γ must be strictly positive")
     new(convert(Float64, γ))
   end
 end
 
-function value{T<:Number}(l::SmoothedL2HingeLoss, yt::T)
+function value{T<:Number}(l::SmoothedL1HingeLoss, yt::T)
   yt >= 1 - l.gamma ? 0.5 / l.gamma * abs2(max(zero(T), 1 - yt)) : one(T) - l.gamma / 2 - yt
 end
 
-function deriv{T<:Number}(l::SmoothedL2HingeLoss, yt::T)
+function deriv{T<:Number}(l::SmoothedL1HingeLoss, yt::T)
   if yt >= 1 - l.gamma
     yt >= 1 ? zero(T) : (yt - one(T)) / l.gamma
   else
@@ -80,16 +80,16 @@ function deriv{T<:Number}(l::SmoothedL2HingeLoss, yt::T)
   end
 end
 
-function deriv2{T<:Number}(l::SmoothedL2HingeLoss, yt::T)
+function deriv2{T<:Number}(l::SmoothedL1HingeLoss, yt::T)
   yt < 1 - l.gamma || yt > 1 ? zero(T) : one(T) / l.gamma
 end
 
-value_deriv(l::SmoothedL2HingeLoss, yt::Number) = (value(l, yt), deriv(l, yt))
+value_deriv(l::SmoothedL1HingeLoss, yt::Number) = (value(l, yt), deriv(l, yt))
 
-isdifferentiable(::SmoothedL2HingeLoss) = true
-isdifferentiable(::SmoothedL2HingeLoss, at) = true
-istwicedifferentiable(::SmoothedL2HingeLoss) = false
-istwicedifferentiable(l::SmoothedL2HingeLoss, at) = at != 1 && at != 1 - l.gamma
-islocallylipschitzcont(::SmoothedL2HingeLoss) = true
-isconvex(::SmoothedL2HingeLoss) = true
-isclipable(::SmoothedL2HingeLoss) = true
+isdifferentiable(::SmoothedL1HingeLoss) = true
+isdifferentiable(::SmoothedL1HingeLoss, at) = true
+istwicedifferentiable(::SmoothedL1HingeLoss) = false
+istwicedifferentiable(l::SmoothedL1HingeLoss, at) = at != 1 && at != 1 - l.gamma
+islocallylipschitzcont(::SmoothedL1HingeLoss) = true
+isconvex(::SmoothedL1HingeLoss) = true
+isclipable(::SmoothedL1HingeLoss) = true

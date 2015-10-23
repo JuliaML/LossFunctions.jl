@@ -108,7 +108,7 @@ end
 # ==========================================================================
 
 margin_losses = [LogitMarginLoss(), L1HingeLoss(), L2HingeLoss(),
-                 SmoothedL2HingeLoss(.5), SmoothedL2HingeLoss(1), SmoothedL2HingeLoss(2)]
+                 SmoothedL1HingeLoss(.5), SmoothedL1HingeLoss(1), SmoothedL1HingeLoss(2)]
 
 msg("Test first derivatives of margin-based losses")
 
