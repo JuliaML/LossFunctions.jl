@@ -1,3 +1,20 @@
+# ==========================================================================
+# L(y, t) = max(0, -yt)
+
+immutable PerceptronLoss <: MarginBasedLoss end
+
+value{T<:Number}(l::PerceptronLoss, yt::T) = max(zero(T), -yt)
+deriv{T<:Number}(l::PerceptronLoss, yt::T) = yt >= 0 ? zero(T) : -one(T)
+deriv2{T<:Number}(l::PerceptronLoss, yt::T) = zero(T)
+value_deriv{T<:Number}(l::PerceptronLoss, yt::T) = yt >= 0 ? (zero(T), zero(T)) : (-yt, -one(T))
+
+isdifferentiable(::PerceptronLoss) = false
+isdifferentiable(::PerceptronLoss, at) = at != 0
+istwicedifferentiable(::PerceptronLoss) = false
+istwicedifferentiable(::PerceptronLoss, at) = at != 0
+isconvex(::PerceptronLoss) = true
+isclipable(::PerceptronLoss) = true
+
 
 # ==========================================================================
 # L(y, t) = ln(1 + exp(-yt))

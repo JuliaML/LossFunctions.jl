@@ -24,6 +24,7 @@ export
         SupervisedLoss,
           MarginBasedLoss,
             LogitMarginLoss,
+            PerceptronLoss,
             HingeLoss,
             L1HingeLoss,
             L2HingeLoss,
