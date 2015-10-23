@@ -9,22 +9,20 @@ end
 LPDistLoss(p::Number) = LPDistLoss{p}()
 
 value{P}(l::LPDistLoss{P}, r::Number) = abs(r)^P
-function deriv{P}(l::LPDistLoss{P}, r::Number)
+function deriv{P,T<:Number}(l::LPDistLoss{P}, r::T)
+  p = convert(T, P)
   if r == 0
     zero(r)
-  elseif r >= 0
-    P * r^(P-1)
   else
-    -P * abs(r)^(P-1)
+    p * r * abs(r)^(p-2)
   end
 end
-function deriv2{P}(l::LPDistLoss{P}, r::Number)
+function deriv2{P,T<:Number}(l::LPDistLoss{P}, r::T)
+  p = convert(T, P)
   if r == 0
     zero(r)
-  elseif r >= 0
-    P * (P-1) * r^(P-2)
   else
-    -P * (P-1) * abs(r)^(P-2)
+    (p^2-p) * abs(r)^p / r^2
   end
 end
 value_deriv{P}(l::LPDistLoss{P}, r::Number) = (value(l,r), deriv(l,r))
@@ -32,6 +30,8 @@ value_deriv{P}(l::LPDistLoss{P}, r::Number) = (value(l,r), deriv(l,r))
 issymmetric{P}(::LPDistLoss{P}) = true
 isdifferentiable{P}(::LPDistLoss{P}) = P > 1
 isdifferentiable{P}(::LPDistLoss{P}, at) = P > 1 || at != 0
+istwicedifferentiable{P}(::LPDistLoss{P}) = P > 1
+istwicedifferentiable{P}(::LPDistLoss{P}, at) = P > 1 || at != 0
 islipschitzcont{P}(::LPDistLoss{P}) = P == 1
 isconvex{P}(::LPDistLoss{P}) = P >= 1
 
@@ -41,12 +41,14 @@ isconvex{P}(::LPDistLoss{P}) = P >= 1
 typealias L1DistLoss LPDistLoss{1}
 
 value(l::L1DistLoss, r::Number) = abs(r)
-deriv(l::L1DistLoss, r::Number) = sign(r)
-deriv2(l::L1DistLoss, r::Number) = zero(r)
+deriv{T<:Number}(l::L1DistLoss, r::T) = convert(T, sign(r))
+deriv2{T<:Number}(l::L1DistLoss, r::T) = zero(T)
 value_deriv(l::L1DistLoss, r::Number) = (abs(r), sign(r))
 
 isdifferentiable(::L1DistLoss) = false
 isdifferentiable(::L1DistLoss, at) = at != 0
+istwicedifferentiable(::L1DistLoss) = true
+istwicedifferentiable(::L1DistLoss, at) = true
 islipschitzcont(::L1DistLoss) = true
 isconvex(::L1DistLoss) = true
 
@@ -57,11 +59,13 @@ typealias L2DistLoss LPDistLoss{2}
 
 value(l::L2DistLoss, r::Number) = abs2(r)
 deriv(l::L2DistLoss, r::Number) = 2r
-deriv2(l::L2DistLoss, r::Number) = 2
+deriv2{T<:Number}(l::L2DistLoss, r::T) = 2*one(T)
 value_deriv(l::L2DistLoss, r::Number) = (abs2(r), 2r)
 
 isdifferentiable(::L2DistLoss) = true
 isdifferentiable(::L2DistLoss, at) = true
+istwicedifferentiable(::L2DistLoss) = true
+istwicedifferentiable(::L2DistLoss, at) = true
 islipschitzcont(::L2DistLoss) = false
 isconvex(::L2DistLoss) = true
 
@@ -84,6 +88,12 @@ function value_deriv{T<:Number}(l::EpsilonInsLoss, r::T)
   absr = abs(r)
   absr <= l.eps ? (zero(T), zero(T)) : (absr - l.eps, sign(r))
 end
+
+issymmetric(::EpsilonInsLoss) = true
+isdifferentiable(::EpsilonInsLoss) = false
+isdifferentiable(l::EpsilonInsLoss, at) = abs(at) != l.eps
+istwicedifferentiable(::EpsilonInsLoss) = true
+istwicedifferentiable(l::EpsilonInsLoss, at) = abs(at) != l.eps
 
 # ==========================================================================
 # L(y, t) = -ln(4 * exp(y - t) / (1 + exp(y - t))²)
@@ -110,3 +120,8 @@ function value_deriv(l::LogitDistLoss, r::Number)
   -log(4 * er / abs2(er1)), (er - 1) / (er1)
 end
 
+issymmetric(::LogitDistLoss) = true
+isdifferentiable(::LogitDistLoss) = true
+isdifferentiable(::LogitDistLoss, at) = true
+istwicedifferentiable(::LogitDistLoss) = true
+istwicedifferentiable(::LogitDistLoss, at) = true
