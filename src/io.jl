@@ -1,7 +1,8 @@
 
-print(io::IO, c::Cost, args...) = print(io, typeof(c), args...)
-print(io::IO, l::EpsilonInsLoss, args...) = print(io, typeof(l), " with ɛ = $(l.eps)", args...)
-print(io::IO, l::L2SmoothedHingeLoss, args...) = print(io, typeof(l), " with γ = $(l.gamma)", args...)
+print(io::IO, c::Cost, args...) = print(io, typeof(c).name.name, args...)
+print{P}(io::IO, l::LPDistLoss{P}, args...) = print(io, typeof(l).name.name, " with P = $(P)", args...)
+print(io::IO, l::EpsilonInsLoss, args...) = print(io, typeof(l).name.name, " with ɛ = $(l.eps)", args...)
+print(io::IO, l::L2SmoothedHingeLoss, args...) = print(io, typeof(l).name.name, " with γ = $(l.gamma)", args...)
 
 function show(io::IO, loss::Union{MarginBasedLoss,DistanceBasedLoss,ZeroOneLoss})
   println(io, loss)

@@ -5,7 +5,7 @@
 immutable CrossentropyLoss <: SupervisedLoss end
 typealias LogitProbLoss CrossentropyLoss
 
-function value(l::CrossentropyLoss, y::Real, t::Real)
+function value(l::CrossentropyLoss, y::Number, t::Number)
   if y == 1
     -log(t)
   elseif y == 0
@@ -14,9 +14,9 @@ function value(l::CrossentropyLoss, y::Real, t::Real)
     -y*log(t) - (1-y)*log(1-t)
   end  
 end
-deriv(l::CrossentropyLoss, y::Real, t::Real) = t - y
-deriv2(l::CrossentropyLoss, y::Real, t::Real) = 1
-value_deriv(l::CrossentropyLoss, y::Real, t::Real) = (value(l,y,t), deriv(l,y,t))
+deriv(l::CrossentropyLoss, y::Number, t::Number) = t - y
+deriv2(l::CrossentropyLoss, y::Number, t::Number) = 1
+value_deriv(l::CrossentropyLoss, y::Number, t::Number) = (value(l,y,t), deriv(l,y,t))
 
 isdifferentiable(::CrossentropyLoss) = true
 isconvex(::CrossentropyLoss) = true
@@ -26,28 +26,28 @@ isconvex(::CrossentropyLoss) = true
 
 immutable ZeroOneLoss <: SupervisedLoss end
 
-call(l::ZeroOneLoss, yt::Real) = value(l, yt)
+call(l::ZeroOneLoss, yt::Number) = value(l, yt)
 transpose(l::ZeroOneLoss) = repr_deriv_fun(l)
-value(l::ZeroOneLoss, y::Real, t::Real) = value(l, y * t)
-deriv(l::ZeroOneLoss, y::Real, t::Real) = zero(t)
-deriv2(l::ZeroOneLoss, y::Real, t::Real) = zero(t)
+value(l::ZeroOneLoss, y::Number, t::Number) = value(l, y * t)
+deriv(l::ZeroOneLoss, y::Number, t::Number) = zero(t)
+deriv2(l::ZeroOneLoss, y::Number, t::Number) = zero(t)
 
-value{T<:Real}(l::ZeroOneLoss, yt::T) = sign(yt) < 0 ? one(T) : zero(T)
-deriv{T<:Real}(l::ZeroOneLoss, yt::T) = zero(T)
-deriv2{T<:Real}(l::ZeroOneLoss, yt::T) = zero(T)
+value{T<:Number}(l::ZeroOneLoss, yt::T) = sign(yt) < 0 ? one(T) : zero(T)
+deriv{T<:Number}(l::ZeroOneLoss, yt::T) = zero(T)
+deriv2{T<:Number}(l::ZeroOneLoss, yt::T) = zero(T)
 
 function repr_fun(l::ZeroOneLoss)
-  _φ(yt::Real) = value(l, yt)
+  _φ(yt::Number) = value(l, yt)
   _φ
 end
 
 function repr_deriv_fun(l::ZeroOneLoss)
-  _φ_deriv(yt::Real) = deriv(l, yt)
+  _φ_deriv(yt::Number) = deriv(l, yt)
   _φ_deriv
 end
 
 function repr_deriv2_fun(l::ZeroOneLoss)
-  _φ_deriv2(yt::Real) = deriv2(l, yt)
+  _φ_deriv2(yt::Number) = deriv2(l, yt)
   _φ_deriv2
 end
 
