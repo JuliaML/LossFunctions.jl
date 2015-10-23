@@ -12,6 +12,7 @@ function test_deriv(l::MarginBasedLoss, t_vec)
       @test_approx_eq val val2
       @test_approx_eq val val3
       @test_approx_eq val val4
+      @test_approx_eq val value(l, y, t)
       @test_approx_eq val value(l, y*t)
       @test_approx_eq val value(l, [2,3], y, t)
       @test_approx_eq val value_fun(l)(y, t)
@@ -46,6 +47,7 @@ function test_deriv(l::DistanceBasedLoss, t_vec)
       @test_approx_eq val val2
       @test_approx_eq val val3
       @test_approx_eq val val4
+      @test_approx_eq val value(l, y, t)
       @test_approx_eq val value(l, y-t)
       @test_approx_eq val value(l, [2,3], y, t)
       @test_approx_eq val value_fun(l)(y, t)
@@ -73,6 +75,7 @@ function test_deriv2(l::MarginBasedLoss, t_vec)
       d2_dual = y*epsilon(deriv(l, dual(y, 0), dual(t, 1)))
       d2_comp = deriv2(l, y, t)
       @test abs(d2_dual - d2_comp) < 1e-10
+      @test_approx_eq d2_comp deriv2(l, y, t)
       @test_approx_eq d2_comp deriv2(l, y*t)
       @test_approx_eq d2_comp deriv2(l, [2,3], y, t)
       @test_approx_eq d2_comp deriv2_fun(l)(y, t)
@@ -90,6 +93,7 @@ function test_deriv2(l::DistanceBasedLoss, t_vec)
       d2_dual = epsilon(deriv(l, dual(y-t, 1)))
       d2_comp = deriv2(l, y, t)
       @test abs(d2_dual - d2_comp) < 1e-10
+      @test_approx_eq d2_comp deriv2(l, y, t)
       @test_approx_eq d2_comp deriv2(l, y-t)
       @test_approx_eq d2_comp deriv2(l, [2,3], y, t)
       @test_approx_eq d2_comp deriv2_fun(l)(y, t)
@@ -104,7 +108,7 @@ end
 # ==========================================================================
 
 margin_losses = [LogitMarginLoss(), L1HingeLoss(), L2HingeLoss(),
-                 L2SmoothedHingeLoss(.5), L2SmoothedHingeLoss(1), L2SmoothedHingeLoss(2)]
+                 SmoothedL2HingeLoss(.5), SmoothedL2HingeLoss(1), SmoothedL2HingeLoss(2)]
 
 msg("Test first derivatives of margin-based losses")
 

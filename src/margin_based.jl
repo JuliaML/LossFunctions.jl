@@ -59,21 +59,21 @@ isclipable(::L2HingeLoss) = true
 # L(y, t) = 0.5 / γ * max(0, 1 - yt)^2   ... yt >= 1 - γ
 #           1 - γ / 2 - yt               ... otherwise
 
-immutable L2SmoothedHingeLoss <: MarginBasedLoss
+immutable SmoothedL2HingeLoss <: MarginBasedLoss
   gamma::Float64
 
-  function L2SmoothedHingeLoss(γ::Number)
+  function SmoothedL2HingeLoss(γ::Number)
     γ > 0 || error("γ must be strictly positive")
     new(convert(Float64, γ))
   end
 end
 
-function value{T<:Number}(l::L2SmoothedHingeLoss, yt::T)
+function value{T<:Number}(l::SmoothedL2HingeLoss, yt::T)
   gamma = convert(T, l.gamma)
   yt >= 1 - gamma ? 0.5 / gamma * abs2(max(zero(T), 1 - yt)) : one(T) - gamma / 2 - yt
 end
 
-function deriv{T<:Number}(l::L2SmoothedHingeLoss, yt::T)
+function deriv{T<:Number}(l::SmoothedL2HingeLoss, yt::T)
   gamma = convert(T, l.gamma)
   if yt >= 1 - gamma
     yt >= 1 ? zero(T) : (yt - one(T)) / gamma
@@ -82,17 +82,17 @@ function deriv{T<:Number}(l::L2SmoothedHingeLoss, yt::T)
   end
 end
 
-function deriv2{T<:Number}(l::L2SmoothedHingeLoss, yt::T)
+function deriv2{T<:Number}(l::SmoothedL2HingeLoss, yt::T)
   gamma = convert(T, l.gamma)
   yt < 1 - gamma || yt > 1 ? zero(T) : one(T) / gamma
 end
 
-value_deriv(l::L2SmoothedHingeLoss, yt::Number) = (value(l, yt), deriv(l, yt))
+value_deriv(l::SmoothedL2HingeLoss, yt::Number) = (value(l, yt), deriv(l, yt))
 
-isdifferentiable(::L2SmoothedHingeLoss) = true
-isdifferentiable(::L2SmoothedHingeLoss, at) = true
-istwicedifferentiable(::L2SmoothedHingeLoss) = false
-istwicedifferentiable(l::L2SmoothedHingeLoss, at) = at != 1 && at != 1 - l.gamma
-islocallylipschitzcont(::L2SmoothedHingeLoss) = true
-isconvex(::L2SmoothedHingeLoss) = true
-isclipable(::L2SmoothedHingeLoss) = true
+isdifferentiable(::SmoothedL2HingeLoss) = true
+isdifferentiable(::SmoothedL2HingeLoss, at) = true
+istwicedifferentiable(::SmoothedL2HingeLoss) = false
+istwicedifferentiable(l::SmoothedL2HingeLoss, at) = at != 1 && at != 1 - l.gamma
+islocallylipschitzcont(::SmoothedL2HingeLoss) = true
+isconvex(::SmoothedL2HingeLoss) = true
+isclipable(::SmoothedL2HingeLoss) = true
