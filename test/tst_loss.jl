@@ -129,7 +129,8 @@ end
 
 distance_losses = [L2DistLoss(), LPDistLoss(2.0), L1DistLoss(), LPDistLoss(1.0),
                    LPDistLoss(0.5), LPDistLoss(1.5), LPDistLoss(3),
-                   LogitDistLoss(), EpsilonInsLoss(0.5), EpsilonInsLoss(1.5)]
+                   LogitDistLoss(), L1EpsilonInsLoss(0.5), EpsilonInsLoss(1.5),
+                   L2EpsilonInsLoss(0.5), L2EpsilonInsLoss(1.5)]
 
 msg("Test first derivatives of distance-based losses")
 

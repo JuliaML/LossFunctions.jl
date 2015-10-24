@@ -70,28 +70,59 @@ isconvex(::L2DistLoss) = true
 # ==========================================================================
 # L(y, t) = max(0, |y - t| - ɛ)
 
-immutable EpsilonInsLoss <: DistanceBasedLoss
+immutable L1EpsilonInsLoss <: DistanceBasedLoss
   eps::Float64
 
-  function EpsilonInsLoss(ɛ::Number)
+  function L1EpsilonInsLoss(ɛ::Number)
+    ɛ > 0 || error("ɛ must be strictly positive")
+    new(convert(Float64, ɛ))
+  end
+end
+typealias EpsilonInsLoss L1EpsilonInsLoss
+
+value{T<:Number}(l::L1EpsilonInsLoss, r::T) = max(zero(T), abs(r) - l.eps)
+deriv{T<:Number}(l::L1EpsilonInsLoss, r::T) = abs(r) <= l.eps ? zero(T) : sign(r)
+deriv2{T<:Number}(l::L1EpsilonInsLoss, r::T) = zero(T)
+function value_deriv{T<:Number}(l::L1EpsilonInsLoss, r::T)
+  absr = abs(r)
+  absr <= l.eps ? (zero(T), zero(T)) : (absr - l.eps, sign(r))
+end
+
+issymmetric(::L1EpsilonInsLoss) = true
+isdifferentiable(::L1EpsilonInsLoss) = false
+isdifferentiable(l::L1EpsilonInsLoss, at) = abs(at) != l.eps
+istwicedifferentiable(::L1EpsilonInsLoss) = true
+istwicedifferentiable(l::L1EpsilonInsLoss, at) = abs(at) != l.eps
+
+# ==========================================================================
+# L(y, t) = max(0, |y - t| - ɛ)^2
+
+immutable L2EpsilonInsLoss <: DistanceBasedLoss
+  eps::Float64
+
+  function L2EpsilonInsLoss(ɛ::Number)
     ɛ > 0 || error("ɛ must be strictly positive")
     new(convert(Float64, ɛ))
   end
 end
 
-value{T<:Number}(l::EpsilonInsLoss, r::T) = max(zero(T), abs(r) - l.eps)
-deriv{T<:Number}(l::EpsilonInsLoss, r::T) = abs(r) <= l.eps ? zero(T) : sign(r)
-deriv2{T<:Number}(l::EpsilonInsLoss, r::T) = zero(T)
-function value_deriv{T<:Number}(l::EpsilonInsLoss, r::T)
+value{T<:Number}(l::L2EpsilonInsLoss, r::T) = abs2(max(zero(T), abs(r) - l.eps))
+function deriv{T<:Number}(l::L2EpsilonInsLoss, r::T)
   absr = abs(r)
-  absr <= l.eps ? (zero(T), zero(T)) : (absr - l.eps, sign(r))
+  absr <= l.eps ? zero(T) : 2*sign(r)*(absr - l.eps)
+end
+deriv2{T<:Number}(l::L2EpsilonInsLoss, r::T) = abs(r) <= l.eps ? zero(T) : 2*one(T)
+function value_deriv{T<:Number}(l::L2EpsilonInsLoss, r::T)
+  absr = abs(r)
+  diff = absr - l.eps
+  absr <= l.eps ? (zero(T), zero(T)) : (abs2(diff), 2*sign(r)*diff)
 end
 
-issymmetric(::EpsilonInsLoss) = true
-isdifferentiable(::EpsilonInsLoss) = false
-isdifferentiable(l::EpsilonInsLoss, at) = abs(at) != l.eps
-istwicedifferentiable(::EpsilonInsLoss) = true
-istwicedifferentiable(l::EpsilonInsLoss, at) = abs(at) != l.eps
+issymmetric(::L2EpsilonInsLoss) = true
+isdifferentiable(::L2EpsilonInsLoss) = true
+isdifferentiable(l::L2EpsilonInsLoss, at) = true
+istwicedifferentiable(::L2EpsilonInsLoss) = false
+istwicedifferentiable(l::L2EpsilonInsLoss, at) = abs(at) != l.eps
 
 # ==========================================================================
 # L(y, t) = -ln(4 * exp(y - t) / (1 + exp(y - t))²)

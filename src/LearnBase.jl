@@ -35,6 +35,8 @@ export
             L1DistLoss,
             L2DistLoss,
             EpsilonInsLoss,
+            L1EpsilonInsLoss,
+            L2EpsilonInsLoss,
             LogitDistLoss,
           LogitProbLoss,
           CrossentropyLoss,
