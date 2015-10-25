@@ -93,6 +93,7 @@ isdifferentiable(::L1EpsilonInsLoss) = false
 isdifferentiable(l::L1EpsilonInsLoss, at) = abs(at) != l.eps
 istwicedifferentiable(::L1EpsilonInsLoss) = true
 istwicedifferentiable(l::L1EpsilonInsLoss, at) = abs(at) != l.eps
+isconvex(::L1EpsilonInsLoss) = true
 
 # ==========================================================================
 # L(y, t) = max(0, |y - t| - ɛ)^2
@@ -120,9 +121,10 @@ end
 
 issymmetric(::L2EpsilonInsLoss) = true
 isdifferentiable(::L2EpsilonInsLoss) = true
-isdifferentiable(l::L2EpsilonInsLoss, at) = true
+isdifferentiable(::L2EpsilonInsLoss, at) = true
 istwicedifferentiable(::L2EpsilonInsLoss) = false
 istwicedifferentiable(l::L2EpsilonInsLoss, at) = abs(at) != l.eps
+isconvex(::L2EpsilonInsLoss) = true
 
 # ==========================================================================
 # L(y, t) = -ln(4 * exp(y - t) / (1 + exp(y - t))²)
@@ -154,3 +156,4 @@ isdifferentiable(::LogitDistLoss) = true
 isdifferentiable(::LogitDistLoss, at) = true
 istwicedifferentiable(::LogitDistLoss) = true
 istwicedifferentiable(::LogitDistLoss, at) = true
+isconvex(::LogitDistLoss) = true
