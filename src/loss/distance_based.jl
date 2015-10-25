@@ -1,4 +1,3 @@
-
 # ==========================================================================
 # L(y, t) = |y - t|^P
 
@@ -135,16 +134,13 @@ function value(l::LogitDistLoss, r::Number)
   er = exp(r)
   -log(4 * er / abs2(1 + er))
 end
-
 function deriv(l::LogitDistLoss, r::Number)
   tanh(r / 2)
 end
-
 function deriv2(l::LogitDistLoss, r::Number)
   er = exp(r)
   2*er / abs2(1 + er)
 end
-
 function value_deriv(l::LogitDistLoss, r::Number)
   er = exp(r)
   er1 = 1 + er

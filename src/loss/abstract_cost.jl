@@ -7,22 +7,22 @@ deriv2(c::Cost, X::AbstractArray, y::Number, α::Number) = @_not_implemented
 value_deriv(c::Cost, X::AbstractArray, y::Number, α::Number) = @_not_implemented
 
 function value_fun(c::Cost)
-  _value(X::AbstractArray, y::Number, α::Number) = value(c, X, y, α)
+  _value(args...) = value(c, args...)
   _value
 end
 
 function deriv_fun(c::Cost)
-  _deriv(X::AbstractArray, y::Number, α::Number) = deriv(c, X, y, α)
+  _deriv(args...) = deriv(c, args...)
   _deriv
 end
 
 function deriv2_fun(c::Cost)
-  _deriv2(X::AbstractArray, y::Number, α::Number) = deriv2(c, X, y, α)
+  _deriv2(args...) = deriv2(c, args...)
   _deriv2
 end
 
 function value_deriv_fun(c::Cost)
-  _value_deriv(X::AbstractArray, y::Number, α::Number) = value_deriv(c, X, y, α)
+  _value_deriv(args...) = value_deriv(c, args...)
   _value_deriv
 end
 
@@ -56,26 +56,6 @@ value(l::SupervisedLoss, y::Number, t::Number) = @_not_implemented
 deriv(l::SupervisedLoss, y::Number, t::Number) = @_not_implemented
 deriv2(l::SupervisedLoss, y::Number, t::Number) = @_not_implemented
 value_deriv(l::SupervisedLoss, y::Number, t::Number) = @_not_implemented
-
-function value_fun(c::SupervisedLoss)
-  _value(y::Number, t::Number) = value(c, y, t)
-  _value
-end
-
-function deriv_fun(c::SupervisedLoss)
-  _deriv(y::Number, t::Number) = deriv(c, y, t)
-  _deriv
-end
-
-function deriv2_fun(c::SupervisedLoss)
-  _deriv2(y::Number, t::Number) = deriv2(c, y, t)
-  _deriv2
-end
-
-function value_deriv_fun(c::SupervisedLoss)
-  _value_deriv(y::Number, t::Number) = value_deriv(c, y, t)
-  _value_deriv
-end
 
 ismarginbased(::SupervisedLoss) = false
 isclasscalibrated(::SupervisedLoss) = false

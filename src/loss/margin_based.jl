@@ -15,7 +15,6 @@ istwicedifferentiable(::PerceptronLoss, at) = at != 0
 isconvex(::PerceptronLoss) = true
 isclipable(::PerceptronLoss) = true
 
-
 # ==========================================================================
 # L(y, t) = ln(1 + exp(-yt))
 
@@ -88,7 +87,6 @@ end
 function value{T<:Number}(l::SmoothedL1HingeLoss, yt::T)
   yt >= 1 - l.gamma ? 0.5 / l.gamma * abs2(max(zero(T), 1 - yt)) : one(T) - l.gamma / 2 - yt
 end
-
 function deriv{T<:Number}(l::SmoothedL1HingeLoss, yt::T)
   if yt >= 1 - l.gamma
     yt >= 1 ? zero(T) : (yt - one(T)) / l.gamma
@@ -96,11 +94,9 @@ function deriv{T<:Number}(l::SmoothedL1HingeLoss, yt::T)
     -one(T)
   end
 end
-
 function deriv2{T<:Number}(l::SmoothedL1HingeLoss, yt::T)
   yt < 1 - l.gamma || yt > 1 ? zero(T) : one(T) / l.gamma
 end
-
 value_deriv(l::SmoothedL1HingeLoss, yt::Number) = (value(l, yt), deriv(l, yt))
 
 isdifferentiable(::SmoothedL1HingeLoss) = true
@@ -120,7 +116,6 @@ immutable ModifiedHuberLoss <: MarginBasedLoss end
 function value{T<:Number}(l::ModifiedHuberLoss, yt::T)
   yt >= -1 ? abs2(max(zero(T), 1 - yt)) : -4 * yt
 end
-
 function deriv{T<:Number}(l::ModifiedHuberLoss, yt::T)
   if yt >= -1
     yt > 1 ? zero(T) : 2*yt - 2
@@ -128,11 +123,9 @@ function deriv{T<:Number}(l::ModifiedHuberLoss, yt::T)
     -4*one(T)
   end
 end
-
 function deriv2{T<:Number}(l::ModifiedHuberLoss, yt::T)
   yt < -1 || yt > 1 ? zero(T) : 2*one(T)
 end
-
 value_deriv(l::ModifiedHuberLoss, yt::Number) = (value(l, yt), deriv(l, yt))
 
 isdifferentiable(::ModifiedHuberLoss) = true
