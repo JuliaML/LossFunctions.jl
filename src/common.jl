@@ -21,4 +21,4 @@ macro _not_implemented()
   end
 end
 
-sigmoid(x) = 1 / (1 + exp(-x))
+sigmoid(x) = one(x) / (one(x) + exp(-x))
