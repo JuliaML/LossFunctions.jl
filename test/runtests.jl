@@ -15,7 +15,7 @@ end
 tests = [
   "tst_loss.jl"
   "tst_classencoding.jl"
-  "tst_prediction.jl"
+  #"tst_prediction.jl"
 ]
 
 perf = [
