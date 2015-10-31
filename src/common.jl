@@ -21,4 +21,6 @@ macro _not_implemented()
   end
 end
 
-sigmoid(x) = 1 / (1 + exp(-x))
+macro _dimcheck(condition)
+  :(($condition) || throw(DimensionMismatch("Dimensions of the parameters don't match")))
+end

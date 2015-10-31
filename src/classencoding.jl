@@ -29,7 +29,7 @@ end
 ZeroOneClassEncoding{T}(lm::LabelMap{T}) =
   ZeroOneClassEncoding{T}(lm)
 
-ZeroOneClassEncoding{T}(targets::Vector{T}) =
+ZeroOneClassEncoding{T}(targets::AbstractVector{T}) =
   ZeroOneClassEncoding{T}(labelmap(targets))
 
 #-----------------------------------------------------------
@@ -49,7 +49,7 @@ end
 SignedClassEncoding{T}(lm::LabelMap{T}) =
   SignedClassEncoding{T}(lm)
 
-SignedClassEncoding{T}(targets::Vector{T}) =
+SignedClassEncoding{T}(targets::AbstractVector{T}) =
   SignedClassEncoding{T}(labelmap(targets))
 
 #-----------------------------------------------------------
@@ -71,7 +71,7 @@ end
 MultivalueClassEncoding{T}(lm::LabelMap{T}; zero_based = false) =
   MultivalueClassEncoding{T}(lm, zero_based)
 
-MultivalueClassEncoding{T}(targets::Vector{T}; zero_based = false) =
+MultivalueClassEncoding{T}(targets::AbstractVector{T}; zero_based = false) =
   MultivalueClassEncoding{T}(labelmap(targets), zero_based)
 
 #-----------------------------------------------------------
@@ -92,7 +92,7 @@ end
 OneOfKClassEncoding{T}(lm::LabelMap{T}) =
   OneOfKClassEncoding{T}(lm)
 
-OneOfKClassEncoding{T}(targets::Vector{T}) =
+OneOfKClassEncoding{T}(targets::AbstractVector{T}) =
   OneOfKClassEncoding{T}(labelmap(targets))
 
 end
@@ -112,23 +112,23 @@ labels{C<:ClassEncoding}(ce::C) = ce.labelmap.vs
 
 #-----------------------------------------------------------
 
-function groupindices{T}(classEncoding::ClassEncoding, targets::Vector{T})
+function groupindices{T}(classEncoding::ClassEncoding, targets::AbstractVector{T})
   groupindices(classEncoding.labelmap, targets)
 end
 
 #-----------------------------------------------------------
 
-function classdistribution{T}(labelmap::LabelMap{T}, targets::Vector{T})
+function classdistribution{T}(labelmap::LabelMap{T}, targets::AbstractVector{T})
   labelmap.vs, map(length, groupindices(labelmap, targets))
 end
 
-function classdistribution{T}(classEncoding::ClassEncoding, targets::Vector{T})
+function classdistribution{T}(classEncoding::ClassEncoding, targets::AbstractVector{T})
   classEncoding.labelmap.vs, map(length, groupindices(classEncoding, targets))
 end
 
 # ==========================================================================
 
-function labelencode{T}(classEncoding::ZeroOneClassEncoding{T}, targets::Vector{T})
+function labelencode{T}(classEncoding::ZeroOneClassEncoding{T}, targets::AbstractVector{T})
   indicies = labelencode(classEncoding.labelmap, targets)
   float(indicies - 1)
 end
@@ -140,7 +140,7 @@ end
 
 #-----------------------------------------------------------
 
-function labelencode{T}(classEncoding::SignedClassEncoding{T}, targets::Vector{T})
+function labelencode{T}(classEncoding::SignedClassEncoding{T}, targets::AbstractVector{T})
   indicies = labelencode(classEncoding.labelmap, targets)
   2(indicies - 1.5)
 end
@@ -152,7 +152,7 @@ end
 
 #-----------------------------------------------------------
 
-function labelencode{T}(classEncoding::MultivalueClassEncoding{T}, targets::Vector{T})
+function labelencode{T}(classEncoding::MultivalueClassEncoding{T}, targets::AbstractVector{T})
   labelencode(classEncoding.labelmap, targets) - classEncoding.zeroBased*1.
 end
 
@@ -163,7 +163,7 @@ end
 
 #-----------------------------------------------------------
 
-function labelencode{T}(classEncoding::OneOfKClassEncoding{T}, targets::Vector{T})
+function labelencode{T}(classEncoding::OneOfKClassEncoding{T}, targets::AbstractVector{T})
   indicies = labelencode(classEncoding.labelmap, targets)
   convert(Matrix{Float64}, indicatormat(indicies)) # this doesn't work if the indexseq is broken (e.g. [1,2,5])
 end

@@ -93,8 +93,8 @@ function lineplot(
   lineplot(loss, .000001, .999999; nargs...)
 end
 
-function lineplot!(
-    plot::Plot,
+function lineplot!{C<:Canvas}(
+    plot::Plot{C},
     loss::Union{MarginBasedLoss,DistanceBasedLoss,ZeroOneLoss},
     args...;
     name = string(typeof(loss).name.name),
@@ -113,8 +113,8 @@ function lineplot{T<:Cost}(
   newPlot
 end
 
-function lineplot!{T<:Cost}(
-    plot::Plot,
+function lineplot!{C<:Canvas,T<:Cost}(
+    plot::Plot{C},
     lossvec::AbstractVector{T},
     args...; nargs...)
   n = length(lossvec)

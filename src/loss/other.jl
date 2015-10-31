@@ -26,8 +26,6 @@ isconvex(::CrossentropyLoss) = true
 
 immutable ZeroOneLoss <: SupervisedLoss end
 
-call(l::ZeroOneLoss, yt::Number) = value(l, yt)
-transpose(l::ZeroOneLoss) = repr_deriv_fun(l)
 value(l::ZeroOneLoss, y::Number, t::Number) = value(l, y * t)
 deriv(l::ZeroOneLoss, y::Number, t::Number) = zero(t)
 deriv2(l::ZeroOneLoss, y::Number, t::Number) = zero(t)

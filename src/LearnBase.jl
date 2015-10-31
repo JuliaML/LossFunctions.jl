@@ -1,7 +1,6 @@
 module LearnBase
 
 using Reexport
-@reexport using StatsBase
 @reexport using MLBase
 using ArrayViews
 using UnicodePlots
@@ -16,8 +15,6 @@ import StatsBase: fit, fit!, predict, predict!, nobs, coef,
 import MLBase: labelencode, labeldecode, groupindices
 
 export
-
-    sigmoid,
 
     Cost,
       Loss,
@@ -42,6 +39,20 @@ export
           CrossentropyLoss,
           ZeroOneLoss,
         UnsupervisedLoss,
+
+    sigmoid,
+    Predictor,
+      LinearPredictor,
+      SigmoidPredictor,
+
+    Penalty,
+      NoPenalty,
+      L1Penalty,
+      L2Penalty,
+      ElasticNetPenalty,
+      SCADPenalty,
+
+    AbstractSolver,
 
     value,
     deriv,
@@ -84,6 +95,7 @@ export
     EncodedStatisticalModel,
     EncodedRegressionModel
 
+include("abstract.jl")
 include("common.jl")
 include("classencoding.jl")
 include("encodedmodel.jl")
@@ -93,5 +105,8 @@ include("loss/margin_based.jl")
 include("loss/distance_based.jl")
 include("loss/other.jl")
 include("loss/io.jl")
+include("penalty/penalty.jl")
+include("prediction/prediction.jl")
+include("risk/riskspec.jl")
 
 end # module
