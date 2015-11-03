@@ -134,10 +134,13 @@ issymmetric(::SupervisedLoss) = false
 
 abstract MarginBasedLoss <: SupervisedLoss
 
-@inline value(l::MarginBasedLoss, y::Number, t::Number) = value(l, y * t)
-@inline deriv(l::MarginBasedLoss, y::Number, t::Number) = deriv(l, y * t)
-@inline deriv2(l::MarginBasedLoss, y::Number, t::Number) = deriv2(l, y * t)
-@inline value_deriv(l::MarginBasedLoss, y::Number, t::Number) = value_deriv(l, y * t)
+@inline value(l::MarginBasedLoss, y::Number, t::Number) = y * value(l, y * t)
+@inline deriv(l::MarginBasedLoss, y::Number, t::Number) = y * deriv(l, y * t)
+@inline deriv2(l::MarginBasedLoss, y::Number, t::Number) = y * deriv2(l, y * t)
+@inline function value_deriv(l::MarginBasedLoss, y::Number, t::Number)
+  v, d = value_deriv(l, y * t)
+  (y*v, y*d)
+end
 
 @inline value(l::MarginBasedLoss, yt::Number) = @_not_implemented
 @inline deriv(l::MarginBasedLoss, yt::Number) = @_not_implemented

@@ -56,6 +56,7 @@ export
 
     value,
     deriv,
+    deriv!,
     deriv2,
     value_deriv,
 
