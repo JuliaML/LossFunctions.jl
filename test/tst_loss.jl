@@ -1,8 +1,8 @@
 
-function test_value(l::MarginBasedLoss, f::Function, t_vec)
+function test_value(l::SupervisedLoss, f::Function, y_vec, t_vec)
   msg2("$(l): ")
-  for y in [-1., 1], t in t_vec
-    @test_approx_eq l(y, t) f(y, t)
+  for y in y_vec, t in t_vec
+    @test abs(l(y, t) - f(y, t)) < 1e-10
   end
   println("ok")
 end
@@ -126,6 +126,47 @@ end
 
 # ==========================================================================
 
+msg("Test margin-based loss against reference function")
+
+_hingeloss(y, t) = max(0, 1 - y.*t)
+test_value(HingeLoss(), _hingeloss, [-1.,1], -10:0.1:10)
+
+_l2hingeloss(y, t) = max(0, 1 - y.*t)^2
+test_value(L2HingeLoss(), _l2hingeloss, [-1.,1], -10:0.1:10)
+
+_perceptronloss(y, t) = max(0, -y.*t)
+test_value(PerceptronLoss(), _perceptronloss, [-1.,1], -10:0.1:10)
+
+_logitmarginloss(y, t) = log(1 + exp(-y.*t))
+test_value(LogitMarginLoss(), _logitmarginloss, [-1.,1], -10:0.1:10)
+
+function _smoothedl1hingeloss(γ)
+  function _value(y, t)
+    if y.*t >= 1 - γ
+      1/(2γ) * max(0, 1- y.*t)^2
+    else
+      1 - γ / 2 - y.*t
+    end
+  end
+  _value
+end
+test_value(SmoothedL1HingeLoss(.5), _smoothedl1hingeloss(.5), [-1.,1], -10:0.1:10)
+test_value(SmoothedL1HingeLoss(1), _smoothedl1hingeloss(1), [-1.,1], -10:0.1:10)
+test_value(SmoothedL1HingeLoss(2), _smoothedl1hingeloss(2), [-1.,1], -10:0.1:10)
+
+# L(y, t) = max(0, 1 - yt)^2    ... yt >= -1
+#           -4*yt               ... otherwise
+function _modhuberloss(y, t)
+  if y.*t >= -1
+    max(0, 1 - y.*t)^2
+  else
+    -4.*y.*t
+  end
+end
+test_value(ModifiedHuberLoss(), _modhuberloss, [-1.,1], -10:0.1:10)
+
+# ==========================================================================
+
 margin_losses = [LogitMarginLoss(), L1HingeLoss(), L2HingeLoss(), PerceptronLoss(),
                  SmoothedL1HingeLoss(.5), SmoothedL1HingeLoss(1), SmoothedL1HingeLoss(2),
                  ModifiedHuberLoss()]
@@ -160,13 +201,4 @@ msg("Test second derivatives of distance-based losses")
 for loss in distance_losses
   test_deriv2(loss, -30:0.5:30)
 end
-
-# ==========================================================================
-
-msg("Test loss values against reference function")
-
-_hingeloss(y, t) = max(0, 1 - y.*t)
-test_value(HingeLoss(), _hingeloss, -10:0.1:10)
-
-
 
