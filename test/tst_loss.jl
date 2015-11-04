@@ -1,8 +1,17 @@
 
+function test_value(l::MarginBasedLoss, f::Function, t_vec)
+  msg2("$(l): ")
+  for y in [-1., 1], t in t_vec
+    @test_approx_eq l(y, t) f(y, t)
+  end
+  println("ok")
+end
+
 function test_deriv(l::MarginBasedLoss, t_vec)
+  msg2("$(l): ")
   for y in [-1., 1], t in t_vec
     if isdifferentiable(l, y*t)
-      d_dual = y * epsilon(value(l, dual(y, 0), dual(t, 1)))
+      d_dual = epsilon(value(l, dual(y, 0), dual(t, 1)))
       d_comp = deriv(l, y, t)
       @test abs(d_dual - d_comp) < 1e-10
       val = value(l, y, t)
@@ -21,13 +30,14 @@ function test_deriv(l::MarginBasedLoss, t_vec)
       @test_approx_eq val l(y*t)
       @test_approx_eq d_comp d_comp2
       @test_approx_eq d_comp d_comp3
-      @test_approx_eq d_comp d_comp4
-      @test_approx_eq d_comp deriv(l, y*t)
+      @test_approx_eq d_comp y*d_comp4
+      @test_approx_eq d_comp y*deriv(l, y*t)
       @test_approx_eq d_comp deriv(l, [2,3], y, t)
       @test_approx_eq d_comp deriv_fun(l)(y, t)
-      @test_approx_eq d_comp deriv_fun(l)(y*t)
-      @test_approx_eq d_comp repr_deriv_fun(l)(y*t)
-      @test_approx_eq d_comp l'(y*t)
+      @test_approx_eq d_comp y*deriv_fun(l)(y*t)
+      @test_approx_eq d_comp y*repr_deriv_fun(l)(y*t)
+      @test_approx_eq d_comp l'(y,t)
+      @test_approx_eq d_comp y*l'(y*t)
     else
       # y*t == 1 ? print(".") : print("(no $(y)*$(t)) ")
       print(".")
@@ -37,6 +47,7 @@ function test_deriv(l::MarginBasedLoss, t_vec)
 end
 
 function test_deriv(l::DistanceBasedLoss, t_vec)
+  msg2("$(l): ")
   for y in -20:.2:20, t in t_vec
     if isdifferentiable(l, y-t)
       d_dual = epsilon(value(l, dual(y-t, 1)))
@@ -74,9 +85,10 @@ function test_deriv(l::DistanceBasedLoss, t_vec)
 end
 
 function test_deriv2(l::MarginBasedLoss, t_vec)
+  msg2("$(l): ")
   for y in [-1., 1], t in t_vec
     if istwicedifferentiable(l, y*t)
-      d2_dual = y*epsilon(deriv(l, dual(y, 0), dual(t, 1)))
+      d2_dual = epsilon(deriv(l, dual(y, 0), dual(t, 1)))
       d2_comp = deriv2(l, y, t)
       @test abs(d2_dual - d2_comp) < 1e-10
       @test_approx_eq d2_comp deriv2(l, y, t)
@@ -93,6 +105,7 @@ function test_deriv2(l::MarginBasedLoss, t_vec)
 end
 
 function test_deriv2(l::DistanceBasedLoss, t_vec)
+  msg2("$(l): ")
   for y in -20:.2:20, t in t_vec
     if istwicedifferentiable(l, y-t)
       d2_dual = epsilon(deriv(l, dual(y-t, 1)))
@@ -120,14 +133,12 @@ margin_losses = [LogitMarginLoss(), L1HingeLoss(), L2HingeLoss(), PerceptronLoss
 msg("Test first derivatives of margin-based losses")
 
 for loss in margin_losses
-  msg2("$(loss): ")
   test_deriv(loss, -10:0.1:10)
 end
 
 msg("Test second derivatives of margin-based losses")
 
 for loss in margin_losses
-  msg2("$(loss): ")
   test_deriv2(loss, -10:0.1:10)
 end
 
@@ -141,13 +152,21 @@ distance_losses = [L2DistLoss(), LPDistLoss(2.0), L1DistLoss(), LPDistLoss(1.0),
 msg("Test first derivatives of distance-based losses")
 
 for loss in distance_losses
-  msg2("$(loss): ")
   test_deriv(loss, -30:0.5:30)
 end
 
 msg("Test second derivatives of distance-based losses")
 
 for loss in distance_losses
-  msg2("$(loss): ")
   test_deriv2(loss, -30:0.5:30)
 end
+
+# ==========================================================================
+
+msg("Test loss values against reference function")
+
+_hingeloss(y, t) = max(0, 1 - y.*t)
+test_value(HingeLoss(), _hingeloss, -10:0.1:10)
+
+
+

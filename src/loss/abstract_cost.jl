@@ -2,10 +2,10 @@ abstract Cost
 
 @inline call(c::Cost, args...) = value(c, args...)
 @inline transpose(c::Cost) = deriv_fun(c)
-@inline value(c::Cost, X::AbstractArray, y::Number, α::Number) = @_not_implemented
-@inline deriv(c::Cost, X::AbstractArray, y::Number, α::Number) = @_not_implemented
-@inline deriv2(c::Cost, X::AbstractArray, y::Number, α::Number) = @_not_implemented
-@inline value_deriv(c::Cost, X::AbstractArray, y::Number, α::Number) = @_not_implemented
+# @inline value(c::Cost, X::AbstractArray, y::Number, α::Number) = @_not_implemented
+# @inline deriv(c::Cost, X::AbstractArray, y::Number, α::Number) = @_not_implemented
+# @inline deriv2(c::Cost, X::AbstractArray, y::Number, α::Number) = @_not_implemented
+# @inline value_deriv(c::Cost, X::AbstractArray, y::Number, α::Number) = @_not_implemented
 
 @inline function value_fun(c::Cost)
   _value(args...) = value(c, args...)
@@ -52,10 +52,10 @@ abstract SupervisedLoss <: Loss
 @inline deriv2(l::SupervisedLoss, X::AbstractArray, y::Number, t::Number) = deriv2(l, y, t)
 @inline value_deriv(l::SupervisedLoss, X::AbstractArray, y::Number, t::Number) = value_deriv(l, y, t)
 
-@inline value(l::SupervisedLoss, y::Number, t::Number) = @_not_implemented
-@inline deriv(l::SupervisedLoss, y::Number, t::Number) = @_not_implemented
-@inline deriv2(l::SupervisedLoss, y::Number, t::Number) = @_not_implemented
-@inline value_deriv(l::SupervisedLoss, y::Number, t::Number) = @_not_implemented
+# @inline value(l::SupervisedLoss, y::Number, t::Number) = @_not_implemented
+# @inline deriv(l::SupervisedLoss, y::Number, t::Number) = @_not_implemented
+# @inline deriv2(l::SupervisedLoss, y::Number, t::Number) = @_not_implemented
+# @inline value_deriv(l::SupervisedLoss, y::Number, t::Number) = @_not_implemented
 
 @inline function value(l::SupervisedLoss, y::AbstractVecOrMat, t::AbstractVecOrMat)
   buffer = similar(t)
@@ -134,18 +134,18 @@ issymmetric(::SupervisedLoss) = false
 
 abstract MarginBasedLoss <: SupervisedLoss
 
-@inline value(l::MarginBasedLoss, y::Number, t::Number) = y * value(l, y * t)
+@inline value(l::MarginBasedLoss, y::Number, t::Number) = value(l, y * t)
 @inline deriv(l::MarginBasedLoss, y::Number, t::Number) = y * deriv(l, y * t)
-@inline deriv2(l::MarginBasedLoss, y::Number, t::Number) = y * deriv2(l, y * t)
+@inline deriv2(l::MarginBasedLoss, y::Number, t::Number) = deriv2(l, y * t)
 @inline function value_deriv(l::MarginBasedLoss, y::Number, t::Number)
   v, d = value_deriv(l, y * t)
-  (y*v, y*d)
+  (v, y*d)
 end
 
-@inline value(l::MarginBasedLoss, yt::Number) = @_not_implemented
-@inline deriv(l::MarginBasedLoss, yt::Number) = @_not_implemented
-@inline deriv2(l::MarginBasedLoss, yt::Number) = @_not_implemented
-@inline value_deriv(l::MarginBasedLoss, yt::Number) = @_not_implemented
+# @inline value(l::MarginBasedLoss, yt::Number) = @_not_implemented
+# @inline deriv(l::MarginBasedLoss, yt::Number) = @_not_implemented
+# @inline deriv2(l::MarginBasedLoss, yt::Number) = @_not_implemented
+# @inline value_deriv(l::MarginBasedLoss, yt::Number) = @_not_implemented
 
 @inline function repr_fun(l::MarginBasedLoss)
   _φ(yt::Number) = value(l, yt)
@@ -178,10 +178,10 @@ abstract DistanceBasedLoss <: SupervisedLoss
 @inline deriv2(l::DistanceBasedLoss, y::Number, t::Number) = deriv2(l, y - t)
 @inline value_deriv(l::DistanceBasedLoss, y::Number, t::Number) = value_deriv(l, y - t)
 
-@inline value(l::DistanceBasedLoss, r::Number) = @_not_implemented
-@inline deriv(l::DistanceBasedLoss, r::Number) = @_not_implemented
-@inline deriv2(l::DistanceBasedLoss, r::Number) = @_not_implemented
-@inline value_deriv(l::DistanceBasedLoss, r::Number) = @_not_implemented
+# @inline value(l::DistanceBasedLoss, r::Number) = @_not_implemented
+# @inline deriv(l::DistanceBasedLoss, r::Number) = @_not_implemented
+# @inline deriv2(l::DistanceBasedLoss, r::Number) = @_not_implemented
+# @inline value_deriv(l::DistanceBasedLoss, r::Number) = @_not_implemented
 
 @inline function repr_fun(l::DistanceBasedLoss)
   _ψ(r::Number) = value(l, r)
@@ -210,7 +210,7 @@ abstract UnsupervisedLoss <: Loss
 @inline deriv2(l::UnsupervisedLoss, X::AbstractArray, y::Number, t::Number) = deriv2(l, X, t)
 @inline value_deriv(l::UnsupervisedLoss, X::AbstractArray, y::Number, t::Number) = value_deriv(l, X, t)
 
-@inline value(l::UnsupervisedLoss, X::AbstractArray, t::Number) = @_not_implemented
-@inline deriv(l::UnsupervisedLoss, X::AbstractArray, t::Number) = @_not_implemented
-@inline deriv2(l::UnsupervisedLoss, X::AbstractArray, t::Number) = @_not_implemented
-@inline value_deriv(l::UnsupervisedLoss, X::AbstractArray, t::Number) = @_not_implemented
+# @inline value(l::UnsupervisedLoss, X::AbstractArray, t::Number) = @_not_implemented
+# @inline deriv(l::UnsupervisedLoss, X::AbstractArray, t::Number) = @_not_implemented
+# @inline deriv2(l::UnsupervisedLoss, X::AbstractArray, t::Number) = @_not_implemented
+# @inline value_deriv(l::UnsupervisedLoss, X::AbstractArray, t::Number) = @_not_implemented
