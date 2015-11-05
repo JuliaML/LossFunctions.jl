@@ -1,6 +1,6 @@
 abstract Cost
 
-@inline call(c::Cost, args...) = value(c, args...)
+@inline call(c::Cost, X, y, α) = value(c, X, y, α)
 @inline transpose(c::Cost) = deriv_fun(c)
 # @inline value(c::Cost, X::AbstractArray, y::Number, α::Number) = @_not_implemented
 # @inline deriv(c::Cost, X::AbstractArray, y::Number, α::Number) = @_not_implemented
@@ -47,6 +47,7 @@ isclipable(::Loss) = false
 
 abstract SupervisedLoss <: Loss
 
+@inline call(l::SupervisedLoss, y, t) = value(l, y, t)
 @inline value(l::SupervisedLoss, X::AbstractArray, y::Number, t::Number) = value(l, y, t)
 @inline deriv(l::SupervisedLoss, X::AbstractArray, y::Number, t::Number) = deriv(l, y, t)
 @inline deriv2(l::SupervisedLoss, X::AbstractArray, y::Number, t::Number) = deriv2(l, y, t)
@@ -134,6 +135,7 @@ issymmetric(::SupervisedLoss) = false
 
 abstract MarginBasedLoss <: SupervisedLoss
 
+@inline call(l::MarginBasedLoss, yt) = value(l, yt)
 @inline value(l::MarginBasedLoss, y::Number, t::Number) = value(l, y * t)
 @inline deriv(l::MarginBasedLoss, y::Number, t::Number) = y * deriv(l, y * t)
 @inline deriv2(l::MarginBasedLoss, y::Number, t::Number) = deriv2(l, y * t)
@@ -173,6 +175,7 @@ isclasscalibrated(l::MarginBasedLoss) = isconvex(l) && isdifferentiable(l, 0) &&
 
 abstract DistanceBasedLoss <: SupervisedLoss
 
+@inline call(l::DistanceBasedLoss, r) = value(l, r)
 @inline value(l::DistanceBasedLoss, y::Number, t::Number) = value(l, y - t)
 @inline deriv(l::DistanceBasedLoss, y::Number, t::Number) = deriv(l, y - t)
 @inline deriv2(l::DistanceBasedLoss, y::Number, t::Number) = deriv2(l, y - t)
