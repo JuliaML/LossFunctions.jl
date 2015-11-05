@@ -6,32 +6,39 @@ using LearnBase
 # Load data of interest from the Rdatasets package
 myData = dataset("datasets", "cars")
 
+cs(x) = (x - mean(x)) / sqrt(var(x))
+
 # create target and design matrix
-x = convert(Array,myData[1])
-x = (x - mean(x)) / sqrt(var(x))
+x = cs(convert(Array,myData[1]))
 y = convert(Array,myData[2])
+y = y .+ sin(x.*2) * 20
+#y[2] = 100
+#y[10] = 100
 m = length(y)
-X = [ones(m) x]'
+X = [cs(sqrt(abs(x))) x cs(x.^2) cs(x.^3) cs(x.^4)]'
 
 # Set hyper parameters
-θ = [0, 0]
+θ = [0., 0, 0, 0, 0, 0]
 α = 0.05
-maxIter = 100
+maxIter = 300
 
 loss = L2DistLoss()
-pred = LinearPredictor(bias = 0)
+reg = L2Penalty(.1)
+pred = LinearPredictor(bias = 1)
 
 # Perform gradient descent
 J = zeros(maxIter)
 print("Starting gradient descent ... ")
 for i = 1:maxIter
   ŷ = pred(X, θ)
-  J[i] = mean(loss(y, ŷ))
-  ▽ = mean(loss'(y, ŷ) .* pred'(X, θ), 2)
-  θ = θ + α .* vec(▽)
+  J[i] = meanvalue(loss, y, ŷ)
+  ▽ = mean(grad(loss, y, ŷ) .* pred'(X, θ), 2)
+  addgrad!(view(▽, 1:(length(θ)-1)), reg, view(θ, 1:(length(θ)-1)))
+  θ = θ - α .* vec(▽)
 end
 println("DONE")
 
+println(θ)
 # Plot results
 mp=scatterplot(x, y, color=:blue)
 lineplot!(mp, x, vec(value(pred, X, θ)), color = :red)

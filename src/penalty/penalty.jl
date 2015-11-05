@@ -7,24 +7,8 @@ abstract Penalty
 "No penalty on the coefficients"
 immutable NoPenalty <: Penalty end
 Base.show(io::IO, p::NoPenalty) = print(io, "NoPenalty")
-@inline value{T<:Number}(p::NoPenalty, w::AbstractVector{T}) = zero(T)
-@inline deriv{T<:Number}(p::L2Penalty, wⱼ::T) = zero(T)
-
-# ==========================================================================
-
-"An L2 (ridge) penalty on the coefficients"
-immutable L2Penalty <: Penalty
-  λ::Float64
-  function L2Penalty(λ::Real)
-    λ >= 0 || error("λ must be positive")
-    new(Float64(λ))
-  end
-end
-isconvex(::L2Penalty) = true
-isdifferentiable(::L2Penalty) = true
-Base.show(io::IO, p::L2Penalty) = print(io, "L2Penalty(λ = $(p.λ))")
-@inline value(p::L2Penalty, w::AbstractVector) = p.λ/2 * sumabs2(w)
-@inline deriv(p::L2Penalty, wⱼ::Number) = p.λ * wⱼ
+@inline value{T<:Number}(p::NoPenalty, w::AbstractArray{T}) = zero(T)
+@inline deriv{T<:Number}(p::NoPenalty, wⱼ::T) = zero(T)
 
 # ==========================================================================
 
@@ -39,8 +23,24 @@ end
 isconvex(::L1Penalty) = true
 isdifferentiable(p::L1Penalty) = false
 Base.show(io::IO, p::L1Penalty) = print(io, "L1Penalty(λ = $(p.λ))")
-@inline value(p::L1Penalty, w::AbstractVector) = p.λ * sumabs(w)
-@inline deriv(p::L2Penalty, wⱼ::Number) = p.λ * sign(wⱼ)
+@inline value(p::L1Penalty, w::AbstractArray) = p.λ * sumabs(w)
+@inline deriv(p::L1Penalty, wⱼ::Number) = p.λ * sign(wⱼ)
+
+# ==========================================================================
+
+"An L2 (ridge) penalty on the coefficients"
+immutable L2Penalty <: Penalty
+  λ::Float64
+  function L2Penalty(λ::Real)
+    λ >= 0 || error("λ must be positive")
+    new(Float64(λ))
+  end
+end
+isconvex(::L2Penalty) = true
+isdifferentiable(::L2Penalty) = true
+Base.show(io::IO, p::L2Penalty) = print(io, "L2Penalty(λ = $(p.λ))")
+@inline value(p::L2Penalty, w::AbstractArray) = p.λ/2 * sumabs2(w)
+@inline deriv(p::L2Penalty, wⱼ::Number) = p.λ * wⱼ
 
 # ==========================================================================
 
@@ -61,12 +61,20 @@ Base.show(io::IO, p::ElasticNetPenalty) = print(io, "ElasticNetPenalty(λ = $(p.
 
 Base.copy(p::Penalty) = deepcopy(p)
 
-@inline grad(p::Penalty, w::AbstractVector{T}) = grad!(similar(w), p, w)
-@inline function grad!{T<:Number}(buffer::AbstractVector, p::Penalty, w::AbstractVector{T})
+@inline grad(p::Penalty, w::AbstractArray) = grad!(similar(w), p, w)
+@inline function grad!{T<:Number}(buffer::AbstractArray, p::Penalty, w::AbstractArray{T})
   k = length(w)
   @_dimcheck length(buffer) == k
   for j in 1:k
     @inbounds buffer[j] = deriv(p, w[j])
+  end
+  buffer
+end
+@inline function addgrad!{T<:Number}(buffer::AbstractArray, p::Penalty, w::AbstractArray{T})
+  k = length(w)
+  @_dimcheck length(buffer) == k
+  for j in 1:k
+    @inbounds buffer[j] += deriv(p, w[j])
   end
   buffer
 end

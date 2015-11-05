@@ -69,16 +69,23 @@ function deriv{T}(h::LinearPredictor{true}, x::AbstractVector, w::AbstractVector
   buffer[end] = h.bias
 end
 
-function value{T}(h::LinearPredictor{true}, X::AbstractMatrix, w::AbstractVector{T})
+@inline function value{T}(h::LinearPredictor{true}, X::AbstractMatrix, w::AbstractVector{T})
+  buffer = zeros(T, 1, size(X, 2))
+  value!(buffer, h, X, w)
+end
+
+@inline function value!{T}(buffer::AbstractMatrix, h::LinearPredictor{true}, X::AbstractMatrix, w::AbstractVector{T})
   k = length(w) - 1
   n = size(X, 2)
-  @_dimcheck size(X, 1) == k
+  @_dimcheck size(X, 1) == k && size(buffer) == (1, n)
   w⃗ = slice(w, 1:k)
   b = convert(T, h.bias) * w[k+1]
-  buffer = zeros(T, 1, n)
   At_mul_B!(buffer, w⃗, X)
   broadcast!(+, buffer, buffer, b)
+  buffer
 end
+
+deriv(h::LinearPredictor{true}, X::AbstractMatrix, w::AbstractVector) = vcat(X, ones(1, size(X,2)))
 
 # ==========================================================================
 # h(x,w) = 1 / (1 + exp(-f(x,w))

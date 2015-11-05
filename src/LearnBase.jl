@@ -52,13 +52,18 @@ export
       ElasticNetPenalty,
       SCADPenalty,
 
+    RiskModel,
+
     AbstractSolver,
 
     value,
+    meanvalue,
+    sumvalue,
     deriv,
     deriv!,
     grad,
     grad!,
+    addgrad!,
     deriv2,
     value_deriv,
 

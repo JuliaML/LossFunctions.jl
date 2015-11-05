@@ -2,10 +2,6 @@ abstract Cost
 
 @inline call(c::Cost, X, y, α) = value(c, X, y, α)
 @inline transpose(c::Cost) = deriv_fun(c)
-# @inline value(c::Cost, X::AbstractArray, y::Number, α::Number) = @_not_implemented
-# @inline deriv(c::Cost, X::AbstractArray, y::Number, α::Number) = @_not_implemented
-# @inline deriv2(c::Cost, X::AbstractArray, y::Number, α::Number) = @_not_implemented
-# @inline value_deriv(c::Cost, X::AbstractArray, y::Number, α::Number) = @_not_implemented
 
 @inline function value_fun(c::Cost)
   _value(args...) = value(c, args...)
@@ -53,10 +49,7 @@ abstract SupervisedLoss <: Loss
 @inline deriv2(l::SupervisedLoss, X::AbstractArray, y::Number, t::Number) = deriv2(l, y, t)
 @inline value_deriv(l::SupervisedLoss, X::AbstractArray, y::Number, t::Number) = value_deriv(l, y, t)
 
-# @inline value(l::SupervisedLoss, y::Number, t::Number) = @_not_implemented
-# @inline deriv(l::SupervisedLoss, y::Number, t::Number) = @_not_implemented
-# @inline deriv2(l::SupervisedLoss, y::Number, t::Number) = @_not_implemented
-# @inline value_deriv(l::SupervisedLoss, y::Number, t::Number) = @_not_implemented
+# --------------------------------------------------------------------------
 
 @inline function value(l::SupervisedLoss, y::AbstractVecOrMat, t::AbstractVecOrMat)
   buffer = similar(t)
@@ -67,6 +60,8 @@ end
   buffer = similar(t)
   grad!(buffer, l, y, t)
 end
+
+# --------------------------------------------------------------------------
 
 @inline function value!(buffer::AbstractVector, l::SupervisedLoss, y::AbstractVector, t::AbstractVector)
   n = length(t)
@@ -85,6 +80,8 @@ end
   end
   buffer
 end
+
+# --------------------------------------------------------------------------
 
 @inline function value!(buffer::AbstractMatrix, l::SupervisedLoss, y::AbstractVector, t::AbstractMatrix)
   n = size(t, 2)
@@ -106,6 +103,8 @@ end
   buffer
 end
 
+# --------------------------------------------------------------------------
+
 @inline function value!(buffer::AbstractMatrix, l::SupervisedLoss, y::AbstractMatrix, t::AbstractMatrix)
   n = size(t, 2)
   k = size(t, 1)
@@ -126,6 +125,29 @@ end
   buffer
 end
 
+# --------------------------------------------------------------------------
+
+@inline function sumvalue{T<:Number}(l::SupervisedLoss, y::AbstractVector, t::AbstractVector{T})
+  n = length(t)
+  @_dimcheck length(y) == n && size(buffer) == size(t)
+  val = zero(T)
+  for i = 1:n
+    @inbounds val += value(l, y[i], t[i])
+  end
+  val
+end
+
+@inline function meanvalue{T<:Number}(l::SupervisedLoss, y::AbstractVector, t::AbstractArray{T})
+  n = length(t)
+  @_dimcheck length(y) == n
+  val = zero(Float64)
+  tn = convert(T, n)
+  for i = 1:n
+    @inbounds val += value(l, y[i], t[i]) / tn
+  end
+  val
+end
+
 ismarginbased(::SupervisedLoss) = false
 isclasscalibrated(::SupervisedLoss) = false
 isdistancebased(::SupervisedLoss) = false
@@ -143,11 +165,6 @@ abstract MarginBasedLoss <: SupervisedLoss
   v, d = value_deriv(l, y * t)
   (v, y*d)
 end
-
-# @inline value(l::MarginBasedLoss, yt::Number) = @_not_implemented
-# @inline deriv(l::MarginBasedLoss, yt::Number) = @_not_implemented
-# @inline deriv2(l::MarginBasedLoss, yt::Number) = @_not_implemented
-# @inline value_deriv(l::MarginBasedLoss, yt::Number) = @_not_implemented
 
 @inline function repr_fun(l::MarginBasedLoss)
   _φ(yt::Number) = value(l, yt)
@@ -176,15 +193,10 @@ isclasscalibrated(l::MarginBasedLoss) = isconvex(l) && isdifferentiable(l, 0) &&
 abstract DistanceBasedLoss <: SupervisedLoss
 
 @inline call(l::DistanceBasedLoss, r) = value(l, r)
-@inline value(l::DistanceBasedLoss, y::Number, t::Number) = value(l, y - t)
-@inline deriv(l::DistanceBasedLoss, y::Number, t::Number) = deriv(l, y - t)
-@inline deriv2(l::DistanceBasedLoss, y::Number, t::Number) = deriv2(l, y - t)
-@inline value_deriv(l::DistanceBasedLoss, y::Number, t::Number) = value_deriv(l, y - t)
-
-# @inline value(l::DistanceBasedLoss, r::Number) = @_not_implemented
-# @inline deriv(l::DistanceBasedLoss, r::Number) = @_not_implemented
-# @inline deriv2(l::DistanceBasedLoss, r::Number) = @_not_implemented
-# @inline value_deriv(l::DistanceBasedLoss, r::Number) = @_not_implemented
+@inline value(l::DistanceBasedLoss, y::Number, t::Number) = value(l, t - y)
+@inline deriv(l::DistanceBasedLoss, y::Number, t::Number) = deriv(l, t - y)
+@inline deriv2(l::DistanceBasedLoss, y::Number, t::Number) = deriv2(l, t - y)
+@inline value_deriv(l::DistanceBasedLoss, y::Number, t::Number) = value_deriv(l, t - y)
 
 @inline function repr_fun(l::DistanceBasedLoss)
   _ψ(r::Number) = value(l, r)
@@ -212,8 +224,3 @@ abstract UnsupervisedLoss <: Loss
 @inline deriv(l::UnsupervisedLoss, X::AbstractArray, y::Number, t::Number) = deriv(l, X, t)
 @inline deriv2(l::UnsupervisedLoss, X::AbstractArray, y::Number, t::Number) = deriv2(l, X, t)
 @inline value_deriv(l::UnsupervisedLoss, X::AbstractArray, y::Number, t::Number) = value_deriv(l, X, t)
-
-# @inline value(l::UnsupervisedLoss, X::AbstractArray, t::Number) = @_not_implemented
-# @inline deriv(l::UnsupervisedLoss, X::AbstractArray, t::Number) = @_not_implemented
-# @inline deriv2(l::UnsupervisedLoss, X::AbstractArray, t::Number) = @_not_implemented
-# @inline value_deriv(l::UnsupervisedLoss, X::AbstractArray, t::Number) = @_not_implemented

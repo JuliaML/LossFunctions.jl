@@ -37,6 +37,7 @@ isconvex{P}(::LPDistLoss{P}) = P >= 1
 
 typealias L1DistLoss LPDistLoss{1}
 
+sumvalue(l::L1DistLoss, r::AbstractArray) = sumabs(yt)
 value(l::L1DistLoss, r::Number) = abs(r)
 deriv{T<:Number}(l::L1DistLoss, r::T) = convert(T, sign(r))
 deriv2{T<:Number}(l::L1DistLoss, r::T) = zero(T)
@@ -54,6 +55,7 @@ isconvex(::L1DistLoss) = true
 
 typealias L2DistLoss LPDistLoss{2}
 
+sumvalue(l::L2DistLoss, r::AbstractArray) = sumabs2(yt)
 value(l::L2DistLoss, r::Number) = abs2(r)
 deriv(l::L2DistLoss, r::Number) = 2r
 deriv2{T<:Number}(l::L2DistLoss, r::T) = 2*one(T)
