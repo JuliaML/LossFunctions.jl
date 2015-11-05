@@ -154,8 +154,6 @@ test_value(SmoothedL1HingeLoss(.5), _smoothedl1hingeloss(.5), [-1.,1], -10:0.1:1
 test_value(SmoothedL1HingeLoss(1), _smoothedl1hingeloss(1), [-1.,1], -10:0.1:10)
 test_value(SmoothedL1HingeLoss(2), _smoothedl1hingeloss(2), [-1.,1], -10:0.1:10)
 
-# L(y, t) = max(0, 1 - yt)^2    ... yt >= -1
-#           -4*yt               ... otherwise
 function _modhuberloss(y, t)
   if y.*t >= -1
     max(0, 1 - y.*t)^2
@@ -164,6 +162,36 @@ function _modhuberloss(y, t)
   end
 end
 test_value(ModifiedHuberLoss(), _modhuberloss, [-1.,1], -10:0.1:10)
+
+msg("Test distance-based loss against reference function")
+
+_l1distloss(y, t) = abs(y - t)
+test_value(L1DistLoss(), _l1distloss, -20:.2:20, -30:0.5:30)
+
+_l2distloss(y, t) = abs(y - t)^2
+test_value(L2DistLoss(), _l2distloss, -20:.2:20, -30:0.5:30)
+
+_lp15distloss(y, t) = abs(y - t)^(1.5)
+test_value(LPDistLoss(1.5), _lp15distloss, -20:.2:20, -30:0.5:30)
+
+function _l1epsinsloss(ɛ)
+  _value(y, t) = max(0, abs(y - t) - ɛ)
+  _value
+end
+test_value(EpsilonInsLoss(.5), _l1epsinsloss(0.5), -20:.2:20, -30:0.5:30)
+test_value(EpsilonInsLoss(1), _l1epsinsloss(1), -20:.2:20, -30:0.5:30)
+test_value(EpsilonInsLoss(1.5), _l1epsinsloss(1.5), -20:.2:20, -30:0.5:30)
+
+function _l2epsinsloss(ɛ)
+  _value(y, t) = max(0, abs(y - t) - ɛ)^2
+  _value
+end
+test_value(L2EpsilonInsLoss(.5), _l2epsinsloss(0.5), -20:.2:20, -30:0.5:30)
+test_value(L2EpsilonInsLoss(1), _l2epsinsloss(1), -20:.2:20, -30:0.5:30)
+test_value(L2EpsilonInsLoss(1.5), _l2epsinsloss(1.5), -20:.2:20, -30:0.5:30)
+
+_logitdistloss(y, t) = -log((4*exp(y-t))/(1+exp(y-t))^2)
+test_value(LogitDistLoss(), _logitdistloss, -20:.2:20, -30:0.5:30)
 
 # ==========================================================================
 
