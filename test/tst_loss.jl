@@ -163,6 +163,8 @@ function _modhuberloss(y, t)
 end
 test_value(ModifiedHuberLoss(), _modhuberloss, [-1.,1], -10:0.1:10)
 
+# ==========================================================================
+
 msg("Test distance-based loss against reference function")
 
 _l1distloss(y, t) = abs(y - t)
@@ -192,6 +194,16 @@ test_value(L2EpsilonInsLoss(1.5), _l2epsinsloss(1.5), -20:.2:20, -30:0.5:30)
 
 _logitdistloss(y, t) = -log((4*exp(y-t))/(1+exp(y-t))^2)
 test_value(LogitDistLoss(), _logitdistloss, -20:.2:20, -30:0.5:30)
+
+# ==========================================================================
+
+msg("Test other loss against reference function")
+
+_crossentropyloss(y, t) = -y*log(t) - (1-y)*log(1-t)
+test_value(CrossentropyLoss(), _crossentropyloss, 0:0.01:1, 0.01:0.01:0.99)
+
+_zerooneloss(y, t) = sign(y*t) < 0 ? 1 : 0
+test_value(ZeroOneLoss(), _zerooneloss, [-1.,1], -10:0.1:10)
 
 # ==========================================================================
 
