@@ -25,14 +25,24 @@ maxIter = 300
 loss = L2DistLoss()
 reg = L2Penalty(.1)
 pred = LinearPredictor(bias = 1)
+risk = RiskModel(pred, loss)
+ŷ = pred(X, θ)
+
+function muh(risk, X, w, y, buffer)
+  for i=1:10000
+    value!(buffer, risk, X, w, y)
+  end
+end
+
+@time muh(risk, X, θ, y, ŷ)
 
 # Perform gradient descent
 J = zeros(maxIter)
 print("Starting gradient descent ... ")
 for i = 1:maxIter
-  ŷ = pred(X, θ)
-  J[i] = meanvalue(loss, y, ŷ)
-  ▽ = mean(grad(loss, y, ŷ) .* pred'(X, θ), 2)
+  J[i] = value!(ŷ, risk, X, θ, y)
+  grd = grad(risk, X, θ, y)
+  ▽ = mean(deriv(loss, y, ŷ) .* pred'(X, θ), 2)
   addgrad!(view(▽, 1:(length(θ)-1)), reg, view(θ, 1:(length(θ)-1)))
   θ = θ - α .* vec(▽)
 end

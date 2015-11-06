@@ -1,11 +1,16 @@
 abstract Predictor
 
 @inline call(p::Predictor, args...) = value(p, args...)
-@inline transpose(p::Predictor) = deriv_fun(p)
+@inline transpose(p::Predictor) = grad_fun(p)
 
 function deriv_fun(p::Predictor)
   _deriv(args...) = deriv(p, args...)
   _deriv
+end
+
+function grad_fun(p::Predictor)
+  _grad(args...) = grad(p, args...)
+  _grad
 end
 
 # ==========================================================================
@@ -25,7 +30,7 @@ LinearPredictor(;bias::Real = 1.) = LinearPredictor{bias!=0.}(bias)
 value(h::LinearPredictor{false}, x::Number, w::Number) = x * w
 deriv(h::LinearPredictor{false}, x::Number, w::Number) = x
 value(h::LinearPredictor{false}, x::AbstractVector, w::AbstractVector) = dot(x, w)
-deriv(h::LinearPredictor{false}, x::AbstractVector, w::AbstractVector) = x
+grad(h::LinearPredictor{false}, x::AbstractVector, w::AbstractVector) = x
 
 function value(h::LinearPredictor{false}, X::AbstractMatrix, w::AbstractVecOrMat)
   k = size(w,2)
@@ -44,22 +49,22 @@ function value!(buffer::AbstractMatrix, h::LinearPredictor{false}, X::AbstractMa
   buffer
 end
 
-deriv(h::LinearPredictor{false}, X::AbstractMatrix, w::AbstractVector) = X
+grad(h::LinearPredictor{false}, X::AbstractMatrix, w::AbstractVector) = X
 
 # ==========================================================================
 
 value(h::LinearPredictor{true}, x::Number, w::AbstractVector) = x * w[1] + h.bias * w[2] 
-deriv(h::LinearPredictor{true}, x::Number, w::AbstractVector) = [x, h.bias]
+grad(h::LinearPredictor{true}, x::Number, w::AbstractVector) = [x, h.bias]
 
-function value(h::LinearPredictor{true}, x::AbstractVector, w::AbstractVector)
+@inline function value(h::LinearPredictor{true}, x::AbstractVector, w::AbstractVector)
   k = length(w)-1
   @_dimcheck length(x) == k
   w⃗ = slice(w, 1:k)
-  b = h.bias * w[k+1]
+  b = convert(T, h.bias) * w[k+1]
   dot(x, w⃗) + b
 end
 
-function deriv{T}(h::LinearPredictor{true}, x::AbstractVector, w::AbstractVector{T})
+@inline function grad{T}(h::LinearPredictor{true}, x::AbstractVector, w::AbstractVector{T})
   k = length(w)-1
   @_dimcheck length(x) == k
   buffer = Array(T, length(w))
@@ -85,7 +90,9 @@ end
   buffer
 end
 
-deriv(h::LinearPredictor{true}, X::AbstractMatrix, w::AbstractVector) = vcat(X, ones(1, size(X,2)))
+grad(h::LinearPredictor{true}, X::AbstractMatrix, w::AbstractVector) = vcat(X, ones(1, size(X,2)))
+
+grad!(h::LinearPredictor{true}, X::AbstractMatrix, w::AbstractVector) = vcat(X, ones(1, size(X,2)))
 
 # ==========================================================================
 # h(x,w) = 1 / (1 + exp(-f(x,w))

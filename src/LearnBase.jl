@@ -57,8 +57,11 @@ export
     AbstractSolver,
 
     value,
+    value!,
     meanvalue,
     sumvalue,
+    meanderiv,
+    sumderiv,
     deriv,
     deriv!,
     grad,

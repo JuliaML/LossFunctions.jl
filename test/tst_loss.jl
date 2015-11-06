@@ -49,33 +49,33 @@ end
 function test_deriv(l::DistanceBasedLoss, t_vec)
   msg2("$(l): ")
   for y in -20:.2:20, t in t_vec
-    if isdifferentiable(l, y-t)
-      d_dual = epsilon(value(l, dual(y-t, 1)))
+    if isdifferentiable(l, t-y)
+      d_dual = epsilon(value(l, dual(t-y, 1)))
       d_comp = deriv(l, y, t)
       @test abs(d_dual - d_comp) < 1e-10
       val = value(l, y, t)
       val2, d_comp2 = value_deriv(l, y, t)
       val3, d_comp3 = value_deriv_fun(l)(y, t)
-      val4, d_comp4 = value_deriv(l, y - t)
+      val4, d_comp4 = value_deriv(l, t-y)
       @test_approx_eq val val2
       @test_approx_eq val val3
       @test_approx_eq val val4
       @test_approx_eq val value(l, y, t)
-      @test_approx_eq val value(l, y-t)
+      @test_approx_eq val value(l, t-y)
       @test_approx_eq val value(l, [2,3], y, t)
       @test_approx_eq val value_fun(l)(y, t)
-      @test_approx_eq val value_fun(l)(y-t)
-      @test_approx_eq val repr_fun(l)(y-t)
-      @test_approx_eq val l(y-t)
+      @test_approx_eq val value_fun(l)(t-y)
+      @test_approx_eq val repr_fun(l)(t-y)
+      @test_approx_eq val l(t-y)
       @test_approx_eq d_comp d_comp2
       @test_approx_eq d_comp d_comp3
       @test_approx_eq d_comp d_comp4
-      @test_approx_eq d_comp deriv(l, y-t)
+      @test_approx_eq d_comp deriv(l, t-y)
       @test_approx_eq d_comp deriv(l, [2,3], y, t)
       @test_approx_eq d_comp deriv_fun(l)(y, t)
-      @test_approx_eq d_comp deriv_fun(l)(y-t)
-      @test_approx_eq d_comp repr_deriv_fun(l)(y-t)
-      @test_approx_eq d_comp l'(y-t)
+      @test_approx_eq d_comp deriv_fun(l)(t-y)
+      @test_approx_eq d_comp repr_deriv_fun(l)(t-y)
+      @test_approx_eq d_comp l'(t-y)
     else
       # y-t == 0 ? print(".") : print("$(y-t) ")
       print(".")
@@ -107,15 +107,15 @@ end
 function test_deriv2(l::DistanceBasedLoss, t_vec)
   msg2("$(l): ")
   for y in -20:.2:20, t in t_vec
-    if istwicedifferentiable(l, y-t)
-      d2_dual = epsilon(deriv(l, dual(y-t, 1)))
+    if istwicedifferentiable(l, t-y)
+      d2_dual = epsilon(deriv(l, dual(t-y, 1)))
       d2_comp = deriv2(l, y, t)
       @test abs(d2_dual - d2_comp) < 1e-10
       @test_approx_eq d2_comp deriv2(l, y, t)
-      @test_approx_eq d2_comp deriv2(l, y-t)
+      @test_approx_eq d2_comp deriv2(l, t-y)
       @test_approx_eq d2_comp deriv2(l, [2,3], y, t)
       @test_approx_eq d2_comp deriv2_fun(l)(y, t)
-      @test_approx_eq d2_comp deriv2_fun(l)(y-t)
+      @test_approx_eq d2_comp deriv2_fun(l)(t-y)
     else
       # y-t == 0 ? print(".") : print("$(y-t) ")
       print(".")
@@ -167,17 +167,17 @@ test_value(ModifiedHuberLoss(), _modhuberloss, [-1.,1], -10:0.1:10)
 
 msg("Test distance-based loss against reference function")
 
-_l1distloss(y, t) = abs(y - t)
+_l1distloss(y, t) = abs(t - y)
 test_value(L1DistLoss(), _l1distloss, -20:.2:20, -30:0.5:30)
 
-_l2distloss(y, t) = abs(y - t)^2
+_l2distloss(y, t) = (t - y)^2
 test_value(L2DistLoss(), _l2distloss, -20:.2:20, -30:0.5:30)
 
-_lp15distloss(y, t) = abs(y - t)^(1.5)
+_lp15distloss(y, t) = abs(t - y)^(1.5)
 test_value(LPDistLoss(1.5), _lp15distloss, -20:.2:20, -30:0.5:30)
 
 function _l1epsinsloss(ɛ)
-  _value(y, t) = max(0, abs(y - t) - ɛ)
+  _value(y, t) = max(0, abs(t - y) - ɛ)
   _value
 end
 test_value(EpsilonInsLoss(.5), _l1epsinsloss(0.5), -20:.2:20, -30:0.5:30)
@@ -185,14 +185,14 @@ test_value(EpsilonInsLoss(1), _l1epsinsloss(1), -20:.2:20, -30:0.5:30)
 test_value(EpsilonInsLoss(1.5), _l1epsinsloss(1.5), -20:.2:20, -30:0.5:30)
 
 function _l2epsinsloss(ɛ)
-  _value(y, t) = max(0, abs(y - t) - ɛ)^2
+  _value(y, t) = max(0, abs(t - y) - ɛ)^2
   _value
 end
 test_value(L2EpsilonInsLoss(.5), _l2epsinsloss(0.5), -20:.2:20, -30:0.5:30)
 test_value(L2EpsilonInsLoss(1), _l2epsinsloss(1), -20:.2:20, -30:0.5:30)
 test_value(L2EpsilonInsLoss(1.5), _l2epsinsloss(1.5), -20:.2:20, -30:0.5:30)
 
-_logitdistloss(y, t) = -log((4*exp(y-t))/(1+exp(y-t))^2)
+_logitdistloss(y, t) = -log((4*exp(t-y))/(1+exp(t-y))^2)
 test_value(LogitDistLoss(), _logitdistloss, -20:.2:20, -30:0.5:30)
 
 # ==========================================================================

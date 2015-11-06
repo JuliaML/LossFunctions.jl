@@ -13,9 +13,61 @@ function RiskModel{TPred<:Predictor, TLoss<:Loss, TPen<:Penalty}(
   RiskModel{TPred, TLoss, TPen}(predictor, loss, penalty)
 end
 
-function value{TPred<:Predictor, TLoss<:Loss, TPen<:Penalty}(
+# ==========================================================================
+# * generic predictor
+# * no penalty
+
+@inline function value{TPred<:Predictor, TLoss<:Loss, TPen<:NoPenalty}(
     risk::RiskModel{TPred, TLoss, TPen},
     X::AbstractMatrix,
-    w::AbstractVector)
-  
+    w::AbstractArray,
+    y::AbstractArray,
+    ŷ::AbstractMatrix = value(risk.predictor, X, w))
+  meanvalue(risk.loss, y, ŷ)
 end
+
+@inline function value!{TPred<:Predictor, TLoss<:Loss, TPen<:NoPenalty}(
+    buffer::AbstractMatrix,
+    risk::RiskModel{TPred, TLoss, TPen},
+    X::AbstractMatrix,
+    w::AbstractArray,
+    y::AbstractArray)
+  value!(buffer, risk.predictor, X, w)
+  meanvalue(risk.loss, y, buffer)
+end
+
+@inline function grad{TPred<:Predictor, TLoss<:Loss, TPen<:NoPenalty}(
+    risk::RiskModel{TPred, TLoss, TPen},
+    X::AbstractMatrix,
+    w::AbstractArray,
+    y::AbstractArray,
+    ŷ::AbstractArray = value(risk.predictor, X, w))
+  dloss = deriv(risk.loss, y, ŷ)
+  dpred = grad(risk.predictor, X, w)
+  A_mul_Bt(dpred, dloss) .* (1/length(y))
+end
+
+@inline function grad!{TPred<:Predictor, TLoss<:Loss, TPen<:NoPenalty}(
+    buffer::AbstractMatrix,
+    risk::RiskModel{TPred, TLoss, TPen},
+    X::AbstractMatrix,
+    w::AbstractArray,
+    y::AbstractArray,
+    ŷ::AbstractArray = value(risk.predictor, X, w))
+  dloss = deriv(risk.loss, y, ŷ)
+  dpred = grad(risk.predictor, X, w)
+  A_mul_Bt!(buffer, dpred, dloss)
+  broadcast!(*, buffer, buffer, 1/length(y))
+end
+
+# ==========================================================================
+# * generic predictor
+# * generic penalty
+
+# ==========================================================================
+# * linear predictor
+# * no penalty
+
+# ==========================================================================
+# * linear predictor
+# * generic penalty

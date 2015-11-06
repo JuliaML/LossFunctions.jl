@@ -56,7 +56,12 @@ abstract SupervisedLoss <: Loss
   value!(buffer, l, y, t)
 end
 
-@inline function grad(l::SupervisedLoss, y::AbstractVecOrMat, t::AbstractVecOrMat)
+@inline function deriv(l::SupervisedLoss, y::AbstractVector, t::AbstractVecOrMat)
+  buffer = similar(t)
+  deriv!(buffer, l, y, t)
+end
+
+@inline function grad(l::SupervisedLoss, y::AbstractMatrix, t::AbstractVecOrMat)
   buffer = similar(t)
   grad!(buffer, l, y, t)
 end
@@ -72,7 +77,7 @@ end
   buffer
 end
 
-@inline function grad!(buffer::AbstractVector, l::SupervisedLoss, y::AbstractVector, t::AbstractVector)
+@inline function deriv!(buffer::AbstractVector, l::SupervisedLoss, y::AbstractVector, t::AbstractVector)
   n = length(t)
   @_dimcheck length(y) == n && size(buffer) == size(t)
   for i = 1:n
@@ -93,7 +98,7 @@ end
   buffer
 end
 
-@inline function grad!(buffer::AbstractMatrix, l::SupervisedLoss, y::AbstractVector, t::AbstractMatrix)
+@inline function deriv!(buffer::AbstractMatrix, l::SupervisedLoss, y::AbstractVector, t::AbstractMatrix)
   n = size(t, 2)
   k = size(t, 1)
   @_dimcheck length(y) == n && size(buffer) == (k, n)
@@ -127,9 +132,9 @@ end
 
 # --------------------------------------------------------------------------
 
-@inline function sumvalue{T<:Number}(l::SupervisedLoss, y::AbstractVector, t::AbstractVector{T})
+@inline function sumvalue{T<:Number}(l::SupervisedLoss, y::AbstractVector, t::AbstractArray{T})
   n = length(t)
-  @_dimcheck length(y) == n && size(buffer) == size(t)
+  @_dimcheck length(y) == n
   val = zero(T)
   for i = 1:n
     @inbounds val += value(l, y[i], t[i])
@@ -137,13 +142,40 @@ end
   val
 end
 
+@inline function sumderiv{T<:Number}(l::SupervisedLoss, y::AbstractVector, t::AbstractArray{T})
+  n = length(t)
+  @_dimcheck length(y) == n
+  val = zero(T)
+  for i = 1:n
+    @inbounds val += deriv(l, y[i], t[i])
+  end
+  val
+end
+
+# --------------------------------------------------------------------------
+
 @inline function meanvalue{T<:Number}(l::SupervisedLoss, y::AbstractVector, t::AbstractArray{T})
   n = length(t)
   @_dimcheck length(y) == n
-  val = zero(Float64)
-  tn = convert(T, n)
+  val = zero(T)
+  tmp = zero(T)
   for i = 1:n
-    @inbounds val += value(l, y[i], t[i]) / tn
+    @inbounds tmp = value(l, y[i], t[i])::T
+    tmp /= n
+    val += tmp
+  end
+  val
+end
+
+@inline function meanderiv{T<:Number}(l::SupervisedLoss, y::AbstractVector, t::AbstractArray{T})
+  n = length(t)
+  @_dimcheck length(y) == n
+  val = zero(T)
+  tmp = zero(T)
+  for i = 1:n
+    @inbounds tmp = deriv(l, y[i], t[i])::T
+    tmp /= n
+    val += tmp
   end
   val
 end
