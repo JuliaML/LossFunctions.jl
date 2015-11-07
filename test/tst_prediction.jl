@@ -28,14 +28,6 @@ pred = LinearPredictor(bias = 1)
 risk = RiskModel(pred, loss)
 ŷ = pred(X, θ)
 
-function muh(risk, X, w, y, buffer)
-  for i=1:10000
-    value!(buffer, risk, X, w, y)
-  end
-end
-
-@time muh(risk, X, θ, y, ŷ)
-
 # Perform gradient descent
 J = zeros(maxIter)
 print("Starting gradient descent ... ")
