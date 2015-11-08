@@ -65,8 +65,8 @@ end
 @inline function value{T}(h::LinearPredictor{true}, x::AbstractVector, w::AbstractVector{T})
   k = length(w)-1
   @_dimcheck length(x) == k
-  w⃗ = slice(w, 1:k)
-  b = convert(T, h.bias) * w[k+1]
+  w⃗ = view(w, 1:k)
+  @inbounds b = convert(T, h.bias) * w[k+1]
   dot(x, w⃗) + b
 end
 
@@ -90,8 +90,8 @@ end
   k = length(w) - 1
   n = size(X, 2)
   @_dimcheck size(X, 1) == k && size(buffer) == (1, n)
-  w⃗ = slice(w, 1:k)
-  b = convert(T, h.bias) * w[k+1]
+  w⃗ = view(w, 1:k)
+  @inbounds b = convert(T, h.bias) * w[k+1]
   At_mul_B!(buffer, w⃗, X)
   broadcast!(+, buffer, buffer, b)
   buffer
@@ -105,7 +105,7 @@ end
   n = size(X, 2)
   @_dimcheck size(buffer) == (k1, n)
   bias = convert(T, h.bias)
-  for i = 1:n
+  @inbounds for i = 1:n
     for j = 1:k
       buffer[j, i] = X[j, i]
     end

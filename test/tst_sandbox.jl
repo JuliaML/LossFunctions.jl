@@ -11,22 +11,29 @@ cs(x) = (x - mean(x)) / sqrt(var(x))
 # create target and design matrix
 x = cs(convert(Array,myData[1]))
 y = convert(Array,myData[2])
-y = y .+ sin(x.*2) * 20
+y = y .+ sin(x.*2) * 20 - 15
 #y[2] = 100
 #y[10] = 100
 m = length(y)
 X = [cs(sqrt(abs(x))) x cs(x.^2) cs(x.^3) cs(x.^4)]'
 
 # Set hyper parameters
-θ = [0., 0, 0, 0, 0, 0]
+θ = randn(6)
 α = 0.05
 maxIter = 300
 
 loss = L2DistLoss()
-reg = L2Penalty(0.01)
+reg = L2Penalty(.1)
 pred = LinearPredictor(bias = 1)
 risk = RiskModel(pred, loss, reg)
 ŷ = pred(X, θ)
+
+function muh(risk, X, w, y)
+  ŷ = zeros(1, size(X,2))
+  for i = 1:10000
+    value!(ŷ, risk, X, w, y)
+  end
+end
 
 # Perform gradient descent
 J = zeros(maxIter)

@@ -72,7 +72,7 @@ end
     y::AbstractArray,
     ŷ::AbstractMatrix = value(risk.predictor, X, w))
   res = meanvalue(risk.loss, y, ŷ)
-  res += value(risk.penalty, w)
+  res += value(risk.penalty, w, size(X, 1))
   res
 end
 
@@ -84,7 +84,7 @@ end
     y::AbstractArray)
   value!(buffer, risk.predictor, X, w)
   res = meanvalue(risk.loss, y, buffer)
-  res += value(risk.penalty, w)
+  res += value(risk.penalty, w, size(X, 1))
   res
 end
 
@@ -98,7 +98,7 @@ end
   dpred = grad(risk.predictor, X, w)
   buffer = A_mul_Bt(dpred, dloss)
   broadcast!(*, buffer, buffer, 1/length(y))
-  addgrad!(buffer, risk.penalty, w)
+  addgrad!(buffer, risk.penalty, w, size(X, 1))
 end
 
 @inline function grad!{TPred<:Predictor, TLoss<:Loss, TPen<:Penalty}(
@@ -112,7 +112,7 @@ end
   dpred = grad(risk.predictor, X, w)
   A_mul_Bt!(buffer, dpred, dloss)
   broadcast!(*, buffer, buffer, 1/length(y))
-  addgrad!(buffer, risk.penalty, w)
+  addgrad!(buffer, risk.penalty, w, size(X, 1))
 end
 
 # ==========================================================================

@@ -49,8 +49,8 @@ export
       NoPenalty,
       L1Penalty,
       L2Penalty,
-      ElasticNetPenalty,
-      SCADPenalty,
+#       ElasticNetPenalty,
+#       SCADPenalty,
 
     RiskModel,
 
