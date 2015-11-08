@@ -16,7 +16,7 @@ tests = [
   "tst_loss.jl"
   "tst_classencoding.jl"
   "tst_penalty.jl"
-#   "tst_prediction.jl"
+  "tst_prediction.jl"
 ]
 
 perf = [

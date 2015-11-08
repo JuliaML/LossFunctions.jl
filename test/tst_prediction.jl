@@ -1,48 +1,60 @@
+x = randn(10)
+X = randn(10, 20)
+w = randn(10)
+wb = randn(11)
+len_wb = length(wb) - 1
 
-using RDatasets
-using UnicodePlots
-using LearnBase
+# ==========================================================================
 
-# Load data of interest from the Rdatasets package
-myData = dataset("datasets", "cars")
+msg("Test linear prediction function without bias")
 
-cs(x) = (x - mean(x)) / sqrt(var(x))
+pred = LinearPredictor(0)
+@test_approx_eq value(pred, x, w) dot(x, w)
+@test_approx_eq grad(pred, x, w) x
 
-# create target and design matrix
-x = cs(convert(Array,myData[1]))
-y = convert(Array,myData[2])
-y = y .+ sin(x.*2) * 20
-#y[2] = 100
-#y[10] = 100
-m = length(y)
-X = [cs(sqrt(abs(x))) x cs(x.^2) cs(x.^3) cs(x.^4)]'
-
-# Set hyper parameters
-θ = [0., 0, 0, 0, 0, 0]
-α = 0.05
-maxIter = 300
-
-loss = L2DistLoss()
-reg = L2Penalty(.1)
-pred = LinearPredictor(bias = 1)
-risk = RiskModel(pred, loss)
-ŷ = pred(X, θ)
-
-# Perform gradient descent
-J = zeros(maxIter)
-print("Starting gradient descent ... ")
-for i = 1:maxIter
-  J[i] = value!(ŷ, risk, X, θ, y)
-  grd = grad(risk, X, θ, y)
-  ▽ = mean(deriv(loss, y, ŷ) .* pred'(X, θ), 2)
-  addgrad!(view(▽, 1:(length(θ)-1)), reg, view(θ, 1:(length(θ)-1)))
-  θ = θ - α .* vec(▽)
+val = 0.
+for i = 1:length(x)
+  val += value(pred, x[i], w[i])
 end
-println("DONE")
+@test_approx_eq val dot(x, w)
 
-println(θ)
-# Plot results
-mp=scatterplot(x, y, color=:blue)
-lineplot!(mp, x, vec(value(pred, X, θ)), color = :red)
-println(mp)
-println(lineplot(1:maxIter, J))
+buffer = zeros(length(x))
+for i = 1:length(x)
+  buffer[i] = deriv(pred, x[i], w[i])
+end
+@test_approx_eq buffer x
+
+@test_approx_eq value(pred, X, w) w'X
+buffer = zeros(1, size(X, 2))
+@test_approx_eq value!(buffer, pred, X, w) w'X
+@test_approx_eq buffer w'X
+
+@test_approx_eq grad(pred, X, w) X
+buffer = zeros(size(X))
+@test_approx_eq grad!(buffer, pred, X, w) X
+@test_approx_eq buffer X
+
+# ==========================================================================
+
+msg("Test linear prediction function with bias")
+
+bias = 0.5
+pred = LinearPredictor(bias)
+@test_approx_eq value(pred, x, wb) (dot(x, wb[1:len_wb]) + bias * wb[end])
+@test_approx_eq grad(pred, x, wb) [x; bias]
+
+val = bias * wb[end]
+for i = 1:length(x)
+  val += value(pred, x[i], wb[i])
+end
+@test_approx_eq val (dot(x, wb[1:len_wb]) + bias * wb[end])
+
+@test_approx_eq value(pred, X, wb) (wb[1:len_wb]'X + bias * wb[end])
+buffer = zeros(1, size(X, 2))
+@test_approx_eq value!(buffer, pred, X, wb) (wb[1:len_wb]'X + bias * wb[end])
+@test_approx_eq buffer (wb[1:len_wb]'X + bias * wb[end])
+
+@test_approx_eq grad(pred, X, wb) vcat(X, bias .* ones(1, size(X,2)))
+buffer = zeros(size(X,1) + 1, size(X,2))
+@test_approx_eq grad!(buffer, pred, X, wb) vcat(X, bias .* ones(1, size(X,2)))
+@test_approx_eq buffer vcat(X, bias .* ones(1, size(X,2)))

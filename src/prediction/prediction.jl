@@ -1,14 +1,14 @@
-abstract Predictor
+abstract Predictor{INTERCEPT}
 
 @inline call(p::Predictor, args...) = value(p, args...)
 @inline transpose(p::Predictor) = grad_fun(p)
 
-function deriv_fun(p::Predictor)
+@inline function deriv_fun(p::Predictor)
   _deriv(args...) = deriv(p, args...)
   _deriv
 end
 
-function grad_fun(p::Predictor)
+@inline function grad_fun(p::Predictor)
   _grad(args...) = grad(p, args...)
   _grad
 end
@@ -16,7 +16,7 @@ end
 # ==========================================================================
 # h(x,w) = wᵀx
 
-immutable LinearPredictor{INTERCEPT} <: Predictor
+immutable LinearPredictor{INTERCEPT} <: Predictor{INTERCEPT}
   bias::Float64
   function LinearPredictor(bias::Real)
     ((typeof(INTERCEPT) <: Bool) && (bias != 0.) == INTERCEPT) || throw(MethodError())
@@ -27,21 +27,23 @@ end
 LinearPredictor(bias::Real) = LinearPredictor{bias!=0.}(bias)
 LinearPredictor(;bias::Real = 1.) = LinearPredictor{bias!=0.}(bias)
 
-value(h::LinearPredictor{false}, x::Number, w::Number) = x * w
-deriv(h::LinearPredictor{false}, x::Number, w::Number) = x
-value(h::LinearPredictor{false}, x::AbstractVector, w::AbstractVector) = dot(x, w)
-grad(h::LinearPredictor{false}, x::AbstractVector, w::AbstractVector) = x
+@inline value(h::LinearPredictor, x::Number, w::Number) = x * w
+@inline deriv(h::LinearPredictor, x::Number, w::Number) = x
 
-function value(h::LinearPredictor{false}, X::AbstractMatrix, w::AbstractVecOrMat)
-  k = size(w,2)
-  n = size(X,2)
-  @_dimcheck size(X, 1) == size(w, 1)
+# --------------------------------------------------------------------------
+# no intercept
+
+@inline value(h::LinearPredictor{false}, x::AbstractVector, w::AbstractVector) = dot(x, w)
+
+@inline grad(h::LinearPredictor{false}, x::AbstractVector, w::AbstractVector) = x
+
+@inline function value(h::LinearPredictor{false}, X::AbstractMatrix, w::AbstractVecOrMat)
   buffer = Array(Float64, size(w, 2), size(X, 2))
-  At_mul_B!(buffer, w, X)
+  value!(buffer, h, X, w)
   buffer
 end
 
-function value!(buffer::AbstractMatrix, h::LinearPredictor{false}, X::AbstractMatrix, w::AbstractVecOrMat)
+@inline function value!(buffer::AbstractMatrix, h::LinearPredictor{false}, X::AbstractMatrix, w::AbstractVecOrMat)
   k = size(w,2)
   n = size(X,2)
   @_dimcheck size(X, 1) == size(w, 1) && size(buffer) == (k, n)
@@ -49,14 +51,18 @@ function value!(buffer::AbstractMatrix, h::LinearPredictor{false}, X::AbstractMa
   buffer
 end
 
-grad(h::LinearPredictor{false}, X::AbstractMatrix, w::AbstractVector) = X
+@inline grad(h::LinearPredictor{false}, X::AbstractMatrix, w::AbstractVector) = X
 
-# ==========================================================================
+@inline function grad!(buffer::AbstractArray, h::LinearPredictor{false}, X::AbstractMatrix, w::AbstractVector)
+  @_dimcheck size(buffer) == size(X)
+  copy!(buffer, X)
+  buffer
+end
 
-value(h::LinearPredictor{true}, x::Number, w::AbstractVector) = x * w[1] + h.bias * w[2] 
-grad(h::LinearPredictor{true}, x::Number, w::AbstractVector) = [x, h.bias]
+# --------------------------------------------------------------------------
+# with intercept
 
-@inline function value(h::LinearPredictor{true}, x::AbstractVector, w::AbstractVector)
+@inline function value{T}(h::LinearPredictor{true}, x::AbstractVector, w::AbstractVector{T})
   k = length(w)-1
   @_dimcheck length(x) == k
   w⃗ = slice(w, 1:k)
@@ -72,6 +78,7 @@ end
     @inbounds buffer[i] = x[i]
   end
   buffer[end] = h.bias
+  buffer
 end
 
 @inline function value{T}(h::LinearPredictor{true}, X::AbstractMatrix, w::AbstractVector{T})
@@ -79,7 +86,7 @@ end
   value!(buffer, h, X, w)
 end
 
-@inline function value!{T}(buffer::AbstractMatrix, h::LinearPredictor{true}, X::AbstractMatrix, w::AbstractVector{T})
+@inline function value!{T}(buffer::AbstractMatrix{T}, h::LinearPredictor{true}, X::AbstractMatrix, w::AbstractVector{T})
   k = length(w) - 1
   n = size(X, 2)
   @_dimcheck size(X, 1) == k && size(buffer) == (1, n)
@@ -90,22 +97,38 @@ end
   buffer
 end
 
-grad(h::LinearPredictor{true}, X::AbstractMatrix, w::AbstractVector) = vcat(X, ones(1, size(X,2)))
+@inline grad{T}(h::LinearPredictor{true}, X::AbstractMatrix{T}, w::AbstractVector) = vcat(X, fill(convert(T,h.bias), (1, size(X,2))))
 
-grad!(h::LinearPredictor{true}, X::AbstractMatrix, w::AbstractVector) = vcat(X, ones(1, size(X,2)))
+@inline function grad!{T}(buffer::AbstractMatrix{T}, h::LinearPredictor{true}, X::AbstractMatrix{T}, w::AbstractVector)
+  k = size(X, 1)
+  k1 = k + 1
+  n = size(X, 2)
+  @_dimcheck size(buffer) == (k1, n)
+  bias = convert(T, h.bias)
+  for i = 1:n
+    for j = 1:k
+      buffer[j, i] = X[j, i]
+    end
+    buffer[k1, i] = bias
+  end
+  buffer
+end
 
 # ==========================================================================
 # h(x,w) = 1 / (1 + exp(-f(x,w))
 
-sigmoid(x) = one(x) ./ (one(x) + exp(-x))
+@inline sigmoid(x) = one(x) ./ (one(x) + exp(-x))
 
-immutable SigmoidPredictor{T<:Predictor} <: Predictor
-  f::T
+immutable SigmoidPredictor{INTERCEPT} <: Predictor{INTERCEPT}
+  f::LinearPredictor{INTERCEPT}
 end
 
-SigmoidPredictor(f = LinearPredictor()) = SigmoidPredictor{typeof(f)}(f)
-value(h::SigmoidPredictor, x, w) = sigmoid(value(h.f, x, w))
-function deriv(h::SigmoidPredictor, x, w)
+SigmoidPredictor{T}(f::LinearPredictor{T} = LinearPredictor()) =
+  SigmoidPredictor{T}(f)
+
+@inline value(h::SigmoidPredictor, x, w) = sigmoid(value(h.f, x, w))
+
+@inline function deriv(h::SigmoidPredictor, x, w)
   z = value(h, x, w)
   (z .* (1 - z)) .* deriv(h.f, x, w)
 end
