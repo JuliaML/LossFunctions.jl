@@ -11,7 +11,7 @@ cs(x) = (x - mean(x)) / sqrt(var(x))
 # create target and design matrix
 x = cs(convert(Array,myData[1]))
 y = convert(Array,myData[2])
-y = y .+ sin(x.*2) * 20 - 15
+y = y .+ sin(x.*2) * 30 - 10
 #y[2] = 100
 #y[10] = 100
 m = length(y)
@@ -30,10 +30,12 @@ ŷ = pred(X, θ)
 
 function muh(risk, X, w, y)
   ŷ = zeros(1, size(X,2))
+  buffer = zeros(1, length(w))
   for i = 1:10000
-    value!(ŷ, risk, X, w, y)
+    grad!(buffer, risk, X, w, y, ŷ)
   end
 end
+@time muh(risk, X, θ, y)
 
 # Perform gradient descent
 J = zeros(maxIter)

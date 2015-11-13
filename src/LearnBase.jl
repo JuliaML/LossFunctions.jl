@@ -5,11 +5,9 @@ using Reexport
 using ArrayViews
 using UnicodePlots
 
-using UnicodePlots
-
 import Base: show, shuffle!, convert, call, print, transpose
 import UnicodePlots: lineplot, lineplot!
-import StatsBase: fit, fit!, predict, predict!, nobs, coef, 
+import StatsBase: fit, fit!, predict, predict!, nobs, coef,
                   deviance, loglikelihood, coeftable, stderr,
                   vcov, confint, residuals, model_response
 import MLBase: labelencode, labeldecode, groupindices
@@ -20,25 +18,10 @@ export
       Loss,
         SupervisedLoss,
           MarginBasedLoss,
-            LogitMarginLoss,
-            PerceptronLoss,
-            HingeLoss,
-            L1HingeLoss,
-            L2HingeLoss,
-            SmoothedL1HingeLoss,
-            ModifiedHuberLoss,
           DistanceBasedLoss,
-            LPDistLoss,
-            L1DistLoss,
-            L2DistLoss,
-            EpsilonInsLoss,
-            L1EpsilonInsLoss,
-            L2EpsilonInsLoss,
-            LogitDistLoss,
-          LogitProbLoss,
-          CrossentropyLoss,
-          ZeroOneLoss,
         UnsupervisedLoss,
+
+    LossFunctions,
 
     sigmoid,
     Predictor,
@@ -46,11 +29,7 @@ export
       SigmoidPredictor,
 
     Penalty,
-      NoPenalty,
-      L1Penalty,
-      L2Penalty,
-#       ElasticNetPenalty,
-#       SCADPenalty,
+    Penalties,
 
     RiskModel,
 
@@ -106,18 +85,15 @@ export
     EncodedStatisticalModel,
     EncodedRegressionModel
 
-include("abstract.jl")
 include("common.jl")
+include("abstract_solver.jl")
+include("abstract_cost.jl")
+include("abstract_penalty.jl")
 include("classencoding.jl")
 include("encodedmodel.jl")
-
-include("loss/abstract_cost.jl")
-include("loss/margin_based.jl")
-include("loss/distance_based.jl")
-include("loss/other.jl")
-include("loss/io.jl")
-include("penalty/penalty.jl")
-include("prediction/prediction.jl")
+include("loss/LossFunctions.jl")
+include("penalty/Penalties.jl")
+include("risk/prediction.jl")
 include("risk/riskspec.jl")
 
 end # module

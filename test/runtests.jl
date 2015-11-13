@@ -1,4 +1,6 @@
 using LearnBase
+using LearnBase.LossFunctions
+using LearnBase.Penalties
 using DualNumbers
 using Base.Test
 

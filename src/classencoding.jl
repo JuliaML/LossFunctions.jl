@@ -170,6 +170,7 @@ end
 
 function labeldecode{T}(classEncoding::OneOfKClassEncoding{T}, values::AbstractMatrix{Float64})
   numLabels = classEncoding.nlabels
+  safeRound(x) = round(Int, x)
   indicies = map(safeRound, values' * collect(1:numLabels))
   labeldecode(classEncoding.labelmap, indicies)
 end
