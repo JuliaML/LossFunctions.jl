@@ -15,18 +15,18 @@ import MLBase: labelencode, labeldecode, groupindices
 export
 
     Cost,
-      Loss,
-        SupervisedLoss,
-          MarginBasedLoss,
-          DistanceBasedLoss,
-        UnsupervisedLoss,
+        Loss,
+            SupervisedLoss,
+                MarginBasedLoss,
+                DistanceBasedLoss,
+            UnsupervisedLoss,
 
     LossFunctions,
 
     sigmoid,
     Predictor,
-      LinearPredictor,
-      SigmoidPredictor,
+        LinearPredictor,
+        SigmoidPredictor,
 
     Penalty,
     Penalties,
@@ -70,10 +70,10 @@ export
     issymmetric,
 
     ClassEncoding,
-      SignedClassEncoding,
-      BinaryClassEncoding,
-      MultinomialClassEncoding,
-      OneHotClassEncoding,
+        SignedClassEncoding,
+        BinaryClassEncoding,
+        MultinomialClassEncoding,
+        OneHotClassEncoding,
 
     nclasses,
     labels,

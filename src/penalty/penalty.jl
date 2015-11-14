@@ -8,35 +8,35 @@ Base.show(io::IO, p::NoPenalty) = print(io, "NoPenalty")
 @inline deriv{T<:Number}(p::NoPenalty, wⱼ::T) = zero(T)
 
 @inline function addgrad!{T<:Number}(buffer::AbstractArray{T}, p::NoPenalty, w::AbstractArray, len::Int=length(w))
-  buffer
+    buffer
 end
 
 # ==========================================================================
 
 "An L1 (LASSO) penalty on the coefficients"
 immutable L1Penalty <: Penalty
-  λ::Float64
-  function L1Penalty(λ::Real)
-    λ >= 0 || error("λ must be positive")
-    new(Float64(λ))
-  end
+    λ::Float64
+    function L1Penalty(λ::Real)
+        λ >= 0 || error("λ must be positive")
+        new(Float64(λ))
+    end
 end
 isconvex(::L1Penalty) = true
 isdifferentiable(p::L1Penalty) = false
 Base.show(io::IO, p::L1Penalty) = print(io, "L1Penalty(λ = $(p.λ))")
 function value{T}(p::L1Penalty, w::AbstractArray{T}, len::Int=length(w))
-  len_w = length(w)
-  @_dimcheck 0 < len <= len_w
-  if len == len_w
-    p.λ * sumabs(w)
-  else
-    val = zero(T)
-    for i = 1:len
-      @inbounds val += abs(w[i])
-    end
-    val *= p.λ
-    val
-  end::Float64
+    len_w = length(w)
+    @_dimcheck 0 < len <= len_w
+    if len == len_w
+        p.λ * sumabs(w)
+    else
+        val = zero(T)
+        for i = 1:len
+            @inbounds val += abs(w[i])
+        end
+        val *= p.λ
+        val
+    end::Float64
 end
 @inline deriv(p::L1Penalty, wⱼ::Number) = p.λ * sign(wⱼ)
 
@@ -44,29 +44,29 @@ end
 
 "An L2 (ridge) penalty on the coefficients"
 immutable L2Penalty <: Penalty
-  λ::Float64
-  function L2Penalty(λ::Real)
-    λ >= 0 || error("λ must be positive")
-    new(Float64(λ))
-  end
+    λ::Float64
+    function L2Penalty(λ::Real)
+        λ >= 0 || error("λ must be positive")
+        new(Float64(λ))
+    end
 end
 isconvex(::L2Penalty) = true
 isdifferentiable(::L2Penalty) = true
 Base.show(io::IO, p::L2Penalty) = print(io, "L2Penalty(λ = $(p.λ))")
 @inline function value{T}(p::L2Penalty, w::AbstractArray{T}, len::Int=length(w))
-  len_w = length(w)
-  @_dimcheck 0 < len <= len_w
-  if len == len_w
-    p.λ/2 * sumabs2(w)
-  else
-    val = zero(T)
-    for i = 1:len
-      @inbounds val += abs2(w[i])
-    end
-    val *= p.λ
-    val /= 2
-    val
-  end::Float64
+    len_w = length(w)
+    @_dimcheck 0 < len <= len_w
+    if len == len_w
+        p.λ/2 * sumabs2(w)
+    else
+        val = zero(T)
+        for i = 1:len
+            @inbounds val += abs2(w[i])
+        end
+        val *= p.λ
+        val /= 2
+        val
+    end::Float64
 end
 @inline deriv(p::L2Penalty, wⱼ::Number) = p.λ * wⱼ
 

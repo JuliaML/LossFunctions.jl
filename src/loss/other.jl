@@ -6,13 +6,13 @@ immutable CrossentropyLoss <: SupervisedLoss end
 typealias LogitProbLoss CrossentropyLoss
 
 function value(l::CrossentropyLoss, y::Number, t::Number)
-  if y == 1
-    -log(t)
-  elseif y == 0
-    -log(1 - t)
-  else
-    -y*log(t) - (1-y)*log(1-t)
-  end
+    if y == 1
+        -log(t)
+    elseif y == 0
+        -log(1 - t)
+    else
+        -y*log(t) - (1-y)*log(1-t)
+    end
 end
 deriv(l::CrossentropyLoss, y::Number, t::Number) = t - y
 deriv2(l::CrossentropyLoss, y::Number, t::Number) = 1

@@ -76,26 +76,26 @@ isclipable(::L2HingeLoss) = true
 #           1 - γ / 2 - yt               ... otherwise
 
 immutable SmoothedL1HingeLoss <: MarginBasedLoss
-  gamma::Float64
+    gamma::Float64
 
-  function SmoothedL1HingeLoss(γ::Number)
-    γ > 0 || error("γ must be strictly positive")
-    new(convert(Float64, γ))
-  end
+    function SmoothedL1HingeLoss(γ::Number)
+        γ > 0 || error("γ must be strictly positive")
+        new(convert(Float64, γ))
+    end
 end
 
 function value{T<:Number}(l::SmoothedL1HingeLoss, yt::T)
-  yt >= 1 - l.gamma ? 0.5 / l.gamma * abs2(max(zero(T), 1 - yt)) : one(T) - l.gamma / 2 - yt
+    yt >= 1 - l.gamma ? 0.5 / l.gamma * abs2(max(zero(T), 1 - yt)) : one(T) - l.gamma / 2 - yt
 end
 function deriv{T<:Number}(l::SmoothedL1HingeLoss, yt::T)
-  if yt >= 1 - l.gamma
-    yt >= 1 ? zero(T) : (yt - one(T)) / l.gamma
-  else
-    -one(T)
-  end
+    if yt >= 1 - l.gamma
+        yt >= 1 ? zero(T) : (yt - one(T)) / l.gamma
+    else
+        -one(T)
+    end
 end
 function deriv2{T<:Number}(l::SmoothedL1HingeLoss, yt::T)
-  yt < 1 - l.gamma || yt > 1 ? zero(T) : one(T) / l.gamma
+    yt < 1 - l.gamma || yt > 1 ? zero(T) : one(T) / l.gamma
 end
 value_deriv(l::SmoothedL1HingeLoss, yt::Number) = (value(l, yt), deriv(l, yt))
 
@@ -114,17 +114,17 @@ isclipable(::SmoothedL1HingeLoss) = true
 immutable ModifiedHuberLoss <: MarginBasedLoss end
 
 function value{T<:Number}(l::ModifiedHuberLoss, yt::T)
-  yt >= -1 ? abs2(max(zero(T), 1 - yt)) : -4 * yt
+    yt >= -1 ? abs2(max(zero(T), 1 - yt)) : -4 * yt
 end
 function deriv{T<:Number}(l::ModifiedHuberLoss, yt::T)
-  if yt >= -1
-    yt > 1 ? zero(T) : 2*yt - 2
-  else
-    -4*one(T)
-  end
+    if yt >= -1
+        yt > 1 ? zero(T) : 2*yt - 2
+    else
+        -4*one(T)
+    end
 end
 function deriv2{T<:Number}(l::ModifiedHuberLoss, yt::T)
-  yt < -1 || yt > 1 ? zero(T) : 2*one(T)
+    yt < -1 || yt > 1 ? zero(T) : 2*one(T)
 end
 value_deriv(l::ModifiedHuberLoss, yt::Number) = (value(l, yt), deriv(l, yt))
 

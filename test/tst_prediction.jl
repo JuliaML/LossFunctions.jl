@@ -14,13 +14,13 @@ pred = LinearPredictor(0)
 
 val = 0.
 for i = 1:length(x)
-  val += value(pred, x[i], w[i])
+    val += value(pred, x[i], w[i])
 end
 @test_approx_eq val dot(x, w)
 
 buffer = zeros(length(x))
 for i = 1:length(x)
-  buffer[i] = deriv(pred, x[i], w[i])
+    buffer[i] = deriv(pred, x[i], w[i])
 end
 @test_approx_eq buffer x
 
@@ -45,7 +45,7 @@ pred = LinearPredictor(bias)
 
 val = bias * wb[end]
 for i = 1:length(x)
-  val += value(pred, x[i], wb[i])
+    val += value(pred, x[i], wb[i])
 end
 @test_approx_eq val (dot(x, wb[1:len_wb]) + bias * wb[end])
 

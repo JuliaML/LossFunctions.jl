@@ -29,11 +29,11 @@ risk = RiskModel(pred, loss, reg)
 ŷ = pred(X, θ)
 
 function muh(risk, X, w, y)
-  ŷ = zeros(1, size(X,2))
-  buffer = zeros(1, length(w))
-  for i = 1:10000
-    grad!(buffer, risk, X, w, y, ŷ)
-  end
+    ŷ = zeros(1, size(X,2))
+    buffer = zeros(1, length(w))
+    for i = 1:10000
+        grad!(buffer, risk, X, w, y, ŷ)
+    end
 end
 @time muh(risk, X, θ, y)
 
@@ -41,9 +41,9 @@ end
 J = zeros(maxIter)
 print("Starting gradient descent ... ")
 for i = 1:maxIter
-  J[i] = value!(ŷ, risk, X, θ, y)
-  ▽ = grad(risk, X, θ, y)
-  θ = θ - α .* vec(▽)
+    J[i] = value!(ŷ, risk, X, θ, y)
+    ▽ = grad(risk, X, θ, y)
+    θ = θ - α .* vec(▽)
 end
 println("DONE")
 
