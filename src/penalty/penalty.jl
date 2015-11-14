@@ -4,7 +4,7 @@
 "No penalty on the coefficients"
 immutable NoPenalty <: Penalty end
 Base.show(io::IO, p::NoPenalty) = print(io, "NoPenalty")
-@inline value{T<:Number}(p::NoPenalty, w::AbstractArray{T}) = zero(T)
+@inline value{T<:Number}(p::NoPenalty, w::AbstractArray{T}, len::Int=0) = zero(T)
 @inline deriv{T<:Number}(p::NoPenalty, wⱼ::T) = zero(T)
 
 @inline function addgrad!{T<:Number}(buffer::AbstractArray{T}, p::NoPenalty, w::AbstractArray, len::Int=length(w))
@@ -24,7 +24,7 @@ end
 isconvex(::L1Penalty) = true
 isdifferentiable(p::L1Penalty) = false
 Base.show(io::IO, p::L1Penalty) = print(io, "L1Penalty(λ = $(p.λ))")
-@inline function value{T}(p::L1Penalty, w::AbstractArray{T}, len::Int=length(w))
+function value{T}(p::L1Penalty, w::AbstractArray{T}, len::Int=length(w))
   len_w = length(w)
   @_dimcheck 0 < len <= len_w
   if len == len_w
