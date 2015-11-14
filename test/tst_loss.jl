@@ -26,7 +26,6 @@ function test_deriv(l::MarginBasedLoss, t_vec)
       @test_approx_eq val value(l, [2,3], y, t)
       @test_approx_eq val value_fun(l)(y, t)
       @test_approx_eq val value_fun(l)(y*t)
-      @test_approx_eq val repr_fun(l)(y*t)
       @test_approx_eq val l(y*t)
       @test_approx_eq d_comp d_comp2
       @test_approx_eq d_comp d_comp3
@@ -35,7 +34,6 @@ function test_deriv(l::MarginBasedLoss, t_vec)
       @test_approx_eq d_comp deriv(l, [2,3], y, t)
       @test_approx_eq d_comp deriv_fun(l)(y, t)
       @test_approx_eq d_comp y*deriv_fun(l)(y*t)
-      @test_approx_eq d_comp y*repr_deriv_fun(l)(y*t)
       @test_approx_eq d_comp l'(y,t)
       @test_approx_eq d_comp y*l'(y*t)
     else
@@ -65,7 +63,6 @@ function test_deriv(l::DistanceBasedLoss, t_vec)
       @test_approx_eq val value(l, [2,3], y, t)
       @test_approx_eq val value_fun(l)(y, t)
       @test_approx_eq val value_fun(l)(t-y)
-      @test_approx_eq val repr_fun(l)(t-y)
       @test_approx_eq val l(t-y)
       @test_approx_eq d_comp d_comp2
       @test_approx_eq d_comp d_comp3
@@ -74,7 +71,6 @@ function test_deriv(l::DistanceBasedLoss, t_vec)
       @test_approx_eq d_comp deriv(l, [2,3], y, t)
       @test_approx_eq d_comp deriv_fun(l)(y, t)
       @test_approx_eq d_comp deriv_fun(l)(t-y)
-      @test_approx_eq d_comp repr_deriv_fun(l)(t-y)
       @test_approx_eq d_comp l'(t-y)
     else
       # y-t == 0 ? print(".") : print("$(y-t) ")
@@ -241,4 +237,3 @@ msg("Test second derivatives of distance-based losses")
 for loss in distance_losses
   test_deriv2(loss, -30:0.5:30)
 end
-

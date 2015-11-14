@@ -12,7 +12,7 @@ function value(l::CrossentropyLoss, y::Number, t::Number)
     -log(1 - t)
   else
     -y*log(t) - (1-y)*log(1-t)
-  end  
+  end
 end
 deriv(l::CrossentropyLoss, y::Number, t::Number) = t - y
 deriv2(l::CrossentropyLoss, y::Number, t::Number) = 1
@@ -33,21 +33,6 @@ deriv2(l::ZeroOneLoss, y::Number, t::Number) = zero(t)
 value{T<:Number}(l::ZeroOneLoss, yt::T) = sign(yt) < 0 ? one(T) : zero(T)
 deriv{T<:Number}(l::ZeroOneLoss, yt::T) = zero(T)
 deriv2{T<:Number}(l::ZeroOneLoss, yt::T) = zero(T)
-
-function repr_fun(l::ZeroOneLoss)
-  _φ(yt::Number) = value(l, yt)
-  _φ
-end
-
-function repr_deriv_fun(l::ZeroOneLoss)
-  _φ_deriv(yt::Number) = deriv(l, yt)
-  _φ_deriv
-end
-
-function repr_deriv2_fun(l::ZeroOneLoss)
-  _φ_deriv2(yt::Number) = deriv2(l, yt)
-  _φ_deriv2
-end
 
 isdifferentiable(::ZeroOneLoss) = false
 isconvex(::ZeroOneLoss) = false

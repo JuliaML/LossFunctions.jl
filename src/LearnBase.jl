@@ -53,9 +53,6 @@ export
     deriv_fun,
     deriv2_fun,
     value_deriv_fun,
-    repr_fun,
-    repr_deriv_fun,
-    repr_deriv2_fun,
 
     isminimizable,
     isdifferentiable,

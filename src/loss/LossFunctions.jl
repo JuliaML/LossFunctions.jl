@@ -4,8 +4,7 @@ using UnicodePlots
 import UnicodePlots: lineplot, lineplot!
 import ..LearnBase: value, value!, deriv, deriv!, deriv2, value_deriv, grad, grad!,
                     sumvalue, sumderiv, meanvalue, meanderiv,
-                    value_fun, deriv_fun, deriv2_fun, value_deriv_fun,
-                    repr_fun, repr_deriv_fun, repr_deriv2_fun
+                    value_fun, deriv_fun, deriv2_fun, value_deriv_fun
 import ..LearnBase: isminimizable, isdifferentiable, istwicedifferentiable,
                     isconvex, isnemitski, islipschitzcont, islocallylipschitzcont,
                     isclipable, ismarginbased, isclasscalibrated, isdistancebased,

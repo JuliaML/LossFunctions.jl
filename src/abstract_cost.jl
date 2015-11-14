@@ -4,22 +4,22 @@ abstract Cost
 @inline transpose(c::Cost) = deriv_fun(c)
 
 @inline function value_fun(c::Cost)
-  _value(args...) = value(c, args...)
+  @inline _value(args...) = value(c, args...)
   _value
 end
 
 @inline function deriv_fun(c::Cost)
-  _deriv(args...) = deriv(c, args...)
+  @inline _deriv(args...) = deriv(c, args...)
   _deriv
 end
 
 @inline function deriv2_fun(c::Cost)
-  _deriv2(args...) = deriv2(c, args...)
+  @inline _deriv2(args...) = deriv2(c, args...)
   _deriv2
 end
 
 @inline function value_deriv_fun(c::Cost)
-  _value_deriv(args...) = value_deriv(c, args...)
+  @inline _value_deriv(args...) = value_deriv(c, args...)
   _value_deriv
 end
 
@@ -198,21 +198,6 @@ abstract MarginBasedLoss <: SupervisedLoss
   (v, y*d)
 end
 
-@inline function repr_fun(l::MarginBasedLoss)
-  _φ(yt::Number) = value(l, yt)
-  _φ
-end
-
-@inline function repr_deriv_fun(l::MarginBasedLoss)
-  _φ_deriv(yt::Number) = deriv(l, yt)
-  _φ_deriv
-end
-
-@inline function repr_deriv2_fun(l::MarginBasedLoss)
-  _φ_deriv2(yt::Number) = deriv2(l, yt)
-  _φ_deriv2
-end
-
 isunivfishercons(::MarginBasedLoss) = false
 isfishercons(l::MarginBasedLoss) = isunivfishercons(l)
 isnemitski(::MarginBasedLoss) = true
@@ -229,21 +214,6 @@ abstract DistanceBasedLoss <: SupervisedLoss
 @inline deriv(l::DistanceBasedLoss, y::Number, t::Number) = deriv(l, t - y)
 @inline deriv2(l::DistanceBasedLoss, y::Number, t::Number) = deriv2(l, t - y)
 @inline value_deriv(l::DistanceBasedLoss, y::Number, t::Number) = value_deriv(l, t - y)
-
-@inline function repr_fun(l::DistanceBasedLoss)
-  _ψ(r::Number) = value(l, r)
-  _ψ
-end
-
-@inline function repr_deriv_fun(l::DistanceBasedLoss)
-  _ψ_deriv(r::Number) = deriv(l, r)
-  _ψ_deriv
-end
-
-@inline function repr_deriv2_fun(l::DistanceBasedLoss)
-  _ψ_deriv2(r::Number) = deriv2(l, r)
-  _ψ_deriv2
-end
 
 isdistancebased(::DistanceBasedLoss) = true
 issymmetric(::DistanceBasedLoss) = false
