@@ -37,6 +37,10 @@ export
 
     RegressionData,
 
+    center!,
+    rescale!,
+    center_rescale!,
+
     value,
     value!,
     meanvalue,
@@ -86,6 +90,7 @@ export
 
 include("common.jl")
 include("data/regression.jl")
+include("preprocessing.jl")
 include("abstract_solver.jl")
 include("abstract_cost.jl")
 include("abstract_penalty.jl")
