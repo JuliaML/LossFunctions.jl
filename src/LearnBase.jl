@@ -35,6 +35,8 @@ export
 
     AbstractSolver,
 
+    RegressionData,
+
     value,
     value!,
     meanvalue,
@@ -83,6 +85,7 @@ export
     EncodedRegressionModel
 
 include("common.jl")
+include("data/regression.jl")
 include("abstract_solver.jl")
 include("abstract_cost.jl")
 include("abstract_penalty.jl")

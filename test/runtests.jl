@@ -1,6 +1,7 @@
 using LearnBase
 using LearnBase.LossFunctions
 using LearnBase.Penalties
+using UnicodePlots
 using DualNumbers
 using Base.Test
 
@@ -19,6 +20,7 @@ tests = [
     "tst_classencoding.jl"
     "tst_penalty.jl"
     "tst_prediction.jl"
+    "tst_risk.jl"
 ]
 
 perf = [
