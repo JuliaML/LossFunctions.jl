@@ -55,7 +55,7 @@ function lineplot(
         args...;
         name = string(typeof(loss).name.name),
         nargs...)
-    newPlot = lineplot(repr_fun(loss), args...; name = name, nargs...)
+    newPlot = lineplot(value_fun(loss), args...; name = name, nargs...)
     xlabel!(newPlot, "y * f(x)")
     ylabel!(newPlot, "L(y,f(x))")
 end
@@ -65,7 +65,7 @@ function lineplot(
         args...;
         name = string(typeof(loss).name.name),
         nargs...)
-    newPlot = lineplot(repr_fun(loss), args...; name = name, nargs...)
+    newPlot = lineplot(value_fun(loss), args...; name = name, nargs...)
     xlabel!(newPlot, "y - f(x)")
     ylabel!(newPlot, "L(y,f(x))")
 end
@@ -99,7 +99,7 @@ function lineplot!{C<:Canvas}(
         args...;
         name = string(typeof(loss).name.name),
         nargs...)
-    lineplot!(plot, repr_fun(loss), args...; name = name, nargs...)
+    lineplot!(plot, value_fun(loss), args...; name = name, nargs...)
 end
 
 function lineplot{T<:Cost}(
