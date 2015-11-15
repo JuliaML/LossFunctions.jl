@@ -40,6 +40,7 @@ export
     center!,
     rescale!,
     center_rescale!,
+    CenterRescale,
 
     value,
     value!,

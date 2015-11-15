@@ -33,3 +33,34 @@ function center_rescale!(X::AbstractMatrix, μ::AbstractVector = vec(mean(X, 2))
     end
     μ, σ
 end
+
+# ==========================================================================
+
+immutable CenterRescale
+    mean::Vector{Float64}
+    std::Vector{Float64}
+
+    function CenterRescale(m::Vector{Float64}, s::Vector{Float64})
+        @_dimcheck length(m) == length(s)
+        new(m, s)
+    end
+end
+
+function CenterRescale{T<:Real}(X::AbstractMatrix{T})
+    CenterRescale(vec(mean(X, 2)), vec(std(X, 2)))
+end
+
+function fit{T<:Real}(::Type{CenterRescale}, X::AbstractMatrix{T})
+    CenterRescale(X)
+end
+
+function predict!{T<:Real}(cs::CenterRescale, X::AbstractMatrix{T})
+    @_dimcheck length(cs.mean) == size(X, 1)
+    center_rescale!(X, cs.mean, cs.std)
+    X
+end
+
+function predict{T<:Real}(cs::CenterRescale, X::AbstractMatrix{T})
+    Xnew = copy(X)
+    predict!(cs, Xnew)
+end
