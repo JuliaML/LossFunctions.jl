@@ -12,7 +12,7 @@ end
 function rescale!(X::AbstractMatrix, σ::AbstractVector = vec(std(X, 2)))
     k, n = size(X)
     @inbounds for j = 1:k
-        if σ[j] > 1
+        if σ[j] > 0
             for i = 1:n
                 X[j, i] = X[j, i] / σ[j]
             end
@@ -26,7 +26,7 @@ function center_rescale!(X::AbstractMatrix, μ::AbstractVector = vec(mean(X, 2))
     @inbounds for j = 1:k
         for i = 1:n
             X[j, i] = X[j, i] - μ[j]
-            if σ[j] > 1
+            if σ[j] > 0
                 X[j, i] = X[j, i] / σ[j]
             end
         end

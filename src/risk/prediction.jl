@@ -66,7 +66,7 @@ end
     k = length(w)-1
     @_dimcheck length(x) == k
     w⃗ = view(w, 1:k)
-    @inbounds b = convert(T, h.bias) * w[k+1]
+    @inbounds b = h.bias * w[k+1]
     dot(x, w⃗) + b
 end
 
@@ -91,7 +91,7 @@ end
     n = size(X, 2)
     @_dimcheck size(X, 1) == k && size(buffer) == (1, n)
     w⃗ = view(w, 1:k)
-    @inbounds b = convert(T, h.bias) * w[k+1]
+    @inbounds b = h.bias * w[k+1]
     At_mul_B!(buffer, w⃗, X)
     broadcast!(+, buffer, buffer, b)
     buffer
