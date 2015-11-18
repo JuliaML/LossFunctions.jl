@@ -3,8 +3,8 @@
 msg("Test linear regression on noisy line")
 
 w = [1, 10]
-X, y = RegressionData.polynome(w, -10:.2:10, noise=.5)
-x = vec(X[end,:])
+x, y = DataGenerators.noisy_poly(w, -10:.2:10, noise = .5)
+X = x'
 
 # Set hyper parameters
 θ = randn(length(w))
@@ -33,9 +33,8 @@ print(mp)
 msg("Test linear regression on sin using poly basis expansion")
 
 k = 5
-x, y = RegressionData.example_sin(0:.1:2π; noise = .1)
-X, _ = RegressionData.polynome(ones(k), x, noise = 0.)
-center_rescale!(X)
+x, y = DataGenerators.noisy_sin(100; noise = .1)
+X = DataUtils.expand_poly(x, degree = 4)
 
 # Set hyper parameters
 θ = zeros(k)

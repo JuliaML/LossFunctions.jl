@@ -2,6 +2,7 @@ module LearnBase
 
 using Reexport
 @reexport using MLBase
+using MLDatasets
 using ArrayViews
 using UnicodePlots
 
@@ -35,12 +36,7 @@ export
 
     AbstractSolver,
 
-    RegressionData,
-
-    center!,
-    rescale!,
-    center_rescale!,
-    CenterRescale,
+    FeatureNormalizer,
 
     value,
     value!,
@@ -90,8 +86,7 @@ export
     EncodedRegressionModel
 
 include("common.jl")
-include("data/regression.jl")
-include("preprocessing.jl")
+include("featurenormalizer.jl")
 include("abstract_solver.jl")
 include("abstract_cost.jl")
 include("abstract_penalty.jl")
