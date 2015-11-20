@@ -19,7 +19,6 @@ end
 tests = [
     "tst_loss.jl"
     "tst_classencoding.jl"
-    "tst_preprocessing.jl"
     "tst_penalty.jl"
     "tst_prediction.jl"
     "tst_risk.jl"

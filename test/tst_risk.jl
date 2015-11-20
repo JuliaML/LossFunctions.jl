@@ -91,7 +91,7 @@ for i = 1:maxIter
 end
 
 J = value!(ŷ, risk, X, θ, y)
-@test 0.04 < J < 0.05
+@test 0.09 < J < 0.1
 mp = scatterplot(x, y, color = :blue, height = 5, ylim=[-1.1, 1.1])
 lineplot!(mp, x1, vec(value(pred, X1, θ)), color = :red)
 print(mp)

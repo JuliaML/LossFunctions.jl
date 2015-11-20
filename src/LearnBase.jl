@@ -2,7 +2,6 @@ module LearnBase
 
 using Reexport
 @reexport using MLBase
-using MLDatasets
 using ArrayViews
 using UnicodePlots
 
@@ -35,8 +34,6 @@ export
     RiskModel,
 
     AbstractSolver,
-
-    FeatureNormalizer,
 
     value,
     value!,
@@ -86,7 +83,6 @@ export
     EncodedRegressionModel
 
 include("common.jl")
-include("featurenormalizer.jl")
 include("abstract_solver.jl")
 include("abstract_cost.jl")
 include("abstract_penalty.jl")
