@@ -12,7 +12,7 @@ function show(io::IO, loss::Union{MarginBasedLoss,DistanceBasedLoss,ZeroOneLoss}
     ylabel!(newPlot, "")
     xlabel!(newPlot, "")
     annotate!(newPlot, :l, 3, "    ")
-    annotate!(newPlot, :r, 3, "L(y,f(x))", :blue)
+    annotate!(newPlot, :r, 3, "L(y,h(x))", :blue)
     annotate!(newPlot, :br, "")
     annotate!(newPlot, :bl, "")
     print(io, newPlot)
@@ -20,7 +20,7 @@ function show(io::IO, loss::Union{MarginBasedLoss,DistanceBasedLoss,ZeroOneLoss}
     ylabel!(newPlot, "")
     xlabel!(newPlot, xl)
     annotate!(newPlot, :l, 3, "    ")
-    annotate!(newPlot, :r, 3, "L'(y,f(x))", :red)
+    annotate!(newPlot, :r, 3, "L'(y,h(x))", :red)
     print(io, newPlot)
 end
 
@@ -56,8 +56,8 @@ function lineplot(
         name = string(typeof(loss).name.name),
         nargs...)
     newPlot = lineplot(value_fun(loss), args...; name = name, nargs...)
-    xlabel!(newPlot, "y * f(x)")
-    ylabel!(newPlot, "L(y,f(x))")
+    xlabel!(newPlot, "y * h(x)")
+    ylabel!(newPlot, "L(y,h(x))")
 end
 
 function lineplot(
@@ -66,8 +66,8 @@ function lineplot(
         name = string(typeof(loss).name.name),
         nargs...)
     newPlot = lineplot(value_fun(loss), args...; name = name, nargs...)
-    xlabel!(newPlot, "y - f(x)")
-    ylabel!(newPlot, "L(y,f(x))")
+    xlabel!(newPlot, "h(x) - y")
+    ylabel!(newPlot, "L(y,h(x))")
 end
 
 function lineplot(
