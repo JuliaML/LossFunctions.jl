@@ -31,7 +31,7 @@ export
     Penalty,
     Penalties,
 
-    RiskModel,
+    EmpiricalRisk,
     RiskFunctional,
 
     AbstractSolver,
@@ -94,7 +94,7 @@ include("encodedmodel.jl")
 include("loss/LossFunctions.jl")
 include("penalty/Penalties.jl")
 include("risk/prediction.jl")
-include("risk/riskmodel.jl")
+include("risk/empiricalrisk.jl")
 include("risk/riskfunc.jl")
 
 end # module

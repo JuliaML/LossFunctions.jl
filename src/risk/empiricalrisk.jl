@@ -1,19 +1,17 @@
 using LearnBase.LossFunctions
 using LearnBase.Penalties
 
-abstract EmpiricalRisk{TPred<:Predictor, TLoss<:Loss, TPen<:Penalty}
-
-immutable RiskModel{TPred<:Predictor, TLoss<:Loss, TPen<:Penalty} <: EmpiricalRisk{TPred, TLoss, TPen}
+immutable EmpiricalRisk{TPred<:Predictor, TLoss<:Loss, TPen<:Penalty}
     predictor::TPred
     loss::TLoss
     penalty::TPen
 end
 
-function RiskModel{TPred<:Predictor, TLoss<:Loss, TPen<:Penalty}(
+function EmpiricalRisk{TPred<:Predictor, TLoss<:Loss, TPen<:Penalty}(
         predictor::TPred = LinearPredictor(0),
         loss::TLoss = L2DistLoss(),
         penalty::TPen = NoPenalty())
-    RiskModel{TPred, TLoss, TPen}(predictor, loss, penalty)
+    EmpiricalRisk{TPred, TLoss, TPen}(predictor, loss, penalty)
 end
 
 # ==========================================================================
@@ -21,7 +19,7 @@ end
 # * no penalty
 
 @inline function value{TPred<:Predictor, TLoss<:Loss, TPen<:NoPenalty}(
-        risk::RiskModel{TPred, TLoss, TPen},
+        risk::EmpiricalRisk{TPred, TLoss, TPen},
         X::AbstractArray,
         w::AbstractArray,
         y::AbstractArray,
@@ -31,7 +29,7 @@ end
 
 @inline function value!{TPred<:Predictor, TLoss<:Loss, TPen<:NoPenalty}(
         buffer::AbstractMatrix,
-        risk::RiskModel{TPred, TLoss, TPen},
+        risk::EmpiricalRisk{TPred, TLoss, TPen},
         X::AbstractArray,
         w::AbstractArray,
         y::AbstractArray)
@@ -44,7 +42,7 @@ end
 # * generic penalty
 
 @inline function value{TPred<:Predictor, TLoss<:Loss, TPen<:Penalty}(
-        risk::RiskModel{TPred, TLoss, TPen},
+        risk::EmpiricalRisk{TPred, TLoss, TPen},
         X::AbstractArray,
         w::AbstractArray,
         y::AbstractArray,
@@ -56,7 +54,7 @@ end
 
 @inline function value!{TPred<:Predictor, TLoss<:Loss, TPen<:Penalty}(
         buffer::AbstractMatrix,
-        risk::RiskModel{TPred, TLoss, TPen},
+        risk::EmpiricalRisk{TPred, TLoss, TPen},
         X::AbstractArray,
         w::AbstractArray,
         y::AbstractArray)
@@ -67,7 +65,7 @@ end
 end
 
 @inline function grad{TPred<:Predictor, TLoss<:Loss, TPen<:Penalty}(
-        risk::RiskModel{TPred, TLoss, TPen},
+        risk::EmpiricalRisk{TPred, TLoss, TPen},
         X::AbstractArray,
         w::AbstractArray,
         y::AbstractArray,
@@ -81,7 +79,7 @@ end
 
 @inline function grad!{TPred<:Predictor, TLoss<:Loss, TPen<:Penalty}(
         buffer::AbstractMatrix,
-        risk::RiskModel{TPred, TLoss, TPen},
+        risk::EmpiricalRisk{TPred, TLoss, TPen},
         X::AbstractArray,
         w::AbstractArray,
         y::AbstractArray,
@@ -98,7 +96,7 @@ end
 # * generic penalty
 
 @inline function grad{INTERCEPT, TLoss<:Loss, TPen<:Penalty}(
-        risk::RiskModel{LinearPredictor{INTERCEPT}, TLoss, TPen},
+        risk::EmpiricalRisk{LinearPredictor{INTERCEPT}, TLoss, TPen},
         X::AbstractArray,
         w::AbstractVector,
         y::AbstractArray,
@@ -109,7 +107,7 @@ end
 
 @inline function grad!{T, INTERCEPT, TLoss<:Loss, TPen<:Penalty}(
         buffer::AbstractMatrix{T},
-        risk::RiskModel{LinearPredictor{INTERCEPT}, TLoss, TPen},
+        risk::EmpiricalRisk{LinearPredictor{INTERCEPT}, TLoss, TPen},
         X::AbstractArray,
         w::AbstractArray,
         y::AbstractArray,

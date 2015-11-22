@@ -13,7 +13,7 @@ maxIter = 1000
 
 loss = LossFunctions.L2DistLoss()
 pred = LinearPredictor(bias = 1)
-risk = RiskModel(pred, loss)
+risk = EmpiricalRisk(pred, loss)
 riskfunc = RiskFunctional(risk, X, y)
 
 fg! = value_grad_fun(riskfunc, θ)
@@ -47,7 +47,7 @@ maxIter = 5000
 
 loss = LossFunctions.L2DistLoss()
 pred = LinearPredictor(bias = 1)
-risk = RiskModel(pred, loss)
+risk = EmpiricalRisk(pred, loss)
 riskfunc = RiskFunctional(risk, X, y)
 
 f = value_fun(riskfunc, θ)

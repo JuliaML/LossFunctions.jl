@@ -13,7 +13,7 @@ maxIter = 1000
 
 loss = LossFunctions.L2DistLoss()
 pred = LinearPredictor(bias = 1)
-risk = RiskModel(pred, loss)
+risk = EmpiricalRisk(pred, loss)
 ŷ = pred(X, θ)
 ▽ = zeros(length(w), 1)
 
@@ -44,7 +44,7 @@ maxIter = 5000
 
 loss = LossFunctions.L2DistLoss()
 pred = LinearPredictor(bias = 1)
-risk = RiskModel(pred, loss)
+risk = EmpiricalRisk(pred, loss)
 ŷ = pred(X, θ)
 ▽ = zeros(k, 1)
 
@@ -80,7 +80,7 @@ maxIter = 5000
 loss = LossFunctions.L2DistLoss()
 pred = LinearPredictor(bias = 0)
 pen = Penalties.L2Penalty(0.05)
-risk = RiskModel(pred, loss, pen)
+risk = EmpiricalRisk(pred, loss, pen)
 ŷ = pred(X, θ)
 ▽ = zeros(k, 1)
 

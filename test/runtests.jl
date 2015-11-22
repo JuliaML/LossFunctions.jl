@@ -21,7 +21,7 @@ tests = [
     "tst_classencoding.jl"
     "tst_penalty.jl"
     "tst_prediction.jl"
-    "tst_riskmodel.jl"
+    "tst_empiricalrisk.jl"
     "tst_riskfunc.jl"
 ]
 
