@@ -16,7 +16,7 @@ pred = LinearPredictor(bias = 1)
 risk = EmpiricalRisk(pred, loss)
 riskfunc = RiskFunctional(risk, X, y)
 
-fg! = value_grad_fun(riskfunc, θ)
+fg! = value_grad_fun(riskfunc)
 
 J = 0.
 ▽ = zeros(θ)
@@ -50,8 +50,8 @@ pred = LinearPredictor(bias = 1)
 risk = EmpiricalRisk(pred, loss)
 riskfunc = RiskFunctional(risk, X, y)
 
-f = value_fun(riskfunc, θ)
-g! = grad_fun(riskfunc, θ)
+f = value_fun(riskfunc)
+g! = grad_fun(riskfunc)
 
 J = 0.
 ▽ = zeros(θ)

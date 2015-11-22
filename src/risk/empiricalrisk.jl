@@ -14,6 +14,13 @@ function EmpiricalRisk{TPred<:Predictor, TLoss<:Loss, TPen<:Penalty}(
     EmpiricalRisk{TPred, TLoss, TPen}(predictor, loss, penalty)
 end
 
+intercept(risk::EmpiricalRisk) = intercept(risk.predictor)
+
+# ==========================================================================
+
+typealias EmpiricalRiskClassifier{TPred<:Predictor, TLoss<:MarginBasedLoss, TPen<:Penalty} EmpiricalRisk{TPred, TLoss, TPen}
+typealias EmpiricalRiskRegressor{TPred<:Predictor, TLoss<:DistanceBasedLoss, TPen<:Penalty} EmpiricalRisk{TPred, TLoss, TPen}
+
 # ==========================================================================
 # * generic predictor
 # * no penalty

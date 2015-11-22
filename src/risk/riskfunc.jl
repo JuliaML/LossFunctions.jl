@@ -1,59 +1,62 @@
 
-type RiskFunctional{TPred<:Predictor, TLoss<:Loss, TPen<:Penalty, TX<:AbstractArray, TY<:AbstractArray}
-    risk::EmpiricalRisk{TPred, TLoss, TPen}
+type RiskFunctional{TRisk<:EmpiricalRisk,
+                    TX<:AbstractArray,
+                    TY<:AbstractArray,
+                    TYhat<:AbstractArray,
+                    TGrat<:AbstractArray}
+    risk::TRisk
     X::TX
     Y::TY
+    Yhat::TYhat
+    grad::TGrat
 end
 
 function RiskFunctional{TPred<:Predictor, TLoss<:Loss, TPen<:Penalty}(
         risk::EmpiricalRisk{TPred, TLoss, TPen},
-        X::AbstractArray,
-        Y::AbstractArray)
-    RiskFunctional{TPred, TLoss, TPen, typeof(X), typeof(Y)}(risk, X, Y)
+        X::AbstractMatrix,
+        Y::AbstractVector)
+    # TODO: come up with better way to decide the coef size
+    w0 = zeros(intercept(risk) ? size(X, 1)+1 : size(X, 1))
+    grad = zeros(length(w0), 1)
+    ŷ = value(risk.predictor, X, w0)
+    RiskFunctional{typeof(risk), typeof(X), typeof(Y), typeof(ŷ), typeof(grad)}(
+        risk, X, Y, ŷ, grad)
 end
 
-function value(func::RiskFunctional, w::AbstractArray, ŷ::AbstractMatrix = value(func.risk.predictor, func.X, w))
-    value(func.risk, func.X, w, func.Y, ŷ)
+function value(func::RiskFunctional, w::AbstractArray)
+    value!(func.Yhat, func.risk, func.X, w, func.Y)
 end
 
-function value!(buffer::AbstractMatrix, func::RiskFunctional, w::AbstractArray)
-    value!(buffer, func.risk, func.X, w, func.Y)
+function grad(func::RiskFunctional, w::AbstractArray)
+    value!(func.Yhat, func.risk.predictor, func.X, w)
+    grad!(func.grad, func.risk, func.X, w, func.Y, func.Yhat)
 end
 
-function grad(func::RiskFunctional, w::AbstractArray, ŷ::AbstractMatrix = value(func.risk.predictor, func.X, w))
-    grad(func.risk, func.X, w, func.Y, ŷ)
+function value_grad(func::RiskFunctional, w::AbstractArray)
+    val = value!(func.Yhat, func.risk, func.X, w, func.Y)
+    grad!(func.grad, func.risk, func.X, w, func.Y, func.Yhat)
+    val
 end
 
-function grad!(buffer::AbstractMatrix, func::RiskFunctional, w::AbstractArray, ŷ::AbstractMatrix = value(func.risk.predictor, func.X, w))
-    grad!(buffer, func.risk, func.X, w, func.Y, ŷ)
-end
-
-function value_fun(func::RiskFunctional, w0::AbstractArray)
-    ŷ = value(func.risk.predictor, func.X, w0)
+function value_fun(func::RiskFunctional)
     function _value(w::AbstractArray)
-        value!(ŷ, func, w)
+        value(func, w)
     end
     _value
 end
 
-function grad_fun(func::RiskFunctional, w0::AbstractVector)
-    ŷ = value(func.risk.predictor, func.X, w0)
-    buffer = zeros(length(w0), 1)
+function grad_fun(func::RiskFunctional)
     function _grad!(w::AbstractArray, storage::AbstractArray)
-        value!(ŷ, func.risk.predictor, func.X, w)
-        grad!(buffer, func, w, ŷ)
-        copy!(storage, buffer)
+        grad(func, w)
+        copy!(storage, func.grad)
     end
     _grad!
 end
 
-function value_grad_fun(func::RiskFunctional, w0::AbstractVector)
-    ŷ = value(func.risk.predictor, func.X, w0)
-    buffer = zeros(length(w0), 1)
+function value_grad_fun(func::RiskFunctional)
     function _val_grad!(w::AbstractArray, storage::AbstractArray)
-        val = value!(ŷ, func, w)
-        grad!(buffer, func, w, ŷ)
-        copy!(storage, buffer)
+        val = value_grad(func, w)
+        copy!(storage, func.grad)
         val
     end
     _val_grad!

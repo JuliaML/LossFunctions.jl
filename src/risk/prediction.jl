@@ -1,5 +1,7 @@
 abstract Predictor{INTERCEPT}
 
+intercept{INTERCEPT}(::Predictor{INTERCEPT}) = INTERCEPT
+
 @inline call(p::Predictor, args...) = value(p, args...)
 @inline transpose(p::Predictor) = grad_fun(p)
 

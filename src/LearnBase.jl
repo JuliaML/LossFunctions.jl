@@ -4,8 +4,9 @@ using Reexport
 @reexport using MLBase
 using ArrayViews
 using UnicodePlots
+using Optim
 
-import Base: show, shuffle!, convert, call, print, transpose
+import Base: show, shuffle!, convert, call, print, transpose, minimum
 import UnicodePlots: lineplot, lineplot!
 import StatsBase: fit, fit!, predict, predict!, nobs, coef,
                   deviance, loglikelihood, coeftable, stderr,
@@ -32,6 +33,8 @@ export
     Penalties,
 
     EmpiricalRisk,
+        EmpiricalRiskClassifier,
+        EmpiricalRiskRegressor,
     RiskFunctional,
 
     AbstractSolver,
@@ -49,6 +52,7 @@ export
     addgrad!,
     deriv2,
     value_deriv,
+    value_grad,
 
     value_fun,
     deriv_fun,
@@ -96,5 +100,6 @@ include("penalty/Penalties.jl")
 include("risk/prediction.jl")
 include("risk/empiricalrisk.jl")
 include("risk/riskfunc.jl")
+include("risk/riskmodel.jl")
 
 end # module
