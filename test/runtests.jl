@@ -22,6 +22,7 @@ tests = [
     "tst_penalty.jl"
     "tst_prediction.jl"
     "tst_riskmodel.jl"
+    "tst_riskfunc.jl"
 ]
 
 perf = [

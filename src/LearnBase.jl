@@ -32,6 +32,7 @@ export
     Penalties,
 
     RiskModel,
+    RiskFunctional,
 
     AbstractSolver,
 
@@ -52,7 +53,9 @@ export
     value_fun,
     deriv_fun,
     deriv2_fun,
+    grad_fun,
     value_deriv_fun,
+    value_grad_fun,
 
     isminimizable,
     isdifferentiable,
@@ -92,5 +95,6 @@ include("loss/LossFunctions.jl")
 include("penalty/Penalties.jl")
 include("risk/prediction.jl")
 include("risk/riskmodel.jl")
+include("risk/riskfunc.jl")
 
 end # module
