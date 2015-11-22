@@ -91,6 +91,6 @@ include("encodedmodel.jl")
 include("loss/LossFunctions.jl")
 include("penalty/Penalties.jl")
 include("risk/prediction.jl")
-include("risk/riskspec.jl")
+include("risk/riskmodel.jl")
 
 end # module
