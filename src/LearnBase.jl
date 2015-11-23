@@ -4,7 +4,6 @@ using Reexport
 @reexport using MLBase
 using ArrayViews
 using UnicodePlots
-using Optim
 
 import Base: show, shuffle!, convert, call, print, transpose, minimum
 import UnicodePlots: lineplot, lineplot!
@@ -37,7 +36,14 @@ export
         EmpiricalRiskRegressor,
     RiskFunctional,
 
+    AbstractOptimizer,
     AbstractSolver,
+
+    MinimizableFunctor,
+        DifferentiableFunctor,
+            TwiceDifferentiableFunctor,
+
+    optimize,
 
     value,
     value!,
@@ -49,10 +55,13 @@ export
     deriv!,
     grad,
     grad!,
+    hess!,
     addgrad!,
     deriv2,
     value_deriv,
+    value_deriv!,
     value_grad,
+    value_grad!,
 
     value_fun,
     deriv_fun,
@@ -90,7 +99,6 @@ export
     EncodedRegressionModel
 
 include("common.jl")
-include("abstract_solver.jl")
 include("abstract_cost.jl")
 include("abstract_penalty.jl")
 include("classencoding.jl")
@@ -101,5 +109,7 @@ include("risk/prediction.jl")
 include("risk/empiricalrisk.jl")
 include("risk/riskfunc.jl")
 include("risk/riskmodel.jl")
+include("optim/minimizeable.jl")
+include("optim/optimize.jl")
 
 end # module
