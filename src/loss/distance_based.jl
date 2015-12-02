@@ -12,14 +12,14 @@ function deriv{P,T<:Number}(l::LPDistLoss{P}, r::T)
     if r == 0
         zero(r)
     else
-        P * r * abs(r)^(P-2)
+        P * r * abs(r)^(P-convert(typeof(P), 2))
     end
 end
 function deriv2{P,T<:Number}(l::LPDistLoss{P}, r::T)
     if r == 0
         zero(r)
     else
-        (P^2-P) * abs(r)^P / r^2
+        (abs2(P)-P) * abs(r)^P / abs2(r)
     end
 end
 value_deriv{P}(l::LPDistLoss{P}, r::Number) = (value(l,r), deriv(l,r))
@@ -57,9 +57,9 @@ typealias L2DistLoss LPDistLoss{2}
 
 sumvalue(l::L2DistLoss, r::AbstractArray) = sumabs2(yt)
 value(l::L2DistLoss, r::Number) = abs2(r)
-deriv(l::L2DistLoss, r::Number) = 2r
-deriv2{T<:Number}(l::L2DistLoss, r::T) = 2*one(T)
-value_deriv(l::L2DistLoss, r::Number) = (abs2(r), 2r)
+deriv{T<:Number}(l::L2DistLoss, r::T) = T(2) * r
+deriv2{T<:Number}(l::L2DistLoss, r::T) = T(2)
+value_deriv{T<:Number}(l::L2DistLoss, r::T) = (abs2(r), T(2) * r)
 
 isdifferentiable(::L2DistLoss) = true
 isdifferentiable(::L2DistLoss, at) = true
@@ -111,13 +111,13 @@ end
 value{T<:Number}(l::L2EpsilonInsLoss, r::T) = abs2(max(zero(T), abs(r) - l.eps))
 function deriv{T<:Number}(l::L2EpsilonInsLoss, r::T)
     absr = abs(r)
-    absr <= l.eps ? zero(T) : 2*sign(r)*(absr - l.eps)
+    absr <= l.eps ? zero(T) : T(2)*sign(r)*(absr - l.eps)
 end
-deriv2{T<:Number}(l::L2EpsilonInsLoss, r::T) = abs(r) <= l.eps ? zero(T) : 2*one(T)
+deriv2{T<:Number}(l::L2EpsilonInsLoss, r::T) = abs(r) <= l.eps ? zero(T) : T(2)
 function value_deriv{T<:Number}(l::L2EpsilonInsLoss, r::T)
     absr = abs(r)
     diff = absr - l.eps
-    absr <= l.eps ? (zero(T), zero(T)) : (abs2(diff), 2*sign(r)*diff)
+    absr <= l.eps ? (zero(T), zero(T)) : (abs2(diff), T(2)*sign(r)*diff)
 end
 
 issymmetric(::L2EpsilonInsLoss) = true
@@ -134,19 +134,22 @@ immutable LogitDistLoss <: DistanceBasedLoss end
 
 function value(l::LogitDistLoss, r::Number)
     er = exp(r)
-    -log(4 * er / abs2(1 + er))
+    T = typeof(er)
+    -log(T(4) * er / abs2(one(T) + er))
 end
-function deriv(l::LogitDistLoss, r::Number)
-    tanh(r / 2)
+function deriv{T<:Number}(l::LogitDistLoss, r::T)
+    tanh(r / T(2))
 end
 function deriv2(l::LogitDistLoss, r::Number)
     er = exp(r)
-    2*er / abs2(1 + er)
+    T = typeof(er)
+    T(2)*er / abs2(one(T) + er)
 end
 function value_deriv(l::LogitDistLoss, r::Number)
     er = exp(r)
-    er1 = 1 + er
-    -log(4 * er / abs2(er1)), (er - 1) / (er1)
+    T = typeof(er)
+    er1 = one(T) + er
+    -log(T(4) * er / abs2(er1)), (er - one(T)) / (er1)
 end
 
 issymmetric(::LogitDistLoss) = true

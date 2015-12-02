@@ -58,10 +58,10 @@ isclipable(::L1HingeLoss) = true
 
 immutable L2HingeLoss <: MarginBasedLoss end
 
-value{T<:Number}(l::L2HingeLoss, yt::T) = yt >= 1 ? zero(T) : abs2(1 - yt)
-deriv{T<:Number}(l::L2HingeLoss, yt::T) = yt >= 1 ? zero(T) : 2(yt - one(T))
-deriv2{T<:Number}(l::L2HingeLoss, yt::T) = yt >= 1 ? zero(T) : convert(T, 2)
-value_deriv{T<:Number}(l::L2HingeLoss, yt::T) = yt >= 1 ? (zero(T), zero(T)) : (abs2(1 - yt), 2(yt - one(T)))
+value{T<:Number}(l::L2HingeLoss, yt::T) = yt >= 1 ? zero(T) : abs2(one(T) - yt)
+deriv{T<:Number}(l::L2HingeLoss, yt::T) = yt >= 1 ? zero(T) : T(2) * (yt - one(T))
+deriv2{T<:Number}(l::L2HingeLoss, yt::T) = yt >= 1 ? zero(T) : T(2)
+value_deriv{T<:Number}(l::L2HingeLoss, yt::T) = yt >= 1 ? (zero(T), zero(T)) : (abs2(one(T) - yt), T(2) * (yt - one(T)))
 
 isdifferentiable(::L2HingeLoss) = true
 isdifferentiable(::L2HingeLoss, at) = true
@@ -85,7 +85,7 @@ immutable SmoothedL1HingeLoss <: MarginBasedLoss
 end
 
 function value{T<:Number}(l::SmoothedL1HingeLoss, yt::T)
-    yt >= 1 - l.gamma ? 0.5 / l.gamma * abs2(max(zero(T), 1 - yt)) : one(T) - l.gamma / 2 - yt
+    yt >= 1 - l.gamma ? 0.5 / l.gamma * abs2(max(zero(T), one(T) - yt)) : one(T) - l.gamma / 2 - yt
 end
 function deriv{T<:Number}(l::SmoothedL1HingeLoss, yt::T)
     if yt >= 1 - l.gamma
@@ -114,17 +114,17 @@ isclipable(::SmoothedL1HingeLoss) = true
 immutable ModifiedHuberLoss <: MarginBasedLoss end
 
 function value{T<:Number}(l::ModifiedHuberLoss, yt::T)
-    yt >= -1 ? abs2(max(zero(T), 1 - yt)) : -4 * yt
+    yt >= -1 ? abs2(max(zero(T), one(yt) - yt)) : -T(4) * yt
 end
 function deriv{T<:Number}(l::ModifiedHuberLoss, yt::T)
     if yt >= -1
-        yt > 1 ? zero(T) : 2*yt - 2
+        yt > 1 ? zero(T) : T(2)*yt - T(2)
     else
-        -4*one(T)
+        -T(4)
     end
 end
 function deriv2{T<:Number}(l::ModifiedHuberLoss, yt::T)
-    yt < -1 || yt > 1 ? zero(T) : 2*one(T)
+    yt < -1 || yt > 1 ? zero(T) : T(2)
 end
 value_deriv(l::ModifiedHuberLoss, yt::Number) = (value(l, yt), deriv(l, yt))
 

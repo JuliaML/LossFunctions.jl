@@ -1,9 +1,20 @@
-function test_type(l::SupervisedLoss)
+function test_value_typestable(l::SupervisedLoss)
     msg2("$(l): ")
-    for y in (-1, 1, -1.5, 1.5, Float32(-.5), Float32(.5))
-        for t in (-.5, .5, -2, 2, Float32(-1), Float32(1))
+    for y in (-1, 1, Int32(-1), Int32(1), -1.5, 1.5, Float32(-.5), Float32(.5))
+        for t in (-2, 2, Int32(-1), Int32(1), -.5, .5, Float32(-1), Float32(1))
             val = value(l, y, t)
-            @test (typeof(val) <: promote_type(typeof(y), typeof(t))) || (typeof(val) <: Float64)
+            @test typeof(val) <: promote_type(typeof(y), typeof(t))
+        end
+    end
+    println("ok")
+end
+
+function test_value_floatforcing(l::SupervisedLoss)
+    msg2("$(l): ")
+    for y in (-1, 1, Int32(-1), Int32(1), -1.5, 1.5, Float32(-.5), Float32(.5))
+        for t in (-2, 2, Int32(-1), Int32(1), -.5, .5, Float32(-1), Float32(1))
+            val = value(l, y, t)
+            @test (typeof(val) <: Float64) || (typeof(val) <: Float32)
         end
     end
     println("ok")
@@ -132,6 +143,21 @@ end
 
 # ==========================================================================
 
+msg("Test typestable supervised loss for type stability")
+
+for loss in [L1HingeLoss(), L2HingeLoss(), ModifiedHuberLoss(), PerceptronLoss(),
+             ZeroOneLoss(), LPDistLoss(1), LPDistLoss(2), LPDistLoss(3)]
+    test_value_typestable(loss)
+end
+
+for loss in [LogitMarginLoss(), SmoothedL1HingeLoss(0.5),
+             SmoothedL1HingeLoss(1), L1EpsilonInsLoss(0.5), L1EpsilonInsLoss(1),
+             LogitDistLoss(), L2EpsilonInsLoss(0.5), L2EpsilonInsLoss(1)]
+    test_value_floatforcing(loss)
+end
+
+# ==========================================================================
+
 msg("Test margin-based loss against reference function")
 
 _hingeloss(y, t) = max(0, 1 - y.*t)
@@ -246,17 +272,4 @@ msg("Test second derivatives of distance-based losses")
 
 for loss in distance_losses
     test_deriv2(loss, -30:0.5:30)
-end
-
-
-# ==========================================================================
-
-msg("Test supervised loss for type stability")
-
-for loss in margin_losses
-    test_type(loss)
-end
-
-for loss in distance_losses
-    test_type(loss)
 end
