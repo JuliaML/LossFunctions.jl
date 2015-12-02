@@ -29,8 +29,8 @@ typealias EmpiricalRiskRegressor{TPred<:Predictor, TLoss<:DistanceBasedLoss, TPe
         risk::EmpiricalRisk{TPred, TLoss, TPen},
         X::AbstractArray,
         w::AbstractArray,
-        y::AbstractArray,
-        ŷ::AbstractMatrix = value(risk.predictor, X, w))
+        y,
+        ŷ = value(risk.predictor, X, w))
     meanvalue(risk.loss, y, ŷ)
 end
 
@@ -39,7 +39,7 @@ end
         risk::EmpiricalRisk{TPred, TLoss, TPen},
         X::AbstractArray,
         w::AbstractArray,
-        y::AbstractArray)
+        y)
     value!(buffer, risk.predictor, X, w)
     meanvalue(risk.loss, y, buffer)
 end
@@ -52,8 +52,8 @@ end
         risk::EmpiricalRisk{TPred, TLoss, TPen},
         X::AbstractArray,
         w::AbstractArray,
-        y::AbstractArray,
-        ŷ::AbstractMatrix = value(risk.predictor, X, w))
+        y,
+        ŷ = value(risk.predictor, X, w))
     res = meanvalue(risk.loss, y, ŷ)
     res += value(risk.penalty, w, size(X, 1))
     res
@@ -64,7 +64,7 @@ end
         risk::EmpiricalRisk{TPred, TLoss, TPen},
         X::AbstractArray,
         w::AbstractArray,
-        y::AbstractArray)
+        y)
     value!(buffer, risk.predictor, X, w)
     res = meanvalue(risk.loss, y, buffer)
     res += value(risk.penalty, w, size(X, 1))
@@ -75,8 +75,8 @@ end
         risk::EmpiricalRisk{TPred, TLoss, TPen},
         X::AbstractArray,
         w::AbstractArray,
-        y::AbstractArray,
-        ŷ::AbstractArray = value(risk.predictor, X, w))
+        y,
+        ŷ = value(risk.predictor, X, w))
     dloss = deriv(risk.loss, y, ŷ)
     dpred = grad(risk.predictor, X, w)
     buffer = A_mul_Bt(dpred, dloss)
@@ -89,8 +89,8 @@ end
         risk::EmpiricalRisk{TPred, TLoss, TPen},
         X::AbstractArray,
         w::AbstractArray,
-        y::AbstractArray,
-        ŷ::AbstractArray = value(risk.predictor, X, w))
+        y,
+        ŷ = value(risk.predictor, X, w))
     dloss = deriv(risk.loss, y, ŷ)
     dpred = grad(risk.predictor, X, w)
     A_mul_Bt!(buffer, dpred, dloss)
@@ -106,8 +106,8 @@ end
         risk::EmpiricalRisk{LinearPredictor{INTERCEPT}, TLoss, TPen},
         X::AbstractArray,
         w::AbstractVector,
-        y::AbstractArray,
-        ŷ::AbstractArray = value(risk.predictor, X, w))
+        y,
+        ŷ = value(risk.predictor, X, w))
     buffer = zeros(length(w), 1)
     grad!(buffer, risk, X, w, y, ŷ)
 end
@@ -117,8 +117,8 @@ end
         risk::EmpiricalRisk{LinearPredictor{INTERCEPT}, TLoss, TPen},
         X::AbstractArray,
         w::AbstractArray,
-        y::AbstractArray,
-        ŷ::AbstractArray = value(risk.predictor, X, w))
+        y,
+        ŷ = value(risk.predictor, X, w))
     n = size(X, 2)
     k = size(X, 1)
     @_dimcheck length(y) == length(ŷ) == n && length(buffer) == length(w)
