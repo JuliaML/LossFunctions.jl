@@ -1,3 +1,13 @@
+function test_type(l::SupervisedLoss)
+    msg2("$(l): ")
+    for y in (-1, 1, -1.5, 1.5, Float32(-.5), Float32(.5))
+        for t in (-.5, .5, -2, 2, Float32(-1), Float32(1))
+            val = value(l, y, t)
+            @test (typeof(val) <: promote_type(typeof(y), typeof(t))) || (typeof(val) <: Float64)
+        end
+    end
+    println("ok")
+end
 
 function test_value(l::SupervisedLoss, f::Function, y_vec, t_vec)
     msg2("$(l): ")
@@ -236,4 +246,17 @@ msg("Test second derivatives of distance-based losses")
 
 for loss in distance_losses
     test_deriv2(loss, -30:0.5:30)
+end
+
+
+# ==========================================================================
+
+msg("Test supervised loss for type stability")
+
+for loss in margin_losses
+    test_type(loss)
+end
+
+for loss in distance_losses
+    test_type(loss)
 end

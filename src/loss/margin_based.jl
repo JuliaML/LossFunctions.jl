@@ -21,9 +21,9 @@ isclipable(::PerceptronLoss) = true
 immutable LogitMarginLoss <: MarginBasedLoss end
 
 value(l::LogitMarginLoss, yt::Number) = log1p(exp(-yt))
-deriv(l::LogitMarginLoss, yt::Number) = -1 / (1 + exp(yt))
-deriv2(l::LogitMarginLoss, yt::Number) = (eᵗ = exp(yt); eᵗ / abs2(1 + eᵗ))
-value_deriv(l::LogitMarginLoss, yt::Number) = (eᵗ = exp(-yt); (log1p(eᵗ), -eᵗ / (1 + eᵗ)))
+deriv(l::LogitMarginLoss, yt::Number) = -one(yt) / (one(yt) + exp(yt))
+deriv2(l::LogitMarginLoss, yt::Number) = (eᵗ = exp(yt); eᵗ / abs2(one(eᵗ) + eᵗ))
+value_deriv(l::LogitMarginLoss, yt::Number) = (eᵗ = exp(-yt); (log1p(eᵗ), -eᵗ / (one(eᵗ) + eᵗ)))
 
 isunivfishercons(::LogitMarginLoss) = true
 isdifferentiable(::LogitMarginLoss) = true
@@ -40,10 +40,10 @@ isclipable(::LogitMarginLoss) = false
 immutable L1HingeLoss <: MarginBasedLoss end
 typealias HingeLoss L1HingeLoss
 
-value{T<:Number}(l::L1HingeLoss, yt::T) = max(zero(T), 1 - yt)
+value{T<:Number}(l::L1HingeLoss, yt::T) = max(zero(T), one(T) - yt)
 deriv{T<:Number}(l::L1HingeLoss, yt::T) = yt >= 1 ? zero(T) : -one(T)
 deriv2{T<:Number}(l::L1HingeLoss, yt::T) = zero(T)
-value_deriv{T<:Number}(l::L1HingeLoss, yt::T) = yt >= 1 ? (zero(T), zero(T)) : (1 - yt, -one(T))
+value_deriv{T<:Number}(l::L1HingeLoss, yt::T) = yt >= 1 ? (zero(T), zero(T)) : (one(T) - yt, -one(T))
 
 isdifferentiable(::L1HingeLoss) = false
 isdifferentiable(::L1HingeLoss, at) = at != 1
