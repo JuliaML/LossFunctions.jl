@@ -150,6 +150,8 @@ for loss in [L1HingeLoss(), L2HingeLoss(), ModifiedHuberLoss(), PerceptronLoss()
     test_value_typestable(loss)
 end
 
+msg("Test float-forcing supervised loss for type stability")
+
 for loss in [LogitMarginLoss(), SmoothedL1HingeLoss(0.5),
              SmoothedL1HingeLoss(1), L1EpsilonInsLoss(0.5), L1EpsilonInsLoss(1),
              LogitDistLoss(), L2EpsilonInsLoss(0.5), L2EpsilonInsLoss(1)]
