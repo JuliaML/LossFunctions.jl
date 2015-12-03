@@ -31,6 +31,7 @@ istwicedifferentiable{P}(::LPDistLoss{P}) = P > 1
 istwicedifferentiable{P}(::LPDistLoss{P}, at) = P > 1 || at != 0
 islipschitzcont{P}(::LPDistLoss{P}) = P == 1
 isconvex{P}(::LPDistLoss{P}) = P >= 1
+isstronglyconvex{P}(::LPDistLoss{P}) = P > 1
 
 # ==========================================================================
 # L(y, t) = |y - t|
@@ -49,6 +50,7 @@ istwicedifferentiable(::L1DistLoss) = true
 istwicedifferentiable(::L1DistLoss, at) = true
 islipschitzcont(::L1DistLoss) = true
 isconvex(::L1DistLoss) = true
+isstronglyconvex(::L1DistLoss) = false
 
 # ==========================================================================
 # L(y, t) = (y - t)^2
@@ -67,6 +69,7 @@ istwicedifferentiable(::L2DistLoss) = true
 istwicedifferentiable(::L2DistLoss, at) = true
 islipschitzcont(::L2DistLoss) = false
 isconvex(::L2DistLoss) = true
+isstronglyconvex(::L2DistLoss) = true
 
 # ==========================================================================
 # L(y, t) = max(0, |y - t| - ɛ)
@@ -95,6 +98,7 @@ isdifferentiable(l::L1EpsilonInsLoss, at) = abs(at) != l.eps
 istwicedifferentiable(::L1EpsilonInsLoss) = true
 istwicedifferentiable(l::L1EpsilonInsLoss, at) = abs(at) != l.eps
 isconvex(::L1EpsilonInsLoss) = true
+isstronglyconvex(::L1EpsilonInsLoss) = false
 
 # ==========================================================================
 # L(y, t) = max(0, |y - t| - ɛ)^2
@@ -126,6 +130,7 @@ isdifferentiable(::L2EpsilonInsLoss, at) = true
 istwicedifferentiable(::L2EpsilonInsLoss) = false
 istwicedifferentiable(l::L2EpsilonInsLoss, at) = abs(at) != l.eps
 isconvex(::L2EpsilonInsLoss) = true
+isstronglyconvex(::L2EpsilonInsLoss) = true
 
 # ==========================================================================
 # L(y, t) = -ln(4 * exp(y - t) / (1 + exp(y - t))²)
@@ -158,3 +163,4 @@ isdifferentiable(::LogitDistLoss, at) = true
 istwicedifferentiable(::LogitDistLoss) = true
 istwicedifferentiable(::LogitDistLoss, at) = true
 isconvex(::LogitDistLoss) = true
+isstronglyconvex(::LogitDistLoss) = true

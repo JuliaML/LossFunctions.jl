@@ -29,6 +29,7 @@ istwicedifferentiable(::Cost) = false
 isdifferentiable(c::Cost, at) = isdifferentiable(c)
 istwicedifferentiable(c::Cost, at) = istwicedifferentiable(c)
 isconvex(::Cost) = false
+isstronglyconvex(::Cost) = false
 
 # ==========================================================================
 

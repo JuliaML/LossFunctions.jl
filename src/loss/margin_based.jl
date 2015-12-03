@@ -13,6 +13,7 @@ isdifferentiable(::PerceptronLoss, at) = at != 0
 istwicedifferentiable(::PerceptronLoss) = false
 istwicedifferentiable(::PerceptronLoss, at) = at != 0
 isconvex(::PerceptronLoss) = true
+isstronglyconvex(::PerceptronLoss) = false
 isclipable(::PerceptronLoss) = true
 
 # ==========================================================================
@@ -32,6 +33,7 @@ istwicedifferentiable(::LogitMarginLoss) = true
 istwicedifferentiable(::LogitMarginLoss, at) = true
 islipschitzcont(::LogitMarginLoss) = true
 isconvex(::LogitMarginLoss) = true
+isstronglyconvex(::LogitMarginLoss) = true
 isclipable(::LogitMarginLoss) = false
 
 # ==========================================================================
@@ -51,6 +53,7 @@ istwicedifferentiable(::L1HingeLoss) = false
 istwicedifferentiable(::L1HingeLoss, at) = at != 1
 islipschitzcont(::L1HingeLoss) = true
 isconvex(::L1HingeLoss) = true
+isstronglyconvex(::L1HingeLoss) = false
 isclipable(::L1HingeLoss) = true
 
 # ==========================================================================
@@ -69,6 +72,7 @@ istwicedifferentiable(::L2HingeLoss) = false
 istwicedifferentiable(::L2HingeLoss, at) = at != 1
 islocallylipschitzcont(::L2HingeLoss) = true
 isconvex(::L2HingeLoss) = true
+isstronglyconvex(::L2HingeLoss) = true
 isclipable(::L2HingeLoss) = true
 
 # ==========================================================================
@@ -105,6 +109,7 @@ istwicedifferentiable(::SmoothedL1HingeLoss) = false
 istwicedifferentiable(l::SmoothedL1HingeLoss, at) = at != 1 && at != 1 - l.gamma
 islocallylipschitzcont(::SmoothedL1HingeLoss) = true
 isconvex(::SmoothedL1HingeLoss) = true
+isstronglyconvex(::SmoothedL1HingeLoss) = false
 isclipable(::SmoothedL1HingeLoss) = true
 
 # ==========================================================================
@@ -134,4 +139,5 @@ istwicedifferentiable(::ModifiedHuberLoss) = false
 istwicedifferentiable(l::ModifiedHuberLoss, at) = at != 1 && at != -1
 islocallylipschitzcont(::ModifiedHuberLoss) = true
 isconvex(::ModifiedHuberLoss) = true
+isstronglyconvex(::ModifiedHuberLoss) = false
 isclipable(::ModifiedHuberLoss) = true

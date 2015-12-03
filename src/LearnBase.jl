@@ -74,6 +74,7 @@ export
     isdifferentiable,
     istwicedifferentiable,
     isconvex,
+    isstronglyconvex,
     isnemitski,
     isunivfishercons,
     isfishercons,

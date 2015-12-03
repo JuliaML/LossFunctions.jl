@@ -6,7 +6,7 @@ import ..LearnBase: value, value!, deriv, deriv!, deriv2, value_deriv, grad, gra
                     sumvalue, sumderiv, meanvalue, meanderiv,
                     value_fun, deriv_fun, deriv2_fun, value_deriv_fun
 import ..LearnBase: isminimizable, isdifferentiable, istwicedifferentiable,
-                    isconvex, isnemitski, islipschitzcont, islocallylipschitzcont,
+                    isconvex, isstronglyconvex, isnemitski, islipschitzcont, islocallylipschitzcont,
                     isclipable, ismarginbased, isclasscalibrated, isdistancebased,
                     issymmetric, isfishercons, isunivfishercons
 import ..LearnBase: Cost, Loss, SupervisedLoss, UnsupervisedLoss,
