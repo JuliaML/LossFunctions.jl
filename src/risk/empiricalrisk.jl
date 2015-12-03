@@ -1,7 +1,7 @@
 using LearnBase.LossFunctions
 using LearnBase.Penalties
 
-immutable EmpiricalRisk{TPred<:Predictor, TLoss<:Loss, TPen<:Penalty}
+immutable EmpiricalRisk{TPred<:Predictor, TLoss<:Loss, TPen<:Penalty, PENALIZEBIAS}
     predictor::TPred
     loss::TLoss
     penalty::TPen
@@ -10,8 +10,9 @@ end
 function EmpiricalRisk{TPred<:Predictor, TLoss<:Loss, TPen<:Penalty}(
         predictor::TPred = LinearPredictor(0),
         loss::TLoss = L2DistLoss(),
-        penalty::TPen = NoPenalty())
-    EmpiricalRisk{TPred, TLoss, TPen}(predictor, loss, penalty)
+        penalty::TPen = NoPenalty(),
+        penalize_bias::Bool = false)
+    EmpiricalRisk{TPred, TLoss, TPen, penalize_bias}(predictor, loss, penalty)
 end
 
 intercept(risk::EmpiricalRisk) = intercept(risk.predictor)
@@ -48,31 +49,39 @@ end
 # * generic predictor
 # * generic penalty
 
-@inline function value{TPred<:Predictor, TLoss<:Loss, TPen<:Penalty}(
-        risk::EmpiricalRisk{TPred, TLoss, TPen},
+@inline function value{TPred<:Predictor, TLoss<:Loss, TPen<:Penalty, PENALIZEBIAS}(
+        risk::EmpiricalRisk{TPred, TLoss, TPen, PENALIZEBIAS},
         X::AbstractArray,
         w::AbstractArray,
         y,
         ŷ = value(risk.predictor, X, w))
     res = meanvalue(risk.loss, y, ŷ)
-    res += value(risk.penalty, w, size(X, 1))
+    if PENALIZEBIAS
+        res += value(risk.penalty, w)
+    else
+        res += value(risk.penalty, w, size(X, 1))
+    end
     res
 end
 
-@inline function value!{TPred<:Predictor, TLoss<:Loss, TPen<:Penalty}(
+@inline function value!{TPred<:Predictor, TLoss<:Loss, TPen<:Penalty, PENALIZEBIAS}(
         buffer::AbstractMatrix,
-        risk::EmpiricalRisk{TPred, TLoss, TPen},
+        risk::EmpiricalRisk{TPred, TLoss, TPen, PENALIZEBIAS},
         X::AbstractArray,
         w::AbstractArray,
         y)
     value!(buffer, risk.predictor, X, w)
     res = meanvalue(risk.loss, y, buffer)
-    res += value(risk.penalty, w, size(X, 1))
+    if PENALIZEBIAS
+        res += value(risk.penalty, w)
+    else
+        res += value(risk.penalty, w, size(X, 1))
+    end
     res
 end
 
-@inline function grad{TPred<:Predictor, TLoss<:Loss, TPen<:Penalty}(
-        risk::EmpiricalRisk{TPred, TLoss, TPen},
+@inline function grad{TPred<:Predictor, TLoss<:Loss, TPen<:Penalty, PENALIZEBIAS}(
+        risk::EmpiricalRisk{TPred, TLoss, TPen, PENALIZEBIAS},
         X::AbstractArray,
         w::AbstractArray,
         y,
@@ -81,12 +90,16 @@ end
     dpred = grad(risk.predictor, X, w)
     buffer = A_mul_Bt(dpred, dloss)
     broadcast!(*, buffer, buffer, 1/length(y))
-    addgrad!(buffer, risk.penalty, w, size(X, 1))
+    if PENALIZEBIAS
+        addgrad!(buffer, risk.penalty, w)
+    else
+        addgrad!(buffer, risk.penalty, w, size(X, 1))
+    end
 end
 
-@inline function grad!{TPred<:Predictor, TLoss<:Loss, TPen<:Penalty}(
+@inline function grad!{TPred<:Predictor, TLoss<:Loss, TPen<:Penalty, PENALIZEBIAS}(
         buffer::AbstractMatrix,
-        risk::EmpiricalRisk{TPred, TLoss, TPen},
+        risk::EmpiricalRisk{TPred, TLoss, TPen, PENALIZEBIAS},
         X::AbstractArray,
         w::AbstractArray,
         y,
@@ -95,7 +108,11 @@ end
     dpred = grad(risk.predictor, X, w)
     A_mul_Bt!(buffer, dpred, dloss)
     broadcast!(*, buffer, buffer, 1/length(y))
-    addgrad!(buffer, risk.penalty, w, size(X, 1))
+    if PENALIZEBIAS
+        addgrad!(buffer, risk.penalty, w)
+    else
+        addgrad!(buffer, risk.penalty, w, size(X, 1))
+    end
 end
 
 # ==========================================================================
@@ -112,9 +129,9 @@ end
     grad!(buffer, risk, X, w, y, ŷ)
 end
 
-@inline function grad!{T, INTERCEPT, TLoss<:Loss, TPen<:Penalty}(
+@inline function grad!{T, INTERCEPT, TLoss<:Loss, TPen<:Penalty, PENALIZEBIAS}(
         buffer::AbstractMatrix{T},
-        risk::EmpiricalRisk{LinearPredictor{INTERCEPT}, TLoss, TPen},
+        risk::EmpiricalRisk{LinearPredictor{INTERCEPT}, TLoss, TPen, PENALIZEBIAS},
         X::AbstractArray,
         w::AbstractArray,
         y,
@@ -126,7 +143,7 @@ end
     fill!(buffer, zero(T))
     @inbounds for i = 1:n
         dloss = deriv(risk.loss, y[i], ŷ[i])
-        for j = 1:k
+        @simd for j = 1:k
             tmp = dloss
             tmp *= X[j, i]
             tmp /= n
@@ -139,5 +156,9 @@ end
             buffer[k+1] += tmp
         end
     end
-    addgrad!(buffer, risk.penalty, w, k)
+    if PENALIZEBIAS
+        addgrad!(buffer, risk.penalty, w)
+    else
+        addgrad!(buffer, risk.penalty, w, k)
+    end
 end

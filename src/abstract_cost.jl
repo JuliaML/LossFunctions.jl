@@ -71,7 +71,7 @@ end
 @inline function value!(buffer::AbstractVector, l::SupervisedLoss, y::AbstractVector, t::AbstractVector)
     n = length(t)
     @_dimcheck length(y) == n && size(buffer) == size(t)
-    for i = 1:n
+    @simd for i = 1:n
         @inbounds buffer[i] = value(l, y[i], t[i])
     end
     buffer
@@ -80,7 +80,7 @@ end
 @inline function deriv!(buffer::AbstractVector, l::SupervisedLoss, y::AbstractVector, t::AbstractVector)
     n = length(t)
     @_dimcheck length(y) == n && size(buffer) == size(t)
-    for i = 1:n
+    @simd for i = 1:n
         @inbounds buffer[i] = deriv(l, y[i], t[i])
     end
     buffer
@@ -92,8 +92,10 @@ end
     n = size(t, 2)
     k = size(t, 1)
     @_dimcheck length(y) == n && size(buffer) == (k, n)
-    for i = 1:n, j = 1:k
-        @inbounds buffer[j, i] = value(l, y[i], t[j, i])
+    for i = 1:n
+        @simd for j = 1:k
+            @inbounds buffer[j, i] = value(l, y[i], t[j, i])
+        end
     end
     buffer
 end
@@ -102,8 +104,10 @@ end
     n = size(t, 2)
     k = size(t, 1)
     @_dimcheck length(y) == n && size(buffer) == (k, n)
-    for i = 1:n, j = 1:k
-        @inbounds buffer[j, i] = deriv(l, y[i], t[j, i])
+    for i = 1:n
+        @simd for j = 1:k
+            @inbounds buffer[j, i] = deriv(l, y[i], t[j, i])
+        end
     end
     buffer
 end
@@ -114,8 +118,10 @@ end
     n = size(t, 2)
     k = size(t, 1)
     @_dimcheck size(y) == size(t) && size(buffer) == (k, n)
-    for i = 1:n, j = 1:k
-        @inbounds buffer[j, i] = value(l, y[j, i], t[j, i])
+    for i = 1:n
+        @simd for j = 1:k
+            @inbounds buffer[j, i] = value(l, y[j, i], t[j, i])
+        end
     end
     buffer
 end
@@ -124,8 +130,10 @@ end
     n = size(t, 2)
     k = size(t, 1)
     @_dimcheck size(y) == size(t) && size(buffer) == (k, n)
-    for i = 1:n, j = 1:k
-        @inbounds buffer[j, i] = deriv(l, y[j, i], t[j, i])
+    for i = 1:n
+        @simd for j = 1:k
+            @inbounds buffer[j, i] = deriv(l, y[j, i], t[j, i])
+        end
     end
     buffer
 end
@@ -136,7 +144,7 @@ end
     n = length(t)
     @_dimcheck length(y) == n
     val = zero(T)
-    for i = 1:n
+    @simd for i = 1:n
         @inbounds val += value(l, y[i], t[i])
     end
     val
@@ -146,7 +154,7 @@ end
     n = length(t)
     @_dimcheck length(y) == n
     val = zero(T)
-    for i = 1:n
+    @simd for i = 1:n
         @inbounds val += deriv(l, y[i], t[i])
     end
     val
@@ -159,7 +167,7 @@ end
     @_dimcheck length(y) == n
     val = zero(T)
     tmp = zero(T)
-    for i = 1:n
+    @simd for i = 1:n
         @inbounds tmp = value(l, y[i], t[i])::T
         tmp /= n
         val += tmp
@@ -172,7 +180,7 @@ end
     @_dimcheck length(y) == n
     val = zero(T)
     tmp = zero(T)
-    for i = 1:n
+    @simd for i = 1:n
         @inbounds tmp = deriv(l, y[i], t[i])::T
         tmp /= n
         val += tmp

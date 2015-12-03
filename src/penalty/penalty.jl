@@ -31,7 +31,7 @@ function value{T}(p::L1Penalty, w::AbstractArray{T}, len::Int=length(w))
         p.λ * sumabs(w)
     else
         val = zero(T)
-        for i = 1:len
+        @simd for i = 1:len
             @inbounds val += abs(w[i])
         end
         val *= p.λ
@@ -60,7 +60,7 @@ Base.show(io::IO, p::L2Penalty) = print(io, "L2Penalty(λ = $(p.λ))")
         p.λ/2 * sumabs2(w)
     else
         val = zero(T)
-        for i = 1:len
+        @simd for i = 1:len
             @inbounds val += abs2(w[i])
         end
         val *= p.λ

@@ -76,7 +76,7 @@ end
     k = length(w)-1
     @_dimcheck length(x) == k
     buffer = Array(T, length(w))
-    for i = 1:k
+    @simd for i = 1:k
         @inbounds buffer[i] = x[i]
     end
     buffer[end] = h.bias
@@ -108,7 +108,7 @@ end
     @_dimcheck size(buffer) == (k1, n)
     bias = convert(T, h.bias)
     @inbounds for i = 1:n
-        for j = 1:k
+        @simd for j = 1:k
             buffer[j, i] = X[j, i]
         end
         buffer[k1, i] = bias
