@@ -80,6 +80,7 @@ export
     isfishercons,
     islipschitzcont,
     islocallylipschitzcont,
+    islipschitzcont_deriv,
     isclipable,
     ismarginbased,
     isclasscalibrated,

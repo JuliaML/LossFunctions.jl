@@ -8,7 +8,7 @@ import ..LearnBase: value, value!, deriv, deriv!, deriv2, value_deriv, grad, gra
 import ..LearnBase: isminimizable, isdifferentiable, istwicedifferentiable,
                     isconvex, isstronglyconvex, isnemitski, islipschitzcont, islocallylipschitzcont,
                     isclipable, ismarginbased, isclasscalibrated, isdistancebased,
-                    issymmetric, isfishercons, isunivfishercons
+                    islipschitzcont_deriv, issymmetric, isfishercons, isunivfishercons
 import ..LearnBase: Cost, Loss, SupervisedLoss, UnsupervisedLoss,
                     MarginBasedLoss, DistanceBasedLoss
 import ..LearnBase: @_dimcheck

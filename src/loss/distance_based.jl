@@ -30,6 +30,7 @@ isdifferentiable{P}(::LPDistLoss{P}, at) = P > 1 || at != 0
 istwicedifferentiable{P}(::LPDistLoss{P}) = P > 1
 istwicedifferentiable{P}(::LPDistLoss{P}, at) = P > 1 || at != 0
 islipschitzcont{P}(::LPDistLoss{P}) = P == 1
+islipschitzcont_deriv{P}(::LPDistLoss{P}) = 1 <= P <= 2
 isconvex{P}(::LPDistLoss{P}) = P >= 1
 isstronglyconvex{P}(::LPDistLoss{P}) = P > 1
 
@@ -49,6 +50,7 @@ isdifferentiable(::L1DistLoss, at) = at != 0
 istwicedifferentiable(::L1DistLoss) = true
 istwicedifferentiable(::L1DistLoss, at) = true
 islipschitzcont(::L1DistLoss) = true
+islipschitzcont_deriv(::L1DistLoss) = true
 isconvex(::L1DistLoss) = true
 isstronglyconvex(::L1DistLoss) = false
 
@@ -68,6 +70,7 @@ isdifferentiable(::L2DistLoss, at) = true
 istwicedifferentiable(::L2DistLoss) = true
 istwicedifferentiable(::L2DistLoss, at) = true
 islipschitzcont(::L2DistLoss) = false
+islipschitzcont_deriv(::L2DistLoss) = true
 isconvex(::L2DistLoss) = true
 isstronglyconvex(::L2DistLoss) = true
 
@@ -97,6 +100,8 @@ isdifferentiable(::L1EpsilonInsLoss) = false
 isdifferentiable(l::L1EpsilonInsLoss, at) = abs(at) != l.eps
 istwicedifferentiable(::L1EpsilonInsLoss) = true
 istwicedifferentiable(l::L1EpsilonInsLoss, at) = abs(at) != l.eps
+islipschitzcont(::L1EpsilonInsLoss) = true
+islipschitzcont_deriv(::L1EpsilonInsLoss) = true
 isconvex(::L1EpsilonInsLoss) = true
 isstronglyconvex(::L1EpsilonInsLoss) = false
 
@@ -129,6 +134,8 @@ isdifferentiable(::L2EpsilonInsLoss) = true
 isdifferentiable(::L2EpsilonInsLoss, at) = true
 istwicedifferentiable(::L2EpsilonInsLoss) = false
 istwicedifferentiable(l::L2EpsilonInsLoss, at) = abs(at) != l.eps
+islipschitzcont(::L2EpsilonInsLoss) = true
+islipschitzcont_deriv(::L2EpsilonInsLoss) = true
 isconvex(::L2EpsilonInsLoss) = true
 isstronglyconvex(::L2EpsilonInsLoss) = true
 
@@ -162,5 +169,7 @@ isdifferentiable(::LogitDistLoss) = true
 isdifferentiable(::LogitDistLoss, at) = true
 istwicedifferentiable(::LogitDistLoss) = true
 istwicedifferentiable(::LogitDistLoss, at) = true
+islipschitzcont(::LogitDistLoss) = true
+islipschitzcont_deriv(::LogitDistLoss) = true
 isconvex(::LogitDistLoss) = true
 isstronglyconvex(::LogitDistLoss) = true

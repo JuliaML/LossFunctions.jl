@@ -39,6 +39,7 @@ isnemitski(l::Loss) = islocallylipschitzcont(l)
 islipschitzcont(::Loss) = false
 islocallylipschitzcont(::Loss) = false
 isclipable(::Loss) = false
+islipschitzcont_deriv(::Loss) = false
 
 # ==========================================================================
 
