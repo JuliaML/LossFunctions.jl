@@ -67,9 +67,11 @@ end
 @inline function value{T}(h::LinearPredictor{true}, x::AbstractVector, w::AbstractVector{T})
     k = length(w)-1
     @_dimcheck length(x) == k
-    w⃗ = view(w, 1:k)
-    @inbounds b = h.bias * w[k+1]
-    dot(x, w⃗) + b
+    @inbounds res = h.bias * w[k+1]
+    @inbounds @simd for i = 1:k
+        res += x[i] * w[i]
+    end
+    res
 end
 
 @inline function grad{T}(h::LinearPredictor{true}, x::AbstractVector, w::AbstractVector{T})

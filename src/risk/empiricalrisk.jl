@@ -142,18 +142,12 @@ function grad!{T, INTERCEPT, TLoss<:Loss, TPen<:Penalty, PENALIZEBIAS}(
     @_dimcheck length(buffer) == (INTERCEPT ? k+1 : k)
     fill!(buffer, zero(T))
     @inbounds for i = 1:n
-        dloss = deriv(risk.loss, y[i], ŷ[i])
+        dloss = deriv(risk.loss, y[i], ŷ[i]) / n
         @simd for j = 1:k
-            tmp = dloss
-            tmp *= X[j, i]
-            tmp /= n
-            buffer[j] += tmp
+            buffer[j] += dloss * X[j, i]
         end
         if INTERCEPT
-            tmp = dloss
-            tmp *= risk.predictor.bias
-            tmp /= n
-            buffer[k+1] += tmp
+            buffer[k+1] += dloss * risk.predictor.bias
         end
     end
     if PENALIZEBIAS
