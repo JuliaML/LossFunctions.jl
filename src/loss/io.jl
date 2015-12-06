@@ -1,5 +1,7 @@
 
 print(io::IO, c::Cost, args...) = print(io, typeof(c).name.name, args...)
+print(io::IO, l::L1DistLoss, args...) = print(io, "L1DistLoss", args...)
+print(io::IO, l::L2DistLoss, args...) = print(io, "L2DistLoss", args...)
 print{P}(io::IO, l::LPDistLoss{P}, args...) = print(io, typeof(l).name.name, " with P = $(P)", args...)
 print(io::IO, l::L1EpsilonInsLoss, args...) = print(io, typeof(l).name.name, " with ɛ = $(l.eps)", args...)
 print(io::IO, l::L2EpsilonInsLoss, args...) = print(io, typeof(l).name.name, " with ɛ = $(l.eps)", args...)
