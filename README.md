@@ -1,5 +1,7 @@
 # LearnBase
 
+## WORK IN PROGRESS
+
 This package is an attempt to provide common interfaces and function definitions for Machine Learning packages in Julia
 
 [![Build Status](https://travis-ci.org/Evizero/LearnBase.jl.svg?branch=master)](https://travis-ci.org/Evizero/LearnBase.jl)
