@@ -1,4 +1,4 @@
-module ParamCosts
+module ParameterLosses
 
 import ..LearnBase: value, value!, deriv, deriv!, deriv2, value_deriv, grad, grad!,
                     value_fun, deriv_fun, deriv2_fun, value_deriv_fun,
@@ -6,45 +6,45 @@ import ..LearnBase: value, value!, deriv, deriv!, deriv2, value_deriv, grad, gra
 import ..LearnBase: isminimizable, isdifferentiable, istwicedifferentiable,
                     isconvex, islipschitzcont, islocallylipschitzcont,
                     isclipable, ismarginbased, issymmetric
-import ..LearnBase: ParamCost
+import ..LearnBase: ParameterLoss
 import ..LearnBase: @_dimcheck
 import Base: show, call, print, transpose
 
 export
 
-    NoParamCost,
-    L1ParamCost,
-    L2ParamCost
-    # ElasticNetParamCost,
-    # SCADParamCost,
+    NoParameterLoss,
+    L1ParameterLoss,
+    L2ParameterLoss
+    # ElasticNetParameterLoss,
+    # SCADParameterLoss,
 
 
 # ==========================================================================
 
 "No penalty on the coefficients"
-immutable NoParamCost <: ParamCost end
-Base.show(io::IO, p::NoParamCost) = print(io, "NoParamCost")
-@inline value{T<:Number}(p::NoParamCost, w::AbstractArray{T}, len::Int=0) = zero(T)
-@inline deriv{T<:Number}(p::NoParamCost, wⱼ::T) = zero(T)
+immutable NoParameterLoss <: ParameterLoss end
+Base.show(io::IO, p::NoParameterLoss) = print(io, "NoParameterLoss")
+@inline value{T<:Number}(p::NoParameterLoss, w::AbstractArray{T}, len::Int=0) = zero(T)
+@inline deriv{T<:Number}(p::NoParameterLoss, wⱼ::T) = zero(T)
 
-@inline function addgrad!{T<:Number}(buffer::AbstractArray{T}, p::NoParamCost, w::AbstractArray, len::Int=length(w))
+@inline function addgrad!{T<:Number}(buffer::AbstractArray{T}, p::NoParameterLoss, w::AbstractArray, len::Int=length(w))
     buffer
 end
 
 # ==========================================================================
 
 "An L1 (LASSO) penalty on the coefficients"
-immutable L1ParamCost <: ParamCost
+immutable L1ParameterLoss <: ParameterLoss
     λ::Float64
-    function L1ParamCost(λ::Real)
+    function L1ParameterLoss(λ::Real)
         λ >= 0 || error("λ must be positive")
         new(Float64(λ))
     end
 end
-isconvex(::L1ParamCost) = true
-isdifferentiable(p::L1ParamCost) = false
-Base.show(io::IO, p::L1ParamCost) = print(io, "L1ParamCost(λ = $(p.λ))")
-function value{T}(p::L1ParamCost, w::AbstractArray{T}, len::Int=length(w))
+isconvex(::L1ParameterLoss) = true
+isdifferentiable(p::L1ParameterLoss) = false
+Base.show(io::IO, p::L1ParameterLoss) = print(io, "L1ParameterLoss(λ = $(p.λ))")
+function value{T}(p::L1ParameterLoss, w::AbstractArray{T}, len::Int=length(w))
     len_w = length(w)
     @_dimcheck 0 < len <= len_w
     if len == len_w
@@ -58,22 +58,22 @@ function value{T}(p::L1ParamCost, w::AbstractArray{T}, len::Int=length(w))
         val
     end::Float64
 end
-@inline deriv(p::L1ParamCost, wⱼ::Number) = p.λ * sign(wⱼ)
+@inline deriv(p::L1ParameterLoss, wⱼ::Number) = p.λ * sign(wⱼ)
 
 # ==========================================================================
 
 "An L2 (ridge) penalty on the coefficients"
-immutable L2ParamCost <: ParamCost
+immutable L2ParameterLoss <: ParameterLoss
     λ::Float64
-    function L2ParamCost(λ::Real)
+    function L2ParameterLoss(λ::Real)
         λ >= 0 || error("λ must be positive")
         new(Float64(λ))
     end
 end
-isconvex(::L2ParamCost) = true
-isdifferentiable(::L2ParamCost) = true
-Base.show(io::IO, p::L2ParamCost) = print(io, "L2ParamCost(λ = $(p.λ))")
-@inline function value{T}(p::L2ParamCost, w::AbstractArray{T}, len::Int=length(w))
+isconvex(::L2ParameterLoss) = true
+isdifferentiable(::L2ParameterLoss) = true
+Base.show(io::IO, p::L2ParameterLoss) = print(io, "L2ParameterLoss(λ = $(p.λ))")
+@inline function value{T}(p::L2ParameterLoss, w::AbstractArray{T}, len::Int=length(w))
     len_w = length(w)
     @_dimcheck 0 < len <= len_w
     if len == len_w
@@ -88,22 +88,22 @@ Base.show(io::IO, p::L2ParamCost) = print(io, "L2ParamCost(λ = $(p.λ))")
         val
     end::Float64
 end
-@inline deriv(p::L2ParamCost, wⱼ::Number) = p.λ * wⱼ
+@inline deriv(p::L2ParameterLoss, wⱼ::Number) = p.λ * wⱼ
 
 # ==========================================================================
 
 # "A weighted average of L1 and L2 penalties on the coefficients"
-# immutable ElasticNetParamCost <: ParamCost
+# immutable ElasticNetParameterLoss <: ParameterLoss
 #   λ::Float64
 #   α::Float64
-#   function ElasticNetParamCost(λ::Real, α::Real)
+#   function ElasticNetParameterLoss(λ::Real, α::Real)
 #     0 <= α <= 1 || error("α must be within [0, 1]")
 #     λ >= 0 || error("λ must be positive")
 #     new(Float64(λ), Float64(α))
 #   end
 # end
-# Base.show(io::IO, p::ElasticNetParamCost) = print(io, "ElasticNetParamCost(λ = $(p.λ), α = $(p.α))")
-# @inline value(p::ElasticNetParamCost, w::AbstractVector) = p.λ * (p.α * sumabs(w) + (1 - p.α) * .5 * sumabs2(w))
+# Base.show(io::IO, p::ElasticNetParameterLoss) = print(io, "ElasticNetParameterLoss(λ = $(p.λ), α = $(p.α))")
+# @inline value(p::ElasticNetParameterLoss, w::AbstractVector) = p.λ * (p.α * sumabs(w) + (1 - p.α) * .5 * sumabs2(w))
 
 # ==========================================================================
 

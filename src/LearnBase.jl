@@ -6,7 +6,7 @@ using Requires
 using ArrayViews
 # using UnicodePlots
 
-import Base: show, shuffle!, convert, call, print, transpose, minimum
+import Base: show, shuffle!, convert, call, print, transpose, minimum, copy
 @require UnicodePlots begin
     import UnicodePlots: lineplot, lineplot!
 end
@@ -28,8 +28,8 @@ export
         LinearPredictor,
         SigmoidPredictor,
 
-    ParamCost,
-    ParamCosts,
+    ParameterLoss,
+    ParameterLosses,
 
     EmpiricalRisk,
         EmpiricalRiskClassifier,

@@ -79,7 +79,7 @@ maxIter = 5000
 
 loss = LossFunctions.L2DistLoss()
 pred = LinearPredictor(bias = 0)
-pen = ParamCosts.L2ParamCost(0.05)
+pen = ParameterLosses.L2ParameterLoss(0.05)
 risk = EmpiricalRisk(pred, loss, pen)
 ŷ = pred(X, θ)
 ▽ = zeros(k, 1)

@@ -1,12 +1,12 @@
 # Code based on code from OnlineStats by Josh day (see LICENSE.md)
 
-abstract ParamCost
+abstract ParameterLoss
 
-Base.copy(p::ParamCost) = deepcopy(p)
+Base.copy(p::ParameterLoss) = deepcopy(p)
 
-@inline grad(p::ParamCost, w::AbstractArray, len::Int=length(w)) = grad!(zeros(w), p, w, len)
+@inline grad(p::ParameterLoss, w::AbstractArray, len::Int=length(w)) = grad!(zeros(w), p, w, len)
 
-@inline function grad!{T<:Number}(buffer::AbstractArray{T}, p::ParamCost, w::AbstractArray, len::Int=length(w))
+@inline function grad!{T<:Number}(buffer::AbstractArray{T}, p::ParameterLoss, w::AbstractArray, len::Int=length(w))
     @_dimcheck length(buffer) == length(w)
     @_dimcheck 0 < len <= length(w)
     @inbounds buffer[end] = zero(T)
@@ -16,7 +16,7 @@ Base.copy(p::ParamCost) = deepcopy(p)
     buffer
 end
 
-@inline function addgrad!{T<:Number}(buffer::AbstractArray{T}, p::ParamCost, w::AbstractArray, len::Int=length(w))
+@inline function addgrad!{T<:Number}(buffer::AbstractArray{T}, p::ParameterLoss, w::AbstractArray, len::Int=length(w))
     @_dimcheck length(buffer) == length(w)
     @_dimcheck 0 < len <= length(w)
     @simd for j in 1:len

@@ -1,6 +1,6 @@
 using LearnBase
-using LearnBase.LossFunctions
-using LearnBase.ParamCosts
+# using LearnBase.LossFunctions
+using LearnBase.ParameterLosses
 using MLDataUtils
 using UnicodePlots
 using DualNumbers
