@@ -1,7 +1,8 @@
 module LossFunctions
 
-using UnicodePlots
-import UnicodePlots: lineplot, lineplot!
+# using UnicodePlots
+# import UnicodePlots: lineplot, lineplot!
+using Requires
 import ..LearnBase: value, value!, deriv, deriv!, deriv2, value_deriv, grad, grad!,
                     sumvalue, sumderiv, meanvalue, meanderiv,
                     value_fun, deriv_fun, deriv2_fun, value_deriv_fun
@@ -9,8 +10,7 @@ import ..LearnBase: isminimizable, isdifferentiable, istwicedifferentiable,
                     isconvex, isstronglyconvex, isnemitski, islipschitzcont, islocallylipschitzcont,
                     isclipable, ismarginbased, isclasscalibrated, isdistancebased,
                     islipschitzcont_deriv, issymmetric, isfishercons, isunivfishercons
-import ..LearnBase: Cost, Loss, SupervisedLoss, UnsupervisedLoss,
-                    MarginBasedLoss, DistanceBasedLoss
+import ..LearnBase: PredictionLoss, MarginBasedLoss, DistanceBasedLoss
 import ..LearnBase: @_dimcheck
 import Base: show, call, print, transpose, copy
 

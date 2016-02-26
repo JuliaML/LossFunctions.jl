@@ -2,11 +2,14 @@ module LearnBase
 
 using Reexport
 @reexport using MLBase
+using Requires
 using ArrayViews
-using UnicodePlots
+# using UnicodePlots
 
 import Base: show, shuffle!, convert, call, print, transpose, minimum
-import UnicodePlots: lineplot, lineplot!
+@require UnicodePlots begin
+    import UnicodePlots: lineplot, lineplot!
+end
 import StatsBase: fit, fit!, predict, predict!, nobs, coef,
                   deviance, loglikelihood, coeftable, stderr,
                   vcov, confint, residuals, model_response
@@ -14,12 +17,9 @@ import MLBase: labelencode, labeldecode, groupindices
 
 export
 
-    Cost,
-        Loss,
-            SupervisedLoss,
-                MarginBasedLoss,
-                DistanceBasedLoss,
-            UnsupervisedLoss,
+    PredictionLoss,
+        MarginBasedLoss,
+        DistanceBasedLoss,
 
     LossFunctions,
 
@@ -28,8 +28,8 @@ export
         LinearPredictor,
         SigmoidPredictor,
 
-    Penalty,
-    Penalties,
+    ParamCost,
+    ParamCosts,
 
     EmpiricalRisk,
         EmpiricalRiskClassifier,
@@ -106,12 +106,13 @@ include("abstract_penalty.jl")
 include("classencoding.jl")
 include("encodedmodel.jl")
 include("loss/LossFunctions.jl")
-include("penalty/Penalties.jl")
+include("paramcosts.jl")
 include("risk/prediction.jl")
 include("risk/empiricalrisk.jl")
 include("risk/riskfunc.jl")
 include("risk/riskmodel.jl")
 include("optim/minimizeable.jl")
 include("optim/optimize.jl")
+include("optim/paramupdater.jl")
 
 end # module

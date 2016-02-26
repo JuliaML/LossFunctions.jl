@@ -1,7 +1,7 @@
 using LearnBase
 using LearnBase.LossFunctions
-using LearnBase.Penalties
-using MLDatasets
+using LearnBase.ParamCosts
+using MLDataUtils
 using UnicodePlots
 using DualNumbers
 using Base.Test

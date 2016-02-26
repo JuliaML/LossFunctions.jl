@@ -1,4 +1,4 @@
-function test_value_typestable(l::SupervisedLoss)
+function test_value_typestable(l::PredictionLoss)
     msg2("$(l): ")
     for y in (-1, 1, Int32(-1), Int32(1), -1.5, 1.5, Float32(-.5), Float32(.5))
         for t in (-2, 2, Int32(-1), Int32(1), -.5, .5, Float32(-1), Float32(1))
@@ -9,7 +9,7 @@ function test_value_typestable(l::SupervisedLoss)
     println("ok")
 end
 
-function test_value_floatforcing(l::SupervisedLoss)
+function test_value_floatforcing(l::PredictionLoss)
     msg2("$(l): ")
     for y in (-1, 1, Int32(-1), Int32(1), -1.5, 1.5, Float32(-.5), Float32(.5))
         for t in (-2, 2, Int32(-1), Int32(1), -.5, .5, Float32(-1), Float32(1))
@@ -20,7 +20,7 @@ function test_value_floatforcing(l::SupervisedLoss)
     println("ok")
 end
 
-function test_value(l::SupervisedLoss, f::Function, y_vec, t_vec)
+function test_value(l::PredictionLoss, f::Function, y_vec, t_vec)
     msg2("$(l): ")
     for y in y_vec, t in t_vec
         @test abs(l(y, t) - f(y, t)) < 1e-10

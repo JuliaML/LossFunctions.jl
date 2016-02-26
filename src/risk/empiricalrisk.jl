@@ -1,16 +1,16 @@
 using LearnBase.LossFunctions
-using LearnBase.Penalties
+using LearnBase.ParamCosts
 
-immutable EmpiricalRisk{TPred<:Predictor, TLoss<:Loss, TPen<:Penalty, PENALIZEBIAS}
+immutable EmpiricalRisk{TPred<:Predictor, TLoss<:PredictionLoss, TPen<:ParamCost, PENALIZEBIAS}
     predictor::TPred
     loss::TLoss
     penalty::TPen
 end
 
-function EmpiricalRisk{TPred<:Predictor, TLoss<:Loss, TPen<:Penalty}(
+function EmpiricalRisk{TPred<:Predictor, TLoss<:PredictionLoss, TPen<:ParamCost}(
         predictor::TPred = LinearPredictor(0),
         loss::TLoss = L2DistLoss(),
-        penalty::TPen = NoPenalty(),
+        penalty::TPen = NoParamCost(),
         penalize_bias::Bool = false)
     EmpiricalRisk{TPred, TLoss, TPen, penalize_bias}(predictor, loss, penalty)
 end
@@ -19,14 +19,14 @@ intercept(risk::EmpiricalRisk) = intercept(risk.predictor)
 
 # ==========================================================================
 
-typealias EmpiricalRiskClassifier{TPred<:Predictor, TLoss<:MarginBasedLoss, TPen<:Penalty} EmpiricalRisk{TPred, TLoss, TPen}
-typealias EmpiricalRiskRegressor{TPred<:Predictor, TLoss<:DistanceBasedLoss, TPen<:Penalty} EmpiricalRisk{TPred, TLoss, TPen}
+typealias EmpiricalRiskClassifier{TPred<:Predictor, TLoss<:MarginBasedLoss, TPen<:ParamCost} EmpiricalRisk{TPred, TLoss, TPen}
+typealias EmpiricalRiskRegressor{TPred<:Predictor, TLoss<:DistanceBasedLoss, TPen<:ParamCost} EmpiricalRisk{TPred, TLoss, TPen}
 
 # ==========================================================================
 # * generic predictor
 # * no penalty
 
-function value{TPred<:Predictor, TLoss<:Loss, TPen<:NoPenalty}(
+function value{TPred<:Predictor, TLoss<:PredictionLoss, TPen<:NoParamCost}(
         risk::EmpiricalRisk{TPred, TLoss, TPen},
         X::AbstractArray,
         w::AbstractArray,
@@ -35,7 +35,7 @@ function value{TPred<:Predictor, TLoss<:Loss, TPen<:NoPenalty}(
     meanvalue(risk.loss, y, ŷ)
 end
 
-function value!{TPred<:Predictor, TLoss<:Loss, TPen<:NoPenalty}(
+function value!{TPred<:Predictor, TLoss<:PredictionLoss, TPen<:NoParamCost}(
         buffer::AbstractMatrix,
         risk::EmpiricalRisk{TPred, TLoss, TPen},
         X::AbstractArray,
@@ -49,7 +49,7 @@ end
 # * generic predictor
 # * generic penalty
 
-function value{TPred<:Predictor, TLoss<:Loss, TPen<:Penalty, PENALIZEBIAS}(
+function value{TPred<:Predictor, TLoss<:PredictionLoss, TPen<:ParamCost, PENALIZEBIAS}(
         risk::EmpiricalRisk{TPred, TLoss, TPen, PENALIZEBIAS},
         X::AbstractArray,
         w::AbstractArray,
@@ -64,7 +64,7 @@ function value{TPred<:Predictor, TLoss<:Loss, TPen<:Penalty, PENALIZEBIAS}(
     res
 end
 
-function value!{TPred<:Predictor, TLoss<:Loss, TPen<:Penalty, PENALIZEBIAS}(
+function value!{TPred<:Predictor, TLoss<:PredictionLoss, TPen<:ParamCost, PENALIZEBIAS}(
         buffer::AbstractMatrix,
         risk::EmpiricalRisk{TPred, TLoss, TPen, PENALIZEBIAS},
         X::AbstractArray,
@@ -80,7 +80,7 @@ function value!{TPred<:Predictor, TLoss<:Loss, TPen<:Penalty, PENALIZEBIAS}(
     res
 end
 
-function grad{TPred<:Predictor, TLoss<:Loss, TPen<:Penalty, PENALIZEBIAS}(
+function grad{TPred<:Predictor, TLoss<:PredictionLoss, TPen<:ParamCost, PENALIZEBIAS}(
         risk::EmpiricalRisk{TPred, TLoss, TPen, PENALIZEBIAS},
         X::AbstractArray,
         w::AbstractArray,
@@ -97,7 +97,7 @@ function grad{TPred<:Predictor, TLoss<:Loss, TPen<:Penalty, PENALIZEBIAS}(
     end
 end
 
-function grad!{TPred<:Predictor, TLoss<:Loss, TPen<:Penalty, PENALIZEBIAS}(
+function grad!{TPred<:Predictor, TLoss<:PredictionLoss, TPen<:ParamCost, PENALIZEBIAS}(
         buffer::AbstractMatrix,
         risk::EmpiricalRisk{TPred, TLoss, TPen, PENALIZEBIAS},
         X::AbstractArray,
@@ -119,7 +119,7 @@ end
 # * linear predictor
 # * generic penalty
 
-function grad{INTERCEPT, TLoss<:Loss, TPen<:Penalty}(
+function grad{INTERCEPT, TLoss<:PredictionLoss, TPen<:ParamCost}(
         risk::EmpiricalRisk{LinearPredictor{INTERCEPT}, TLoss, TPen},
         X::AbstractArray,
         w::AbstractVector,
@@ -129,7 +129,7 @@ function grad{INTERCEPT, TLoss<:Loss, TPen<:Penalty}(
     grad!(buffer, risk, X, w, y, ŷ)
 end
 
-function grad!{T, INTERCEPT, TLoss<:Loss, TPen<:Penalty, PENALIZEBIAS}(
+function grad!{T, INTERCEPT, TLoss<:PredictionLoss, TPen<:ParamCost, PENALIZEBIAS}(
         buffer::AbstractMatrix{T},
         risk::EmpiricalRisk{LinearPredictor{INTERCEPT}, TLoss, TPen, PENALIZEBIAS},
         X::AbstractArray,

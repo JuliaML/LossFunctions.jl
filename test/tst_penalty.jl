@@ -1,4 +1,4 @@
-function test_value(pen::Penalty, f::Function)
+function test_value(pen::ParamCost, f::Function)
     msg2("$(pen): ")
     for i = 1:20
         w = randn(10)
@@ -12,7 +12,7 @@ function test_value(pen::Penalty, f::Function)
     println("ok")
 end
 
-function test_grad(pen::Penalty, g::Function)
+function test_grad(pen::ParamCost, g::Function)
     msg2("$(pen): ")
     for i = 1:20
         len = 10
@@ -46,20 +46,20 @@ function _l1pen(λ)
     _value(w) = λ * sumabs(w)
     _value
 end
-test_value(L1Penalty(0.05), _l1pen(0.05))
-test_value(L1Penalty(0.1), _l1pen(0.1))
-test_value(L1Penalty(0.5), _l1pen(0.5))
-test_value(L1Penalty(1), sumabs)
+test_value(L1ParamCost(0.05), _l1pen(0.05))
+test_value(L1ParamCost(0.1), _l1pen(0.1))
+test_value(L1ParamCost(0.5), _l1pen(0.5))
+test_value(L1ParamCost(1), sumabs)
 
 function _l2pen(λ)
     _value(w) = λ/2 * sumabs2(w)
     _value
 end
-test_value(L2Penalty(0.05), _l2pen(0.05))
-test_value(L2Penalty(0.1), _l2pen(0.1))
-test_value(L2Penalty(0.5), _l2pen(0.5))
-test_value(L2Penalty(1), _l2pen(1))
-test_value(L2Penalty(2), sumabs2)
+test_value(L2ParamCost(0.05), _l2pen(0.05))
+test_value(L2ParamCost(0.1), _l2pen(0.1))
+test_value(L2ParamCost(0.5), _l2pen(0.5))
+test_value(L2ParamCost(1), _l2pen(1))
+test_value(L2ParamCost(2), sumabs2)
 
 # ==========================================================================
 
@@ -69,16 +69,16 @@ function _l1pengrad(λ)
     _grad(w) = λ * sign(w)
     _grad
 end
-test_grad(L1Penalty(0.05), _l1pengrad(0.05))
-test_grad(L1Penalty(0.1), _l1pengrad(0.1))
-test_grad(L1Penalty(0.5), _l1pengrad(0.5))
-test_grad(L1Penalty(1), _l1pengrad(1))
+test_grad(L1ParamCost(0.05), _l1pengrad(0.05))
+test_grad(L1ParamCost(0.1), _l1pengrad(0.1))
+test_grad(L1ParamCost(0.5), _l1pengrad(0.5))
+test_grad(L1ParamCost(1), _l1pengrad(1))
 
 function _l2pengrad(λ)
     _grad(w) = λ * w
     _grad
 end
-test_grad(L2Penalty(0.05), _l2pengrad(0.05))
-test_grad(L2Penalty(0.1), _l2pengrad(0.1))
-test_grad(L2Penalty(0.5), _l2pengrad(0.5))
-test_grad(L2Penalty(1), _l2pengrad(1))
+test_grad(L2ParamCost(0.05), _l2pengrad(0.05))
+test_grad(L2ParamCost(0.1), _l2pengrad(0.1))
+test_grad(L2ParamCost(0.5), _l2pengrad(0.5))
+test_grad(L2ParamCost(1), _l2pengrad(1))

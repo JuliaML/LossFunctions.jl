@@ -2,7 +2,7 @@
 # ==========================================================================
 # L(y, t) = - y*ln(t) - (1-y)*ln(1-t)
 
-immutable CrossentropyLoss <: SupervisedLoss end
+immutable CrossentropyLoss <: PredictionLoss end
 typealias LogitProbLoss CrossentropyLoss
 
 function value(l::CrossentropyLoss, y::Number, t::Number)
@@ -24,7 +24,7 @@ isconvex(::CrossentropyLoss) = true
 # ==========================================================================
 # L(y, t) = sign(yt) < 0 ? 1 : 0
 
-immutable ZeroOneLoss <: SupervisedLoss end
+immutable ZeroOneLoss <: PredictionLoss end
 
 value(l::ZeroOneLoss, y::Number, t::Number) = value(l, y * t)
 deriv(l::ZeroOneLoss, y::Number, t::Number) = zero(t)
