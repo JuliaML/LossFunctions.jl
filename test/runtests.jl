@@ -30,6 +30,9 @@ perf = [
     #"bm_datasource.jl"
 ]
 
+# for deterministic testing
+srand(1234)
+
 for t in tests
     println("[->] $t")
     include(t)
