@@ -2,7 +2,7 @@
 abstract Loss
 abstract PredictionLoss <: Loss
 
-@inline call(c::PredictionLoss, X, y, α) = value(c, X, y, α)
+@inline call(c::PredictionLoss, X, target, α) = value(c, X, target, α)
 @inline transpose(c::PredictionLoss) = deriv_fun(c)
 
 @inline function value_fun(c::PredictionLoss)
@@ -35,7 +35,7 @@ isstronglyconvex(::PredictionLoss) = false
 
 # ==========================================================================
 
-isnemitski(l::PredictionLoss) = islocallylipschitzcont(l)
+isnemitski(loss::PredictionLoss) = islocallylipschitzcont(loss)
 islipschitzcont(::PredictionLoss) = false
 islocallylipschitzcont(::PredictionLoss) = false
 isclipable(::PredictionLoss) = false
@@ -43,96 +43,70 @@ islipschitzcont_deriv(::PredictionLoss) = false
 
 # ==========================================================================
 
-@inline call(l::PredictionLoss, y, t) = value(l, y, t)
-@inline value(l::PredictionLoss, X::AbstractArray, y::Number, t::Number) = value(l, y, t)
-@inline deriv(l::PredictionLoss, X::AbstractArray, y::Number, t::Number) = deriv(l, y, t)
-@inline deriv2(l::PredictionLoss, X::AbstractArray, y::Number, t::Number) = deriv2(l, y, t)
-@inline value_deriv(l::PredictionLoss, X::AbstractArray, y::Number, t::Number) = value_deriv(l, y, t)
+@inline call(loss::PredictionLoss, target, output) = value(loss, target, output)
+@inline value(loss::PredictionLoss, X::AbstractArray, target::Number, output::Number) = value(loss, target, output)
+@inline deriv(loss::PredictionLoss, X::AbstractArray, target::Number, output::Number) = deriv(loss, target, output)
+@inline deriv2(loss::PredictionLoss, X::AbstractArray, target::Number, output::Number) = deriv2(loss, target, output)
+@inline value_deriv(loss::PredictionLoss, X::AbstractArray, target::Number, output::Number) = value_deriv(loss, target, output)
 
 # --------------------------------------------------------------------------
 
-@inline function value(l::PredictionLoss, y::AbstractVecOrMat, t::AbstractVecOrMat)
-    buffer = similar(t)
-    value!(buffer, l, y, t)
+@inline function value(loss::PredictionLoss, target::AbstractVecOrMat, output::AbstractVecOrMat)
+    buffer = similar(output)
+    value!(buffer, loss, target, output)
 end
 
-@inline function deriv(l::PredictionLoss, y::AbstractVector, t::AbstractVecOrMat)
-    buffer = similar(t)
-    deriv!(buffer, l, y, t)
+@inline function deriv(loss::PredictionLoss, target::AbstractVector, output::AbstractVecOrMat)
+    buffer = similar(output)
+    deriv!(buffer, loss, target, output)
 end
 
-@inline function grad(l::PredictionLoss, y::AbstractMatrix, t::AbstractVecOrMat)
-    buffer = similar(t)
-    grad!(buffer, l, y, t)
+@inline function grad(loss::PredictionLoss, target::AbstractMatrix, output::AbstractVecOrMat)
+    buffer = similar(output)
+    grad!(buffer, loss, target, output)
 end
 
 # --------------------------------------------------------------------------
 
-@inline function value!(buffer::AbstractVector, l::PredictionLoss, y::AbstractVector, t::AbstractVector)
-    n = length(t)
-    @_dimcheck length(y) == n && size(buffer) == size(t)
+@inline function value!(buffer::AbstractVector, loss::PredictionLoss, target::AbstractVector, output::AbstractVector)
+    n = length(output)
+    @_dimcheck length(target) == n && size(buffer) == size(output)
     @simd for i = 1:n
-        @inbounds buffer[i] = value(l, y[i], t[i])
+        @inbounds buffer[i] = value(loss, target[i], output[i])
     end
     buffer
 end
 
-@inline function deriv!(buffer::AbstractVector, l::PredictionLoss, y::AbstractVector, t::AbstractVector)
-    n = length(t)
-    @_dimcheck length(y) == n && size(buffer) == size(t)
+@inline function deriv!(buffer::AbstractVector, loss::PredictionLoss, target::AbstractVector, output::AbstractVector)
+    n = length(output)
+    @_dimcheck length(target) == n && size(buffer) == size(output)
     @simd for i = 1:n
-        @inbounds buffer[i] = deriv(l, y[i], t[i])
+        @inbounds buffer[i] = deriv(loss, target[i], output[i])
     end
     buffer
 end
 
 # --------------------------------------------------------------------------
 
-@inline function value!(buffer::AbstractMatrix, l::PredictionLoss, y::AbstractVector, t::AbstractMatrix)
-    n = size(t, 2)
-    k = size(t, 1)
-    @_dimcheck length(y) == n && size(buffer) == (k, n)
+@inline function value!(buffer::AbstractMatrix, loss::PredictionLoss, target::AbstractVector, output::AbstractMatrix)
+    n = size(output, 2)
+    k = size(output, 1)
+    @_dimcheck length(target) == n && size(buffer) == (k, n)
     for i = 1:n
         @simd for j = 1:k
-            @inbounds buffer[j, i] = value(l, y[i], t[j, i])
+            @inbounds buffer[j, i] = value(loss, target[i], output[j, i])
         end
     end
     buffer
 end
 
-@inline function deriv!(buffer::AbstractMatrix, l::PredictionLoss, y::AbstractVector, t::AbstractMatrix)
-    n = size(t, 2)
-    k = size(t, 1)
-    @_dimcheck length(y) == n && size(buffer) == (k, n)
+@inline function deriv!(buffer::AbstractMatrix, loss::PredictionLoss, target::AbstractVector, output::AbstractMatrix)
+    n = size(output, 2)
+    k = size(output, 1)
+    @_dimcheck length(target) == n && size(buffer) == (k, n)
     for i = 1:n
         @simd for j = 1:k
-            @inbounds buffer[j, i] = deriv(l, y[i], t[j, i])
-        end
-    end
-    buffer
-end
-
-# --------------------------------------------------------------------------
-
-@inline function value!(buffer::AbstractMatrix, l::PredictionLoss, y::AbstractMatrix, t::AbstractMatrix)
-    n = size(t, 2)
-    k = size(t, 1)
-    @_dimcheck size(y) == size(t) && size(buffer) == (k, n)
-    for i = 1:n
-        @simd for j = 1:k
-            @inbounds buffer[j, i] = value(l, y[j, i], t[j, i])
-        end
-    end
-    buffer
-end
-
-@inline function grad!(buffer::AbstractMatrix, l::PredictionLoss, y::AbstractMatrix, t::AbstractMatrix)
-    n = size(t, 2)
-    k = size(t, 1)
-    @_dimcheck size(y) == size(t) && size(buffer) == (k, n)
-    for i = 1:n
-        @simd for j = 1:k
-            @inbounds buffer[j, i] = deriv(l, y[j, i], t[j, i])
+            @inbounds buffer[j, i] = deriv(loss, target[i], output[j, i])
         end
     end
     buffer
@@ -140,48 +114,74 @@ end
 
 # --------------------------------------------------------------------------
 
-@inline function sumvalue{T<:Number}(l::PredictionLoss, y::AbstractVector, t::AbstractArray{T})
-    n = length(t)
-    @_dimcheck length(y) == n
+@inline function value!(buffer::AbstractMatrix, loss::PredictionLoss, target::AbstractMatrix, output::AbstractMatrix)
+    n = size(output, 2)
+    k = size(output, 1)
+    @_dimcheck size(target) == size(output) && size(buffer) == (k, n)
+    for i = 1:n
+        @simd for j = 1:k
+            @inbounds buffer[j, i] = value(loss, target[j, i], output[j, i])
+        end
+    end
+    buffer
+end
+
+@inline function grad!(buffer::AbstractMatrix, loss::PredictionLoss, target::AbstractMatrix, output::AbstractMatrix)
+    n = size(output, 2)
+    k = size(output, 1)
+    @_dimcheck size(target) == size(output) && size(buffer) == (k, n)
+    for i = 1:n
+        @simd for j = 1:k
+            @inbounds buffer[j, i] = deriv(loss, target[j, i], output[j, i])
+        end
+    end
+    buffer
+end
+
+# --------------------------------------------------------------------------
+
+@inline function sumvalue{T<:Number}(loss::PredictionLoss, target::AbstractVector, output::AbstractArray{T})
+    n = length(output)
+    @_dimcheck length(target) == n
     val = zero(T)
     @simd for i = 1:n
-        @inbounds val += value(l, y[i], t[i])
+        @inbounds val += value(loss, target[i], output[i])
     end
     val
 end
 
-@inline function sumderiv{T<:Number}(l::PredictionLoss, y::AbstractVector, t::AbstractArray{T})
-    n = length(t)
-    @_dimcheck length(y) == n
+@inline function sumderiv{T<:Number}(loss::PredictionLoss, target::AbstractVector, output::AbstractArray{T})
+    n = length(output)
+    @_dimcheck length(target) == n
     val = zero(T)
     @simd for i = 1:n
-        @inbounds val += deriv(l, y[i], t[i])
+        @inbounds val += deriv(loss, target[i], output[i])
     end
     val
 end
 
 # --------------------------------------------------------------------------
 
-@inline function meanvalue{T<:Number}(l::PredictionLoss, y::AbstractVector, t::AbstractArray{T})
-    n = length(t)
-    @_dimcheck length(y) == n
+@inline function meanvalue{T<:Number}(loss::PredictionLoss, target::AbstractVector, output::AbstractArray{T})
+    n = length(output)
+    @_dimcheck length(target) == n
     val = zero(T)
     tmp = zero(T)
     @simd for i = 1:n
-        @inbounds tmp = value(l, y[i], t[i])::T
+        @inbounds tmp = value(loss, target[i], output[i])::T
         tmp /= n
         val += tmp
     end
     val
 end
 
-@inline function meanderiv{T<:Number}(l::PredictionLoss, y::AbstractVector, t::AbstractArray{T})
-    n = length(t)
-    @_dimcheck length(y) == n
+@inline function meanderiv{T<:Number}(loss::PredictionLoss, target::AbstractVector, output::AbstractArray{T})
+    n = length(output)
+    @_dimcheck length(target) == n
     val = zero(T)
     tmp = zero(T)
     @simd for i = 1:n
-        @inbounds tmp = deriv(l, y[i], t[i])::T
+        @inbounds tmp = deriv(loss, target[i], output[i])::T
         tmp /= n
         val += tmp
     end
@@ -197,31 +197,31 @@ issymmetric(::PredictionLoss) = false
 
 abstract MarginBasedLoss <: PredictionLoss
 
-@inline call(l::MarginBasedLoss, yt) = value(l, yt)
-@inline value(l::MarginBasedLoss, y::Number, t::Number) = value(l, y * t)
-@inline deriv(l::MarginBasedLoss, y::Number, t::Number) = y * deriv(l, y * t)
-@inline deriv2(l::MarginBasedLoss, y::Number, t::Number) = deriv2(l, y * t)
-@inline function value_deriv(l::MarginBasedLoss, y::Number, t::Number)
-    v, d = value_deriv(l, y * t)
-    (v, y*d)
+@inline call(loss::MarginBasedLoss, yt) = value(loss, yt)
+@inline value(loss::MarginBasedLoss, target::Number, output::Number) = value(loss, target * output)
+@inline deriv(loss::MarginBasedLoss, target::Number, output::Number) = target * deriv(loss, target * output)
+@inline deriv2(loss::MarginBasedLoss, target::Number, output::Number) = deriv2(loss, target * output)
+@inline function value_deriv(loss::MarginBasedLoss, target::Number, output::Number)
+    v, d = value_deriv(loss, target * output)
+    (v, target*d)
 end
 
 isunivfishercons(::MarginBasedLoss) = false
-isfishercons(l::MarginBasedLoss) = isunivfishercons(l)
+isfishercons(loss::MarginBasedLoss) = isunivfishercons(loss)
 isnemitski(::MarginBasedLoss) = true
-islocallylipschitzcont(l::MarginBasedLoss) = isconvex(l)
+islocallylipschitzcont(loss::MarginBasedLoss) = isconvex(loss)
 ismarginbased(::MarginBasedLoss) = true
-isclasscalibrated(l::MarginBasedLoss) = isconvex(l) && isdifferentiable(l, 0) && deriv(l, 0) < 0
+isclasscalibrated(loss::MarginBasedLoss) = isconvex(loss) && isdifferentiable(loss, 0) && deriv(loss, 0) < 0
 
 # ==========================================================================
 
 abstract DistanceBasedLoss <: PredictionLoss
 
-@inline call(l::DistanceBasedLoss, r) = value(l, r)
-@inline value(l::DistanceBasedLoss, y::Number, t::Number) = value(l, t - y)
-@inline deriv(l::DistanceBasedLoss, y::Number, t::Number) = deriv(l, t - y)
-@inline deriv2(l::DistanceBasedLoss, y::Number, t::Number) = deriv2(l, t - y)
-@inline value_deriv(l::DistanceBasedLoss, y::Number, t::Number) = value_deriv(l, t - y)
+@inline call(loss::DistanceBasedLoss, residual) = value(loss, residual)
+@inline value(loss::DistanceBasedLoss, target::Number, output::Number) = value(loss, output - target)
+@inline deriv(loss::DistanceBasedLoss, target::Number, output::Number) = deriv(loss, output - target)
+@inline deriv2(loss::DistanceBasedLoss, target::Number, output::Number) = deriv2(loss, output - target)
+@inline value_deriv(loss::DistanceBasedLoss, target::Number, output::Number) = value_deriv(loss, output - target)
 
 isdistancebased(::DistanceBasedLoss) = true
 issymmetric(::DistanceBasedLoss) = false
@@ -233,25 +233,25 @@ issymmetric(::DistanceBasedLoss) = false
 
 abstract ParameterLoss <: Loss
 
-Base.copy(p::ParameterLoss) = deepcopy(p)
+Base.copy(loss::ParameterLoss) = deepcopy(loss)
 
-@inline grad(p::ParameterLoss, w::AbstractArray, len::Int=length(w)) = grad!(zeros(w), p, w, len)
+@inline grad(loss::ParameterLoss, params::AbstractArray, len::Int=length(params)) = grad!(zeros(params), loss, params, len)
 
-@inline function grad!{T<:Number}(buffer::AbstractArray{T}, p::ParameterLoss, w::AbstractArray, len::Int=length(w))
-    @_dimcheck length(buffer) == length(w)
-    @_dimcheck 0 < len <= length(w)
+@inline function grad!{T<:Number}(buffer::AbstractArray{T}, loss::ParameterLoss, params::AbstractArray, len::Int=length(params))
+    @_dimcheck length(buffer) == length(params)
+    @_dimcheck 0 < len <= length(params)
     @inbounds buffer[end] = zero(T)
     @simd for j in 1:len
-        @inbounds buffer[j] = deriv(p, w[j])
+        @inbounds buffer[j] = deriv(loss, params[j])
     end
     buffer
 end
 
-@inline function addgrad!{T<:Number}(buffer::AbstractArray{T}, p::ParameterLoss, w::AbstractArray, len::Int=length(w))
-    @_dimcheck length(buffer) == length(w)
-    @_dimcheck 0 < len <= length(w)
+@inline function addgrad!{T<:Number}(buffer::AbstractArray{T}, loss::ParameterLoss, params::AbstractArray, len::Int=length(params))
+    @_dimcheck length(buffer) == length(params)
+    @_dimcheck 0 < len <= length(params)
     @simd for j in 1:len
-        @inbounds buffer[j] += deriv(p, w[j])
+        @inbounds buffer[j] += deriv(loss, params[j])
     end
     buffer
 end

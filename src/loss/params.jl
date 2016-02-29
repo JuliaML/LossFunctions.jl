@@ -1,32 +1,13 @@
-# module ParameterLosses
-
-# import ..LearnBase: value, value!, deriv, deriv!, deriv2, value_deriv, grad, grad!,
-#                     value_fun, deriv_fun, deriv2_fun, value_deriv_fun,
-#                     addgrad!
-# import ..LearnBase: isminimizable, isdifferentiable, istwicedifferentiable,
-#                     isconvex, islipschitzcont, islocallylipschitzcont,
-#                     isclipable, ismarginbased, issymmetric
-# import ..LearnBase: ParameterLoss
-# import ..LearnBase: @_dimcheck
-# import Base: show, call, print, transpose
-
-# @autocomplete ParameterLosses export
-#     NoParameterLoss,
-#     L1ParameterLoss,
-#     L2ParameterLoss
-#     # ElasticNetParameterLoss,
-#     # SCADParameterLoss,
-
 
 # ==========================================================================
 
 "No penalty on the coefficients"
 immutable NoParameterLoss <: ParameterLoss end
-Base.show(io::IO, p::NoParameterLoss) = print(io, "NoParameterLoss")
-@inline value{T<:Number}(p::NoParameterLoss, w::AbstractArray{T}, len::Int=0) = zero(T)
-@inline deriv{T<:Number}(p::NoParameterLoss, wⱼ::T) = zero(T)
+Base.show(io::IO, loss::NoParameterLoss) = print(io, "NoParameterLoss")
+@inline value{T<:Number}(loss::NoParameterLoss, params::AbstractArray{T}, len::Int=0) = zero(T)
+@inline deriv{T<:Number}(loss::NoParameterLoss, param::T) = zero(T)
 
-@inline function addgrad!{T<:Number}(buffer::AbstractArray{T}, p::NoParameterLoss, w::AbstractArray, len::Int=length(w))
+@inline function addgrad!{T<:Number}(buffer::AbstractArray{T}, loss::NoParameterLoss, params::AbstractArray, len::Int=length(params))
     buffer
 end
 
@@ -41,23 +22,23 @@ immutable L1ParameterLoss <: ParameterLoss
     end
 end
 isconvex(::L1ParameterLoss) = true
-isdifferentiable(p::L1ParameterLoss) = false
-Base.show(io::IO, p::L1ParameterLoss) = print(io, "L1ParameterLoss(λ = $(p.λ))")
-function value{T}(p::L1ParameterLoss, w::AbstractArray{T}, len::Int=length(w))
-    len_w = length(w)
+isdifferentiable(loss::L1ParameterLoss) = false
+Base.show(io::IO, loss::L1ParameterLoss) = print(io, "L1ParameterLoss(λ = $(loss.λ))")
+function value{T}(loss::L1ParameterLoss, params::AbstractArray{T}, len::Int=length(params))
+    len_w = length(params)
     @_dimcheck 0 < len <= len_w
     if len == len_w
-        p.λ * sumabs(w)
+        loss.λ * sumabs(params)
     else
         val = zero(T)
         @simd for i = 1:len
-            @inbounds val += abs(w[i])
+            @inbounds val += abs(params[i])
         end
-        val *= p.λ
+        val *= loss.λ
         val
     end::Float64
 end
-@inline deriv(p::L1ParameterLoss, wⱼ::Number) = p.λ * sign(wⱼ)
+@inline deriv(loss::L1ParameterLoss, param::Number) = loss.λ * sign(param)
 
 # ==========================================================================
 
@@ -71,23 +52,23 @@ immutable L2ParameterLoss <: ParameterLoss
 end
 isconvex(::L2ParameterLoss) = true
 isdifferentiable(::L2ParameterLoss) = true
-Base.show(io::IO, p::L2ParameterLoss) = print(io, "L2ParameterLoss(λ = $(p.λ))")
-@inline function value{T}(p::L2ParameterLoss, w::AbstractArray{T}, len::Int=length(w))
-    len_w = length(w)
+Base.show(io::IO, loss::L2ParameterLoss) = print(io, "L2ParameterLoss(λ = $(loss.λ))")
+@inline function value{T}(loss::L2ParameterLoss, params::AbstractArray{T}, len::Int=length(params))
+    len_w = length(params)
     @_dimcheck 0 < len <= len_w
     if len == len_w
-        p.λ/2 * sumabs2(w)
+        loss.λ/2 * sumabs2(params)
     else
         val = zero(T)
         @simd for i = 1:len
-            @inbounds val += abs2(w[i])
+            @inbounds val += abs2(params[i])
         end
-        val *= p.λ
+        val *= loss.λ
         val /= 2
         val
     end::Float64
 end
-@inline deriv(p::L2ParameterLoss, wⱼ::Number) = p.λ * wⱼ
+@inline deriv(loss::L2ParameterLoss, param::Number) = loss.λ * param
 
 # ==========================================================================
 
@@ -101,10 +82,7 @@ end
 #     new(Float64(λ), Float64(α))
 #   end
 # end
-# Base.show(io::IO, p::ElasticNetParameterLoss) = print(io, "ElasticNetParameterLoss(λ = $(p.λ), α = $(p.α))")
-# @inline value(p::ElasticNetParameterLoss, w::AbstractVector) = p.λ * (p.α * sumabs(w) + (1 - p.α) * .5 * sumabs2(w))
+# Base.show(io::IO, loss::ElasticNetParameterLoss) = print(io, "ElasticNetParameterLoss(λ = $(loss.λ), α = $(loss.α))")
+# @inline value(loss::ElasticNetParameterLoss, params::AbstractVector) = loss.λ * (loss.α * sumabs(params) + (1 - loss.α) * .5 * sumabs2(params))
 
 # ==========================================================================
-
-
-# end # module

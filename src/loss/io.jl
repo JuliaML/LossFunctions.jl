@@ -1,11 +1,11 @@
 
-print(io::IO, c::PredictionLoss, args...) = print(io, typeof(c).name.name, args...)
-print(io::IO, l::L1DistLoss, args...) = print(io, "L1DistLoss", args...)
-print(io::IO, l::L2DistLoss, args...) = print(io, "L2DistLoss", args...)
-print{P}(io::IO, l::LPDistLoss{P}, args...) = print(io, typeof(l).name.name, " with P = $(P)", args...)
-print(io::IO, l::L1EpsilonInsLoss, args...) = print(io, typeof(l).name.name, " with ɛ = $(l.eps)", args...)
-print(io::IO, l::L2EpsilonInsLoss, args...) = print(io, typeof(l).name.name, " with ɛ = $(l.eps)", args...)
-print(io::IO, l::SmoothedL1HingeLoss, args...) = print(io, typeof(l).name.name, " with γ = $(l.gamma)", args...)
+print(io::IO, loss::PredictionLoss, args...) = print(io, typeof(loss).name.name, args...)
+print(io::IO, loss::L1DistLoss, args...) = print(io, "L1DistLoss", args...)
+print(io::IO, loss::L2DistLoss, args...) = print(io, "L2DistLoss", args...)
+print{P}(io::IO, loss::LPDistLoss{P}, args...) = print(io, typeof(loss).name.name, " with P = $(P)", args...)
+print(io::IO, loss::L1EpsilonInsLoss, args...) = print(io, typeof(loss).name.name, " with ɛ = $(loss.eps)", args...)
+print(io::IO, loss::L2EpsilonInsLoss, args...) = print(io, typeof(loss).name.name, " with ɛ = $(loss.eps)", args...)
+print(io::IO, loss::SmoothedL1HingeLoss, args...) = print(io, typeof(loss).name.name, " with γ = $(loss.gamma)", args...)
 
 @require UnicodePlots begin
     
