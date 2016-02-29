@@ -1,6 +1,6 @@
 using LearnBase
 # using LearnBase.LossFunctions
-using LearnBase.ParameterLosses
+# using LearnBase.ParameterLosses
 using MLDataUtils
 using UnicodePlots
 using DualNumbers
@@ -18,6 +18,7 @@ end
 
 tests = [
     "tst_activation.jl"
+    "tst_paramupdater.jl"
     "tst_loss.jl"
     "tst_classencoding.jl"
     "tst_penalty.jl"
