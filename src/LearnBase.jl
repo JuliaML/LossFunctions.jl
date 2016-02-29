@@ -81,6 +81,7 @@ export
 include("common.jl")
 include("encoding/encoding.jl")
 include("loss/loss.jl")
+include("transform/transform.jl")
 include("risk/prediction.jl")
 include("risk/empiricalrisk.jl")
 include("risk/riskfunc.jl")

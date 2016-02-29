@@ -1,6 +1,10 @@
 
 abstract Transformation
 
+export
+    Transformation,
+        Activation
+
 # ------------------------------------
 # Activation Functions
 # ------------------------------------
@@ -8,7 +12,6 @@ abstract Transformation
 include("activation.jl")
 
 @autocomplete Activations export
-    Activation,
     IdentityActivation,
     SigmoidActivation,
     TanhActivation,

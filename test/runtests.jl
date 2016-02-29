@@ -17,6 +17,7 @@ function msg2(args...; newline = false)
 end
 
 tests = [
+    "tst_activation.jl"
     "tst_loss.jl"
     "tst_classencoding.jl"
     "tst_penalty.jl"
