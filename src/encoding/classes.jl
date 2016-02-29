@@ -5,15 +5,6 @@ abstract MultinomialClassEncoding <: ClassEncoding
 
 # ==========================================================================
 
-module ClassEncodings
-
-export ZeroOneClassEncoding, SignedClassEncoding, MultivalueClassEncoding, OneOfKClassEncoding, OneHotClassEncoding
-
-using MLBase
-using ..LearnBase.ClassEncoding
-using ..LearnBase.BinaryClassEncoding
-using ..LearnBase.MultinomialClassEncoding
-
 immutable ZeroOneClassEncoding{T} <: BinaryClassEncoding
     labelmap::LabelMap{T}
 
@@ -94,14 +85,6 @@ OneOfKClassEncoding{T}(lm::LabelMap{T}) =
 
 OneOfKClassEncoding{T}(targets::AbstractVector{T}) =
     OneOfKClassEncoding{T}(labelmap(targets))
-
-end
-
-# ==========================================================================
-
-@reexport using LearnBase.ClassEncodings
-
-typealias OneHotClassEncoding OneOfKClassEncoding
 
 # ==========================================================================
 

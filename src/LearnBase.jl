@@ -17,19 +17,10 @@ import MLBase: labelencode, labeldecode, groupindices
 
 export
 
-    PredictionLoss,
-        MarginBasedLoss,
-        DistanceBasedLoss,
-
-    LossFunctions,
-
     sigmoid,
     Predictor,
         LinearPredictor,
         SigmoidPredictor,
-
-    ParameterLoss,
-    ParameterLosses,
 
     EmpiricalRisk,
         EmpiricalRiskClassifier,
@@ -85,28 +76,11 @@ export
     ismarginbased,
     isclasscalibrated,
     isdistancebased,
-    issymmetric,
-
-    ClassEncoding,
-        SignedClassEncoding,
-        BinaryClassEncoding,
-        MultinomialClassEncoding,
-        OneHotClassEncoding,
-
-    nclasses,
-    labels,
-    classdistribution,
-
-    EncodedStatisticalModel,
-    EncodedRegressionModel
+    issymmetric
 
 include("common.jl")
-include("abstract_cost.jl")
-include("abstract_penalty.jl")
-include("classencoding.jl")
-include("encodedmodel.jl")
-include("loss/LossFunctions.jl")
-include("paramcosts.jl")
+include("encoding/encoding.jl")
+include("loss/loss.jl")
 include("risk/prediction.jl")
 include("risk/empiricalrisk.jl")
 include("risk/riskfunc.jl")

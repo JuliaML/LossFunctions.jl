@@ -1,4 +1,7 @@
 
+# -------------------------------------------------------------
+# Repurposed from https://github.com/tbreloff/OnlineAI.jl
+# -------------------------------------------------------------
 
 abstract ParamUpdater
 abstract ParamUpdaterState

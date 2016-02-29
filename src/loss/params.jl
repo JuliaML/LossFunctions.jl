@@ -1,22 +1,21 @@
-module ParameterLosses
+# module ParameterLosses
 
-import ..LearnBase: value, value!, deriv, deriv!, deriv2, value_deriv, grad, grad!,
-                    value_fun, deriv_fun, deriv2_fun, value_deriv_fun,
-                    addgrad!
-import ..LearnBase: isminimizable, isdifferentiable, istwicedifferentiable,
-                    isconvex, islipschitzcont, islocallylipschitzcont,
-                    isclipable, ismarginbased, issymmetric
-import ..LearnBase: ParameterLoss
-import ..LearnBase: @_dimcheck
-import Base: show, call, print, transpose
+# import ..LearnBase: value, value!, deriv, deriv!, deriv2, value_deriv, grad, grad!,
+#                     value_fun, deriv_fun, deriv2_fun, value_deriv_fun,
+#                     addgrad!
+# import ..LearnBase: isminimizable, isdifferentiable, istwicedifferentiable,
+#                     isconvex, islipschitzcont, islocallylipschitzcont,
+#                     isclipable, ismarginbased, issymmetric
+# import ..LearnBase: ParameterLoss
+# import ..LearnBase: @_dimcheck
+# import Base: show, call, print, transpose
 
-export
-
-    NoParameterLoss,
-    L1ParameterLoss,
-    L2ParameterLoss
-    # ElasticNetParameterLoss,
-    # SCADParameterLoss,
+# @autocomplete ParameterLosses export
+#     NoParameterLoss,
+#     L1ParameterLoss,
+#     L2ParameterLoss
+#     # ElasticNetParameterLoss,
+#     # SCADParameterLoss,
 
 
 # ==========================================================================
@@ -108,4 +107,4 @@ end
 # ==========================================================================
 
 
-end # module
+# end # module
