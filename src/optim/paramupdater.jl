@@ -3,28 +3,6 @@
 # Repurposed from https://github.com/tbreloff/OnlineAI.jl
 # -------------------------------------------------------------
 
-export
-    ParameterUpdater,
-    SGDUpdater,
-    AdagradUpdater,
-    AdadeltaUpdater,
-    AdamUpdater,
-    AdaMaxUpdater,
-
-    ParameterUpdaterState,
-    SGDState,
-    AdagradState,
-    AdadeltaState,
-    AdamState,
-    AdaMaxState,
-
-    get_state_type,
-    param_change!
-
-abstract ParameterUpdater
-abstract ParameterUpdaterState
-
-
 """
 Calculate the amount `Δwᵢⱼ` to adjust the parameter.  Signatures:
 

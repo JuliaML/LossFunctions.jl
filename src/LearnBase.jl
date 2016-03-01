@@ -27,15 +27,6 @@ export
         EmpiricalRiskRegressor,
     RiskFunctional,
 
-    AbstractOptimizer,
-    AbstractSolver,
-
-    MinimizableFunctor,
-        DifferentiableFunctor,
-            TwiceDifferentiableFunctor,
-
-    optimize,
-
     value,
     value!,
     meanvalue,
@@ -86,8 +77,6 @@ include("risk/prediction.jl")
 include("risk/empiricalrisk.jl")
 include("risk/riskfunc.jl")
 include("risk/riskmodel.jl")
-include("optim/minimizeable.jl")
-include("optim/optimize.jl")
-include("optim/paramupdater.jl")
+include("optim/optim.jl")
 
 end # module
