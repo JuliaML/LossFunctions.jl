@@ -26,8 +26,8 @@ f(x) = x
 f'(x) = 1
 """
 immutable IdentityActivation <: Activation end
-value(activation::IdentityActivation, input::Real) = input
-deriv(activation::IdentityActivation, input::Real) = 1.0
+value(activation::IdentityActivation, input::Number) = input
+deriv{T<:Number}(activation::IdentityActivation, input::T) = one(T)
 
 # ----------------------------------------------------------------------------
 
@@ -36,8 +36,8 @@ f(x) = 1 / (1 + exp(-x))
 f'(x) = f(x) * (1 - f(x))
 """
 immutable SigmoidActivation <: Activation end
-value(activation::SigmoidActivation, input::Real) = 1.0 / (1.0 + exp(-input))
-deriv(activation::SigmoidActivation, input::Real) = (s = value(activation, input); s * (1.0 - s))
+value{T<:Number}(activation::SigmoidActivation, input::T) = one(T) / (one(T) + exp(-input))
+deriv{T<:Number}(activation::SigmoidActivation, input::T) = (s = value(activation, input); s * (one(T) - s))
 
 # ----------------------------------------------------------------------------
 
@@ -46,8 +46,8 @@ f(x) = tanh(x)
 f'(x) = 1 - tanh(x)²
 """
 immutable TanhActivation <: Activation end
-value(activation::TanhActivation, input::Real) = tanh(input)
-deriv(activation::TanhActivation, input::Real) = 1.0 - tanh(input)^2
+value(activation::TanhActivation, input::Number) = tanh(input)
+deriv{T<:Number}(activation::TanhActivation, input::T) = one(T) - tanh(input)^2
 
 # ----------------------------------------------------------------------------
 
@@ -56,8 +56,8 @@ f(x) = x / (1 + |x|)
 f'(x) = 1 / (1 + |x|)²
 """
 immutable SoftsignActivation <: Activation end
-value(activation::SoftsignActivation, input::Real) = input / (1.0 + abs(input))
-deriv(activation::SoftsignActivation, input::Real) = 1.0 / (1.0 + abs(input))^2
+value{T<:Number}(activation::SoftsignActivation, input::T) = input / (one(T) + abs(input))
+deriv{T<:Number}(activation::SoftsignActivation, input::T) = one(T) / (one(T) + abs(input))^2
 
 # ----------------------------------------------------------------------------
 
@@ -68,8 +68,8 @@ f'(x) = { 1,  x > 0
         { 0,  x ≤ 0
 """
 immutable ReLUActivation <: Activation end
-value(activation::ReLUActivation, input::Real) = max(0.0, input)
-deriv(activation::ReLUActivation, input::Real) = float(input >= 0.0)
+value{T<:Number}(activation::ReLUActivation, input::T) = max(zero(T), input)
+deriv{T<:Number}(activation::ReLUActivation, input::T) = input >= zero(T) ? one(T) : zero(T)
 
 # ----------------------------------------------------------------------------
 
@@ -79,12 +79,18 @@ f(x) = max(0, x)
 f'(x) = { 1,  x > 0
         { ρ,  x ≤ 0
 """
-immutable LReLUActivation <: Activation
-    ρ::Float64
+immutable LReLUActivation{T<:Number} <: Activation
+    ρ::T
 end
 LReLUActivation() = LReLUActivation(0.01)
-value(activation::LReLUActivation, input::Real) = deriv(activation, input) * input 
-deriv{T<:Real}(activation::LReLUActivation, input::T) = input >= zero(T) ? one(T) : activation.ρ
+
+value(activation::LReLUActivation, input::Number) = deriv(activation, input) * input 
+deriv{T<:Number}(activation::LReLUActivation{T}, input::T) = input >= zero(T) ? one(T) : activation.ρ
+
+function deriv{T<:Number, R<:Number}(activation::LReLUActivation{T}, input::R)
+    N = promote_type(T, R)
+    input >= zero(R) ? one(N) : N(activation.ρ)
+end
 
 # ----------------------------------------------------------------------------
 
@@ -101,28 +107,32 @@ immutable SoftmaxActivation <: Activation end
 
 function value(activation::SoftmaxActivation, input::AbstractVector)
     evec = exp(input)
-    evec / sum(evec)
+    s = sum(evec)
+    for i in eachindex(evec)
+        evec[i] /= s
+    end
+    evec
 end
 
-function deriv{T<:Real}(activation::SoftmaxActivation, input::AbstractVector{T})
+function deriv{T<:Number}(activation::SoftmaxActivation, input::AbstractVector{T})
     buffer = Array(T, length(input))
     deriv!(buffer, activation, input)
 end
 
-function value!(buffer::AbstractVector, activation::SoftmaxActivation, input::AbstractVector)
-    buffer[:] = exp(input)
+function value!{T<:Number}(buffer::AbstractVector{T}, activation::SoftmaxActivation, input::AbstractVector{T})
+    broadcast!(exp, buffer, input)
     s = sum(buffer)
-    for i=1:length(input)
+    for i in eachindex(input)
         buffer[i] /= s
     end
     buffer
 end
 
-function deriv!{T<:Real}(buffer::AbstractVector{T}, activation::SoftmaxActivation, input::AbstractVector{T})
+function deriv!{T<:Number}(buffer::AbstractVector{T}, activation::SoftmaxActivation, input::AbstractVector{T})
     throw(ArgumentError("This should never actually be used, as we expect Softmax to be used only with CrossEntropyCostModel and so we don't multiply by the derivative"))
 
     # though in case we change our minds on this logic, here's the derivative:
-    for i=1:length(input)
+    for i in eachindex(input)
         buffer[i] = input[i] * (one(T) - input[i])
     end
     buffer
