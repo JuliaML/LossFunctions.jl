@@ -6,7 +6,7 @@
 # ==========================================================================
 # L(target, output) = max(0, -agreement)
 
-immutable PerceptronLoss <: MarginBasedLoss end
+immutable PerceptronLoss <: MarginLoss end
 
 value{T<:Number}(loss::PerceptronLoss, agreement::T) = max(zero(T), -agreement)
 deriv{T<:Number}(loss::PerceptronLoss, agreement::T) = agreement >= 0 ? zero(T) : -one(T)
@@ -26,7 +26,7 @@ isclipable(::PerceptronLoss) = true
 # ==========================================================================
 # L(target, output) = ln(1 + exp(-agreement))
 
-immutable LogitMarginLoss <: MarginBasedLoss end
+immutable LogitMarginLoss <: MarginLoss end
 
 value(loss::LogitMarginLoss, agreement::Number) = log1p(exp(-agreement))
 deriv(loss::LogitMarginLoss, agreement::Number) = -one(agreement) / (one(agreement) + exp(agreement))
@@ -47,7 +47,7 @@ isclipable(::LogitMarginLoss) = false
 # ==========================================================================
 # L(target, output) = max(0, 1 - agreement)
 
-immutable L1HingeLoss <: MarginBasedLoss end
+immutable L1HingeLoss <: MarginLoss end
 typealias HingeLoss L1HingeLoss
 
 value{T<:Number}(loss::L1HingeLoss, agreement::T) = max(zero(T), one(T) - agreement)
@@ -68,7 +68,7 @@ isclipable(::L1HingeLoss) = true
 # ==========================================================================
 # L(target, output) = max(0, 1 - agreement)^2
 
-immutable L2HingeLoss <: MarginBasedLoss end
+immutable L2HingeLoss <: MarginLoss end
 
 value{T<:Number}(loss::L2HingeLoss, agreement::T) = agreement >= 1 ? zero(T) : abs2(one(T) - agreement)
 deriv{T<:Number}(loss::L2HingeLoss, agreement::T) = agreement >= 1 ? zero(T) : T(2) * (agreement - one(T))
@@ -90,7 +90,7 @@ isclipable(::L2HingeLoss) = true
 # L(target, output) = 0.5 / γ * max(0, 1 - agreement)^2   ... agreement >= 1 - γ
 #                     1 - γ / 2 - agreement               ... otherwise
 
-immutable SmoothedL1HingeLoss <: MarginBasedLoss
+immutable SmoothedL1HingeLoss <: MarginLoss
     gamma::Float64
 
     function SmoothedL1HingeLoss(γ::Number)
@@ -129,7 +129,7 @@ isclipable(::SmoothedL1HingeLoss) = true
 # L(target, output) = max(0, 1 - agreement)^2    ... agreement >= -1
 #                     -4*agreement               ... otherwise
 
-immutable ModifiedHuberLoss <: MarginBasedLoss end
+immutable ModifiedHuberLoss <: MarginLoss end
 
 function value{T<:Number}(loss::ModifiedHuberLoss, agreement::T)
     agreement >= -1 ? abs2(max(zero(T), one(agreement) - agreement)) : -T(4) * agreement

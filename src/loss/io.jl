@@ -1,5 +1,5 @@
 
-print(io::IO, loss::PredictionLoss, args...) = print(io, typeof(loss).name.name, args...)
+print(io::IO, loss::ModelLoss, args...) = print(io, typeof(loss).name.name, args...)
 print(io::IO, loss::L1DistLoss, args...) = print(io, "L1DistLoss", args...)
 print(io::IO, loss::L2DistLoss, args...) = print(io, "L2DistLoss", args...)
 print{P}(io::IO, loss::LPDistLoss{P}, args...) = print(io, typeof(loss).name.name, " with P = $(P)", args...)
@@ -12,7 +12,7 @@ print(io::IO, loss::SmoothedL1HingeLoss, args...) = print(io, typeof(loss).name.
     using UnicodePlots
     import UnicodePlots: lineplot, lineplot!
 
-    function show(io::IO, loss::Union{MarginBasedLoss,DistanceBasedLoss,ZeroOneLoss})
+    function show(io::IO, loss::Union{MarginLoss,DistanceLoss,ZeroOneLoss})
         println(io, loss)
         newPlot = lineplot(loss, -3:.05:3, margin = 0, width = 20, height = 5, name = " ")
         xl = xlabel(newPlot)
@@ -58,7 +58,7 @@ print(io::IO, loss::SmoothedL1HingeLoss, args...) = print(io, typeof(loss).name.
     end
 
     function lineplot(
-            loss::Union{MarginBasedLoss,ZeroOneLoss},
+            loss::Union{MarginLoss,ZeroOneLoss},
             args...;
             name = string(typeof(loss).name.name),
             nargs...)
@@ -68,7 +68,7 @@ print(io::IO, loss::SmoothedL1HingeLoss, args...) = print(io, typeof(loss).name.
     end
 
     function lineplot(
-            loss::DistanceBasedLoss,
+            loss::DistanceLoss,
             args...;
             name = string(typeof(loss).name.name),
             nargs...)
@@ -102,14 +102,14 @@ print(io::IO, loss::SmoothedL1HingeLoss, args...) = print(io, typeof(loss).name.
 
     function lineplot!{C<:Canvas}(
             plot::Plot{C},
-            loss::Union{MarginBasedLoss,DistanceBasedLoss,ZeroOneLoss},
+            loss::Union{MarginLoss,DistanceLoss,ZeroOneLoss},
             args...;
             name = string(typeof(loss).name.name),
             nargs...)
         lineplot!(plot, value_fun(loss), args...; name = name, nargs...)
     end
 
-    function lineplot{T<:PredictionLoss}(
+    function lineplot{T<:ModelLoss}(
             lossvec::AbstractVector{T}, args...; name = "", nargs...)
         n = length(lossvec)
         @assert n > 0
@@ -120,7 +120,7 @@ print(io::IO, loss::SmoothedL1HingeLoss, args...) = print(io, typeof(loss).name.
         newPlot
     end
 
-    function lineplot!{C<:Canvas,T<:PredictionLoss}(
+    function lineplot!{C<:Canvas,T<:ModelLoss}(
             plot::Plot{C},
             lossvec::AbstractVector{T},
             args...; nargs...)

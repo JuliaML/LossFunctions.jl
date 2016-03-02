@@ -5,9 +5,9 @@ export
 
     # abstract types
     Loss,
-        PredictionLoss,
-            MarginBasedLoss,
-            DistanceBasedLoss,
+        ModelLoss,
+            MarginLoss,
+            DistanceLoss,
         ParameterLoss,
 
     # autocomplete objects

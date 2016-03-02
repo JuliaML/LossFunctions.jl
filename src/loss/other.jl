@@ -2,7 +2,7 @@
 # ==========================================================================
 # L(target, output) = - target*ln(output) - (1-target)*ln(1-output)
 
-immutable CrossentropyLoss <: PredictionLoss end
+immutable CrossentropyLoss <: ModelLoss end
 typealias LogitProbLoss CrossentropyLoss
 
 function value(loss::CrossentropyLoss, target::Number, output::Number)
@@ -24,7 +24,7 @@ isconvex(::CrossentropyLoss) = true
 # ==========================================================================
 # L(target, output) = sign(agreement) < 0 ? 1 : 0
 
-immutable ZeroOneLoss <: PredictionLoss end
+immutable ZeroOneLoss <: ModelLoss end
 
 value(loss::ZeroOneLoss, target::Number, output::Number) = value(loss, target * output)
 deriv(loss::ZeroOneLoss, target::Number, output::Number) = zero(output)

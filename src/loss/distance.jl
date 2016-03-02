@@ -1,7 +1,7 @@
 # ==========================================================================
 # L(y, t) = |y - t|^P
 
-immutable LPDistLoss{P} <: DistanceBasedLoss
+immutable LPDistLoss{P} <: DistanceLoss
     LPDistLoss() = typeof(P) <: Number ? new() : error()
 end
 
@@ -77,7 +77,7 @@ isstronglyconvex(::L2DistLoss) = true
 # ==========================================================================
 # L(y, t) = max(0, |y - t| - ɛ)
 
-immutable L1EpsilonInsLoss <: DistanceBasedLoss
+immutable L1EpsilonInsLoss <: DistanceLoss
     eps::Float64
 
     function L1EpsilonInsLoss(ɛ::Number)
@@ -108,7 +108,7 @@ isstronglyconvex(::L1EpsilonInsLoss) = false
 # ==========================================================================
 # L(y, t) = max(0, |y - t| - ɛ)^2
 
-immutable L2EpsilonInsLoss <: DistanceBasedLoss
+immutable L2EpsilonInsLoss <: DistanceLoss
     eps::Float64
 
     function L2EpsilonInsLoss(ɛ::Number)
@@ -142,7 +142,7 @@ isstronglyconvex(::L2EpsilonInsLoss) = true
 # ==========================================================================
 # L(y, t) = -ln(4 * exp(y - t) / (1 + exp(y - t))²)
 
-immutable LogitDistLoss <: DistanceBasedLoss end
+immutable LogitDistLoss <: DistanceLoss end
 
 function value(loss::LogitDistLoss, residual::Number)
     er = exp(residual)
