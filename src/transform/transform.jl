@@ -3,22 +3,22 @@ abstract Transformation
 
 export
     Transformation,
-        Activation
+        Mapping
 
 # ------------------------------------
-# Activation Functions
+# Mapping Functions
 # ------------------------------------
 
-include("activation.jl")
+include("mapping.jl")
 
-@autocomplete Activations export
-    IdentityActivation,
-    SigmoidActivation,
-    TanhActivation,
-    SoftsignActivation,
-    ReLUActivation,
-    LReLUActivation,
-    SoftmaxActivation
+@autocomplete Mappings export
+    IdentityMapping,
+    SigmoidMapping,
+    TanhMapping,
+    SoftsignMapping,
+    ReLUMapping,
+    LReLUMapping,
+    SoftmaxMapping
 
 
 # ------------------------------------
