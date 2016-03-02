@@ -1,12 +1,17 @@
+
+# Note: agreement = output * target
+#       Agreement is high when output and target are the same sign and |output| is large.
+#       It is an indication that the output represents the correct class in a margin-based model.
+
 # ==========================================================================
-# L(y, t) = max(0, -yt)
+# L(target, output) = max(0, -agreement)
 
 immutable PerceptronLoss <: MarginBasedLoss end
 
-value{T<:Number}(loss::PerceptronLoss, yt::T) = max(zero(T), -yt)
-deriv{T<:Number}(loss::PerceptronLoss, yt::T) = yt >= 0 ? zero(T) : -one(T)
-deriv2{T<:Number}(loss::PerceptronLoss, yt::T) = zero(T)
-value_deriv{T<:Number}(loss::PerceptronLoss, yt::T) = yt >= 0 ? (zero(T), zero(T)) : (-yt, -one(T))
+value{T<:Number}(loss::PerceptronLoss, agreement::T) = max(zero(T), -agreement)
+deriv{T<:Number}(loss::PerceptronLoss, agreement::T) = agreement >= 0 ? zero(T) : -one(T)
+deriv2{T<:Number}(loss::PerceptronLoss, agreement::T) = zero(T)
+value_deriv{T<:Number}(loss::PerceptronLoss, agreement::T) = agreement >= 0 ? (zero(T), zero(T)) : (-agreement, -one(T))
 
 isdifferentiable(::PerceptronLoss) = false
 isdifferentiable(::PerceptronLoss, at) = at != 0
@@ -19,14 +24,14 @@ isstronglyconvex(::PerceptronLoss) = false
 isclipable(::PerceptronLoss) = true
 
 # ==========================================================================
-# L(y, t) = ln(1 + exp(-yt))
+# L(target, output) = ln(1 + exp(-agreement))
 
 immutable LogitMarginLoss <: MarginBasedLoss end
 
-value(loss::LogitMarginLoss, yt::Number) = log1p(exp(-yt))
-deriv(loss::LogitMarginLoss, yt::Number) = -one(yt) / (one(yt) + exp(yt))
-deriv2(loss::LogitMarginLoss, yt::Number) = (eᵗ = exp(yt); eᵗ / abs2(one(eᵗ) + eᵗ))
-value_deriv(loss::LogitMarginLoss, yt::Number) = (eᵗ = exp(-yt); (log1p(eᵗ), -eᵗ / (one(eᵗ) + eᵗ)))
+value(loss::LogitMarginLoss, agreement::Number) = log1p(exp(-agreement))
+deriv(loss::LogitMarginLoss, agreement::Number) = -one(agreement) / (one(agreement) + exp(agreement))
+deriv2(loss::LogitMarginLoss, agreement::Number) = (eᵗ = exp(agreement); eᵗ / abs2(one(eᵗ) + eᵗ))
+value_deriv(loss::LogitMarginLoss, agreement::Number) = (eᵗ = exp(-agreement); (log1p(eᵗ), -eᵗ / (one(eᵗ) + eᵗ)))
 
 isunivfishercons(::LogitMarginLoss) = true
 isdifferentiable(::LogitMarginLoss) = true
@@ -40,15 +45,15 @@ isstronglyconvex(::LogitMarginLoss) = true
 isclipable(::LogitMarginLoss) = false
 
 # ==========================================================================
-# L(y, t) = max(0, 1 - yt)
+# L(target, output) = max(0, 1 - agreement)
 
 immutable L1HingeLoss <: MarginBasedLoss end
 typealias HingeLoss L1HingeLoss
 
-value{T<:Number}(loss::L1HingeLoss, yt::T) = max(zero(T), one(T) - yt)
-deriv{T<:Number}(loss::L1HingeLoss, yt::T) = yt >= 1 ? zero(T) : -one(T)
-deriv2{T<:Number}(loss::L1HingeLoss, yt::T) = zero(T)
-value_deriv{T<:Number}(loss::L1HingeLoss, yt::T) = yt >= 1 ? (zero(T), zero(T)) : (one(T) - yt, -one(T))
+value{T<:Number}(loss::L1HingeLoss, agreement::T) = max(zero(T), one(T) - agreement)
+deriv{T<:Number}(loss::L1HingeLoss, agreement::T) = agreement >= 1 ? zero(T) : -one(T)
+deriv2{T<:Number}(loss::L1HingeLoss, agreement::T) = zero(T)
+value_deriv{T<:Number}(loss::L1HingeLoss, agreement::T) = agreement >= 1 ? (zero(T), zero(T)) : (one(T) - agreement, -one(T))
 
 isdifferentiable(::L1HingeLoss) = false
 isdifferentiable(::L1HingeLoss, at) = at != 1
@@ -61,14 +66,14 @@ isstronglyconvex(::L1HingeLoss) = false
 isclipable(::L1HingeLoss) = true
 
 # ==========================================================================
-# L(y, t) = max(0, 1 - yt)^2
+# L(target, output) = max(0, 1 - agreement)^2
 
 immutable L2HingeLoss <: MarginBasedLoss end
 
-value{T<:Number}(loss::L2HingeLoss, yt::T) = yt >= 1 ? zero(T) : abs2(one(T) - yt)
-deriv{T<:Number}(loss::L2HingeLoss, yt::T) = yt >= 1 ? zero(T) : T(2) * (yt - one(T))
-deriv2{T<:Number}(loss::L2HingeLoss, yt::T) = yt >= 1 ? zero(T) : T(2)
-value_deriv{T<:Number}(loss::L2HingeLoss, yt::T) = yt >= 1 ? (zero(T), zero(T)) : (abs2(one(T) - yt), T(2) * (yt - one(T)))
+value{T<:Number}(loss::L2HingeLoss, agreement::T) = agreement >= 1 ? zero(T) : abs2(one(T) - agreement)
+deriv{T<:Number}(loss::L2HingeLoss, agreement::T) = agreement >= 1 ? zero(T) : T(2) * (agreement - one(T))
+deriv2{T<:Number}(loss::L2HingeLoss, agreement::T) = agreement >= 1 ? zero(T) : T(2)
+value_deriv{T<:Number}(loss::L2HingeLoss, agreement::T) = agreement >= 1 ? (zero(T), zero(T)) : (abs2(one(T) - agreement), T(2) * (agreement - one(T)))
 
 isdifferentiable(::L2HingeLoss) = true
 isdifferentiable(::L2HingeLoss, at) = true
@@ -82,8 +87,8 @@ isstronglyconvex(::L2HingeLoss) = true
 isclipable(::L2HingeLoss) = true
 
 # ==========================================================================
-# L(y, t) = 0.5 / γ * max(0, 1 - yt)^2   ... yt >= 1 - γ
-#           1 - γ / 2 - yt               ... otherwise
+# L(target, output) = 0.5 / γ * max(0, 1 - agreement)^2   ... agreement >= 1 - γ
+#                     1 - γ / 2 - agreement               ... otherwise
 
 immutable SmoothedL1HingeLoss <: MarginBasedLoss
     gamma::Float64
@@ -94,20 +99,20 @@ immutable SmoothedL1HingeLoss <: MarginBasedLoss
     end
 end
 
-function value{T<:Number}(loss::SmoothedL1HingeLoss, yt::T)
-    yt >= 1 - loss.gamma ? 0.5 / loss.gamma * abs2(max(zero(T), one(T) - yt)) : one(T) - loss.gamma / 2 - yt
+function value{T<:Number}(loss::SmoothedL1HingeLoss, agreement::T)
+    agreement >= 1 - loss.gamma ? 0.5 / loss.gamma * abs2(max(zero(T), one(T) - agreement)) : one(T) - loss.gamma / 2 - agreement
 end
-function deriv{T<:Number}(loss::SmoothedL1HingeLoss, yt::T)
-    if yt >= 1 - loss.gamma
-        yt >= 1 ? zero(T) : (yt - one(T)) / loss.gamma
+function deriv{T<:Number}(loss::SmoothedL1HingeLoss, agreement::T)
+    if agreement >= 1 - loss.gamma
+        agreement >= 1 ? zero(T) : (agreement - one(T)) / loss.gamma
     else
         -one(T)
     end
 end
-function deriv2{T<:Number}(loss::SmoothedL1HingeLoss, yt::T)
-    yt < 1 - loss.gamma || yt > 1 ? zero(T) : one(T) / loss.gamma
+function deriv2{T<:Number}(loss::SmoothedL1HingeLoss, agreement::T)
+    agreement < 1 - loss.gamma || agreement > 1 ? zero(T) : one(T) / loss.gamma
 end
-value_deriv(loss::SmoothedL1HingeLoss, yt::Number) = (value(loss, yt), deriv(loss, yt))
+value_deriv(loss::SmoothedL1HingeLoss, agreement::Number) = (value(loss, agreement), deriv(loss, agreement))
 
 isdifferentiable(::SmoothedL1HingeLoss) = true
 isdifferentiable(::SmoothedL1HingeLoss, at) = true
@@ -121,25 +126,25 @@ isstronglyconvex(::SmoothedL1HingeLoss) = false
 isclipable(::SmoothedL1HingeLoss) = true
 
 # ==========================================================================
-# L(y, t) = max(0, 1 - yt)^2    ... yt >= -1
-#           -4*yt               ... otherwise
+# L(target, output) = max(0, 1 - agreement)^2    ... agreement >= -1
+#                     -4*agreement               ... otherwise
 
 immutable ModifiedHuberLoss <: MarginBasedLoss end
 
-function value{T<:Number}(loss::ModifiedHuberLoss, yt::T)
-    yt >= -1 ? abs2(max(zero(T), one(yt) - yt)) : -T(4) * yt
+function value{T<:Number}(loss::ModifiedHuberLoss, agreement::T)
+    agreement >= -1 ? abs2(max(zero(T), one(agreement) - agreement)) : -T(4) * agreement
 end
-function deriv{T<:Number}(loss::ModifiedHuberLoss, yt::T)
-    if yt >= -1
-        yt > 1 ? zero(T) : T(2)*yt - T(2)
+function deriv{T<:Number}(loss::ModifiedHuberLoss, agreement::T)
+    if agreement >= -1
+        agreement > 1 ? zero(T) : T(2)*agreement - T(2)
     else
         -T(4)
     end
 end
-function deriv2{T<:Number}(loss::ModifiedHuberLoss, yt::T)
-    yt < -1 || yt > 1 ? zero(T) : T(2)
+function deriv2{T<:Number}(loss::ModifiedHuberLoss, agreement::T)
+    agreement < -1 || agreement > 1 ? zero(T) : T(2)
 end
-value_deriv(loss::ModifiedHuberLoss, yt::Number) = (value(loss, yt), deriv(loss, yt))
+value_deriv(loss::ModifiedHuberLoss, agreement::Number) = (value(loss, agreement), deriv(loss, agreement))
 
 isdifferentiable(::ModifiedHuberLoss) = true
 isdifferentiable(::ModifiedHuberLoss, at) = true

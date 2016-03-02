@@ -197,7 +197,7 @@ issymmetric(::PredictionLoss) = false
 
 abstract MarginBasedLoss <: PredictionLoss
 
-@inline call(loss::MarginBasedLoss, yt) = value(loss, yt)
+@inline call(loss::MarginBasedLoss, agreement) = value(loss, agreement)
 @inline value(loss::MarginBasedLoss, target::Number, output::Number) = value(loss, target * output)
 @inline deriv(loss::MarginBasedLoss, target::Number, output::Number) = target * deriv(loss, target * output)
 @inline deriv2(loss::MarginBasedLoss, target::Number, output::Number) = deriv2(loss, target * output)
