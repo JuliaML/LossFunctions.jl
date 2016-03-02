@@ -17,16 +17,6 @@ import MLBase: labelencode, labeldecode, groupindices
 
 export
 
-    sigmoid,
-    Predictor,
-        LinearPredictor,
-        SigmoidPredictor,
-
-    EmpiricalRisk,
-        EmpiricalRiskClassifier,
-        EmpiricalRiskRegressor,
-    RiskFunctional,
-
     value,
     value!,
     meanvalue,
@@ -73,10 +63,7 @@ include("common.jl")
 include("encoding/encoding.jl")
 include("loss/loss.jl")
 include("transform/transform.jl")
-include("risk/prediction.jl")
-include("risk/empiricalrisk.jl")
-include("risk/riskfunc.jl")
-include("risk/riskmodel.jl")
+include("risk/risk.jl")
 include("optim/optim.jl")
 
 end # module
