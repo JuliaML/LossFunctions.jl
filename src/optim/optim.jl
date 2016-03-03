@@ -91,6 +91,13 @@ include("paramupdater.jl")
     AdamState,
     AdaMaxState
     
+function Base.show{S<:ParameterUpdaterState}(io::IO, states::AbstractVecOrMat{S})
+    write(io, "$S:")
+    for field in fieldnames(S)
+        write(io, "\n  $field\n")
+        show(io, map(x->getfield(x,field), states))
+    end
+end
 
 # ------------------------------------------------------------
 # sensitivity / error responsibility calculations

@@ -1,3 +1,6 @@
+
+__precompile__()
+
 module LearnBase
 
 using Reexport
