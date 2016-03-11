@@ -3,7 +3,7 @@
 msg("Test linear regression on noisy line")
 
 w = [1, 10]
-x, y = DataGenerators.noisy_poly(w, -10:.2:10, noise = .5)
+x, y = noisy_poly(w, -10:.2:10, noise = .5)
 X = x'
 
 # Set hyper parameters
@@ -33,9 +33,9 @@ print(mp)
 msg("Test linear regression on sin using poly basis expansion")
 
 k = 5
-x, y = DataGenerators.noisy_sin(100; noise = .1)
-X = DataUtils.expand_poly(x, degree = 4)
-DataUtils.normalize!(X)
+x, y = noisy_sin(100; noise = .1)
+X = expand_poly(x, degree = 4)
+rescale!(X)
 
 # Set hyper parameters
 θ = zeros(k)
@@ -66,12 +66,12 @@ msg("Test linear regression with L2 pen on sin using poly basis expansion")
 
 k = 14
 x, y = load_sin()
-X = DataUtils.expand_poly(x, degree = k)
-o, s = DataUtils.normalize!(X)
+X = expand_poly(x, degree = k)
+o, s = rescale!(X)
 
 x1 = collect(0:.01:2π)
-X1 = DataUtils.expand_poly(x1, degree = k)
-DataUtils.normalize!(X1, o, s)
+X1 = expand_poly(x1, degree = k)
+rescale!(X1, o, s)
 
 θ = zeros(k)
 α = 0.05
@@ -79,7 +79,7 @@ maxIter = 5000
 
 loss = LossFunctions.L2DistLoss()
 pred = LinearPredictor(bias = 0)
-pen = Penalties.L2Penalty(0.05)
+pen = ParameterLosses.L2ParameterLoss(0.05)
 risk = EmpiricalRisk(pred, loss, pen)
 ŷ = pred(X, θ)
 ▽ = zeros(k, 1)

@@ -3,7 +3,7 @@
 msg("Test linear regression with value_grad_fun")
 
 w = [1, 10]
-x, y = DataGenerators.noisy_poly(w, -10:.2:10, noise = .5)
+x, y = noisy_poly(w, -10:.2:10, noise = .5)
 X = x'
 
 # Set hyper parameters
@@ -36,9 +36,9 @@ print(mp)
 msg("Test linear regression with value_fun and grad_fun")
 
 k = 5
-x, y = DataGenerators.noisy_sin(100; noise = .1)
-X = DataUtils.expand_poly(x, degree = 4)
-DataUtils.normalize!(X)
+x, y = noisy_sin(100; noise = .1)
+X = expand_poly(x, degree = 4)
+rescale!(X)
 
 # Set hyper parameters
 θ = zeros(k)

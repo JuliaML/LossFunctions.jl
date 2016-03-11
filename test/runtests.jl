@@ -1,7 +1,7 @@
 using LearnBase
-using LearnBase.LossFunctions
-using LearnBase.Penalties
-using MLDatasets
+# using LearnBase.LossFunctions
+# using LearnBase.ParameterLosses
+using MLDataUtils
 using UnicodePlots
 using DualNumbers
 using Base.Test
@@ -17,6 +17,8 @@ function msg2(args...; newline = false)
 end
 
 tests = [
+    "tst_mapping.jl"
+    "tst_paramupdater.jl"
     "tst_loss.jl"
     "tst_classencoding.jl"
     "tst_penalty.jl"
@@ -28,6 +30,9 @@ tests = [
 perf = [
     #"bm_datasource.jl"
 ]
+
+# for deterministic testing
+srand(1234)
 
 for t in tests
     println("[->] $t")

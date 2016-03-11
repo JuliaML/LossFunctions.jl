@@ -1,49 +1,24 @@
+
+__precompile__()
+
 module LearnBase
 
 using Reexport
 @reexport using MLBase
+using Requires
 using ArrayViews
-using UnicodePlots
+# using UnicodePlots
 
-import Base: show, shuffle!, convert, call, print, transpose, minimum
-import UnicodePlots: lineplot, lineplot!
+import Base: show, shuffle!, convert, call, print, transpose, minimum, copy
+@require UnicodePlots begin
+    import UnicodePlots: lineplot, lineplot!
+end
 import StatsBase: fit, fit!, predict, predict!, nobs, coef,
                   deviance, loglikelihood, coeftable, stderr,
                   vcov, confint, residuals, model_response
 import MLBase: labelencode, labeldecode, groupindices
 
 export
-
-    Cost,
-        Loss,
-            SupervisedLoss,
-                MarginBasedLoss,
-                DistanceBasedLoss,
-            UnsupervisedLoss,
-
-    LossFunctions,
-
-    sigmoid,
-    Predictor,
-        LinearPredictor,
-        SigmoidPredictor,
-
-    Penalty,
-    Penalties,
-
-    EmpiricalRisk,
-        EmpiricalRiskClassifier,
-        EmpiricalRiskRegressor,
-    RiskFunctional,
-
-    AbstractOptimizer,
-    AbstractSolver,
-
-    MinimizableFunctor,
-        DifferentiableFunctor,
-            TwiceDifferentiableFunctor,
-
-    optimize,
 
     value,
     value!,
@@ -85,33 +60,13 @@ export
     ismarginbased,
     isclasscalibrated,
     isdistancebased,
-    issymmetric,
-
-    ClassEncoding,
-        SignedClassEncoding,
-        BinaryClassEncoding,
-        MultinomialClassEncoding,
-        OneHotClassEncoding,
-
-    nclasses,
-    labels,
-    classdistribution,
-
-    EncodedStatisticalModel,
-    EncodedRegressionModel
+    issymmetric
 
 include("common.jl")
-include("abstract_cost.jl")
-include("abstract_penalty.jl")
-include("classencoding.jl")
-include("encodedmodel.jl")
-include("loss/LossFunctions.jl")
-include("penalty/Penalties.jl")
-include("risk/prediction.jl")
-include("risk/empiricalrisk.jl")
-include("risk/riskfunc.jl")
-include("risk/riskmodel.jl")
-include("optim/minimizeable.jl")
-include("optim/optimize.jl")
+include("encoding/encoding.jl")
+include("loss/loss.jl")
+include("transform/transform.jl")
+include("risk/risk.jl")
+include("optim/optim.jl")
 
 end # module

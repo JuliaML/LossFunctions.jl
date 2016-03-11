@@ -11,7 +11,7 @@ type RiskFunctional{TRisk<:EmpiricalRisk,
     grad::TGrat
 end
 
-function RiskFunctional{TPred<:Predictor, TLoss<:Loss, TPen<:Penalty}(
+function RiskFunctional{TPred<:Predictor, TLoss<:ModelLoss, TPen<:ParameterLoss}(
         risk::EmpiricalRisk{TPred, TLoss, TPen},
         X::AbstractMatrix,
         Y::AbstractVector)

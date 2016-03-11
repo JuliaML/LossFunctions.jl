@@ -1,39 +1,39 @@
 
 # ==========================================================================
-# L(y, t) = - y*ln(t) - (1-y)*ln(1-t)
+# L(target, output) = - target*ln(output) - (1-target)*ln(1-output)
 
-immutable CrossentropyLoss <: SupervisedLoss end
+immutable CrossentropyLoss <: ModelLoss end
 typealias LogitProbLoss CrossentropyLoss
 
-function value(l::CrossentropyLoss, y::Number, t::Number)
-    if y == 1
-        -log(t)
-    elseif y == 0
-        -log(1 - t)
+function value(loss::CrossentropyLoss, target::Number, output::Number)
+    if target == 0
+        -log(1 - output)
+    elseif target == 1
+        -log(output)
     else
-        -y*log(t) - (1-y)*log(1-t)
+        -(target * log(output) + (1-target) * log(1-output))
     end
 end
-deriv(l::CrossentropyLoss, y::Number, t::Number) = t - y
-deriv2(l::CrossentropyLoss, y::Number, t::Number) = 1
-value_deriv(l::CrossentropyLoss, y::Number, t::Number) = (value(l,y,t), deriv(l,y,t))
+deriv(loss::CrossentropyLoss, target::Number, output::Number) = (1-target) / (1-output) - target / output
+deriv2(loss::CrossentropyLoss, target::Number, output::Number) = (1-target) / (1-output)^2 + target / output^2
+value_deriv(loss::CrossentropyLoss, target::Number, output::Number) = (value(loss,target,output), deriv(loss,target,output))
 
 isdifferentiable(::CrossentropyLoss) = true
 isconvex(::CrossentropyLoss) = true
 
 # ==========================================================================
-# L(y, t) = sign(yt) < 0 ? 1 : 0
+# L(target, output) = sign(agreement) < 0 ? 1 : 0
 
-immutable ZeroOneLoss <: SupervisedLoss end
+immutable ZeroOneLoss <: ModelLoss end
 
-value(l::ZeroOneLoss, y::Number, t::Number) = value(l, y * t)
-deriv(l::ZeroOneLoss, y::Number, t::Number) = zero(t)
-deriv2(l::ZeroOneLoss, y::Number, t::Number) = zero(t)
+value(loss::ZeroOneLoss, target::Number, output::Number) = value(loss, target * output)
+deriv(loss::ZeroOneLoss, target::Number, output::Number) = zero(output)
+deriv2(loss::ZeroOneLoss, target::Number, output::Number) = zero(output)
 
-value{T<:Number}(l::ZeroOneLoss, yt::T) = sign(yt) < 0 ? one(T) : zero(T)
-deriv{T<:Number}(l::ZeroOneLoss, yt::T) = zero(T)
-deriv2{T<:Number}(l::ZeroOneLoss, yt::T) = zero(T)
+value{T<:Number}(loss::ZeroOneLoss, agreement::T) = sign(agreement) < 0 ? one(T) : zero(T)
+deriv{T<:Number}(loss::ZeroOneLoss, agreement::T) = zero(T)
+deriv2{T<:Number}(loss::ZeroOneLoss, agreement::T) = zero(T)
 
 isdifferentiable(::ZeroOneLoss) = false
 isconvex(::ZeroOneLoss) = false
-isclasscalibrated(l::ZeroOneLoss) = true
+isclasscalibrated(loss::ZeroOneLoss) = true
