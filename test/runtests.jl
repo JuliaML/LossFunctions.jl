@@ -1,19 +1,13 @@
 using LearnBase
-# using LearnBase.LossFunctions
-# using LearnBase.ParameterLosses
 using MLDataUtils
 using UnicodePlots
 using DualNumbers
-using Base.Test
 
-function msg(args...; newline = true)
-    print("   --> ", args...)
-    newline && println()
-end
-
-function msg2(args...; newline = false)
-    print("       - ", args...)
-    newline && println()
+if VERSION >= v"0.5-"
+    using Base.Test
+else
+    using BaseTestNext
+    const Test = BaseTestNext
 end
 
 tests = [
@@ -35,15 +29,13 @@ perf = [
 srand(1234)
 
 for t in tests
-    println("[->] $t")
-    include(t)
-    println("[OK] $t")
-    println("====================================================================")
+    @testset "$t" begin
+        include(t)
+    end
 end
 
 for p in perf
-    println("[->] $p")
-    include(p)
-    println("[OK] $p")
-    println("====================================================================")
+    @testset "$p" begin
+        include(p)
+    end
 end

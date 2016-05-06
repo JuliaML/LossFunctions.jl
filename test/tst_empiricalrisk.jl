@@ -1,97 +1,96 @@
-# ==========================================================================
+@testset "Test linear regression on noisy line" begin
 
-msg("Test linear regression on noisy line")
+    w = [1, 10]
+    x, y = noisy_poly(w, -10:.2:10, noise = .5)
+    X = x'
 
-w = [1, 10]
-x, y = noisy_poly(w, -10:.2:10, noise = .5)
-X = x'
+    # Set hyper parameters
+    θ = randn(length(w))
+    α = 0.005
+    maxIter = 1000
 
-# Set hyper parameters
-θ = randn(length(w))
-α = 0.005
-maxIter = 1000
+    loss = LossFunctions.L2DistLoss()
+    pred = LinearPredictor(bias = 1)
+    risk = EmpiricalRisk(pred, loss)
+    ŷ = pred(X, θ)
+    ▽ = zeros(length(w), 1)
 
-loss = LossFunctions.L2DistLoss()
-pred = LinearPredictor(bias = 1)
-risk = EmpiricalRisk(pred, loss)
-ŷ = pred(X, θ)
-▽ = zeros(length(w), 1)
+    for i = 1:maxIter
+        value!(ŷ, risk, X, θ, y)
+        grad!(▽, risk, X, θ, y, ŷ)
+        θ = θ - α .* vec(▽)
+    end
 
-for i = 1:maxIter
-    value!(ŷ, risk, X, θ, y)
-    grad!(▽, risk, X, θ, y, ŷ)
-    θ = θ - α .* vec(▽)
+    @test sumabs(w - θ) < .15
+    mp = scatterplot(x, y, color = :blue, height = 5, margin = 5,
+                     title = "Linreg on noisy line")
+    lineplot!(mp, x, vec(value(pred, X, θ)), color = :red)
+    print(mp)
 end
 
-@test sumabs(w - θ) < .15
-mp = scatterplot(x, y, color = :blue, height = 5, margin = 5)
-lineplot!(mp, x, vec(value(pred, X, θ)), color = :red)
-print(mp)
+@testset "Test linear regression on sin using poly basis expansion" begin
+    k = 5
+    x, y = noisy_sin(100; noise = .1)
+    X = expand_poly(x, degree = 4)
+    rescale!(X)
 
-# ==========================================================================
+    # Set hyper parameters
+    θ = zeros(k)
+    α = 0.2
+    maxIter = 5000
 
-msg("Test linear regression on sin using poly basis expansion")
+    loss = LossFunctions.L2DistLoss()
+    pred = LinearPredictor(bias = 1)
+    risk = EmpiricalRisk(pred, loss)
+    ŷ = pred(X, θ)
+    ▽ = zeros(k, 1)
 
-k = 5
-x, y = noisy_sin(100; noise = .1)
-X = expand_poly(x, degree = 4)
-rescale!(X)
+    for i = 1:maxIter
+        value!(ŷ, risk, X, θ, y)
+        grad!(▽, risk, X, θ, y, ŷ)
+        θ = θ - α .* vec(▽)
+    end
 
-# Set hyper parameters
-θ = zeros(k)
-α = 0.2
-maxIter = 5000
-
-loss = LossFunctions.L2DistLoss()
-pred = LinearPredictor(bias = 1)
-risk = EmpiricalRisk(pred, loss)
-ŷ = pred(X, θ)
-▽ = zeros(k, 1)
-
-for i = 1:maxIter
-    value!(ŷ, risk, X, θ, y)
-    grad!(▽, risk, X, θ, y, ŷ)
-    θ = θ - α .* vec(▽)
+    J = value!(ŷ, risk, X, θ, y)
+    @test J < 0.04
+    mp = scatterplot(x, y, color = :blue, height = 5,
+                     title = "Linreg on sin with poly exp")
+    lineplot!(mp, x, vec(value(pred, X, θ)), color = :red)
+    print(mp)
 end
 
-J = value!(ŷ, risk, X, θ, y)
-@test J < 0.04
-mp = scatterplot(x, y, color = :blue, height = 5)
-lineplot!(mp, x, vec(value(pred, X, θ)), color = :red)
-print(mp)
+@testset "Test linear regression with L2 pen on sin using poly basis expansion" begin
+    k = 14
+    x, y = load_sin()
+    X = expand_poly(x, degree = k)
+    o, s = rescale!(X)
 
-# ==========================================================================
+    x1 = collect(0:.01:2π)
+    X1 = expand_poly(x1, degree = k)
+    rescale!(X1, o, s)
 
-msg("Test linear regression with L2 pen on sin using poly basis expansion")
+    θ = zeros(k)
+    α = 0.05
+    maxIter = 5000
 
-k = 14
-x, y = load_sin()
-X = expand_poly(x, degree = k)
-o, s = rescale!(X)
+    loss = LossFunctions.L2DistLoss()
+    pred = LinearPredictor(bias = 0)
+    pen = ParameterLosses.L2ParameterLoss(0.05)
+    risk = EmpiricalRisk(pred, loss, pen)
+    ŷ = pred(X, θ)
+    ▽ = zeros(k, 1)
 
-x1 = collect(0:.01:2π)
-X1 = expand_poly(x1, degree = k)
-rescale!(X1, o, s)
+    for i = 1:maxIter
+        value!(ŷ, risk, X, θ, y)
+        grad!(▽, risk, X, θ, y, ŷ)
+        θ = θ - α .* vec(▽)
+    end
 
-θ = zeros(k)
-α = 0.05
-maxIter = 5000
-
-loss = LossFunctions.L2DistLoss()
-pred = LinearPredictor(bias = 0)
-pen = ParameterLosses.L2ParameterLoss(0.05)
-risk = EmpiricalRisk(pred, loss, pen)
-ŷ = pred(X, θ)
-▽ = zeros(k, 1)
-
-for i = 1:maxIter
-    value!(ŷ, risk, X, θ, y)
-    grad!(▽, risk, X, θ, y, ŷ)
-    θ = θ - α .* vec(▽)
+    J = value!(ŷ, risk, X, θ, y)
+    @test 0.09 < J < 0.1
+    mp = scatterplot(x, y, color = :blue, height = 5, ylim=[-1.1, 1.1],
+                     title = "Ridgereg on sin with poly exp")
+    lineplot!(mp, x1, vec(value(pred, X1, θ)), color = :red)
+    print(mp)
 end
 
-J = value!(ŷ, risk, X, θ, y)
-@test 0.09 < J < 0.1
-mp = scatterplot(x, y, color = :blue, height = 5, ylim=[-1.1, 1.1])
-lineplot!(mp, x1, vec(value(pred, X1, θ)), color = :red)
-print(mp)
