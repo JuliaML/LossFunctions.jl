@@ -94,7 +94,7 @@ end
     k = length(w) - 1
     n = size(X, 2)
     @_dimcheck size(X, 1) == k && size(buffer) == (1, n)
-    w⃗ = view(w, 1:k)
+    w⃗ = sub(w, 1:k)
     @inbounds b = h.bias * w[k+1]
     At_mul_B!(buffer, w⃗, X)
     broadcast!(+, buffer, buffer, b)
