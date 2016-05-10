@@ -6,13 +6,12 @@ module LearnBase
 using Reexport
 @reexport using MLBase
 using Requires
-using ArrayViews
-# using UnicodePlots
+using RecipesBase
 
 import Base: show, shuffle!, convert, call, print, transpose, minimum, copy
-@require UnicodePlots begin
-    import UnicodePlots: lineplot, lineplot!
-end
+# @require UnicodePlots begin
+#     import UnicodePlots: lineplot, lineplot!
+# end
 import StatsBase: fit, fit!, predict, predict!, nobs, coef,
                   deviance, loglikelihood, coeftable, stderr,
                   vcov, confint, residuals, model_response
