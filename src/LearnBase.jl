@@ -5,9 +5,7 @@ module LearnBase
 
 using Reexport
 @reexport using MLBase
-# using Requires
-# using ArrayViews
-# using UnicodePlots
+using Requires
 using RecipesBase
 
 import Base: show, shuffle!, convert, call, print, transpose, minimum, copy
