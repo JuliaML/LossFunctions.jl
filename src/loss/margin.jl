@@ -6,6 +6,24 @@
 # ==========================================================================
 # L(target, output) = max(0, -agreement)
 
+"""
+`PerceptronLoss <: MarginLoss`
+
+              Lossfunction                     Derivative
+      ┌────────────┬────────────┐      ┌────────────┬────────────┐
+    2 │\.                       │    0 │            r------------│
+      │ '..                     │      │            |            │
+      │   \.                    │      │            |            │
+      │     `.                  │      │            |            │
+      │      '.                 │      │            |            │
+      │        \.               │      │            |            │
+      │         ".              │      │            |            │
+    0 │           \.____________│   -1 │____________!            │
+      └────────────┴────────────┘      └────────────┴────────────┘
+      -2                        2      -2                        2
+                y * h(x)                         y * h(x)
+
+"""
 immutable PerceptronLoss <: MarginLoss end
 
 value{T<:Number}(loss::PerceptronLoss, agreement::T) = max(zero(T), -agreement)
@@ -47,6 +65,26 @@ isclipable(::LogitMarginLoss) = false
 # ==========================================================================
 # L(target, output) = max(0, 1 - agreement)
 
+# lineplot(HingeLoss(), canvas = AsciiCanvas, width = 25, height = 8, xlim=[-2,2], ylim=[0,3])
+# lineplot(deriv_fun(HingeLoss()), 0:.01:2, canvas = AsciiCanvas, width = 25, height = 8, xlim=[0,2], ylim=[-1,0])
+
+"""
+`L1HingeLoss <: MarginLoss`
+
+              Lossfunction                     Derivative
+      ┌────────────┬────────────┐      ┌─────────────────────────┐
+    3 │"\\.                      │    0 │            ┌------------│
+      │  ''_                    │      │            |            │
+      │     \\.                  │      │            |            │
+      │       '.                │      │            |            │
+      │         "'_             │      │            |            │
+      │            \\.           │      │            |            │
+      │              '.         │      │            |            │
+    0 │                "'_______│   -1 │____________|            │
+      └────────────┴────────────┘      └─────────────────────────┘
+      -2                        2      0                         2
+                y * h(x)                         y * h(x)
+"""
 immutable L1HingeLoss <: MarginLoss end
 typealias HingeLoss L1HingeLoss
 
@@ -156,3 +194,4 @@ islipschitzcont_deriv(::ModifiedHuberLoss) = true
 isconvex(::ModifiedHuberLoss) = true
 isstronglyconvex(::ModifiedHuberLoss) = false
 isclipable(::ModifiedHuberLoss) = true
+

@@ -173,3 +173,4 @@ islipschitzcont(::LogitDistLoss) = true
 islipschitzcont_deriv(::LogitDistLoss) = true
 isconvex(::LogitDistLoss) = true
 isstronglyconvex(::LogitDistLoss) = true
+

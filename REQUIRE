@@ -1,7 +1,5 @@
 julia 0.4
 
-StatsBase
-MLBase
 Reexport
-Requires
+LearnBase
 RecipesBase

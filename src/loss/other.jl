@@ -37,3 +37,4 @@ deriv2{T<:Number}(loss::ZeroOneLoss, agreement::T) = zero(T)
 isdifferentiable(::ZeroOneLoss) = false
 isconvex(::ZeroOneLoss) = false
 isclasscalibrated(loss::ZeroOneLoss) = true
+

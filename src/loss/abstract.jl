@@ -1,27 +1,20 @@
-
-abstract Loss
-abstract ModelLoss <: Loss
-
-@inline call(c::ModelLoss, X, target, α) = value(c, X, target, α)
-@inline transpose(c::ModelLoss) = deriv_fun(c)
-
 @inline function value_fun(c::ModelLoss)
-    @inline _value(args...) = value(c, args...)
+    _value(args...) = value(c, args...)
     _value
 end
 
 @inline function deriv_fun(c::ModelLoss)
-    @inline _deriv(args...) = deriv(c, args...)
+    _deriv(args...) = deriv(c, args...)
     _deriv
 end
 
 @inline function deriv2_fun(c::ModelLoss)
-    @inline _deriv2(args...) = deriv2(c, args...)
+    _deriv2(args...) = deriv2(c, args...)
     _deriv2
 end
 
 @inline function value_deriv_fun(c::ModelLoss)
-    @inline _value_deriv(args...) = value_deriv(c, args...)
+    _value_deriv(args...) = value_deriv(c, args...)
     _value_deriv
 end
 
@@ -33,7 +26,7 @@ istwicedifferentiable(c::ModelLoss, at) = istwicedifferentiable(c)
 isconvex(::ModelLoss) = false
 isstronglyconvex(::ModelLoss) = false
 
-# ==========================================================================
+# ===============================================================
 
 isnemitski(loss::ModelLoss) = islocallylipschitzcont(loss)
 islipschitzcont(::ModelLoss) = false
@@ -41,15 +34,7 @@ islocallylipschitzcont(::ModelLoss) = false
 isclipable(::ModelLoss) = false
 islipschitzcont_deriv(::ModelLoss) = false
 
-# ==========================================================================
-
-@inline call(loss::ModelLoss, target, output) = value(loss, target, output)
-@inline value(loss::ModelLoss, X::AbstractArray, target::Number, output::Number) = value(loss, target, output)
-@inline deriv(loss::ModelLoss, X::AbstractArray, target::Number, output::Number) = deriv(loss, target, output)
-@inline deriv2(loss::ModelLoss, X::AbstractArray, target::Number, output::Number) = deriv2(loss, target, output)
-@inline value_deriv(loss::ModelLoss, X::AbstractArray, target::Number, output::Number) = value_deriv(loss, target, output)
-
-# --------------------------------------------------------------------------
+# --------------------------------------------------------------
 
 @inline function value(loss::ModelLoss, target::AbstractVecOrMat, output::AbstractVecOrMat)
     buffer = similar(output)
@@ -66,9 +51,9 @@ end
     grad!(buffer, loss, target, output)
 end
 
-# --------------------------------------------------------------------------
+# --------------------------------------------------------------
 
-@inline function value!(buffer::AbstractVector, loss::ModelLoss, target::AbstractVector, output::AbstractVector)
+function value!(buffer::AbstractVector, loss::ModelLoss, target::AbstractVector, output::AbstractVector)
     n = length(output)
     @_dimcheck length(target) == n && size(buffer) == size(output)
     @simd for i = 1:n
@@ -77,7 +62,7 @@ end
     buffer
 end
 
-@inline function deriv!(buffer::AbstractVector, loss::ModelLoss, target::AbstractVector, output::AbstractVector)
+function deriv!(buffer::AbstractVector, loss::ModelLoss, target::AbstractVector, output::AbstractVector)
     n = length(output)
     @_dimcheck length(target) == n && size(buffer) == size(output)
     @simd for i = 1:n
@@ -86,9 +71,9 @@ end
     buffer
 end
 
-# --------------------------------------------------------------------------
+# --------------------------------------------------------------
 
-@inline function value!(buffer::AbstractMatrix, loss::ModelLoss, target::AbstractVector, output::AbstractMatrix)
+function value!(buffer::AbstractMatrix, loss::ModelLoss, target::AbstractVector, output::AbstractMatrix)
     n = size(output, 2)
     k = size(output, 1)
     @_dimcheck length(target) == n && size(buffer) == (k, n)
@@ -100,7 +85,7 @@ end
     buffer
 end
 
-@inline function deriv!(buffer::AbstractMatrix, loss::ModelLoss, target::AbstractVector, output::AbstractMatrix)
+function deriv!(buffer::AbstractMatrix, loss::ModelLoss, target::AbstractVector, output::AbstractMatrix)
     n = size(output, 2)
     k = size(output, 1)
     @_dimcheck length(target) == n && size(buffer) == (k, n)
@@ -112,9 +97,9 @@ end
     buffer
 end
 
-# --------------------------------------------------------------------------
+# --------------------------------------------------------------
 
-@inline function value!(buffer::AbstractMatrix, loss::ModelLoss, target::AbstractMatrix, output::AbstractMatrix)
+function value!(buffer::AbstractMatrix, loss::ModelLoss, target::AbstractMatrix, output::AbstractMatrix)
     n = size(output, 2)
     k = size(output, 1)
     @_dimcheck size(target) == size(output) && size(buffer) == (k, n)
@@ -126,7 +111,7 @@ end
     buffer
 end
 
-@inline function grad!(buffer::AbstractMatrix, loss::ModelLoss, target::AbstractMatrix, output::AbstractMatrix)
+function grad!(buffer::AbstractMatrix, loss::ModelLoss, target::AbstractMatrix, output::AbstractMatrix)
     n = size(output, 2)
     k = size(output, 1)
     @_dimcheck size(target) == size(output) && size(buffer) == (k, n)
@@ -138,9 +123,9 @@ end
     buffer
 end
 
-# --------------------------------------------------------------------------
+# --------------------------------------------------------------
 
-@inline function sumvalue{T<:Number}(loss::ModelLoss, target::AbstractVector, output::AbstractArray{T})
+function sumvalue{T<:Number}(loss::ModelLoss, target::AbstractVector, output::AbstractArray{T})
     n = length(output)
     @_dimcheck length(target) == n
     val = zero(T)
@@ -150,7 +135,7 @@ end
     val
 end
 
-@inline function sumderiv{T<:Number}(loss::ModelLoss, target::AbstractVector, output::AbstractArray{T})
+function sumderiv{T<:Number}(loss::ModelLoss, target::AbstractVector, output::AbstractArray{T})
     n = length(output)
     @_dimcheck length(target) == n
     val = zero(T)
@@ -160,9 +145,9 @@ end
     val
 end
 
-# --------------------------------------------------------------------------
+# --------------------------------------------------------------
 
-@inline function meanvalue{T<:Number}(loss::ModelLoss, target::AbstractVector, output::AbstractArray{T})
+function meanvalue{T<:Number}(loss::ModelLoss, target::AbstractVector, output::AbstractArray{T})
     n = length(output)
     @_dimcheck length(target) == n
     val = zero(T)
@@ -175,7 +160,7 @@ end
     val
 end
 
-@inline function meanderiv{T<:Number}(loss::ModelLoss, target::AbstractVector, output::AbstractArray{T})
+function meanderiv{T<:Number}(loss::ModelLoss, target::AbstractVector, output::AbstractArray{T})
     n = length(output)
     @_dimcheck length(target) == n
     val = zero(T)
@@ -193,11 +178,10 @@ isclasscalibrated(::ModelLoss) = false
 isdistancebased(::ModelLoss) = false
 issymmetric(::ModelLoss) = false
 
-# ==========================================================================
+# ==============================================================
 
-abstract MarginLoss <: ModelLoss
+# abstract MarginLoss <: ModelLoss
 
-@inline call(loss::MarginLoss, agreement) = value(loss, agreement)
 @inline value(loss::MarginLoss, target::Number, output::Number) = value(loss, target * output)
 @inline deriv(loss::MarginLoss, target::Number, output::Number) = target * deriv(loss, target * output)
 @inline deriv2(loss::MarginLoss, target::Number, output::Number) = deriv2(loss, target * output)
@@ -213,11 +197,10 @@ islocallylipschitzcont(loss::MarginLoss) = isconvex(loss)
 ismarginbased(::MarginLoss) = true
 isclasscalibrated(loss::MarginLoss) = isconvex(loss) && isdifferentiable(loss, 0) && deriv(loss, 0) < 0
 
-# ==========================================================================
+# ==============================================================
 
-abstract DistanceLoss <: ModelLoss
+# abstract DistanceLoss <: ModelLoss
 
-@inline call(loss::DistanceLoss, residual) = value(loss, residual)
 @inline value(loss::DistanceLoss, target::Number, output::Number) = value(loss, output - target)
 @inline deriv(loss::DistanceLoss, target::Number, output::Number) = deriv(loss, output - target)
 @inline deriv2(loss::DistanceLoss, target::Number, output::Number) = deriv2(loss, output - target)
@@ -226,18 +209,18 @@ abstract DistanceLoss <: ModelLoss
 isdistancebased(::DistanceLoss) = true
 issymmetric(::DistanceLoss) = false
 
-# ==========================================================================
+# ==============================================================
 
 
 # Code based on code from OnlineStats by Josh day (see LICENSE.md)
 
-abstract ParameterLoss <: Loss
+# abstract ParameterLoss <: Loss
 
 Base.copy(loss::ParameterLoss) = deepcopy(loss)
 
 @inline grad(loss::ParameterLoss, params::AbstractArray, len::Int=length(params)) = grad!(zeros(params), loss, params, len)
 
-@inline function grad!{T<:Number}(buffer::AbstractArray{T}, loss::ParameterLoss, params::AbstractArray, len::Int=length(params))
+function grad!{T<:Number}(buffer::AbstractArray{T}, loss::ParameterLoss, params::AbstractArray, len::Int=length(params))
     @_dimcheck length(buffer) == length(params)
     @_dimcheck 0 < len <= length(params)
     @inbounds buffer[end] = zero(T)
@@ -247,7 +230,7 @@ Base.copy(loss::ParameterLoss) = deepcopy(loss)
     buffer
 end
 
-@inline function addgrad!{T<:Number}(buffer::AbstractArray{T}, loss::ParameterLoss, params::AbstractArray, len::Int=length(params))
+function addgrad!{T<:Number}(buffer::AbstractArray{T}, loss::ParameterLoss, params::AbstractArray, len::Int=length(params))
     @_dimcheck length(buffer) == length(params)
     @_dimcheck 0 < len <= length(params)
     @simd for j in 1:len
@@ -255,3 +238,4 @@ end
     end
     buffer
 end
+

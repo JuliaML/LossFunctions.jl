@@ -1,6 +1,4 @@
 
-abstract Transformation
-
 export
     Transformation,
         Mapping

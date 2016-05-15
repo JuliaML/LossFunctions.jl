@@ -1,17 +1,14 @@
-
-# ==========================================================================
-
 "No penalty on the coefficients"
 immutable NoParameterLoss <: ParameterLoss end
 Base.show(io::IO, loss::NoParameterLoss) = print(io, "NoParameterLoss")
-@inline value{T<:Number}(loss::NoParameterLoss, params::AbstractArray{T}, len::Int=0) = zero(T)
-@inline deriv{T<:Number}(loss::NoParameterLoss, param::T) = zero(T)
+value{T<:Number}(loss::NoParameterLoss, params::AbstractArray{T}, len::Int=0) = zero(T)
+deriv{T<:Number}(loss::NoParameterLoss, param::T) = zero(T)
 
 @inline function addgrad!{T<:Number}(buffer::AbstractArray{T}, loss::NoParameterLoss, params::AbstractArray, len::Int=length(params))
     buffer
 end
 
-# ==========================================================================
+# ============================================================
 
 "An L1 (LASSO) penalty on the coefficients"
 immutable L1ParameterLoss <: ParameterLoss
@@ -38,9 +35,9 @@ function value{T}(loss::L1ParameterLoss, params::AbstractArray{T}, len::Int=leng
         val
     end::Float64
 end
-@inline deriv(loss::L1ParameterLoss, param::Number) = loss.λ * sign(param)
+deriv(loss::L1ParameterLoss, param::Number) = loss.λ * sign(param)
 
-# ==========================================================================
+# ============================================================
 
 "An L2 (ridge) penalty on the coefficients"
 immutable L2ParameterLoss <: ParameterLoss
@@ -53,7 +50,7 @@ end
 isconvex(::L2ParameterLoss) = true
 isdifferentiable(::L2ParameterLoss) = true
 Base.show(io::IO, loss::L2ParameterLoss) = print(io, "L2ParameterLoss(λ = $(loss.λ))")
-@inline function value{T}(loss::L2ParameterLoss, params::AbstractArray{T}, len::Int=length(params))
+function value{T}(loss::L2ParameterLoss, params::AbstractArray{T}, len::Int=length(params))
     len_w = length(params)
     @_dimcheck 0 < len <= len_w
     if len == len_w
@@ -68,9 +65,9 @@ Base.show(io::IO, loss::L2ParameterLoss) = print(io, "L2ParameterLoss(λ = $(los
         val
     end::Float64
 end
-@inline deriv(loss::L2ParameterLoss, param::Number) = loss.λ * param
+deriv(loss::L2ParameterLoss, param::Number) = loss.λ * param
 
-# ==========================================================================
+# =============================================================
 
 # "A weighted average of L1 and L2 penalties on the coefficients"
 # immutable ElasticNetParameterLoss <: ParameterLoss
@@ -85,4 +82,4 @@ end
 # Base.show(io::IO, loss::ElasticNetParameterLoss) = print(io, "ElasticNetParameterLoss(λ = $(loss.λ), α = $(loss.α))")
 # @inline value(loss::ElasticNetParameterLoss, params::AbstractVector) = loss.λ * (loss.α * sumabs(params) + (1 - loss.α) * .5 * sumabs2(params))
 
-# ==========================================================================
+# =============================================================

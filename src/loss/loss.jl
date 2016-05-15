@@ -3,13 +3,6 @@ include("abstract.jl")
 
 export
 
-    # abstract types
-    Loss,
-        ModelLoss,
-            MarginLoss,
-            DistanceLoss,
-        ParameterLoss,
-
     # autocomplete objects
     LossFunctions,
     ParameterLosses
@@ -44,7 +37,7 @@ include("other.jl")
     CrossentropyLoss,
     ZeroOneLoss
 
-    
+
 # ------------------------------------
 # Parameter Losses
 # ------------------------------------

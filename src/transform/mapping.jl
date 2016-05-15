@@ -21,7 +21,7 @@ end
 
 # ----------------------------------------------------------------------------
 
-doc"""
+"""
 f(x) = x
 f'(x) = 1
 """
@@ -31,7 +31,7 @@ deriv{T<:Number}(mapping::IdentityMapping, input::T) = one(T)
 
 # ----------------------------------------------------------------------------
 
-doc"""
+"""
 f(x) = 1 / (1 + exp(-x))
 f'(x) = f(x) * (1 - f(x))
 """
@@ -41,7 +41,7 @@ deriv{T<:Number}(mapping::SigmoidMapping, input::T) = (s = value(mapping, input)
 
 # ----------------------------------------------------------------------------
 
-doc"""
+"""
 f(x) = tanh(x)
 f'(x) = 1 - tanh(x)²
 """
@@ -51,7 +51,7 @@ deriv{T<:Number}(mapping::TanhMapping, input::T) = one(T) - tanh(input)^2
 
 # ----------------------------------------------------------------------------
 
-doc"""
+"""
 f(x) = x / (1 + |x|)
 f'(x) = 1 / (1 + |x|)²
 """
@@ -62,7 +62,7 @@ deriv{T<:Number}(mapping::SoftsignMapping, input::T) = one(T) / (one(T) + abs(in
 # ----------------------------------------------------------------------------
 
 # Rectified Linear Unit
-doc"""
+"""
 f(x) = max(0, x)
 f'(x) = { 1,  x > 0
         { 0,  x ≤ 0
@@ -74,7 +74,7 @@ deriv{T<:Number}(mapping::ReLUMapping, input::T) = input >= zero(T) ? one(T) : z
 # ----------------------------------------------------------------------------
 
 # Leaky Rectified Linear Unit: modified derivative to fix "dying ReLU" problem
-doc"""
+"""
 f(x) = max(0, x)
 f'(x) = { 1,  x > 0
         { ρ,  x ≤ 0
@@ -84,7 +84,7 @@ immutable LReLUMapping{T<:Number} <: Mapping
 end
 LReLUMapping() = LReLUMapping(0.01)
 
-value(mapping::LReLUMapping, input::Number) = deriv(mapping, input) * input 
+value(mapping::LReLUMapping, input::Number) = deriv(mapping, input) * input
 deriv{T<:Number}(mapping::LReLUMapping{T}, input::T) = input >= zero(T) ? one(T) : mapping.ρ
 
 function deriv{T<:Number, R<:Number}(mapping::LReLUMapping{T}, input::R)
@@ -100,7 +100,7 @@ f(xᵢ) = exp(xᵢ) / Z
   where Z := sum(exp(x))
 f'(xᵢ) = f(xᵢ) * (1 - f(xᵢ))
 
-Note: we expect the target vector to be a multinomal indicator vector, where 
+Note: we expect the target vector to be a multinomal indicator vector, where
 a 1 in the iᵗʰ position implies that the instance belongs to the iᵗʰ class
 """
 immutable SoftmaxMapping <: Mapping end

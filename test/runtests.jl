@@ -1,4 +1,5 @@
 using LearnBase
+using MLModels
 using MLDataUtils
 using UnicodePlots
 using DualNumbers
@@ -12,9 +13,7 @@ end
 
 tests = [
     "tst_mapping.jl"
-    "tst_paramupdater.jl"
     "tst_loss.jl"
-    "tst_classencoding.jl"
     "tst_penalty.jl"
     "tst_prediction.jl"
     "tst_empiricalrisk.jl"

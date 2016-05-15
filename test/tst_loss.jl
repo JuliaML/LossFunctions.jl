@@ -23,7 +23,7 @@ end
 function test_value(l::ModelLoss, f::Function, y_vec, t_vec)
     @testset "$(l): " begin
         for y in y_vec, t in t_vec
-            @test abs(l(y, t) - f(y, t)) < 1e-10
+            @test abs(value(l, y, t) - f(y, t)) < 1e-10
         end
     end
 end
@@ -44,19 +44,14 @@ function test_deriv(l::MarginLoss, t_vec)
                 @test_approx_eq val val4
                 @test_approx_eq val value(l, y, t)
                 @test_approx_eq val value(l, y*t)
-                @test_approx_eq val value(l, [2,3], y, t)
                 @test_approx_eq val value_fun(l)(y, t)
                 @test_approx_eq val value_fun(l)(y*t)
-                @test_approx_eq val l(y*t)
                 @test_approx_eq d_comp d_comp2
                 @test_approx_eq d_comp d_comp3
                 @test_approx_eq d_comp y*d_comp4
                 @test_approx_eq d_comp y*deriv(l, y*t)
-                @test_approx_eq d_comp deriv(l, [2,3], y, t)
                 @test_approx_eq d_comp deriv_fun(l)(y, t)
                 @test_approx_eq d_comp y*deriv_fun(l)(y*t)
-                @test_approx_eq d_comp l'(y,t)
-                @test_approx_eq d_comp y*l'(y*t)
             else
                 # y*t == 1 ? print(".") : print("(no $(y)*$(t)) ")
                 #print(".")
@@ -81,18 +76,14 @@ function test_deriv(l::DistanceLoss, t_vec)
                 @test_approx_eq val val4
                 @test_approx_eq val value(l, y, t)
                 @test_approx_eq val value(l, t-y)
-                @test_approx_eq val value(l, [2,3], y, t)
                 @test_approx_eq val value_fun(l)(y, t)
                 @test_approx_eq val value_fun(l)(t-y)
-                @test_approx_eq val l(t-y)
                 @test_approx_eq d_comp d_comp2
                 @test_approx_eq d_comp d_comp3
                 @test_approx_eq d_comp d_comp4
                 @test_approx_eq d_comp deriv(l, t-y)
-                @test_approx_eq d_comp deriv(l, [2,3], y, t)
                 @test_approx_eq d_comp deriv_fun(l)(y, t)
                 @test_approx_eq d_comp deriv_fun(l)(t-y)
-                @test_approx_eq d_comp l'(t-y)
             else
                 # y-t == 0 ? print(".") : print("$(y-t) ")
                 #print(".")
@@ -110,7 +101,6 @@ function test_deriv2(l::MarginLoss, t_vec)
                 @test abs(d2_dual - d2_comp) < 1e-10
                 @test_approx_eq d2_comp deriv2(l, y, t)
                 @test_approx_eq d2_comp deriv2(l, y*t)
-                @test_approx_eq d2_comp deriv2(l, [2,3], y, t)
                 @test_approx_eq d2_comp deriv2_fun(l)(y, t)
                 @test_approx_eq d2_comp deriv2_fun(l)(y*t)
             else
@@ -130,7 +120,6 @@ function test_deriv2(l::DistanceLoss, t_vec)
                 @test abs(d2_dual - d2_comp) < 1e-10
                 @test_approx_eq d2_comp deriv2(l, y, t)
                 @test_approx_eq d2_comp deriv2(l, t-y)
-                @test_approx_eq d2_comp deriv2(l, [2,3], y, t)
                 @test_approx_eq d2_comp deriv2_fun(l)(y, t)
                 @test_approx_eq d2_comp deriv2_fun(l)(t-y)
             else

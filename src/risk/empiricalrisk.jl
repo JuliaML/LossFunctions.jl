@@ -1,5 +1,5 @@
 # using LearnBase.LossFunctions
-using LearnBase.ParameterLosses
+using MLModels.ParameterLosses
 
 immutable EmpiricalRisk{TPred<:Predictor, TLoss<:ModelLoss, TPen<:ParameterLoss, PENALIZEBIAS}
     predictor::TPred

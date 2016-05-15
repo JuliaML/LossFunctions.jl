@@ -12,7 +12,7 @@
     loss = LossFunctions.L2DistLoss()
     pred = LinearPredictor(bias = 1)
     risk = EmpiricalRisk(pred, loss)
-    ŷ = pred(X, θ)
+    ŷ = value(pred, X, θ)
     ▽ = zeros(length(w), 1)
 
     for i = 1:maxIter
@@ -42,7 +42,7 @@ end
     loss = LossFunctions.L2DistLoss()
     pred = LinearPredictor(bias = 1)
     risk = EmpiricalRisk(pred, loss)
-    ŷ = pred(X, θ)
+    ŷ = value(pred, X, θ)
     ▽ = zeros(k, 1)
 
     for i = 1:maxIter
@@ -77,7 +77,7 @@ end
     pred = LinearPredictor(bias = 0)
     pen = ParameterLosses.L2ParameterLoss(0.05)
     risk = EmpiricalRisk(pred, loss, pen)
-    ŷ = pred(X, θ)
+    ŷ = value(pred, X, θ)
     ▽ = zeros(k, 1)
 
     for i = 1:maxIter
