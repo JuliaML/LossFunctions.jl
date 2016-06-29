@@ -1,4 +1,4 @@
-# ==========================================================================
+# ===========================================================
 # L(y, t) = |y - t|^P
 
 immutable LPDistLoss{P} <: DistanceLoss
@@ -34,9 +34,26 @@ islipschitzcont_deriv{P}(::LPDistLoss{P}) = 1 <= P <= 2
 isconvex{P}(::LPDistLoss{P}) = P >= 1
 isstronglyconvex{P}(::LPDistLoss{P}) = P > 1
 
-# ==========================================================================
+# ===========================================================
 # L(y, t) = |y - t|
 
+"""
+`L1DistLoss <: DistanceLoss`
+
+              Lossfunction                     Derivative
+      ┌────────────┬────────────┐      ┌────────────┬────────────┐
+    3 │\\.                     ./│    1 │            ┌------------│
+      │ '\\.                 ./' │      │            |            │
+      │   \\.               ./   │      │            |            │
+      │    '\\.           ./'    │      │_           |           _│
+      │      \\.         ./      │      │            |            │
+      │       '\\.     ./'       │      │            |            │
+      │         \\.   ./         │      │            |            │
+    0 │          '\\./'          │   -1 │------------┘            │
+      └────────────┴────────────┘      └────────────┴────────────┘
+      -3                        3      -3                        3
+               h(x) - y                         h(x) - y
+"""
 typealias L1DistLoss LPDistLoss{1}
 
 sumvalue(loss::L1DistLoss, residual::AbstractArray) = sumabs(residual)
@@ -54,9 +71,26 @@ islipschitzcont_deriv(::L1DistLoss) = true
 isconvex(::L1DistLoss) = true
 isstronglyconvex(::L1DistLoss) = false
 
-# ==========================================================================
+# ===========================================================
 # L(y, t) = (y - t)^2
 
+"""
+`L2DistLoss <: DistanceLoss`
+
+              Lossfunction                     Derivative
+      ┌────────────┬────────────┐      ┌────────────┬────────────┐
+    9 │\\                       /│    3 │                   .r/   │
+      │".                     ."│      │                 .r'     │
+      │ ".                   ." │      │              _./'       │
+      │  ".                 ."  │      │_           .r/         _│
+      │   ".               ."   │      │         _:/'            │
+      │    '\\.           ./'    │      │       .r'               │
+      │      \\.         ./      │      │     .r'                 │
+    0 │        "-.___.-"        │   -3 │  _/r'                   │
+      └────────────┴────────────┘      └────────────┴────────────┘
+      -3                        3      -2                        2
+               h(x) - y                         h(x) - y
+"""
 typealias L2DistLoss LPDistLoss{2}
 
 sumvalue(loss::L2DistLoss, residual::AbstractArray) = sumabs2(residual)
@@ -74,7 +108,7 @@ islipschitzcont_deriv(::L2DistLoss) = true
 isconvex(::L2DistLoss) = true
 isstronglyconvex(::L2DistLoss) = true
 
-# ==========================================================================
+# ===========================================================
 # L(y, t) = max(0, |y - t| - ɛ)
 
 immutable L1EpsilonInsLoss <: DistanceLoss
@@ -105,7 +139,7 @@ islipschitzcont_deriv(::L1EpsilonInsLoss) = true
 isconvex(::L1EpsilonInsLoss) = true
 isstronglyconvex(::L1EpsilonInsLoss) = false
 
-# ==========================================================================
+# ===========================================================
 # L(y, t) = max(0, |y - t| - ɛ)^2
 
 immutable L2EpsilonInsLoss <: DistanceLoss
@@ -139,7 +173,7 @@ islipschitzcont_deriv(::L2EpsilonInsLoss) = true
 isconvex(::L2EpsilonInsLoss) = true
 isstronglyconvex(::L2EpsilonInsLoss) = true
 
-# ==========================================================================
+# ===========================================================
 # L(y, t) = -ln(4 * exp(y - t) / (1 + exp(y - t))²)
 
 immutable LogitDistLoss <: DistanceLoss end

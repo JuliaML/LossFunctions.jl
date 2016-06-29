@@ -3,7 +3,7 @@
 #       Agreement is high when output and target are the same sign and |output| is large.
 #       It is an indication that the output represents the correct class in a margin-based model.
 
-# ==========================================================================
+# ============================================================
 # L(target, output) = max(0, -agreement)
 
 """
@@ -11,14 +11,14 @@
 
               Lossfunction                     Derivative
       ┌────────────┬────────────┐      ┌────────────┬────────────┐
-    2 │\.                       │    0 │            r------------│
+    2 │\\.                       │    0 │            ┌------------│
       │ '..                     │      │            |            │
-      │   \.                    │      │            |            │
+      │   \\.                    │      │            |            │
       │     `.                  │      │            |            │
       │      '.                 │      │            |            │
-      │        \.               │      │            |            │
+      │        \\.               │      │            |            │
       │         ".              │      │            |            │
-    0 │           \.____________│   -1 │____________!            │
+    0 │           \\.____________│   -1 │------------┘            │
       └────────────┴────────────┘      └────────────┴────────────┘
       -2                        2      -2                        2
                 y * h(x)                         y * h(x)
@@ -41,11 +41,27 @@ isconvex(::PerceptronLoss) = true
 isstronglyconvex(::PerceptronLoss) = false
 isclipable(::PerceptronLoss) = true
 
-# ==========================================================================
+# ============================================================
 # L(target, output) = ln(1 + exp(-agreement))
 
-immutable LogitMarginLoss <: MarginLoss end
+"""
+`LogitMarginLoss <: MarginLoss`
 
+              Lossfunction                     Derivative
+      ┌────────────┬────────────┐      ┌────────────┬────────────┐
+    2 │ \\.                      │    0 │                  ._--/""│
+      │   \\.                    │      │               ../`      │
+      │     \\.                  │      │              ./         │
+      │       \\..               │      │            ./`          │
+      │         '-_             │      │          .,`            │
+      │            "-_          │      │         ./              │
+      │               '\\-._     │      │      .,/`               │
+    0 │                    `""`-│   -1 │__.--"`                  │
+      └────────────┴────────────┘      └────────────┴────────────┘
+      -2                        2      -4                        4
+                y * h(x)                         y * h(x)
+"""
+immutable LogitMarginLoss <: MarginLoss end
 value(loss::LogitMarginLoss, agreement::Number) = log1p(exp(-agreement))
 deriv(loss::LogitMarginLoss, agreement::Number) = -one(agreement) / (one(agreement) + exp(agreement))
 deriv2(loss::LogitMarginLoss, agreement::Number) = (eᵗ = exp(agreement); eᵗ / abs2(one(eᵗ) + eᵗ))
@@ -62,7 +78,7 @@ isconvex(::LogitMarginLoss) = true
 isstronglyconvex(::LogitMarginLoss) = true
 isclipable(::LogitMarginLoss) = false
 
-# ==========================================================================
+# ============================================================
 # L(target, output) = max(0, 1 - agreement)
 
 # lineplot(HingeLoss(), canvas = AsciiCanvas, width = 25, height = 8, xlim=[-2,2], ylim=[0,3])
@@ -72,17 +88,17 @@ isclipable(::LogitMarginLoss) = false
 `L1HingeLoss <: MarginLoss`
 
               Lossfunction                     Derivative
-      ┌────────────┬────────────┐      ┌─────────────────────────┐
-    3 │"\\.                      │    0 │            ┌------------│
-      │  ''_                    │      │            |            │
-      │     \\.                  │      │            |            │
-      │       '.                │      │            |            │
-      │         "'_             │      │            |            │
-      │            \\.           │      │            |            │
-      │              '.         │      │            |            │
-    0 │                "'_______│   -1 │____________|            │
-      └────────────┴────────────┘      └─────────────────────────┘
-      -2                        2      0                         2
+      ┌────────────┬────────────┐      ┌────────────┬────────────┐
+    3 │"\\.                      │    0 │                  ┌------│
+      │  ''_                    │      │                  |      │
+      │     \\.                  │      │                  |      │
+      │       '.                │      │                  |      │
+      │         "'_             │      │                  |      │
+      │            \\.           │      │                  |      │
+      │              '.         │      │                  |      │
+    0 │                "'_______│   -1 │------------------┘      │
+      └────────────┴────────────┘      └────────────┴────────────┘
+      -2                        2      -2                        2
                 y * h(x)                         y * h(x)
 """
 immutable L1HingeLoss <: MarginLoss end
@@ -103,9 +119,26 @@ isconvex(::L1HingeLoss) = true
 isstronglyconvex(::L1HingeLoss) = false
 isclipable(::L1HingeLoss) = true
 
-# ==========================================================================
+# ============================================================
 # L(target, output) = max(0, 1 - agreement)^2
 
+"""
+`L2HingeLoss <: MarginLoss`
+
+              Lossfunction                     Derivative
+      ┌────────────┬────────────┐      ┌────────────┬────────────┐
+    5 │     .                   │    0 │                 ,r------│
+      │     ".                  │      │               ,/        │
+      │      "\\                 │      │             ,/          │
+      │        \\                │      │           ,/            │
+      │         '.              │      │         ./              │
+      │          '.             │      │       ./                │
+      │            \\.           │      │     ./                  │
+    0 │              "-.________│   -5 │   ./                    │
+      └────────────┴────────────┘      └────────────┴────────────┘
+      -2                        2      -2                        2
+                y * h(x)                         y * h(x)
+"""
 immutable L2HingeLoss <: MarginLoss end
 
 value{T<:Number}(loss::L2HingeLoss, agreement::T) = agreement >= 1 ? zero(T) : abs2(one(T) - agreement)
@@ -124,10 +157,27 @@ isconvex(::L2HingeLoss) = true
 isstronglyconvex(::L2HingeLoss) = true
 isclipable(::L2HingeLoss) = true
 
-# ==========================================================================
+# ============================================================
 # L(target, output) = 0.5 / γ * max(0, 1 - agreement)^2   ... agreement >= 1 - γ
 #                     1 - γ / 2 - agreement               ... otherwise
 
+"""
+`SmoothedL1HingeLoss <: MarginLoss`
+
+              Lossfunction                     Derivative
+      ┌────────────┬────────────┐      ┌────────────┬────────────┐
+    2 │\\.                       │    0 │                 ,r------│
+      │ '.                      │      │               ./'       │
+      │   \\.                    │      │              ,/         │
+      │     '.                  │      │            ./'          │
+      │      '.                 │      │           ,'            │
+      │        \\.               │      │         ,/              │
+      │          ",             │      │       ./'               │
+    0 │            "*-._________│   -1 │______./                 │
+      └────────────┴────────────┘      └────────────┴────────────┘
+      -2                        2      -2                        2
+                y * h(x)                         y * h(x)
+"""
 immutable SmoothedL1HingeLoss <: MarginLoss
     gamma::Float64
 
@@ -163,10 +213,27 @@ isconvex(::SmoothedL1HingeLoss) = true
 isstronglyconvex(::SmoothedL1HingeLoss) = false
 isclipable(::SmoothedL1HingeLoss) = true
 
-# ==========================================================================
+# ============================================================
 # L(target, output) = max(0, 1 - agreement)^2    ... agreement >= -1
 #                     -4*agreement               ... otherwise
 
+"""
+`ModifiedHuberLoss <: MarginLoss`
+
+              Lossfunction                     Derivative
+      ┌────────────┬────────────┐      ┌────────────┬────────────┐
+    5 │    ".                   │    0 │                .+-------│
+      │     ".                  │      │              ./'        │
+      │      "\\                 │      │             ,/          │
+      │        \\                │      │           ,/            │
+      │         '.              │      │         ./              │
+      │          '.             │      │       ./'               │
+      │            \\.           │      │______/'                 │
+    0 │              "-.________│   -5 │                         │
+      └────────────┴────────────┘      └────────────┴────────────┘
+      -2                        2      -2                        2
+                y * h(x)                         y * h(x)
+"""
 immutable ModifiedHuberLoss <: MarginLoss end
 
 function value{T<:Number}(loss::ModifiedHuberLoss, agreement::T)
