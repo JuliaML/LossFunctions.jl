@@ -1,4 +1,4 @@
-function test_value_typestable(l::ModelLoss)
+function test_value_typestable(l::SupervisedLoss)
     @testset "$(l): " begin
         for y in (-1, 1, Int32(-1), Int32(1), -1.5, 1.5, Float32(-.5), Float32(.5))
             for t in (-2, 2, Int32(-1), Int32(1), -.5, .5, Float32(-1), Float32(1))
@@ -9,7 +9,7 @@ function test_value_typestable(l::ModelLoss)
     end
 end
 
-function test_value_floatforcing(l::ModelLoss)
+function test_value_floatforcing(l::SupervisedLoss)
     @testset "$(l): " begin
         for y in (-1, 1, Int32(-1), Int32(1), -1.5, 1.5, Float32(-.5), Float32(.5))
             for t in (-2, 2, Int32(-1), Int32(1), -.5, .5, Float32(-1), Float32(1))
@@ -20,7 +20,7 @@ function test_value_floatforcing(l::ModelLoss)
     end
 end
 
-function test_value(l::ModelLoss, f::Function, y_vec, t_vec)
+function test_value(l::SupervisedLoss, f::Function, y_vec, t_vec)
     @testset "$(l): " begin
         for y in y_vec, t in t_vec
             @test abs(value(l, y, t) - f(y, t)) < 1e-10

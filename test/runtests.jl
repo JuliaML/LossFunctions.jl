@@ -1,5 +1,5 @@
 using LearnBase
-using MLModels
+using Losses
 using MLDataUtils
 using UnicodePlots
 using DualNumbers
@@ -12,12 +12,7 @@ else
 end
 
 tests = [
-    "tst_mapping.jl"
     "tst_loss.jl"
-    "tst_penalty.jl"
-    "tst_prediction.jl"
-    "tst_empiricalrisk.jl"
-    "tst_riskfunc.jl"
 ]
 
 perf = [
