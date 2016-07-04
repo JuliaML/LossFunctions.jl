@@ -2,7 +2,8 @@ __precompile__()
 
 module Losses
 
-importall LearnBase
+using Reexport
+@reexport using LearnBase
 using RecipesBase
 
 export
