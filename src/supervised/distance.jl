@@ -7,22 +7,22 @@ end
 
 LPDistLoss(p::Number) = LPDistLoss{p}()
 
-value{P}(loss::LPDistLoss{P}, residual::Number) = abs(residual)^P
-function deriv{P,T<:Number}(loss::LPDistLoss{P}, residual::T)
-    if residual == 0
-        zero(residual)
+value{P}(loss::LPDistLoss{P}, difference::Number) = abs(difference)^P
+function deriv{P,T<:Number}(loss::LPDistLoss{P}, difference::T)
+    if difference == 0
+        zero(difference)
     else
-        P * residual * abs(residual)^(P-convert(typeof(P), 2))
+        P * difference * abs(difference)^(P-convert(typeof(P), 2))
     end
 end
-function deriv2{P,T<:Number}(loss::LPDistLoss{P}, residual::T)
-    if residual == 0
-        zero(residual)
+function deriv2{P,T<:Number}(loss::LPDistLoss{P}, difference::T)
+    if difference == 0
+        zero(difference)
     else
-        (abs2(P)-P) * abs(residual)^P / abs2(residual)
+        (abs2(P)-P) * abs(difference)^P / abs2(difference)
     end
 end
-value_deriv{P}(loss::LPDistLoss{P}, residual::Number) = (value(loss,residual), deriv(loss,residual))
+value_deriv{P}(loss::LPDistLoss{P}, difference::Number) = (value(loss,difference), deriv(loss,difference))
 
 issymmetric{P}(::LPDistLoss{P}) = true
 isdifferentiable{P}(::LPDistLoss{P}) = P > 1
@@ -56,11 +56,11 @@ isstronglyconvex{P}(::LPDistLoss{P}) = P > 1
 """
 typealias L1DistLoss LPDistLoss{1}
 
-sumvalue(loss::L1DistLoss, residual::AbstractArray) = sumabs(residual)
-value(loss::L1DistLoss, residual::Number) = abs(residual)
-deriv{T<:Number}(loss::L1DistLoss, residual::T) = convert(T, sign(residual))
-deriv2{T<:Number}(loss::L1DistLoss, residual::T) = zero(T)
-value_deriv(loss::L1DistLoss, residual::Number) = (abs(residual), sign(residual))
+sumvalue(loss::L1DistLoss, difference::AbstractArray) = sumabs(difference)
+value(loss::L1DistLoss, difference::Number) = abs(difference)
+deriv{T<:Number}(loss::L1DistLoss, difference::T) = convert(T, sign(difference))
+deriv2{T<:Number}(loss::L1DistLoss, difference::T) = zero(T)
+value_deriv(loss::L1DistLoss, difference::Number) = (abs(difference), sign(difference))
 
 isdifferentiable(::L1DistLoss) = false
 isdifferentiable(::L1DistLoss, at) = at != 0
@@ -93,11 +93,11 @@ isstronglyconvex(::L1DistLoss) = false
 """
 typealias L2DistLoss LPDistLoss{2}
 
-sumvalue(loss::L2DistLoss, residual::AbstractArray) = sumabs2(residual)
-value(loss::L2DistLoss, residual::Number) = abs2(residual)
-deriv{T<:Number}(loss::L2DistLoss, residual::T) = T(2) * residual
-deriv2{T<:Number}(loss::L2DistLoss, residual::T) = T(2)
-value_deriv{T<:Number}(loss::L2DistLoss, residual::T) = (abs2(residual), T(2) * residual)
+sumvalue(loss::L2DistLoss, difference::AbstractArray) = sumabs2(difference)
+value(loss::L2DistLoss, difference::Number) = abs2(difference)
+deriv{T<:Number}(loss::L2DistLoss, difference::T) = T(2) * difference
+deriv2{T<:Number}(loss::L2DistLoss, difference::T) = T(2)
+value_deriv{T<:Number}(loss::L2DistLoss, difference::T) = (abs2(difference), T(2) * difference)
 
 isdifferentiable(::L2DistLoss) = true
 isdifferentiable(::L2DistLoss, at) = true
@@ -121,12 +121,12 @@ immutable L1EpsilonInsLoss <: DistanceLoss
 end
 typealias EpsilonInsLoss L1EpsilonInsLoss
 
-value{T<:Number}(loss::L1EpsilonInsLoss, residual::T) = max(zero(T), abs(residual) - loss.eps)
-deriv{T<:Number}(loss::L1EpsilonInsLoss, residual::T) = abs(residual) <= loss.eps ? zero(T) : sign(residual)
-deriv2{T<:Number}(loss::L1EpsilonInsLoss, residual::T) = zero(T)
-function value_deriv{T<:Number}(loss::L1EpsilonInsLoss, residual::T)
-    absr = abs(residual)
-    absr <= loss.eps ? (zero(T), zero(T)) : (absr - loss.eps, sign(residual))
+value{T<:Number}(loss::L1EpsilonInsLoss, difference::T) = max(zero(T), abs(difference) - loss.eps)
+deriv{T<:Number}(loss::L1EpsilonInsLoss, difference::T) = abs(difference) <= loss.eps ? zero(T) : sign(difference)
+deriv2{T<:Number}(loss::L1EpsilonInsLoss, difference::T) = zero(T)
+function value_deriv{T<:Number}(loss::L1EpsilonInsLoss, difference::T)
+    absr = abs(difference)
+    absr <= loss.eps ? (zero(T), zero(T)) : (absr - loss.eps, sign(difference))
 end
 
 issymmetric(::L1EpsilonInsLoss) = true
@@ -151,16 +151,16 @@ immutable L2EpsilonInsLoss <: DistanceLoss
     end
 end
 
-value{T<:Number}(loss::L2EpsilonInsLoss, residual::T) = abs2(max(zero(T), abs(residual) - loss.eps))
-function deriv{T<:Number}(loss::L2EpsilonInsLoss, residual::T)
-    absr = abs(residual)
-    absr <= loss.eps ? zero(T) : T(2)*sign(residual)*(absr - loss.eps)
+value{T<:Number}(loss::L2EpsilonInsLoss, difference::T) = abs2(max(zero(T), abs(difference) - loss.eps))
+function deriv{T<:Number}(loss::L2EpsilonInsLoss, difference::T)
+    absr = abs(difference)
+    absr <= loss.eps ? zero(T) : T(2)*sign(difference)*(absr - loss.eps)
 end
-deriv2{T<:Number}(loss::L2EpsilonInsLoss, residual::T) = abs(residual) <= loss.eps ? zero(T) : T(2)
-function value_deriv{T<:Number}(loss::L2EpsilonInsLoss, residual::T)
-    absr = abs(residual)
+deriv2{T<:Number}(loss::L2EpsilonInsLoss, difference::T) = abs(difference) <= loss.eps ? zero(T) : T(2)
+function value_deriv{T<:Number}(loss::L2EpsilonInsLoss, difference::T)
+    absr = abs(difference)
     diff = absr - loss.eps
-    absr <= loss.eps ? (zero(T), zero(T)) : (abs2(diff), T(2)*sign(residual)*diff)
+    absr <= loss.eps ? (zero(T), zero(T)) : (abs2(diff), T(2)*sign(difference)*diff)
 end
 
 issymmetric(::L2EpsilonInsLoss) = true
@@ -178,21 +178,21 @@ isstronglyconvex(::L2EpsilonInsLoss) = true
 
 immutable LogitDistLoss <: DistanceLoss end
 
-function value(loss::LogitDistLoss, residual::Number)
-    er = exp(residual)
+function value(loss::LogitDistLoss, difference::Number)
+    er = exp(difference)
     T = typeof(er)
     -log(T(4) * er / abs2(one(T) + er))
 end
-function deriv{T<:Number}(loss::LogitDistLoss, residual::T)
-    tanh(residual / T(2))
+function deriv{T<:Number}(loss::LogitDistLoss, difference::T)
+    tanh(difference / T(2))
 end
-function deriv2(loss::LogitDistLoss, residual::Number)
-    er = exp(residual)
+function deriv2(loss::LogitDistLoss, difference::Number)
+    er = exp(difference)
     T = typeof(er)
     T(2)*er / abs2(one(T) + er)
 end
-function value_deriv(loss::LogitDistLoss, residual::Number)
-    er = exp(residual)
+function value_deriv(loss::LogitDistLoss, difference::Number)
+    er = exp(difference)
     T = typeof(er)
     er1 = one(T) + er
     -log(T(4) * er / abs2(er1)), (er - one(T)) / (er1)
