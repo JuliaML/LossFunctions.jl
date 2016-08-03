@@ -130,6 +130,16 @@ function test_deriv2(l::DistanceLoss, t_vec)
     end
 end
 
+function test_scaledloss(l::Loss, t_vec)
+    λ = 2.0
+    sl = ScaledLoss(l,λ)
+    for t in t_vec
+        @test value(ScaledLoss(l,λ),t) == λ*value(l,t)
+        @test deriv(ScaledLoss(l,λ),t) == λ*deriv(l,t)
+        @test deriv2(ScaledLoss(l,λ),t) == λ*deriv2(l,t)
+    end
+end
+
 # ====================================================================
 
 @testset "Test typestable supervised loss for type stability" begin
@@ -252,5 +262,11 @@ end
 @testset "Test second derivatives of distance-based losses" begin
     for loss in distance_losses
         test_deriv2(loss, -30:0.5:30)
+    end
+end
+
+@testset "Test scaled loss" begin
+    for loss in distance_losses
+        test_scaledloss(loss, -30:0.5:30)
     end
 end
