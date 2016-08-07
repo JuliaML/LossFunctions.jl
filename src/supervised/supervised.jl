@@ -182,10 +182,10 @@ issymmetric(::SupervisedLoss) = false
 
 # abstract MarginLoss <: SupervisedLoss
 
-@inline value(loss::MarginLoss, target::Number, output::Number) = value(loss, target * output)
-@inline deriv(loss::MarginLoss, target::Number, output::Number) = target * deriv(loss, target * output)
-@inline deriv2(loss::MarginLoss, target::Number, output::Number) = deriv2(loss, target * output)
-@inline function value_deriv(loss::MarginLoss, target::Number, output::Number)
+value(loss::MarginLoss, target::Number, output::Number) = value(loss, target * output)
+deriv(loss::MarginLoss, target::Number, output::Number) = target * deriv(loss, target * output)
+deriv2(loss::MarginLoss, target::Number, output::Number) = deriv2(loss, target * output)
+function value_deriv(loss::MarginLoss, target::Number, output::Number)
     v, d = value_deriv(loss, target * output)
     (v, target*d)
 end
@@ -201,10 +201,10 @@ isclasscalibrated(loss::MarginLoss) = isconvex(loss) && isdifferentiable(loss, 0
 
 # abstract DistanceLoss <: SupervisedLoss
 
-@inline value(loss::DistanceLoss, target::Number, output::Number) = value(loss, output - target)
-@inline deriv(loss::DistanceLoss, target::Number, output::Number) = deriv(loss, output - target)
-@inline deriv2(loss::DistanceLoss, target::Number, output::Number) = deriv2(loss, output - target)
-@inline value_deriv(loss::DistanceLoss, target::Number, output::Number) = value_deriv(loss, output - target)
+value(loss::DistanceLoss, target::Number, output::Number) = value(loss, output - target)
+deriv(loss::DistanceLoss, target::Number, output::Number) = deriv(loss, output - target)
+deriv2(loss::DistanceLoss, target::Number, output::Number) = deriv2(loss, output - target)
+value_deriv(loss::DistanceLoss, target::Number, output::Number) = value_deriv(loss, output - target)
 
 isdistancebased(::DistanceLoss) = true
 issymmetric(::DistanceLoss) = false

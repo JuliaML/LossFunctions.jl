@@ -1,19 +1,35 @@
-immutable ScaledLoss{T<:Number} <: Loss
-    loss::Loss
-    λ::T
+for KIND in (:MarginLoss, :DistanceLoss)
+    @eval begin
+        immutable $(symbol("Scaled", KIND)){L<:$KIND,T<:Number} <: $KIND
+            loss::L
+            factor::T
+        end
+        (*)(factor::Number, loss::$KIND) = $(symbol("Scaled", KIND))(loss, factor)
+    end
 end
 
-value(l::ScaledLoss, r::Number) = l.λ*value(l.loss,r)
-deriv(l::ScaledLoss, r::Number) = l.λ*deriv(l.loss,r)
-deriv2(l::ScaledLoss, r::Number) = l.λ*deriv2(l.loss,r)
-value_deriv(l::ScaledLoss, r::Number) = (l.λ*value(l.loss,r), l.λ*deriv(l.loss,r))
+typealias ScaledLoss Union{ScaledMarginLoss, ScaledDistanceLoss}
 
-issymmetric(l::ScaledLoss) = issymmetric(l.loss)
-isdifferentiable(l::ScaledLoss) = isdifferentiable(l.loss)
-isdifferentiable(l::ScaledLoss, at) = isdifferentiable(l.loss, at)
-istwicedifferentiable(l::ScaledLoss) = istwicedifferentiable(l.loss)
-istwicedifferentiable(l::ScaledLoss, at) = istwicedifferentiable(l.loss, at)
-islipschitzcont(l::ScaledLoss) = islipschitzcont(l)
-islipschitzcont_deriv(l::ScaledLoss) = islipschitzcont_deriv(l)
-isconvex(l::ScaledLoss) = isconvex(l)
-isstronglyconvex(l::ScaledLoss) = isstronglyconvex(l)
+Base.convert(::Type{ScaledLoss}, l::Loss, factor::Number) = factor * l
+
+value_deriv(l::ScaledLoss, num::Number) = (l.factor * value(l.loss, num), l.factor * deriv(l.loss, num))
+
+for fun in (:value, :deriv, :deriv2)
+    @eval ($fun)(l::ScaledLoss, num::Number) = l.factor .* ($fun)(l.loss, num)
+end
+
+for prop in [:isminimizable, :isdifferentiable,
+             :istwicedifferentiable, :isconvex,
+             :isstronglyconvex, :isnemitski,
+             :isunivfishercons, :isfishercons,
+             :islipschitzcont, :islocallylipschitzcont,
+             :islipschitzcont_deriv, :isclipable,
+             :ismarginbased, :isclasscalibrated,
+             :isdistancebased, :issymmetric]
+    @eval ($prop)(l::ScaledLoss) = ($prop)(l.loss)
+end
+
+for prop_param in (:isdifferentiable, :istwicedifferentiable)
+    @eval ($prop_param)(l::ScaledLoss, at) = ($prop_param)(l.loss, at)
+end
+
