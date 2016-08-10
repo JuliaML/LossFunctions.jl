@@ -2,10 +2,12 @@
 Base.print(io::IO, loss::SupervisedLoss, args...) = print(io, typeof(loss).name.name, args...)
 Base.print(io::IO, loss::L1DistLoss, args...) = print(io, "L1DistLoss", args...)
 Base.print(io::IO, loss::L2DistLoss, args...) = print(io, "L2DistLoss", args...)
-Base.print{P}(io::IO, loss::LPDistLoss{P}, args...) = print(io, typeof(loss).name.name, " with P = $(P)", args...)
-Base.print(io::IO, loss::L1EpsilonInsLoss, args...) = print(io, typeof(loss).name.name, " with ɛ = $(loss.eps)", args...)
-Base.print(io::IO, loss::L2EpsilonInsLoss, args...) = print(io, typeof(loss).name.name, " with ɛ = $(loss.eps)", args...)
+Base.print{P}(io::IO, loss::LPDistLoss{P}, args...) = print(io, typeof(loss).name.name, " with P=$(P)", args...)
+Base.print(io::IO, loss::L1EpsilonInsLoss, args...) = print(io, typeof(loss).name.name, " with ɛ=$(loss.ε)", args...)
+Base.print(io::IO, loss::L2EpsilonInsLoss, args...) = print(io, typeof(loss).name.name, " with ɛ=$(loss.ε)", args...)
 Base.print(io::IO, loss::SmoothedL1HingeLoss, args...) = print(io, typeof(loss).name.name, " with γ = $(loss.gamma)", args...)
+Base.print(io::IO, loss::PeriodicLoss, args...) = print(io, typeof(loss).name.name, " with circumf=$(round(loss.k / 2π,1))", args...)
+Base.print(io::IO, loss::ScaledLoss, args...) = print(io, typeof(loss).name.name, " $(loss.factor) * [ $(loss.loss) ]", args...)
 
 # -------------------------------------------------------------
 # Plot Recipes
