@@ -108,6 +108,40 @@ islipschitzcont_deriv(::L2DistLoss) = true
 isconvex(::L2DistLoss) = true
 isstronglyconvex(::L2DistLoss) = true
 
+
+# ===========================================================
+# L(y, t) = 1 - cos((y-t)*2π/c)
+
+"""
+`PeriodicLoss <: DistanceLoss`
+
+Measures distance on a circle of specified circumference.
+""" 
+immutable PeriodicLoss{T<:AbstractFloat} <: DistanceLoss
+    k::T   # k = 2π/circumference
+    PeriodicLoss(circ::T) = new(T(2π/circ))
+end
+PeriodicLoss{T<:AbstractFloat}(circ::T=1.0) = PeriodicLoss{T}(circ)
+PeriodicLoss{T<:Number}(circ::T) = PeriodicLoss{Float64}(Float64(circ))
+
+value{T<:Number}(loss::PeriodicLoss, difference::T) = 1 - cos(difference*loss.k)
+deriv{T<:Number}(loss::PeriodicLoss, difference::T) = loss.k * sin(difference*loss.k)
+deriv2{T<:Number}(loss::PeriodicLoss, difference::T) = abs2(loss.k) * cos(difference*loss.k)
+function value_deriv{T<:Number}(loss::PeriodicLoss, difference::T)
+    dk = difference*loss.k
+    return 1-cos(dk), loss.k*sin(dk)
+end
+
+isdifferentiable(::PeriodicLoss) = true
+isdifferentiable(::PeriodicLoss, at) = true
+istwicedifferentiable(::PeriodicLoss) = true
+istwicedifferentiable(::PeriodicLoss, at) = true
+islipschitzcont(::PeriodicLoss) = true
+islipschitzcont_deriv(::PeriodicLoss) = true
+isconvex(::PeriodicLoss) = false
+isstronglyconvex(::PeriodicLoss) = false
+
+
 # ===========================================================
 # L(y, t) = max(0, |y - t| - ɛ)
 

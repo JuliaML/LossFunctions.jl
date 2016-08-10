@@ -30,6 +30,7 @@ export
     LPDistLoss,
     L1DistLoss,
     L2DistLoss,
+    PeriodicLoss,
     EpsilonInsLoss,
     L1EpsilonInsLoss,
     L2EpsilonInsLoss,
