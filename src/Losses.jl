@@ -4,6 +4,8 @@ module Losses
 
 using RecipesBase
 
+import Base.*
+
 # to be replaced with Reexport as soon as it's importall issues are fixed
 importall LearnBase
 eval(Expr(:toplevel, Expr(:export, setdiff(names(LearnBase), [:LearnBase])...)))
@@ -35,14 +37,18 @@ export
 
     LogitProbLoss,
     CrossentropyLoss,
-    ZeroOneLoss
+    ZeroOneLoss,
+
+    ScaledLoss
 
 include("common.jl")
 
 include("supervised/supervised.jl")
 include("supervised/distance.jl")
 include("supervised/margin.jl")
+include("supervised/scaledloss.jl")
 include("supervised/other.jl")
 include("supervised/io.jl")
+
 
 end # module

@@ -130,12 +130,45 @@ function test_deriv2(l::DistanceLoss, t_vec)
     end
 end
 
+function test_scaledloss(l::Loss, t_vec, y_vec)
+    @testset "Scaling for $(l): " begin
+        for λ = (2.0, 2)
+            sl = ScaledLoss(l,λ)
+            @test sl == λ * l
+            for t in t_vec
+                for y in y_vec
+                    @test value(ScaledLoss(l,λ),t,y) == λ*value(l,t,y)
+                    @test deriv(ScaledLoss(l,λ),t,y) == λ*deriv(l,t,y)
+                    @test deriv2(ScaledLoss(l,λ),t,y) == λ*deriv2(l,t,y)
+                end
+            end
+        end
+    end
+end
+
+function test_scaledloss(l::Loss, n_vec)
+    @testset "Scaling for $(l): " begin
+        for λ = (2.0, 2)
+            sl = ScaledLoss(l,λ)
+            @test sl == λ * l
+            for n in n_vec
+                @test value(ScaledLoss(l,λ),n) == λ*value(l,n)
+                @test deriv(ScaledLoss(l,λ),n) == λ*deriv(l,n)
+                @test deriv2(ScaledLoss(l,λ),n) == λ*deriv2(l,n)
+            end
+        end
+    end
+end
+
 # ====================================================================
 
 @testset "Test typestable supervised loss for type stability" begin
     for loss in [L1HingeLoss(), L2HingeLoss(), ModifiedHuberLoss(), PerceptronLoss(),
                 ZeroOneLoss(), LPDistLoss(1), LPDistLoss(2), LPDistLoss(3)]
         test_value_typestable(loss)
+        if typeof(loss) <: Union{MarginLoss, DistanceLoss}
+            test_value_floatforcing(2. * loss)
+        end
     end
 end
 
@@ -144,6 +177,8 @@ end
                 SmoothedL1HingeLoss(1), L1EpsilonInsLoss(0.5), L1EpsilonInsLoss(1),
                 LogitDistLoss(), L2EpsilonInsLoss(0.5), L2EpsilonInsLoss(1)]
         test_value_floatforcing(loss)
+        test_value_floatforcing(2 * loss)
+        test_value_floatforcing(2. * loss)
     end
 end
 
@@ -238,6 +273,13 @@ end
     end
 end
 
+@testset "Test margin-based scaled loss" begin
+    for loss in margin_losses
+        test_scaledloss(loss, [-1.,1], -10:0.1:10)
+        test_scaledloss(loss, -10:0.1:10)
+    end
+end
+
 distance_losses = [L2DistLoss(), LPDistLoss(2.0), L1DistLoss(), LPDistLoss(1.0),
                    LPDistLoss(0.5), LPDistLoss(1.5), LPDistLoss(3),
                    LogitDistLoss(), L1EpsilonInsLoss(0.5), EpsilonInsLoss(1.5),
@@ -254,3 +296,11 @@ end
         test_deriv2(loss, -30:0.5:30)
     end
 end
+
+@testset "Test distance-based scaled loss" begin
+    for loss in distance_losses
+        test_scaledloss(loss, -20:.2:20, -30:0.5:30)
+        test_scaledloss(loss, -30:0.5:30)
+    end
+end
+
