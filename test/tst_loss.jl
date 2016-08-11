@@ -52,8 +52,6 @@ function test_value(l::SupervisedLoss, f::Function, y_vec, t_vec)
     @testset "$(l): " begin
         for y in y_vec, t in t_vec
             @test abs(value(l, y, t) - f(y, t)) < 1e-10
-            # TODO: consider this test?
-            # @test abs(value_deriv(l,y,t)[1] - f(y, t)) < 1e-10
         end
     end
 end
@@ -114,6 +112,32 @@ function test_deriv(l::DistanceLoss, t_vec)
                 @test_approx_eq d_comp deriv(l, t-y)
                 @test_approx_eq d_comp deriv_fun(l)(y, t)
                 @test_approx_eq d_comp deriv_fun(l)(t-y)
+            else
+                # y-t == 0 ? print(".") : print("$(y-t) ")
+                #print(".")
+            end
+        end
+    end
+end
+
+function test_deriv(l::SupervisedLoss, t_vec)
+    @testset "$(l): " begin
+        for y in -20:.2:20, t in t_vec
+            if isdifferentiable(l, y, t)
+                d_dual = epsilon(value(l, y, dual(t, 1)))
+                d_comp = deriv(l, y, t)
+                @test abs(d_dual - d_comp) < 1e-10
+                val = value(l, y, t)
+                val2, d_comp2 = value_deriv(l, y, t)
+                val3, d_comp3 = value_deriv_fun(l)(y, t)
+                @test_approx_eq val val2
+                @test_approx_eq val val3
+                @test_approx_eq val value(l, y, t)
+                @test_approx_eq val value_fun(l)(y, t)
+                @test_approx_eq d_comp d_comp2
+                @test_approx_eq d_comp d_comp3
+                @test_approx_eq d_comp deriv(l, y, t)
+                @test_approx_eq d_comp deriv_fun(l)(y, t)
             else
                 # y-t == 0 ? print(".") : print("$(y-t) ")
                 #print(".")
@@ -303,6 +327,9 @@ end
 
     _zerooneloss(y, t) = sign(y*t) < 0 ? 1 : 0
     test_value(ZeroOneLoss(), _zerooneloss, [-1.,1], -10:0.1:10)
+
+    _poissonloss(y, t) = exp(t) - t*y
+    test_value(PoissonLoss(), _poissonloss, 0:10, linspace(0,10,11))
 end
 
 margin_losses = [LogitMarginLoss(), L1HingeLoss(), L2HingeLoss(), PerceptronLoss(),
@@ -337,6 +364,10 @@ distance_losses = [L2DistLoss(), LPDistLoss(2.0), L1DistLoss(), LPDistLoss(1.0),
     for loss in distance_losses
         test_deriv(loss, -30:0.5:30)
     end
+end
+
+@testset "Test first derivatives of other losses" begin
+    test_deriv(PoissonLoss(), 0:30)
 end
 
 @testset "Test second derivatives of distance-based losses" begin

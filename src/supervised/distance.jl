@@ -149,7 +149,6 @@ islipschitzcont_deriv(::PeriodicLoss) = true
 isconvex(::PeriodicLoss) = false
 isstronglyconvex(::PeriodicLoss) = false
 
-
 # ===========================================================
 # L(y, t) = max(0, |y - t| - ɛ)
 
