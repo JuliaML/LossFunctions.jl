@@ -124,13 +124,8 @@ immutable PeriodicLoss{T<:AbstractFloat} <: DistanceLoss
         new(convert(T, 2π/circ))
     end
 end
-function PeriodicLoss{T<:Number}(ε::T=1.0)
-    if T <: AbstractFloat
-        PeriodicLoss{T}(ε)
-    else # cast to Float64
-        PeriodicLoss{Float64}(Float64(ε))
-    end
-end
+PeriodicLoss{T<:AbstractFloat}(circ::T=1.0) = PeriodicLoss{T}(circ)
+PeriodicLoss(circ) = PeriodicLoss{Float64}(Float64(circ))
 
 value{T<:Number}(loss::PeriodicLoss, difference::T) = 1 - cos(difference*loss.k)
 deriv{T<:Number}(loss::PeriodicLoss, difference::T) = loss.k * sin(difference*loss.k)
@@ -167,7 +162,7 @@ type HuberLoss{T<:AbstractFloat} <: DistanceLoss
     end
 end
 HuberLoss{T<:AbstractFloat}(d::T=1.0) = HuberLoss{T}(d)
-HuberLoss{T<:Number}(d::T) = HuberLoss{Float64}(Float64(d))
+HuberLoss(d) = HuberLoss{Float64}(Float64(d))
 
 function value{T1,T2<:Number}(loss::HuberLoss{T1}, difference::T2)
     T = promote_type(T1,T2)
@@ -228,6 +223,9 @@ immutable L1EpsilonInsLoss{T<:AbstractFloat} <: DistanceLoss
     end
 end
 typealias EpsilonInsLoss L1EpsilonInsLoss
+L1EpsilonInsLoss{T<:AbstractFloat}(ε::T) = L1EpsilonInsLoss{T}(ε)
+L1EpsilonInsLoss(ε) = L1EpsilonInsLoss{Float64}(Float64(ε))
+
 function L1EpsilonInsLoss{T<:Number}(ε::T)
     if T <: AbstractFloat
         L1EpsilonInsLoss{T}(ε)
@@ -272,13 +270,8 @@ immutable L2EpsilonInsLoss{T<:AbstractFloat} <: DistanceLoss
         new(convert(T, ɛ))
     end
 end
-function L2EpsilonInsLoss{T<:Number}(ε::T)
-    if T <: AbstractFloat
-        L2EpsilonInsLoss{T}(ε)
-    else # cast to Float64
-        L2EpsilonInsLoss{Float64}(Float64(ε))
-    end
-end
+L2EpsilonInsLoss{T<:AbstractFloat}(ε::T) = L2EpsilonInsLoss{T}(ε)
+L2EpsilonInsLoss(ε) = L2EpsilonInsLoss{Float64}(Float64(ε))
 
 function value{T1,T2<:Number}(loss::L2EpsilonInsLoss{T1}, difference::T2)
     T = promote_type(T1,T2)
