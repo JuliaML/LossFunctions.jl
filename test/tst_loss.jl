@@ -227,7 +227,8 @@ end
 @testset "Test float-forcing supervised loss for type stability" begin
     # Losses that should always return Float64
     for loss in [SmoothedL1HingeLoss(0.5), SmoothedL1HingeLoss(1), L1EpsilonInsLoss(0.5),
-                 L1EpsilonInsLoss(1), L2EpsilonInsLoss(0.5), L2EpsilonInsLoss(1), PeriodicLoss(1)]
+                 L1EpsilonInsLoss(1), L2EpsilonInsLoss(0.5), L2EpsilonInsLoss(1),
+                 PeriodicLoss(1), PeriodicLoss(1.5), HuberLoss(1.0)]
         test_value_float64_forcing(loss)
         test_value_float64_forcing(2.0 * loss)
     end
@@ -301,6 +302,14 @@ end
     test_value(PeriodicLoss(1), _periodicloss(1), yr, tr)
     test_value(PeriodicLoss(1.5), _periodicloss(1.5), yr, tr)
 
+    function _huberloss(d)
+        _value(y, t) = abs(y-t)<d ? (abs2(y-t)/2) : (d*(abs(y-t) - (d/2)))
+        _value
+    end
+    test_value(HuberLoss(0.5), _huberloss(0.5), yr, tr)
+    test_value(HuberLoss(1), _huberloss(1), yr, tr)
+    test_value(HuberLoss(1.5), _huberloss(1.5), yr, tr)
+
     function _l1epsinsloss(ɛ)
         _value(y, t) = max(0, abs(t - y) - ɛ)
         _value
@@ -358,7 +367,8 @@ end
 distance_losses = [L2DistLoss(), LPDistLoss(2.0), L1DistLoss(), LPDistLoss(1.0),
                    LPDistLoss(0.5), LPDistLoss(1.5), LPDistLoss(3),
                    LogitDistLoss(), L1EpsilonInsLoss(0.5), EpsilonInsLoss(1.5),
-                   L2EpsilonInsLoss(0.5), L2EpsilonInsLoss(1.5), PeriodicLoss(1)]
+                   L2EpsilonInsLoss(0.5), L2EpsilonInsLoss(1.5), PeriodicLoss(1),
+                   HuberLoss(1), HuberLoss(1.5)]
 
 @testset "Test first derivatives of distance-based losses" begin
     for loss in distance_losses

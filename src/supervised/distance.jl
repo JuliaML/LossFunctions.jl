@@ -116,7 +116,7 @@ isstronglyconvex(::L2DistLoss) = true
 `PeriodicLoss <: DistanceLoss`
 
 Measures distance on a circle of specified circumference.
-""" 
+"""
 immutable PeriodicLoss{T<:AbstractFloat} <: DistanceLoss
     k::T   # k = 2π/circumference
     function PeriodicLoss(circ::T)
@@ -148,6 +148,73 @@ islipschitzcont(::PeriodicLoss) = true
 islipschitzcont_deriv(::PeriodicLoss) = true
 isconvex(::PeriodicLoss) = false
 isstronglyconvex(::PeriodicLoss) = false
+
+
+# ===========================================================
+# L(y, t) =  1/2 * (y-t)²    , if |y-t| < d
+# L(y, t) =  d⋅(|y-t| - d/2) , otherwise
+
+"""
+`HuberLoss <: DistanceLoss`
+
+Loss function commonly used for robustness to outliers
+"""
+type HuberLoss{T<:AbstractFloat} <: DistanceLoss
+    d::T   # boundary between quadratic and linear loss
+    function HuberLoss(d::T)
+        d > 0 || error("Huber crossover parameter must be strictly positive.")
+        new(d)
+    end
+end
+HuberLoss{T<:AbstractFloat}(d::T=1.0) = HuberLoss{T}(d)
+HuberLoss{T<:Number}(d::T) = HuberLoss{Float64}(Float64(d))
+
+function value{T1,T2<:Number}(loss::HuberLoss{T1}, difference::T2)
+    T = promote_type(T1,T2)
+    abs_diff = abs(difference)
+    if abs_diff <= loss.d
+        return T(0.5)*abs2(difference)   # quadratic
+    else
+        return (loss.d*abs_diff) - T(0.5)*abs2(loss.d)   # linear
+    end
+end
+function deriv{T1,T2<:Number}(loss::HuberLoss{T1}, difference::T2)
+    T = promote_type(T1,T2)
+    if abs(difference) <= loss.d
+        return T(difference)   # quadratic
+    else
+        return loss.d*T(sign(difference))   # linear
+    end
+end
+function deriv2{T1,T2<:Number}(loss::HuberLoss{T1}, difference::T2)
+    T = promote_type(T1,T2)
+    if abs(difference) <= loss.d
+        return one(T)   # quadratic
+    else
+        return zero(T)   # linear
+    end
+end
+function value_deriv{T1,T2<:Number}(loss::HuberLoss{T1}, difference::T2)
+    T = promote_type(T1,T2)
+    abs_diff = abs(difference)
+    if abs_diff <= loss.d
+        val = T(0.5)*abs2(difference)
+        der = T(difference)
+    else
+        val = (loss.d*abs_diff) - T(0.5)*abs2(loss.d)
+        der = loss.d*T(sign(difference))
+    end
+    return val,der
+end
+
+isdifferentiable(::HuberLoss) = true
+isdifferentiable(l::HuberLoss, at) = true
+istwicedifferentiable(::HuberLoss) = false
+istwicedifferentiable(l::HuberLoss, at) = at != abs(l.d)
+islipschitzcont(::HuberLoss) = true
+islipschitzcont_deriv(::HuberLoss) = false
+isconvex(::HuberLoss) = true
+isstronglyconvex(::HuberLoss) = false
 
 # ===========================================================
 # L(y, t) = max(0, |y - t| - ɛ)
