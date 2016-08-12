@@ -183,11 +183,7 @@ function deriv{T1,T2<:Number}(loss::HuberLoss{T1}, difference::T2)
 end
 function deriv2{T1,T2<:Number}(loss::HuberLoss{T1}, difference::T2)
     T = promote_type(T1,T2)
-    if abs(difference) <= loss.d
-        return one(T)   # quadratic
-    else
-        return zero(T)   # linear
-    end
+    abs(difference) <= loss.d ? one(T) : zero(T)
 end
 function value_deriv{T1,T2<:Number}(loss::HuberLoss{T1}, difference::T2)
     T = promote_type(T1,T2)
