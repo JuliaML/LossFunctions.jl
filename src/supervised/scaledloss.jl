@@ -1,10 +1,10 @@
 for KIND in (:MarginLoss, :DistanceLoss)
     @eval begin
-        immutable $(symbol("Scaled", KIND)){L<:$KIND,T<:Number} <: $KIND
+        immutable $(@compat Symbol("Scaled", KIND)){L<:$KIND,T<:Number} <: $KIND
             loss::L
             factor::T
         end
-        (*)(factor::Number, loss::$KIND) = $(symbol("Scaled", KIND))(loss, factor)
+        (*)(factor::Number, loss::$KIND) = $(Symbol("Scaled", KIND))(loss, factor)
     end
 end
 
