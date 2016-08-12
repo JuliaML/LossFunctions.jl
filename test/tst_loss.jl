@@ -149,7 +149,7 @@ end
 function test_deriv2(l::MarginLoss, t_vec)
     @testset "$(l): " begin
         for y in [-1., 1], t in t_vec
-            if istwicedifferentiable(l, y*t)
+            if istwicedifferentiable(l, y*t) && isdifferentiable(l, y*t)
                 d2_dual = epsilon(deriv(l, dual(y, 0), dual(t, 1)))
                 d2_comp = deriv2(l, y, t)
                 @test abs(d2_dual - d2_comp) < 1e-10
@@ -168,7 +168,7 @@ end
 function test_deriv2(l::DistanceLoss, t_vec)
     @testset "$(l): " begin
         for y in -20:.2:20, t in t_vec
-            if istwicedifferentiable(l, t-y)
+            if istwicedifferentiable(l, t-y) && isdifferentiable(l, t-y)
                 d2_dual = epsilon(deriv(l, dual(t-y, 1)))
                 d2_comp = deriv2(l, y, t)
                 @test abs(d2_dual - d2_comp) < 1e-10
