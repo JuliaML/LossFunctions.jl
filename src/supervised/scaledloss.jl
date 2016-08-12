@@ -10,7 +10,11 @@ end
 
 typealias ScaledLoss Union{ScaledMarginLoss, ScaledDistanceLoss}
 
-Base.convert(::Type{ScaledLoss}, l::Loss, factor::Number) = factor * l
+if VERSION >= v"0.5-"
+    ScaledLoss(l::Loss, factor::Number) = factor * l
+else
+    Base.convert(::Type{ScaledLoss}, l::Loss, factor::Number) = factor * l
+end
 
 value_deriv(l::ScaledLoss, num::Number) = (l.factor * value(l.loss, num), l.factor * deriv(l.loss, num))
 
