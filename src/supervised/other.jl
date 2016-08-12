@@ -1,4 +1,31 @@
 
+# ===========================================================
+# L(y, t) = exp(t) - t*y
+
+"""
+`PoissonLoss <: SupervisedLoss`
+
+Loss under a Poisson noise distribution (KL-divergence)
+"""
+immutable PoissonLoss <: SupervisedLoss end
+
+value(loss::PoissonLoss, target::Number, output::Number) = exp(output) - target*output
+deriv(loss::PoissonLoss, target::Number, output::Number) = exp(output) - target
+deriv2(loss::PoissonLoss, target::Number, output::Number) = exp(output)
+function value_deriv(loss::PoissonLoss, target::Number, output::Number)
+    exp_o = exp(output)
+    return (exp_o-(target*output), exp_o-target)
+end
+
+isdifferentiable(::PoissonLoss) = true
+isdifferentiable(::PoissonLoss, y, t) = true
+istwicedifferentiable(::PoissonLoss) = true
+istwicedifferentiable(::PoissonLoss, y, t) = true
+islipschitzcont(::PoissonLoss) = false
+islipschitzcont_deriv(::PoissonLoss) = false
+isconvex(::PoissonLoss) = true
+isstronglyconvex(::PoissonLoss) = false
+
 # ==========================================================================
 # L(target, output) = - target*ln(output) - (1-target)*ln(1-output)
 

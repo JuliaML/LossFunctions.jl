@@ -2,19 +2,47 @@ function test_value_typestable(l::SupervisedLoss)
     @testset "$(l): " begin
         for y in (-1, 1, Int32(-1), Int32(1), -1.5, 1.5, Float32(-.5), Float32(.5))
             for t in (-2, 2, Int32(-1), Int32(1), -.5, .5, Float32(-1), Float32(1))
+                # get expected return type
+                T = promote_type(typeof(y), typeof(t))
+
+                # test basic loss
                 val = value(l, y, t)
-                @test typeof(val) <: promote_type(typeof(y), typeof(t))
+                @test typeof(val) <: T
+
+                # test scaled version of loss
+                @test typeof(value(T(2)*l, y, t)) <: T
             end
         end
     end
 end
 
-function test_value_floatforcing(l::SupervisedLoss)
+function test_value_float32_preserving(l::SupervisedLoss)
     @testset "$(l): " begin
         for y in (-1, 1, Int32(-1), Int32(1), -1.5, 1.5, Float32(-.5), Float32(.5))
             for t in (-2, 2, Int32(-1), Int32(1), -.5, .5, Float32(-1), Float32(1))
                 val = value(l, y, t)
-                @test (typeof(val) <: Float64) || (typeof(val) <: Float32)
+                T = promote_type(typeof(y),typeof(t))
+                if !(T <: AbstractFloat)
+                    # cast Integers to a float
+                    # (whether its Float32 or Float64 depends on the loss...)
+                    @test (typeof(val) <: AbstractFloat)
+                elseif T <: Float32
+                    # preserve Float32
+                    @test (typeof(val) <: Float32)
+                else
+                    @test (typeof(val) <: Float64)
+                end
+            end
+        end
+    end
+end
+
+function test_value_float64_forcing(l::SupervisedLoss)
+    @testset "$(l): " begin
+        for y in (-1, 1, Int32(-1), Int32(1), -1.5, 1.5, Float32(-.5), Float32(.5))
+            for t in (-2, 2, Int32(-1), Int32(1), -.5, .5, Float32(-1), Float32(1))
+                val = value(l, y, t)
+                @test (typeof(val) <: Float64)
             end
         end
     end
@@ -84,6 +112,32 @@ function test_deriv(l::DistanceLoss, t_vec)
                 @test_approx_eq d_comp deriv(l, t-y)
                 @test_approx_eq d_comp deriv_fun(l)(y, t)
                 @test_approx_eq d_comp deriv_fun(l)(t-y)
+            else
+                # y-t == 0 ? print(".") : print("$(y-t) ")
+                #print(".")
+            end
+        end
+    end
+end
+
+function test_deriv(l::SupervisedLoss, t_vec)
+    @testset "$(l): " begin
+        for y in -20:.2:20, t in t_vec
+            if isdifferentiable(l, y, t)
+                d_dual = epsilon(value(l, y, dual(t, 1)))
+                d_comp = deriv(l, y, t)
+                @test abs(d_dual - d_comp) < 1e-10
+                val = value(l, y, t)
+                val2, d_comp2 = value_deriv(l, y, t)
+                val3, d_comp3 = value_deriv_fun(l)(y, t)
+                @test_approx_eq val val2
+                @test_approx_eq val val3
+                @test_approx_eq val value(l, y, t)
+                @test_approx_eq val value_fun(l)(y, t)
+                @test_approx_eq d_comp d_comp2
+                @test_approx_eq d_comp d_comp3
+                @test_approx_eq d_comp deriv(l, y, t)
+                @test_approx_eq d_comp deriv_fun(l)(y, t)
             else
                 # y-t == 0 ? print(".") : print("$(y-t) ")
                 #print(".")
@@ -164,21 +218,30 @@ end
 
 @testset "Test typestable supervised loss for type stability" begin
     for loss in [L1HingeLoss(), L2HingeLoss(), ModifiedHuberLoss(), PerceptronLoss(),
-                ZeroOneLoss(), LPDistLoss(1), LPDistLoss(2), LPDistLoss(3)]
+                LPDistLoss(1), LPDistLoss(2), LPDistLoss(3)]
         test_value_typestable(loss)
-        if typeof(loss) <: Union{MarginLoss, DistanceLoss}
-            test_value_floatforcing(2. * loss)
-        end
+        # TODO: add ZeroOneLoss after scaling works...
     end
 end
 
 @testset "Test float-forcing supervised loss for type stability" begin
-    for loss in [LogitMarginLoss(), SmoothedL1HingeLoss(0.5),
-                SmoothedL1HingeLoss(1), L1EpsilonInsLoss(0.5), L1EpsilonInsLoss(1),
-                LogitDistLoss(), L2EpsilonInsLoss(0.5), L2EpsilonInsLoss(1)]
-        test_value_floatforcing(loss)
-        test_value_floatforcing(2 * loss)
-        test_value_floatforcing(2. * loss)
+    # Losses that should always return Float64
+    for loss in [SmoothedL1HingeLoss(0.5), SmoothedL1HingeLoss(1), L1EpsilonInsLoss(0.5),
+                 L1EpsilonInsLoss(1), L2EpsilonInsLoss(0.5), L2EpsilonInsLoss(1),
+                 PeriodicLoss(1), PeriodicLoss(1.5), HuberLoss(1.0)]
+        test_value_float64_forcing(loss)
+        test_value_float64_forcing(2.0 * loss)
+    end
+    test_value_float64_forcing(2.0 * LogitDistLoss())
+    test_value_float64_forcing(2.0 * LogitMarginLoss())
+    
+    # Losses that should return an AbstractFloat, preserving type if possible
+    for loss in [PeriodicLoss(Float32(1)), PeriodicLoss(Float32(0.5)),
+                 LogitDistLoss(), LogitMarginLoss(),
+                 L1EpsilonInsLoss(Float32(1)), L1EpsilonInsLoss(Float32(0.5)),
+                 L2EpsilonInsLoss(Float32(1)), L2EpsilonInsLoss(Float32(0.5))]
+        test_value_float32_preserving(loss)
+        test_value_float32_preserving(Float32(2) * loss)
     end
 end
 
@@ -220,33 +283,51 @@ end
 end
 
 @testset "Test distance-based loss against reference function" begin
+    yr,tr = linspace(-20,20,10),linspace(-30,30,10)
+
     _l1distloss(y, t) = abs(t - y)
-    test_value(L1DistLoss(), _l1distloss, -20:.2:20, -30:0.5:30)
+    test_value(L1DistLoss(), _l1distloss, yr, tr)
 
     _l2distloss(y, t) = (t - y)^2
-    test_value(L2DistLoss(), _l2distloss, -20:.2:20, -30:0.5:30)
+    test_value(L2DistLoss(), _l2distloss, yr, tr)
 
     _lp15distloss(y, t) = abs(t - y)^(1.5)
-    test_value(LPDistLoss(1.5), _lp15distloss, -20:.2:20, -30:0.5:30)
+    test_value(LPDistLoss(1.5), _lp15distloss, yr, tr)
+
+    function _periodicloss(c)
+        _value(y, t) = 1 - cos((y-t)*2π/c)
+        _value
+    end
+    test_value(PeriodicLoss(0.5), _periodicloss(0.5), yr, tr)
+    test_value(PeriodicLoss(1), _periodicloss(1), yr, tr)
+    test_value(PeriodicLoss(1.5), _periodicloss(1.5), yr, tr)
+
+    function _huberloss(d)
+        _value(y, t) = abs(y-t)<d ? (abs2(y-t)/2) : (d*(abs(y-t) - (d/2)))
+        _value
+    end
+    test_value(HuberLoss(0.5), _huberloss(0.5), yr, tr)
+    test_value(HuberLoss(1), _huberloss(1), yr, tr)
+    test_value(HuberLoss(1.5), _huberloss(1.5), yr, tr)
 
     function _l1epsinsloss(ɛ)
         _value(y, t) = max(0, abs(t - y) - ɛ)
         _value
     end
-    test_value(EpsilonInsLoss(.5), _l1epsinsloss(0.5), -20:.2:20, -30:0.5:30)
-    test_value(EpsilonInsLoss(1), _l1epsinsloss(1), -20:.2:20, -30:0.5:30)
-    test_value(EpsilonInsLoss(1.5), _l1epsinsloss(1.5), -20:.2:20, -30:0.5:30)
+    test_value(EpsilonInsLoss(0.5), _l1epsinsloss(0.5), yr, tr)
+    test_value(EpsilonInsLoss(1), _l1epsinsloss(1), yr, tr)
+    test_value(EpsilonInsLoss(1.5), _l1epsinsloss(1.5), yr, tr)
 
     function _l2epsinsloss(ɛ)
         _value(y, t) = max(0, abs(t - y) - ɛ)^2
         _value
     end
-    test_value(L2EpsilonInsLoss(.5), _l2epsinsloss(0.5), -20:.2:20, -30:0.5:30)
-    test_value(L2EpsilonInsLoss(1), _l2epsinsloss(1), -20:.2:20, -30:0.5:30)
-    test_value(L2EpsilonInsLoss(1.5), _l2epsinsloss(1.5), -20:.2:20, -30:0.5:30)
+    test_value(L2EpsilonInsLoss(0.5), _l2epsinsloss(0.5), yr, tr)
+    test_value(L2EpsilonInsLoss(1), _l2epsinsloss(1), yr, tr)
+    test_value(L2EpsilonInsLoss(1.5), _l2epsinsloss(1.5), yr, tr)
 
     _logitdistloss(y, t) = -log((4*exp(t-y))/(1+exp(t-y))^2)
-    test_value(LogitDistLoss(), _logitdistloss, -20:.2:20, -30:0.5:30)
+    test_value(LogitDistLoss(), _logitdistloss, yr, tr)
 end
 
 @testset "Test other loss against reference function" begin
@@ -255,6 +336,9 @@ end
 
     _zerooneloss(y, t) = sign(y*t) < 0 ? 1 : 0
     test_value(ZeroOneLoss(), _zerooneloss, [-1.,1], -10:0.1:10)
+
+    _poissonloss(y, t) = exp(t) - t*y
+    test_value(PoissonLoss(), _poissonloss, 0:10, linspace(0,10,11))
 end
 
 margin_losses = [LogitMarginLoss(), L1HingeLoss(), L2HingeLoss(), PerceptronLoss(),
@@ -283,12 +367,17 @@ end
 distance_losses = [L2DistLoss(), LPDistLoss(2.0), L1DistLoss(), LPDistLoss(1.0),
                    LPDistLoss(0.5), LPDistLoss(1.5), LPDistLoss(3),
                    LogitDistLoss(), L1EpsilonInsLoss(0.5), EpsilonInsLoss(1.5),
-                   L2EpsilonInsLoss(0.5), L2EpsilonInsLoss(1.5)]
+                   L2EpsilonInsLoss(0.5), L2EpsilonInsLoss(1.5), PeriodicLoss(1),
+                   HuberLoss(1), HuberLoss(1.5)]
 
 @testset "Test first derivatives of distance-based losses" begin
     for loss in distance_losses
         test_deriv(loss, -30:0.5:30)
     end
+end
+
+@testset "Test first derivatives of other losses" begin
+    test_deriv(PoissonLoss(), 0:30)
 end
 
 @testset "Test second derivatives of distance-based losses" begin

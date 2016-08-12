@@ -108,11 +108,110 @@ islipschitzcont_deriv(::L2DistLoss) = true
 isconvex(::L2DistLoss) = true
 isstronglyconvex(::L2DistLoss) = true
 
+
+# ===========================================================
+# L(y, t) = 1 - cos((y-t)*2π/c)
+
+"""
+`PeriodicLoss <: DistanceLoss`
+
+Measures distance on a circle of specified circumference.
+"""
+immutable PeriodicLoss{T<:AbstractFloat} <: DistanceLoss
+    k::T   # k = 2π/circumference
+    function PeriodicLoss(circ::T)
+        circ > 0 || error("circumference should be strictly positive")
+        new(convert(T, 2π/circ))
+    end
+end
+PeriodicLoss{T<:AbstractFloat}(circ::T=1.0) = PeriodicLoss{T}(circ)
+PeriodicLoss(circ) = PeriodicLoss{Float64}(Float64(circ))
+
+value{T<:Number}(loss::PeriodicLoss, difference::T) = 1 - cos(difference*loss.k)
+deriv{T<:Number}(loss::PeriodicLoss, difference::T) = loss.k * sin(difference*loss.k)
+deriv2{T<:Number}(loss::PeriodicLoss, difference::T) = abs2(loss.k) * cos(difference*loss.k)
+function value_deriv{T<:Number}(loss::PeriodicLoss, difference::T)
+    dk = difference*loss.k
+    return 1-cos(dk), loss.k*sin(dk)
+end
+
+isdifferentiable(::PeriodicLoss) = true
+isdifferentiable(::PeriodicLoss, at) = true
+istwicedifferentiable(::PeriodicLoss) = true
+istwicedifferentiable(::PeriodicLoss, at) = true
+islipschitzcont(::PeriodicLoss) = true
+islipschitzcont_deriv(::PeriodicLoss) = true
+isconvex(::PeriodicLoss) = false
+isstronglyconvex(::PeriodicLoss) = false
+
+
+# ===========================================================
+# L(y, t) =  1/2 * (y-t)²    , if |y-t| < d
+# L(y, t) =  d⋅(|y-t| - d/2) , otherwise
+
+"""
+`HuberLoss <: DistanceLoss`
+
+Loss function commonly used for robustness to outliers
+"""
+type HuberLoss{T<:AbstractFloat} <: DistanceLoss
+    d::T   # boundary between quadratic and linear loss
+    function HuberLoss(d::T)
+        d > 0 || error("Huber crossover parameter must be strictly positive.")
+        new(d)
+    end
+end
+HuberLoss{T<:AbstractFloat}(d::T=1.0) = HuberLoss{T}(d)
+HuberLoss(d) = HuberLoss{Float64}(Float64(d))
+
+function value{T1,T2<:Number}(loss::HuberLoss{T1}, difference::T2)
+    T = promote_type(T1,T2)
+    abs_diff = abs(difference)
+    if abs_diff <= loss.d
+        return T(0.5)*abs2(difference)   # quadratic
+    else
+        return (loss.d*abs_diff) - T(0.5)*abs2(loss.d)   # linear
+    end
+end
+function deriv{T1,T2<:Number}(loss::HuberLoss{T1}, difference::T2)
+    T = promote_type(T1,T2)
+    if abs(difference) <= loss.d
+        return T(difference)   # quadratic
+    else
+        return loss.d*T(sign(difference))   # linear
+    end
+end
+function deriv2{T1,T2<:Number}(loss::HuberLoss{T1}, difference::T2)
+    T = promote_type(T1,T2)
+    abs(difference) <= loss.d ? one(T) : zero(T)
+end
+function value_deriv{T1,T2<:Number}(loss::HuberLoss{T1}, difference::T2)
+    T = promote_type(T1,T2)
+    abs_diff = abs(difference)
+    if abs_diff <= loss.d
+        val = T(0.5)*abs2(difference)
+        der = T(difference)
+    else
+        val = (loss.d*abs_diff) - T(0.5)*abs2(loss.d)
+        der = loss.d*T(sign(difference))
+    end
+    return val,der
+end
+
+isdifferentiable(::HuberLoss) = true
+isdifferentiable(l::HuberLoss, at) = true
+istwicedifferentiable(::HuberLoss) = false
+istwicedifferentiable(l::HuberLoss, at) = at != abs(l.d)
+islipschitzcont(::HuberLoss) = true
+islipschitzcont_deriv(::HuberLoss) = false
+isconvex(::HuberLoss) = true
+isstronglyconvex(::HuberLoss) = false
+
 # ===========================================================
 # L(y, t) = max(0, |y - t| - ɛ)
 
-immutable L1EpsilonInsLoss <: DistanceLoss
-    eps::Float64
+immutable L1EpsilonInsLoss{T<:AbstractFloat} <: DistanceLoss
+    ε::T
 
     function L1EpsilonInsLoss(ɛ::Number)
         ɛ > 0 || error("ɛ must be strictly positive")
@@ -120,20 +219,37 @@ immutable L1EpsilonInsLoss <: DistanceLoss
     end
 end
 typealias EpsilonInsLoss L1EpsilonInsLoss
+L1EpsilonInsLoss{T<:AbstractFloat}(ε::T) = L1EpsilonInsLoss{T}(ε)
+L1EpsilonInsLoss(ε) = L1EpsilonInsLoss{Float64}(Float64(ε))
 
-value{T<:Number}(loss::L1EpsilonInsLoss, difference::T) = max(zero(T), abs(difference) - loss.eps)
-deriv{T<:Number}(loss::L1EpsilonInsLoss, difference::T) = abs(difference) <= loss.eps ? zero(T) : sign(difference)
-deriv2{T<:Number}(loss::L1EpsilonInsLoss, difference::T) = zero(T)
-function value_deriv{T<:Number}(loss::L1EpsilonInsLoss, difference::T)
+function L1EpsilonInsLoss{T<:Number}(ε::T)
+    if T <: AbstractFloat
+        L1EpsilonInsLoss{T}(ε)
+    else # cast to Float64
+        L1EpsilonInsLoss{Float64}(Float64(ε))
+    end
+end
+
+function value{T1,T2<:Number}(loss::L1EpsilonInsLoss{T1}, difference::T2)
+    T = promote_type(T1,T2)
+    max(zero(T), abs(difference) - loss.ε)
+end
+function deriv{T1,T2<:Number}(loss::L1EpsilonInsLoss{T1}, difference::T2)
+    T = promote_type(T1,T2)
+    abs(difference) <= loss.ε ? zero(T) : sign(difference)
+end
+deriv2{T1,T2<:Number}(loss::L1EpsilonInsLoss{T1}, difference::T2) = zero(promote_type(T1,T2))
+function value_deriv{T1,T2<:Number}(loss::L1EpsilonInsLoss{T1}, difference::T2)
+    T = promote_type(T1,T2)
     absr = abs(difference)
-    absr <= loss.eps ? (zero(T), zero(T)) : (absr - loss.eps, sign(difference))
+    absr <= loss.ε ? (zero(T), zero(T)) : (absr - loss.ε, sign(difference))
 end
 
 issymmetric(::L1EpsilonInsLoss) = true
 isdifferentiable(::L1EpsilonInsLoss) = false
-isdifferentiable(loss::L1EpsilonInsLoss, at) = abs(at) != loss.eps
+isdifferentiable(loss::L1EpsilonInsLoss, at) = abs(at) != loss.ε
 istwicedifferentiable(::L1EpsilonInsLoss) = true
-istwicedifferentiable(loss::L1EpsilonInsLoss, at) = abs(at) != loss.eps
+istwicedifferentiable(loss::L1EpsilonInsLoss, at) = abs(at) != loss.ε
 islipschitzcont(::L1EpsilonInsLoss) = true
 islipschitzcont_deriv(::L1EpsilonInsLoss) = true
 isconvex(::L1EpsilonInsLoss) = true
@@ -142,32 +258,41 @@ isstronglyconvex(::L1EpsilonInsLoss) = false
 # ===========================================================
 # L(y, t) = max(0, |y - t| - ɛ)^2
 
-immutable L2EpsilonInsLoss <: DistanceLoss
-    eps::Float64
+immutable L2EpsilonInsLoss{T<:AbstractFloat} <: DistanceLoss
+    ε::T
 
     function L2EpsilonInsLoss(ɛ::Number)
         ɛ > 0 || error("ɛ must be strictly positive")
-        new(convert(Float64, ɛ))
+        new(convert(T, ɛ))
     end
 end
+L2EpsilonInsLoss{T<:AbstractFloat}(ε::T) = L2EpsilonInsLoss{T}(ε)
+L2EpsilonInsLoss(ε) = L2EpsilonInsLoss{Float64}(Float64(ε))
 
-value{T<:Number}(loss::L2EpsilonInsLoss, difference::T) = abs2(max(zero(T), abs(difference) - loss.eps))
-function deriv{T<:Number}(loss::L2EpsilonInsLoss, difference::T)
-    absr = abs(difference)
-    absr <= loss.eps ? zero(T) : T(2)*sign(difference)*(absr - loss.eps)
+function value{T1,T2<:Number}(loss::L2EpsilonInsLoss{T1}, difference::T2)
+    T = promote_type(T1,T2)
+    abs2(max(zero(T), abs(difference) - loss.ε))
 end
-deriv2{T<:Number}(loss::L2EpsilonInsLoss, difference::T) = abs(difference) <= loss.eps ? zero(T) : T(2)
-function value_deriv{T<:Number}(loss::L2EpsilonInsLoss, difference::T)
+function deriv{T1,T2<:Number}(loss::L2EpsilonInsLoss{T1}, difference::T2)
+    T = promote_type(T1,T2)
     absr = abs(difference)
-    diff = absr - loss.eps
-    absr <= loss.eps ? (zero(T), zero(T)) : (abs2(diff), T(2)*sign(difference)*diff)
+    absr <= loss.ε ? zero(T) : T(2)*sign(difference)*(absr - loss.ε)
+end
+function deriv2{T1,T2<:Number}(loss::L2EpsilonInsLoss{T1}, difference::T2)
+    T = promote_type(T1,T2)
+    abs(difference) <= loss.ε ? zero(T) : T(2)
+end
+function value_deriv{T}(loss::L2EpsilonInsLoss{T}, difference::Number)
+    absr = abs(difference)
+    diff = absr - loss.ε
+    absr <= loss.ε ? (zero(T), zero(T)) : (abs2(diff), T(2)*sign(difference)*diff)
 end
 
 issymmetric(::L2EpsilonInsLoss) = true
 isdifferentiable(::L2EpsilonInsLoss) = true
 isdifferentiable(::L2EpsilonInsLoss, at) = true
 istwicedifferentiable(::L2EpsilonInsLoss) = false
-istwicedifferentiable(loss::L2EpsilonInsLoss, at) = abs(at) != loss.eps
+istwicedifferentiable(loss::L2EpsilonInsLoss, at) = abs(at) != loss.ε
 islipschitzcont(::L2EpsilonInsLoss) = true
 islipschitzcont_deriv(::L2EpsilonInsLoss) = true
 isconvex(::L2EpsilonInsLoss) = true
