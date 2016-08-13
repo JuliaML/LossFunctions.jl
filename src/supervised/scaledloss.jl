@@ -1,16 +1,20 @@
 for KIND in (:MarginLoss, :DistanceLoss)
     @eval begin
-        immutable $(symbol("Scaled", KIND)){L<:$KIND,T<:Number} <: $KIND
+        immutable $(@compat Symbol("Scaled", KIND)){L<:$KIND,T<:Number} <: $KIND
             loss::L
             factor::T
         end
-        (*)(factor::Number, loss::$KIND) = $(symbol("Scaled", KIND))(loss, factor)
+        (*)(factor::Number, loss::$KIND) = $(Symbol("Scaled", KIND))(loss, factor)
     end
 end
 
 typealias ScaledLoss Union{ScaledMarginLoss, ScaledDistanceLoss}
 
-Base.convert(::Type{ScaledLoss}, l::Loss, factor::Number) = factor * l
+if VERSION >= v"0.5-"
+    ScaledLoss(l::Loss, factor::Number) = factor * l
+else
+    Base.convert(::Type{ScaledLoss}, l::Loss, factor::Number) = factor * l
+end
 
 value_deriv(l::ScaledLoss, num::Number) = (l.factor * value(l.loss, num), l.factor * deriv(l.loss, num))
 
