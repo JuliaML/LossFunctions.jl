@@ -61,11 +61,11 @@ end
         target::AbstractArray{Q,M},
         output::AbstractArray{T,N}
     )
+    M > N && throw(ArgumentError("target has more dimensions than output; broadcasting not supported in this direction."))
     quote
       @_dimcheck size(buffer) == size(output)
-      @nexprs $N (n)->(s_n = size(output,n))
-      @nexprs $M (n)->@_dimcheck(size(target,n) == s_n)
-      @simd for I in CartesianRange(@ntuple($N,n->(1:s_n)))
+      @nexprs $M (n)->@_dimcheck(size(target,n) == size(output,n))
+      @simd for I in CartesianRange(size(output))
           @nexprs $N n->(i_n = I[n])
           @inbounds @nref($N,buffer,i) = value(loss, @nref($M,target,i), @nref($N,output,i))
       end
@@ -79,11 +79,11 @@ end
         target::AbstractArray{Q,M},
         output::AbstractArray{T,N}
     )
+    M > N && throw(ArgumentError("target has more dimensions than output; broadcasting not supported in this direction."))
     quote
       @_dimcheck size(buffer) == size(output)
-      @nexprs $N (n)->(s_n = size(output,n))
-      @nexprs $M (n)->@_dimcheck(size(target,n) == s_n)
-      @simd for I in CartesianRange(@ntuple($N,n->(1:s_n)))
+      @nexprs $M (n)->@_dimcheck(size(target,n) == size(output,n))
+      @simd for I in CartesianRange(size(output))
           @nexprs $N n->(i_n = I[n])
           @inbounds @nref($N,buffer,i) = deriv(loss, @nref($M,target,i), @nref($N,output,i))
       end
@@ -109,12 +109,11 @@ end
         target::AbstractArray{Q,M},
         output::AbstractArray{T,N}
     )
+    M > N && throw(ArgumentError("target has more dimensions than output; broadcasting not supported in this direction."))
     quote
-      @_dimcheck size(buffer) == size(output)
-      @nexprs $N (n)->(s_n = size(output,n))
-      @nexprs $M (n)->@_dimcheck(size(target,n) == s_n)
+      @nexprs $M (n)->@_dimcheck(size(target,n) == size(output,n))
       val = zero(T) # TODO: this might be not be type-stable?
-      @simd for I in CartesianRange(@ntuple($N,n->(1:s_n)))
+      @simd for I in CartesianRange(size(output))
           @nexprs $N n->(i_n = I[n])
           @inbounds val += value(loss, @nref($M,target,i), @nref($N,output,i))
       end
@@ -127,12 +126,11 @@ end
         target::AbstractArray{Q,M},
         output::AbstractArray{T,N}
     )
+    M > N && throw(ArgumentError("target has more dimensions than output; broadcasting not supported in this direction."))
     quote
-      @_dimcheck size(buffer) == size(output)
-      @nexprs $N (n)->(s_n = size(output,n))
-      @nexprs $M (n)->@_dimcheck(size(target,n) == s_n)
+      @nexprs $M (n)->@_dimcheck(size(target,n) == size(output,n))
       val = zero(T) # TODO: this might be not be type-stable?
-      @simd for I in CartesianRange(@ntuple($N,n->(1:s_n)))
+      @simd for I in CartesianRange(size(output))
           @nexprs $N n->(i_n = I[n])
           @inbounds val += deriv(loss, @nref($M,target,i), @nref($N,output,i))
       end
@@ -147,15 +145,16 @@ end
         target::AbstractArray{Q,M},
         output::AbstractArray{T,N}
     )
+    M > N && throw(ArgumentError("target has more dimensions than output; broadcasting not supported in this direction."))
     quote
-      @_dimcheck size(buffer) == size(output)
-      @nexprs $N (n)->(s_n = size(output,n))
-      @nexprs $M (n)->@_dimcheck(size(target,n) == s_n)
+      @nexprs $M (n)->@_dimcheck(size(target,n) == size(output,n))
       val = zero(T) # TODO: this might be not be type-stable?
       tmp = zero(T) # TODO: this might be not be type-stable?
-      @simd for I in CartesianRange(@ntuple($N,n->(1:s_n)))
+      len = length(output)
+      @simd for I in CartesianRange(size(output))
+          @nexprs $N n->(i_n = I[n])
           @inbounds tmp = value(loss, @nref($M,target,i), @nref($N,output,i))
-          tmp /= n # is this to prevent overflow?
+          tmp /= len # is this to prevent overflow?
           val += tmp
       end
       val
@@ -167,15 +166,16 @@ end
         target::AbstractArray{Q,M},
         output::AbstractArray{T,N}
     )
+    M > N && throw(ArgumentError("target has more dimensions than output; broadcasting not supported in this direction."))
     quote
-      @_dimcheck size(buffer) == size(output)
-      @nexprs $N (n)->(s_n = size(output,n))
-      @nexprs $M (n)->@_dimcheck(size(target,n) == s_n)
+      @nexprs $M (n)->@_dimcheck(size(target,n) == size(output,n))
       val = zero(T) # TODO: this might be not be type-stable?
       tmp = zero(T) # TODO: this might be not be type-stable?
-      @simd for I in CartesianRange(@ntuple($N,n->(1:s_n)))
+      len = length(output)
+      @simd for I in CartesianRange(size(output))
+          @nexprs $N n->(i_n = I[n])
           @inbounds tmp = deriv(loss, @nref($M,target,i), @nref($N,output,i))
-          tmp /= n # is this to prevent overflow?
+          tmp /= len # is this to prevent overflow?
           val += tmp
       end
       val

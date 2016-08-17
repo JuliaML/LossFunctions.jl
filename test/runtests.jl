@@ -12,7 +12,8 @@ else
 end
 
 tests = [
-    "tst_loss.jl"
+    "tst_loss.jl",
+    "tst_api.jl"
 ]
 
 perf = [
