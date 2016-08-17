@@ -1,6 +1,9 @@
 # ===========================================================
 # L(y, t) = |y - t|^P
 
+"""
+    LPDistLoss{P} <: DistanceLoss
+"""
 immutable LPDistLoss{P} <: DistanceLoss
     LPDistLoss() = typeof(P) <: Number ? new() : error()
 end
@@ -38,7 +41,7 @@ isstronglyconvex{P}(::LPDistLoss{P}) = P > 1
 # L(y, t) = |y - t|
 
 """
-`L1DistLoss <: DistanceLoss`
+    L1DistLoss <: DistanceLoss
 
               Lossfunction                     Derivative
       ┌────────────┬────────────┐      ┌────────────┬────────────┐
@@ -75,7 +78,7 @@ isstronglyconvex(::L1DistLoss) = false
 # L(y, t) = (y - t)^2
 
 """
-`L2DistLoss <: DistanceLoss`
+    L2DistLoss <: DistanceLoss
 
               Lossfunction                     Derivative
       ┌────────────┬────────────┐      ┌────────────┬────────────┐
@@ -113,7 +116,7 @@ isstronglyconvex(::L2DistLoss) = true
 # L(y, t) = 1 - cos((y-t)*2π/c)
 
 """
-`PeriodicLoss <: DistanceLoss`
+    PeriodicLoss <: DistanceLoss
 
 Measures distance on a circle of specified circumference.
 """
@@ -150,9 +153,23 @@ isstronglyconvex(::PeriodicLoss) = false
 # L(y, t) =  d⋅(|y-t| - d/2) , otherwise
 
 """
-`HuberLoss <: DistanceLoss`
+    HuberLoss <: DistanceLoss
 
-Loss function commonly used for robustness to outliers
+Loss function commonly used for robustness to outliers.
+
+              Lossfunction (d=1)               Derivative
+      ┌────────────┬────────────┐      ┌────────────┬────────────┐
+    2 │                         │    1 │                .+-------│
+      │                         │      │              ./'        │
+      │\\.                     ./│      │             ./          │
+      │ '.                   .' │      │_           ./          _│
+      │   \\.               ./   │      │           /'            │
+      │     \\.           ./     │      │          /'             │
+      │      '.         .'      │      │        ./'              │
+    0 │        '-.___.-'        │   -1 │-------+'                │
+      └────────────┴────────────┘      └────────────┴────────────┘
+      -2                        2      -2                        2
+               h(x) - y                         h(x) - y
 """
 type HuberLoss{T<:AbstractFloat} <: DistanceLoss
     d::T   # boundary between quadratic and linear loss
@@ -210,6 +227,23 @@ isstronglyconvex(::HuberLoss) = false
 # ===========================================================
 # L(y, t) = max(0, |y - t| - ɛ)
 
+"""
+    L1EpsilonInsLoss <: DistanceLoss
+
+              Lossfunction (ɛ=1)               Derivative
+      ┌────────────┬────────────┐      ┌────────────┬────────────┐
+    2 │\\                       /│    1 │                  ┌------│
+      │ \\                     / │      │                  |      │
+      │  \\                   /  │      │                  |      │
+      │   \\                 /   │      │_      ___________!     _│
+      │    \\               /    │      │      |                  │
+      │     \\             /     │      │      |                  │
+      │      \\           /      │      │      |                  │
+    0 │       \\_________/       │   -1 │------┘                  │
+      └────────────┴────────────┘      └────────────┴────────────┘
+      -3                        3      -2                        2
+               h(x) - y                         h(x) - y
+"""
 immutable L1EpsilonInsLoss{T<:AbstractFloat} <: DistanceLoss
     ε::T
 
@@ -258,6 +292,23 @@ isstronglyconvex(::L1EpsilonInsLoss) = false
 # ===========================================================
 # L(y, t) = max(0, |y - t| - ɛ)^2
 
+"""
+    L2EpsilonInsLoss <: DistanceLoss
+
+              Lossfunction (ɛ=0.5)             Derivative
+      ┌────────────┬────────────┐      ┌────────────┬────────────┐
+    8 │                         │    1 │                  /      │
+      │:                       :│      │                 /       │
+      │'.                     .'│      │                /        │
+      │ \\.                   ./ │      │_         _____/        _│
+      │  \\.                 ./  │      │         /               │
+      │   \\.               ./   │      │        /                │
+      │    '\\.           ./'    │      │       /                 │
+    0 │      '-._______.-'      │   -1 │      /                  │
+      └────────────┴────────────┘      └────────────┴────────────┘
+      -3                        3      -2                        2
+               h(x) - y                         h(x) - y
+"""
 immutable L2EpsilonInsLoss{T<:AbstractFloat} <: DistanceLoss
     ε::T
 
@@ -301,6 +352,23 @@ isstronglyconvex(::L2EpsilonInsLoss) = true
 # ===========================================================
 # L(y, t) = -ln(4 * exp(y - t) / (1 + exp(y - t))²)
 
+"""
+    LogitDistLoss <: DistanceLoss
+
+              Lossfunction                     Derivative
+      ┌────────────┬────────────┐      ┌────────────┬────────────┐
+    2 │                         │    1 │                   _--'''│
+      │\\                       /│      │                ./'      │
+      │ \\.                   ./ │      │              ./         │
+      │  '.                 .'  │      │_           ./          _│
+      │   '.               .'   │      │           ./            │
+      │     \\.           ./     │      │         ./              │
+      │      '.         .'      │      │       ./                │
+    0 │        '-.___.-'        │   -1 │___.-''                  │
+      └────────────┴────────────┘      └────────────┴────────────┘
+      -3                        3      -4                        4
+               h(x) - y                         h(x) - y
+"""
 immutable LogitDistLoss <: DistanceLoss end
 
 function value(loss::LogitDistLoss, difference::Number)

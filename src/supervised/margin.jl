@@ -1,4 +1,3 @@
-
 # Note: agreement = output * target
 #       Agreement is high when output and target are the same sign and |output| is large.
 #       It is an indication that the output represents the correct class in a margin-based model.
@@ -7,7 +6,7 @@
 # L(target, output) = max(0, -agreement)
 
 """
-`PerceptronLoss <: MarginLoss`
+    PerceptronLoss <: MarginLoss
 
               Lossfunction                     Derivative
       ┌────────────┬────────────┐      ┌────────────┬────────────┐
@@ -22,7 +21,6 @@
       └────────────┴────────────┘      └────────────┴────────────┘
       -2                        2      -2                        2
                 y * h(x)                         y * h(x)
-
 """
 immutable PerceptronLoss <: MarginLoss end
 
@@ -45,7 +43,7 @@ isclipable(::PerceptronLoss) = true
 # L(target, output) = ln(1 + exp(-agreement))
 
 """
-`LogitMarginLoss <: MarginLoss`
+    LogitMarginLoss <: MarginLoss
 
               Lossfunction                     Derivative
       ┌────────────┬────────────┐      ┌────────────┬────────────┐
@@ -85,7 +83,7 @@ isclipable(::LogitMarginLoss) = false
 # lineplot(deriv_fun(HingeLoss()), 0:.01:2, canvas = AsciiCanvas, width = 25, height = 8, xlim=[0,2], ylim=[-1,0])
 
 """
-`L1HingeLoss <: MarginLoss`
+    L1HingeLoss <: MarginLoss
 
               Lossfunction                     Derivative
       ┌────────────┬────────────┐      ┌────────────┬────────────┐
@@ -123,7 +121,7 @@ isclipable(::L1HingeLoss) = true
 # L(target, output) = max(0, 1 - agreement)^2
 
 """
-`L2HingeLoss <: MarginLoss`
+    L2HingeLoss <: MarginLoss
 
               Lossfunction                     Derivative
       ┌────────────┬────────────┐      ┌────────────┬────────────┐
@@ -162,9 +160,9 @@ isclipable(::L2HingeLoss) = true
 #                     1 - γ / 2 - agreement               ... otherwise
 
 """
-`SmoothedL1HingeLoss <: MarginLoss`
+    SmoothedL1HingeLoss <: MarginLoss
 
-              Lossfunction                     Derivative
+              Lossfunction (γ=1)               Derivative
       ┌────────────┬────────────┐      ┌────────────┬────────────┐
     2 │\\.                       │    0 │                 ,r------│
       │ '.                      │      │               ./'       │
@@ -218,7 +216,7 @@ isclipable(::SmoothedL1HingeLoss) = true
 #                     -4*agreement               ... otherwise
 
 """
-`ModifiedHuberLoss <: MarginLoss`
+    ModifiedHuberLoss <: MarginLoss
 
               Lossfunction                     Derivative
       ┌────────────┬────────────┐      ┌────────────┬────────────┐

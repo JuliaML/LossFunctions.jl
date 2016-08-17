@@ -1,9 +1,8 @@
-
-# ===========================================================
+# ===============================================================
 # L(y, t) = exp(t) - t*y
 
 """
-`PoissonLoss <: SupervisedLoss`
+    PoissonLoss <: SupervisedLoss
 
 Loss under a Poisson noise distribution (KL-divergence)
 """
@@ -26,7 +25,7 @@ islipschitzcont_deriv(::PoissonLoss) = false
 isconvex(::PoissonLoss) = true
 isstronglyconvex(::PoissonLoss) = false
 
-# ==========================================================================
+# ===============================================================
 # L(target, output) = - target*ln(output) - (1-target)*ln(1-output)
 
 immutable CrossentropyLoss <: SupervisedLoss end
@@ -48,9 +47,26 @@ value_deriv(loss::CrossentropyLoss, target::Number, output::Number) = (value(los
 isdifferentiable(::CrossentropyLoss) = true
 isconvex(::CrossentropyLoss) = true
 
-# ==========================================================================
+# ===============================================================
 # L(target, output) = sign(agreement) < 0 ? 1 : 0
 
+"""
+    ZeroOneLoss <: SupervisedLoss
+
+              Lossfunction                     Derivative
+      ┌────────────┬────────────┐      ┌────────────┬────────────┐
+    1 │------------┐            │    1 │                         │
+      │            |            │      │                         │
+      │            |            │      │                         │
+      │            |            │      │_________________________│
+      │            |            │      │                         │
+      │            |            │      │                         │
+      │            |            │      │                         │
+    0 │            └------------│   -1 │                         │
+      └────────────┴────────────┘      └────────────┴────────────┘
+      -2                        2      -2                        2
+                y * h(x)                         y * h(x)
+"""
 immutable ZeroOneLoss <: SupervisedLoss end
 
 value(loss::ZeroOneLoss, target::Number, output::Number) = value(loss, target * output)
