@@ -1,4 +1,3 @@
-
 @testset "Broadcasting higher-order arrays" begin
     for f in (value,deriv,sumvalue,sumderiv,meanvalue,meanderiv)
         @testset "$f" begin
@@ -17,6 +16,9 @@
             @test isapprox(f(loss,targ1,out2), f(loss,targ2,out2))
             @test isapprox(f(loss,targ1,out2), f(loss,targ3,out2))
             @test isapprox(f(loss,targ2,out2), f(loss,targ3,out2))
+
+            # can't broadcast in this direction (yet)
+            @test_throws Exception f(loss,targ3,out1)
         end
     end
 end
