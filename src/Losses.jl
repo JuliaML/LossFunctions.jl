@@ -5,6 +5,7 @@ module Losses
 using RecipesBase
 
 import Base.*
+using Base.Cartesian
 
 # to be replaced with Reexport as soon as it's importall issues are fixed
 importall LearnBase
