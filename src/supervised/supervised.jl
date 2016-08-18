@@ -46,11 +46,6 @@ end
     deriv!(buffer, loss, target, output)
 end
 
-# @inline function grad(loss::SupervisedLoss, target::AbstractMatrix, output::AbstractVecOrMat)
-#     buffer = similar(output)
-#     grad!(buffer, loss, target, output)
-# end
-
 # --------------------------------------------------------------
 # value!, deriv!
 # `output` can have more dimensions than `target`, in which case do broadcasting
@@ -90,18 +85,6 @@ end
       buffer
     end
 end
-
-# function grad!(buffer::AbstractMatrix, loss::SupervisedLoss, target::AbstractMatrix, output::AbstractMatrix)
-#     n = size(output, 2)
-#     k = size(output, 1)
-#     @_dimcheck size(target) == size(output) && size(buffer) == (k, n)
-#     for i = 1:n
-#         @simd for j = 1:k
-#             @inbounds buffer[j, i] = deriv(loss, target[j, i], output[j, i])
-#         end
-#     end
-#     buffer
-# end
 
 # --------------------------------------------------------------
 @generated function sumvalue{T,N,Q,M}(
@@ -154,7 +137,7 @@ end
       @simd for I in CartesianRange(size(output))
           @nexprs $N n->(i_n = I[n])
           @inbounds tmp = value(loss, @nref($M,target,i), @nref($N,output,i))
-          tmp /= len # is this to prevent overflow?
+          tmp /= len
           val += tmp
       end
       val
@@ -175,7 +158,7 @@ end
       @simd for I in CartesianRange(size(output))
           @nexprs $N n->(i_n = I[n])
           @inbounds tmp = deriv(loss, @nref($M,target,i), @nref($N,output,i))
-          tmp /= len # is this to prevent overflow?
+          tmp /= len
           val += tmp
       end
       val
