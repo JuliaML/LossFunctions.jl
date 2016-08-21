@@ -10,6 +10,83 @@ To that end we will provide a condensed overview of the package.
     In order to keep this overview consise, we will not discuss any
     background information or theory on the losses here in detail.
 
+
+Using Losses.jl
+----------------
+
+Once installed the Losses package can be imported just as any
+other Julia package.
+
+.. code-block:: julia
+
+    using Losses
+
+To get help on specific functionality you can either look up the
+information here, or if you prefer you can make use of Julia's
+native doc-system.
+The following example shows how to get additional information
+on :class:`L1HingeLoss` within Julia's REPL:
+
+.. code-block:: julia
+
+    ?L1HingeLoss
+
+
+Hello World
+------------
+
+The following code snippets show a simple scenario of how a
+`Loss` can be used to compute the element-wise values.
+
+.. code-block:: julia
+
+    using Losses
+
+    true_targets = [  1,  0, -2]
+    pred_outputs = [0.5,  1, -1]
+
+    value(L2DistLoss(), true_targets, pred_outputs)
+
+.. code-block:: none
+
+    3-element Array{Float64,1}:
+     0.25
+     1.0
+     1.0
+
+The same function signatures also apply to the derivatives.
+
+.. code-block:: julia
+
+    deriv(L2DistLoss(), true_targets, pred_outputs)
+
+.. code-block:: none
+
+    3-element Array{Float64,1}:
+     -1.0
+     2.0
+     2.0
+
+Additionally, we provide mutating versions of most functions.
+
+.. code-block:: julia
+
+    buffer = zeros(3)
+    deriv!(buffer, L2DistLoss(), true_targets, pred_outputs)
+
+If need be, one can also compute the :func:`meanvalue` or
+:func:`sumvalue` efficiently, without allocating a temporary array.
+
+.. code-block:: julia
+
+    # or meanvalue
+    sumvalue(L2DistLoss(), true_targets, pred_outputs)
+
+.. code-block:: none
+
+    0.75
+
+
 Overview
 ---------
 
@@ -81,6 +158,4 @@ probabilities as output.
     Even though distance-based losses and margin-based losses
     can be expressed in univariate form, we still provide the
     bivariate form of ``value`` for both.
-
-
 
