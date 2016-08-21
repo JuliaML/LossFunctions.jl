@@ -6,14 +6,26 @@
 Losses.jl's documentation
 ==========================
 
-Julia implementation for commonly used loss functions in Machine Learning
+This package represents a community effort to centralize the
+definition and implementation of **loss functions** in Julia.
+As such, it is a part of the `JuliaML <https://github.com/JuliaML>`_
+ecosystem.
 
 Contents:
 
 .. toctree::
    :maxdepth: 2
+   :caption: Introduction
 
+   introduction/install
+   introduction/gettingstarted
 
+.. toctree::
+   :maxdepth: 2
+   :caption: About
+
+   about/acknowledgements
+   about/license
 
 Indices and tables
 ==================
