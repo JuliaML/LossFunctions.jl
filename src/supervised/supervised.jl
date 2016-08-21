@@ -26,13 +26,16 @@ istwicedifferentiable(c::SupervisedLoss, at) = istwicedifferentiable(c)
 isconvex(::SupervisedLoss) = false
 isstronglyconvex(::SupervisedLoss) = false
 
-# ===============================================================
-
 isnemitski(loss::SupervisedLoss) = islocallylipschitzcont(loss)
 islipschitzcont(::SupervisedLoss) = false
 islocallylipschitzcont(::SupervisedLoss) = false
 isclipable(::SupervisedLoss) = false
 islipschitzcont_deriv(::SupervisedLoss) = false
+
+ismarginbased(::SupervisedLoss) = false
+isclasscalibrated(::SupervisedLoss) = false
+isdistancebased(::SupervisedLoss) = false
+issymmetric(::SupervisedLoss) = false
 
 # --------------------------------------------------------------
 
@@ -45,6 +48,10 @@ end
     buffer = similar(output)
     deriv!(buffer, loss, target, output)
 end
+
+# TODO: same for deriv2
+
+# TODO: same for value_deriv
 
 # --------------------------------------------------------------
 # value!, deriv!
@@ -85,6 +92,10 @@ end
       buffer
     end
 end
+
+# TODO: same for deriv2
+
+# TODO: same for value_deriv
 
 # --------------------------------------------------------------
 @generated function sumvalue{T,N,Q,M}(
@@ -164,11 +175,6 @@ end
       val
     end
 end
-
-ismarginbased(::SupervisedLoss) = false
-isclasscalibrated(::SupervisedLoss) = false
-isdistancebased(::SupervisedLoss) = false
-issymmetric(::SupervisedLoss) = false
 
 # ==============================================================
 

@@ -22,6 +22,15 @@ For details on a specific aspect, see the documentation outlined below.
 
 .. toctree::
    :maxdepth: 2
+   :caption: Losses
+
+   losses/interface
+   losses/distance
+   losses/margin
+   losses/other
+
+.. toctree::
+   :maxdepth: 2
    :caption: About
 
    about/acknowledgements
