@@ -66,6 +66,7 @@ HuberLoss
 
    .. attribute:: α
 
+   Loss function commonly used for robustness to outliers.
    For large values of :math:`\alpha` it becomes close to the
    :class:`L1DistLoss`, while for small values of :math:`\alpha`
    it resembles the :class:`L2DistLoss`.

@@ -39,11 +39,25 @@ issymmetric(::SupervisedLoss) = false
 
 # --------------------------------------------------------------
 
+"""
+    value(loss::SupervisedLoss, target::AbstractArray, output::AbstractArray)
+
+Computes the value of the loss function for each observation-pair
+in targets and outputs individual and returns the result as an array
+of the same size as the parameters.
+"""
 @inline function value(loss::SupervisedLoss, target::AbstractArray, output::AbstractArray)
     buffer = similar(output)
     value!(buffer, loss, target, output)
 end
 
+"""
+    deriv(loss::SupervisedLoss, target::AbstractArray, output::AbstractArray)
+
+Computes the derivative of the loss function for each
+observation-pair in targets and outputs individually and returns
+the result as an array of the same size as the parameters.
+"""
 @inline function deriv(loss::SupervisedLoss, target::AbstractArray, output::AbstractArray)
     buffer = similar(output)
     deriv!(buffer, loss, target, output)
@@ -57,6 +71,13 @@ end
 # value!, deriv!
 # `output` can have more dimensions than `target`, in which case do broadcasting
 
+"""
+    value!(buffer::AbstractArray, loss::SupervisedLoss, target::AbstractArray, output::AbstractArray)
+
+Computes the values of the loss function for each observation-pair
+in targets and outputs individually and stores them in the
+preallocated buffer, which has to be the same size as the parameters.
+"""
 @generated function value!{T,N,Q,M}(
         buffer::AbstractArray,
         loss::SupervisedLoss,
@@ -75,6 +96,14 @@ end
     end
 end
 
+"""
+    deriv!(buffer::AbstractArray, loss::SupervisedLoss, target::AbstractArray, output::AbstractArray)
+
+Computes the derivative of the loss function for each
+observation-pair in targets and outputs individually and stores
+them in the preallocated buffer, which has to be the same size
+as the parameters
+"""
 @generated function deriv!{T,N,Q,M}(
         buffer::AbstractArray,
         loss::SupervisedLoss,

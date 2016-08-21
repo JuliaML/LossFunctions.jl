@@ -1,8 +1,11 @@
-# ===========================================================
-# L(y, t) = |y - t|^P
-
-"""
+doc"""
     LPDistLoss{P} <: DistanceLoss
+
+The P-th power absolute distance loss. It is Lipschitz continuous
+iff `P == 1`, convex if and only if `P >= 1`, and stricktly convex
+iff `P > 1`.
+
+$L(y, ŷ) = |ŷ - y|^P$
 """
 immutable LPDistLoss{P} <: DistanceLoss
     LPDistLoss() = typeof(P) <: Number ? new() : error()
@@ -38,24 +41,28 @@ isconvex{P}(::LPDistLoss{P}) = P >= 1
 isstronglyconvex{P}(::LPDistLoss{P}) = P > 1
 
 # ===========================================================
-# L(y, t) = |y - t|
 
-"""
+doc"""
     L1DistLoss <: DistanceLoss
+
+The absolute distance loss. Special case of the `LPDistLoss` with `P=1`.
+It is Lipshitz continuous and convex, but not stricktly convex.
+
+$L(y, ŷ) = |ŷ - y|$
 
               Lossfunction                     Derivative
       ┌────────────┬────────────┐      ┌────────────┬────────────┐
-    3 │\\.                     ./│    1 │            ┌------------│
-      │ '\\.                 ./' │      │            |            │
-      │   \\.               ./   │      │            |            │
-      │    '\\.           ./'    │      │_           |           _│
-      │      \\.         ./      │      │            |            │
-      │       '\\.     ./'       │      │            |            │
-      │         \\.   ./         │      │            |            │
-    0 │          '\\./'          │   -1 │------------┘            │
+    3 │\.                     ./│    1 │            ┌------------│
+      │ '\.                 ./' │      │            |            │
+      │   \.               ./   │      │            |            │
+      │    '\.           ./'    │      │_           |           _│
+    L │      \.         ./      │   L' │            |            │
+      │       '\.     ./'       │      │            |            │
+      │         \.   ./         │      │            |            │
+    0 │          '\./'          │   -1 │------------┘            │
       └────────────┴────────────┘      └────────────┴────────────┘
       -3                        3      -3                        3
-               h(x) - y                         h(x) - y
+                 ŷ - y                            ŷ - y
 """
 typealias L1DistLoss LPDistLoss{1}
 
@@ -75,24 +82,28 @@ isconvex(::L1DistLoss) = true
 isstronglyconvex(::L1DistLoss) = false
 
 # ===========================================================
-# L(y, t) = (y - t)^2
 
-"""
+doc"""
     L2DistLoss <: DistanceLoss
+
+The least squares loss. Special case of the `LPDistLoss` with `P=2`.
+It is stricktly convex.
+
+$L(y, ŷ) = |ŷ - y|²$
 
               Lossfunction                     Derivative
       ┌────────────┬────────────┐      ┌────────────┬────────────┐
-    9 │\\                       /│    3 │                   .r/   │
+    9 │\                       /│    3 │                   .r/   │
       │".                     ."│      │                 .r'     │
       │ ".                   ." │      │              _./'       │
       │  ".                 ."  │      │_           .r/         _│
-      │   ".               ."   │      │         _:/'            │
-      │    '\\.           ./'    │      │       .r'               │
-      │      \\.         ./      │      │     .r'                 │
+    L │   ".               ."   │   L' │         _:/'            │
+      │    '\.           ./'    │      │       .r'               │
+      │      \.         ./      │      │     .r'                 │
     0 │        "-.___.-"        │   -3 │  _/r'                   │
       └────────────┴────────────┘      └────────────┴────────────┘
       -3                        3      -2                        2
-               h(x) - y                         h(x) - y
+                 ŷ - y                            ŷ - y
 """
 typealias L2DistLoss LPDistLoss{2}
 
@@ -113,12 +124,13 @@ isstronglyconvex(::L2DistLoss) = true
 
 
 # ===========================================================
-# L(y, t) = 1 - cos((y-t)*2π/c)
 
-"""
+doc"""
     PeriodicLoss <: DistanceLoss
 
-Measures distance on a circle of specified circumference.
+Measures distance on a circle of specified circumference `c`.
+
+$L(y, ŷ) = 1 - cos((ŷ-y)*2π/c)$
 """
 immutable PeriodicLoss{T<:AbstractFloat} <: DistanceLoss
     k::T   # k = 2π/circumference
@@ -149,27 +161,31 @@ isstronglyconvex(::PeriodicLoss) = false
 
 
 # ===========================================================
-# L(y, t) =  1/2 * (y-t)²    , if |y-t| < d
-# L(y, t) =  d⋅(|y-t| - d/2) , otherwise
 
-"""
+doc"""
     HuberLoss <: DistanceLoss
 
 Loss function commonly used for robustness to outliers.
+For large values of `d` it becomes close to the `L1DistLoss`,
+while for small values of `d` it resembles the `L2DistLoss`.
+It is Lipshitz continuous and convex, but not stricktly convex.
+
+$L(y, ŷ) =  1/2 ⋅ (ŷ-y)²    , if |ŷ-y| < d$
+$L(y, ŷ) =  d⋅(|ŷ-y| - d/2) , otherwise$
 
               Lossfunction (d=1)               Derivative
       ┌────────────┬────────────┐      ┌────────────┬────────────┐
     2 │                         │    1 │                .+-------│
       │                         │      │              ./'        │
-      │\\.                     ./│      │             ./          │
+      │\.                     ./│      │             ./          │
       │ '.                   .' │      │_           ./          _│
-      │   \\.               ./   │      │           /'            │
-      │     \\.           ./     │      │          /'             │
+    L │   \.               ./   │   L' │           /'            │
+      │     \.           ./     │      │          /'             │
       │      '.         .'      │      │        ./'              │
     0 │        '-.___.-'        │   -1 │-------+'                │
       └────────────┴────────────┘      └────────────┴────────────┘
       -2                        2      -2                        2
-               h(x) - y                         h(x) - y
+                 ŷ - y                            ŷ - y
 """
 type HuberLoss{T<:AbstractFloat} <: DistanceLoss
     d::T   # boundary between quadratic and linear loss
@@ -225,24 +241,30 @@ isconvex(::HuberLoss) = true
 isstronglyconvex(::HuberLoss) = false
 
 # ===========================================================
-# L(y, t) = max(0, |y - t| - ɛ)
 
-"""
+doc"""
     L1EpsilonInsLoss <: DistanceLoss
+
+The `ϵ`-insensitive loss. Typically used in linear support vector
+regression. It ignores deviances smaller than `ϵ`, but penalizes
+larger deviances linarily.
+It is Lipshitz continuous and convex, but not stricktly convex.
+
+$L(y, ŷ) = max(0, |ŷ - y| - ɛ)$
 
               Lossfunction (ɛ=1)               Derivative
       ┌────────────┬────────────┐      ┌────────────┬────────────┐
-    2 │\\                       /│    1 │                  ┌------│
-      │ \\                     / │      │                  |      │
-      │  \\                   /  │      │                  |      │
-      │   \\                 /   │      │_      ___________!     _│
-      │    \\               /    │      │      |                  │
-      │     \\             /     │      │      |                  │
-      │      \\           /      │      │      |                  │
-    0 │       \\_________/       │   -1 │------┘                  │
+    2 │\                       /│    1 │                  ┌------│
+      │ \                     / │      │                  |      │
+      │  \                   /  │      │                  |      │
+      │   \                 /   │      │_      ___________!     _│
+    L │    \               /    │   L' │      |                  │
+      │     \             /     │      │      |                  │
+      │      \           /      │      │      |                  │
+    0 │       \_________/       │   -1 │------┘                  │
       └────────────┴────────────┘      └────────────┴────────────┘
       -3                        3      -2                        2
-               h(x) - y                         h(x) - y
+                 ŷ - y                            ŷ - y
 """
 immutable L1EpsilonInsLoss{T<:AbstractFloat} <: DistanceLoss
     ε::T
@@ -290,24 +312,29 @@ isconvex(::L1EpsilonInsLoss) = true
 isstronglyconvex(::L1EpsilonInsLoss) = false
 
 # ===========================================================
-# L(y, t) = max(0, |y - t| - ɛ)^2
 
-"""
+doc"""
     L2EpsilonInsLoss <: DistanceLoss
+
+The `ϵ`-insensitive loss. Typically used in linear support vector
+regression. It ignores deviances smaller than `ϵ`, but penalizes
+larger deviances quadratically. It is convex, but not stricktly convex.
+
+$L(y, ŷ) = max(0, |ŷ - y| - ɛ)²$
 
               Lossfunction (ɛ=0.5)             Derivative
       ┌────────────┬────────────┐      ┌────────────┬────────────┐
     8 │                         │    1 │                  /      │
       │:                       :│      │                 /       │
       │'.                     .'│      │                /        │
-      │ \\.                   ./ │      │_         _____/        _│
-      │  \\.                 ./  │      │         /               │
-      │   \\.               ./   │      │        /                │
-      │    '\\.           ./'    │      │       /                 │
+      │ \.                   ./ │      │_         _____/        _│
+    L │  \.                 ./  │   L' │         /               │
+      │   \.               ./   │      │        /                │
+      │    '\.           ./'    │      │       /                 │
     0 │      '-._______.-'      │   -1 │      /                  │
       └────────────┴────────────┘      └────────────┴────────────┘
       -3                        3      -2                        2
-               h(x) - y                         h(x) - y
+                 ŷ - y                            ŷ - y
 """
 immutable L2EpsilonInsLoss{T<:AbstractFloat} <: DistanceLoss
     ε::T
@@ -350,24 +377,28 @@ isconvex(::L2EpsilonInsLoss) = true
 isstronglyconvex(::L2EpsilonInsLoss) = true
 
 # ===========================================================
-# L(y, t) = -ln(4 * exp(y - t) / (1 + exp(y - t))²)
 
-"""
+doc"""
     LogitDistLoss <: DistanceLoss
+
+The distance-based logistic loss for regression.
+It is stricktly convex and Lipshitz continuous.
+
+$L(y, ŷ) = -ln(4 ⋅ exp(ŷ - y) / (1 + exp(ŷ - y))²)$
 
               Lossfunction                     Derivative
       ┌────────────┬────────────┐      ┌────────────┬────────────┐
     2 │                         │    1 │                   _--'''│
-      │\\                       /│      │                ./'      │
-      │ \\.                   ./ │      │              ./         │
+      │\                       /│      │                ./'      │
+      │ \.                   ./ │      │              ./         │
       │  '.                 .'  │      │_           ./          _│
-      │   '.               .'   │      │           ./            │
-      │     \\.           ./     │      │         ./              │
+    L │   '.               .'   │   L' │           ./            │
+      │     \.           ./     │      │         ./              │
       │      '.         .'      │      │       ./                │
     0 │        '-.___.-'        │   -1 │___.-''                  │
       └────────────┴────────────┘      └────────────┴────────────┘
       -3                        3      -4                        4
-               h(x) - y                         h(x) - y
+                 ŷ - y                            ŷ - y
 """
 immutable LogitDistLoss <: DistanceLoss end
 

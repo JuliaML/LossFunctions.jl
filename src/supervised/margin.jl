@@ -3,24 +3,29 @@
 #       It is an indication that the output represents the correct class in a margin-based model.
 
 # ============================================================
-# L(target, output) = max(0, -agreement)
 
-"""
+doc"""
     PerceptronLoss <: MarginLoss
+
+The perceptron loss linearly penalizes every prediction where the
+resulting `agreement <= 0`.
+It is Lipshitz continuous and convex, but not stricktly convex.
+
+$L(y, ŷ) = max(0, -y⋅ŷ)$
 
               Lossfunction                     Derivative
       ┌────────────┬────────────┐      ┌────────────┬────────────┐
-    2 │\\.                       │    0 │            ┌------------│
+    2 │\.                       │    0 │            ┌------------│
       │ '..                     │      │            |            │
-      │   \\.                    │      │            |            │
+      │   \.                    │      │            |            │
       │     '.                  │      │            |            │
-      │      '.                 │      │            |            │
-      │        \\.               │      │            |            │
+    L │      '.                 │   L' │            |            │
+      │        \.               │      │            |            │
       │         '.              │      │            |            │
-    0 │           \\.____________│   -1 │------------┘            │
+    0 │           \.____________│   -1 │------------┘            │
       └────────────┴────────────┘      └────────────┴────────────┘
       -2                        2      -2                        2
-                y * h(x)                         y * h(x)
+                 y ⋅ ŷ                            y ⋅ ŷ
 """
 immutable PerceptronLoss <: MarginLoss end
 
@@ -40,24 +45,28 @@ isstronglyconvex(::PerceptronLoss) = false
 isclipable(::PerceptronLoss) = true
 
 # ============================================================
-# L(target, output) = ln(1 + exp(-agreement))
 
-"""
+doc"""
     LogitMarginLoss <: MarginLoss
+
+The margin version of the logistic loss. It is infinitely many
+times differentiable, strictly convex, and lipschitz continuous.
+
+$L(y, ŷ) = ln(1 + exp(-y⋅ŷ))$
 
               Lossfunction                     Derivative
       ┌────────────┬────────────┐      ┌────────────┬────────────┐
-    2 │ \\.                      │    0 │                  ._--/""│
-      │   \\.                    │      │               ../'      │
-      │     \\.                  │      │              ./         │
-      │       \\..               │      │            ./'          │
-      │         '-_             │      │          .,'            │
+    2 │ \.                      │    0 │                  ._--/""│
+      │   \.                    │      │               ../'      │
+      │     \.                  │      │              ./         │
+      │       \..               │      │            ./'          │
+    L │         '-_             │   L' │          .,'            │
       │            '-_          │      │         ./              │
-      │               '\\-._     │      │      .,/'               │
+      │               '\-._     │      │      .,/'               │
     0 │                    '""*-│   -1 │__.--''                  │
       └────────────┴────────────┘      └────────────┴────────────┘
       -2                        2      -4                        4
-                y * h(x)                         y * h(x)
+                 y ⋅ ŷ                            y ⋅ ŷ
 """
 immutable LogitMarginLoss <: MarginLoss end
 value(loss::LogitMarginLoss, agreement::Number) = log1p(exp(-agreement))
@@ -77,27 +86,29 @@ isstronglyconvex(::LogitMarginLoss) = true
 isclipable(::LogitMarginLoss) = false
 
 # ============================================================
-# L(target, output) = max(0, 1 - agreement)
 
-# lineplot(HingeLoss(), canvas = AsciiCanvas, width = 25, height = 8, xlim=[-2,2], ylim=[0,3])
-# lineplot(deriv_fun(HingeLoss()), 0:.01:2, canvas = AsciiCanvas, width = 25, height = 8, xlim=[0,2], ylim=[-1,0])
-
-"""
+doc"""
     L1HingeLoss <: MarginLoss
+
+The hinge loss linearly penalizes every predicition where the
+resulting `agreement <= 1` .
+It is Lipshitz continuous and convex, but not stricktly convex.
+
+$L(y, ŷ) = max(0, 1 - y⋅ŷ)$
 
               Lossfunction                     Derivative
       ┌────────────┬────────────┐      ┌────────────┬────────────┐
-    3 │'\\.                      │    0 │                  ┌------│
+    3 │'\.                      │    0 │                  ┌------│
       │  ''_                    │      │                  |      │
-      │     \\.                  │      │                  |      │
+      │     \.                  │      │                  |      │
       │       '.                │      │                  |      │
-      │         ''_             │      │                  |      │
-      │            \\.           │      │                  |      │
+    L │         ''_             │   L' │                  |      │
+      │            \.           │      │                  |      │
       │              '.         │      │                  |      │
     0 │                ''_______│   -1 │------------------┘      │
       └────────────┴────────────┘      └────────────┴────────────┘
       -2                        2      -2                        2
-                y * h(x)                         y * h(x)
+                 y ⋅ ŷ                            y ⋅ ŷ
 """
 immutable L1HingeLoss <: MarginLoss end
 typealias HingeLoss L1HingeLoss
@@ -118,24 +129,29 @@ isstronglyconvex(::L1HingeLoss) = false
 isclipable(::L1HingeLoss) = true
 
 # ============================================================
-# L(target, output) = max(0, 1 - agreement)^2
 
-"""
+doc"""
     L2HingeLoss <: MarginLoss
+
+The truncated least squares loss quadratically penalizes every
+predicition where the resulting `agreement <= 1`.
+It is locally Lipshitz continuous and convex, but not stricktly convex.
+
+$L(y, ŷ) = max(0, 1 - y⋅ŷ)²$
 
               Lossfunction                     Derivative
       ┌────────────┬────────────┐      ┌────────────┬────────────┐
     5 │     .                   │    0 │                 ,r------│
       │     '.                  │      │               ,/        │
-      │      '\\                 │      │             ,/          │
-      │        \\                │      │           ,/            │
-      │         '.              │      │         ./              │
+      │      '\                 │      │             ,/          │
+      │        \                │      │           ,/            │
+    L │         '.              │   L' │         ./              │
       │          '.             │      │       ./                │
-      │            \\.           │      │     ./                  │
+      │            \.           │      │     ./                  │
     0 │              '-.________│   -5 │   ./                    │
       └────────────┴────────────┘      └────────────┴────────────┘
       -2                        2      -2                        2
-                y * h(x)                         y * h(x)
+                 y ⋅ ŷ                            y ⋅ ŷ
 """
 immutable L2HingeLoss <: MarginLoss end
 
@@ -156,25 +172,29 @@ isstronglyconvex(::L2HingeLoss) = true
 isclipable(::L2HingeLoss) = true
 
 # ============================================================
-# L(target, output) = 0.5 / γ * max(0, 1 - agreement)^2   ... agreement >= 1 - γ
-#                     1 - γ / 2 - agreement               ... otherwise
 
-"""
+doc"""
     SmoothedL1HingeLoss <: MarginLoss
+
+As the name suggests a smoothed version of the L1 hinge loss.
+It is Lipshitz continuous and convex, but not stricktly convex.
+
+$L(y, ŷ) = 0.5 / γ * max(0, 1 - y⋅ŷ)²    ... y⋅ŷ ≥ 1 - γ$
+$L(y, ŷ) = 1 - γ / 2 - y⋅ŷ               ... otherwise$
 
               Lossfunction (γ=1)               Derivative
       ┌────────────┬────────────┐      ┌────────────┬────────────┐
-    2 │\\.                       │    0 │                 ,r------│
+    2 │\.                       │    0 │                 ,r------│
       │ '.                      │      │               ./'       │
-      │   \\.                    │      │              ,/         │
+      │   \.                    │      │              ,/         │
       │     '.                  │      │            ./'          │
-      │      '.                 │      │           ,'            │
-      │        \\.               │      │         ,/              │
+    L │      '.                 │   L' │           ,'            │
+      │        \.               │      │         ,/              │
       │          ',             │      │       ./'               │
     0 │            '*-._________│   -1 │______./                 │
       └────────────┴────────────┘      └────────────┴────────────┘
       -2                        2      -2                        2
-                y * h(x)                         y * h(x)
+                 y ⋅ ŷ                            y ⋅ ŷ
 """
 immutable SmoothedL1HingeLoss <: MarginLoss
     gamma::Float64
@@ -212,25 +232,29 @@ isstronglyconvex(::SmoothedL1HingeLoss) = false
 isclipable(::SmoothedL1HingeLoss) = true
 
 # ============================================================
-# L(target, output) = max(0, 1 - agreement)^2    ... agreement >= -1
-#                     -4*agreement               ... otherwise
 
-"""
+doc"""
     ModifiedHuberLoss <: MarginLoss
+
+A special (scaled) case of the `SmoothedL1HingeLoss` with `γ=4`.
+It is Lipshitz continuous and convex, but not stricktly convex.
+
+$L(y, ŷ) = max(0, 1 - y⋅ŷ)^2    ... y⋅ŷ >= -1$
+$L(y, ŷ) = -4⋅y⋅ŷ               ... otherwise$
 
               Lossfunction                     Derivative
       ┌────────────┬────────────┐      ┌────────────┬────────────┐
     5 │    '.                   │    0 │                .+-------│
       │     '.                  │      │              ./'        │
-      │      '\\                 │      │             ,/          │
-      │        \\                │      │           ,/            │
-      │         '.              │      │         ./              │
+      │      '\                 │      │             ,/          │
+      │        \                │      │           ,/            │
+    L │         '.              │   L' │         ./              │
       │          '.             │      │       ./'               │
-      │            \\.           │      │______/'                 │
+      │            \.           │      │______/'                 │
     0 │              '-.________│   -5 │                         │
       └────────────┴────────────┘      └────────────┴────────────┘
       -2                        2      -2                        2
-                y * h(x)                         y * h(x)
+                 y ⋅ ŷ                            y ⋅ ŷ
 """
 immutable ModifiedHuberLoss <: MarginLoss end
 

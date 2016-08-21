@@ -16,7 +16,7 @@ PerceptronLoss
 .. class:: PerceptronLoss
 
    The perceptron loss linearly penalizes every prediction where the
-   resulting ``agreement`` :math:`a \le 0``
+   resulting ``agreement`` :math:`a \le 0`.
    It is Lipshitz continuous and convex, but not stricktly convex.
 
 .. math::
