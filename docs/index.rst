@@ -22,7 +22,7 @@ For details on a specific aspect, see the documentation outlined below.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Losses
+   :caption: API Documentation
 
    losses/interface
    losses/distance

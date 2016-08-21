@@ -188,6 +188,8 @@ function value_deriv(loss::MarginLoss, target::Number, output::Number)
     (v, target*d)
 end
 
+# TODO: consider meanvalue(loss, agreement) etc
+
 isunivfishercons(::MarginLoss) = false
 isfishercons(loss::MarginLoss) = isunivfishercons(loss)
 isnemitski(::MarginLoss) = true
@@ -203,6 +205,8 @@ value(loss::DistanceLoss, target::Number, output::Number) = value(loss, output -
 deriv(loss::DistanceLoss, target::Number, output::Number) = deriv(loss, output - target)
 deriv2(loss::DistanceLoss, target::Number, output::Number) = deriv2(loss, output - target)
 value_deriv(loss::DistanceLoss, target::Number, output::Number) = value_deriv(loss, output - target)
+
+# TODO: consider meanvalue(loss, difference) etc
 
 isdistancebased(::DistanceLoss) = true
 issymmetric(::DistanceLoss) = false
