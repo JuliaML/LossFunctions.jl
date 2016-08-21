@@ -55,5 +55,5 @@ include("supervised/scaledloss.jl")
 include("supervised/other.jl")
 include("supervised/io.jl")
 
-
 end # module
+
