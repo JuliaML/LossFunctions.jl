@@ -11,7 +11,7 @@ definition and implementation of **loss functions** in Julia.
 As such, it is a part of the `JuliaML <https://github.com/JuliaML>`_
 ecosystem.
 
-Contents:
+For details on a specific aspect, see the documentation outlined below.
 
 .. toctree::
    :maxdepth: 2

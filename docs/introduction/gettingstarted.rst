@@ -13,3 +13,6 @@ To that end we will provide a condensed overview of the package.
 Overview
 ---------
 
+All the concrete loss functions that this package provides are
+defined as types and are subtypes of the abstract ``Loss``.
+
