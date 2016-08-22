@@ -25,7 +25,7 @@ end
 @recipe function plot{T<:SupervisedLoss}(losses::AbstractVector{T}, xmin = -2, xmax = 2)
     for loss in losses
         @series begin
-            loss
+            loss, xmin, xmax
         end
     end
 end

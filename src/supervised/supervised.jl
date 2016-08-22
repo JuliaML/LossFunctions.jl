@@ -26,30 +26,58 @@ istwicedifferentiable(c::SupervisedLoss, at) = istwicedifferentiable(c)
 isconvex(::SupervisedLoss) = false
 isstronglyconvex(::SupervisedLoss) = false
 
-# ===============================================================
-
 isnemitski(loss::SupervisedLoss) = islocallylipschitzcont(loss)
 islipschitzcont(::SupervisedLoss) = false
 islocallylipschitzcont(::SupervisedLoss) = false
 isclipable(::SupervisedLoss) = false
 islipschitzcont_deriv(::SupervisedLoss) = false
 
+ismarginbased(::SupervisedLoss) = false
+isclasscalibrated(::SupervisedLoss) = false
+isdistancebased(::SupervisedLoss) = false
+issymmetric(::SupervisedLoss) = false
+
 # --------------------------------------------------------------
 
+"""
+    value(loss::SupervisedLoss, target::AbstractArray, output::AbstractArray)
+
+Computes the value of the loss function for each observation-pair
+in targets and outputs individual and returns the result as an array
+of the same size as the parameters.
+"""
 @inline function value(loss::SupervisedLoss, target::AbstractArray, output::AbstractArray)
     buffer = similar(output)
     value!(buffer, loss, target, output)
 end
 
+"""
+    deriv(loss::SupervisedLoss, target::AbstractArray, output::AbstractArray)
+
+Computes the derivative of the loss function for each
+observation-pair in targets and outputs individually and returns
+the result as an array of the same size as the parameters.
+"""
 @inline function deriv(loss::SupervisedLoss, target::AbstractArray, output::AbstractArray)
     buffer = similar(output)
     deriv!(buffer, loss, target, output)
 end
 
+# TODO: same for deriv2
+
+# TODO: same for value_deriv
+
 # --------------------------------------------------------------
 # value!, deriv!
 # `output` can have more dimensions than `target`, in which case do broadcasting
 
+"""
+    value!(buffer::AbstractArray, loss::SupervisedLoss, target::AbstractArray, output::AbstractArray)
+
+Computes the values of the loss function for each observation-pair
+in targets and outputs individually and stores them in the
+preallocated buffer, which has to be the same size as the parameters.
+"""
 @generated function value!{T,N,Q,M}(
         buffer::AbstractArray,
         loss::SupervisedLoss,
@@ -68,6 +96,14 @@ end
     end
 end
 
+"""
+    deriv!(buffer::AbstractArray, loss::SupervisedLoss, target::AbstractArray, output::AbstractArray)
+
+Computes the derivative of the loss function for each
+observation-pair in targets and outputs individually and stores
+them in the preallocated buffer, which has to be the same size
+as the parameters
+"""
 @generated function deriv!{T,N,Q,M}(
         buffer::AbstractArray,
         loss::SupervisedLoss,
@@ -85,6 +121,10 @@ end
       buffer
     end
 end
+
+# TODO: same for deriv2
+
+# TODO: same for value_deriv
 
 # --------------------------------------------------------------
 @generated function sumvalue{T,N,Q,M}(
@@ -165,11 +205,6 @@ end
     end
 end
 
-ismarginbased(::SupervisedLoss) = false
-isclasscalibrated(::SupervisedLoss) = false
-isdistancebased(::SupervisedLoss) = false
-issymmetric(::SupervisedLoss) = false
-
 # ==============================================================
 
 # abstract MarginLoss <: SupervisedLoss
@@ -181,6 +216,8 @@ function value_deriv(loss::MarginLoss, target::Number, output::Number)
     v, d = value_deriv(loss, target * output)
     (v, target*d)
 end
+
+# TODO: consider meanvalue(loss, agreement) etc
 
 isunivfishercons(::MarginLoss) = false
 isfishercons(loss::MarginLoss) = isunivfishercons(loss)
@@ -197,6 +234,8 @@ value(loss::DistanceLoss, target::Number, output::Number) = value(loss, output -
 deriv(loss::DistanceLoss, target::Number, output::Number) = deriv(loss, output - target)
 deriv2(loss::DistanceLoss, target::Number, output::Number) = deriv2(loss, output - target)
 value_deriv(loss::DistanceLoss, target::Number, output::Number) = value_deriv(loss, output - target)
+
+# TODO: consider meanvalue(loss, difference) etc
 
 isdistancebased(::DistanceLoss) = true
 issymmetric(::DistanceLoss) = false
