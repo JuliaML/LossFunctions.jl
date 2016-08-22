@@ -119,5 +119,5 @@ PeriodicLoss
 
 .. math::
 
-   L(r) = 1 - \cos(\frac{2 r \pi}{c})
+   L(r) = 1 - \cos \left ( \frac{2 r \pi}{c} \right )
 
