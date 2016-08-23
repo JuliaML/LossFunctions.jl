@@ -1,7 +1,5 @@
 using LearnBase
 using Losses
-using MLDataUtils
-using UnicodePlots
 using DualNumbers
 
 if VERSION >= v"0.5-"
