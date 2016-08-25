@@ -2,7 +2,7 @@ doc"""
     LPDistLoss{P} <: DistanceLoss
 
 The P-th power absolute distance loss. It is Lipschitz continuous
-iff `P == 1`, convex if and only if `P >= 1`, and stricktly convex
+iff `P == 1`, convex if and only if `P >= 1`, and strictly convex
 iff `P > 1`.
 
 $L(y, ŷ) = |ŷ - y|^P$
@@ -46,7 +46,7 @@ doc"""
     L1DistLoss <: DistanceLoss
 
 The absolute distance loss. Special case of the `LPDistLoss` with `P=1`.
-It is Lipshitz continuous and convex, but not stricktly convex.
+It is Lipshitz continuous and convex, but not strictly convex.
 
 $L(y, ŷ) = |ŷ - y|$
 
@@ -87,7 +87,7 @@ doc"""
     L2DistLoss <: DistanceLoss
 
 The least squares loss. Special case of the `LPDistLoss` with `P=2`.
-It is stricktly convex.
+It is strictly convex.
 
 $L(y, ŷ) = |ŷ - y|²$
 
@@ -168,7 +168,7 @@ doc"""
 Loss function commonly used for robustness to outliers.
 For large values of `d` it becomes close to the `L1DistLoss`,
 while for small values of `d` it resembles the `L2DistLoss`.
-It is Lipshitz continuous and convex, but not stricktly convex.
+It is Lipshitz continuous and convex, but not strictly convex.
 
 $L(y, ŷ) =  1/2 ⋅ (ŷ-y)²    , if |ŷ-y| < d$
 $L(y, ŷ) =  d⋅(|ŷ-y| - d/2) , otherwise$
@@ -248,7 +248,7 @@ doc"""
 The `ϵ`-insensitive loss. Typically used in linear support vector
 regression. It ignores deviances smaller than `ϵ`, but penalizes
 larger deviances linarily.
-It is Lipshitz continuous and convex, but not stricktly convex.
+It is Lipshitz continuous and convex, but not strictly convex.
 
 $L(y, ŷ) = max(0, |ŷ - y| - ɛ)$
 
@@ -318,7 +318,7 @@ doc"""
 
 The `ϵ`-insensitive loss. Typically used in linear support vector
 regression. It ignores deviances smaller than `ϵ`, but penalizes
-larger deviances quadratically. It is convex, but not stricktly convex.
+larger deviances quadratically. It is convex, but not strictly convex.
 
 $L(y, ŷ) = max(0, |ŷ - y| - ɛ)²$
 
@@ -382,7 +382,7 @@ doc"""
     LogitDistLoss <: DistanceLoss
 
 The distance-based logistic loss for regression.
-It is stricktly convex and Lipshitz continuous.
+It is strictly convex and Lipshitz continuous.
 
 $L(y, ŷ) = -ln(4 ⋅ exp(ŷ - y) / (1 + exp(ŷ - y))²)$
 

@@ -9,7 +9,7 @@ doc"""
 
 The perceptron loss linearly penalizes every prediction where the
 resulting `agreement <= 0`.
-It is Lipshitz continuous and convex, but not stricktly convex.
+It is Lipshitz continuous and convex, but not strictly convex.
 
 $L(y, ŷ) = max(0, -y⋅ŷ)$
 
@@ -92,7 +92,7 @@ doc"""
 
 The hinge loss linearly penalizes every predicition where the
 resulting `agreement <= 1` .
-It is Lipshitz continuous and convex, but not stricktly convex.
+It is Lipshitz continuous and convex, but not strictly convex.
 
 $L(y, ŷ) = max(0, 1 - y⋅ŷ)$
 
@@ -135,7 +135,7 @@ doc"""
 
 The truncated least squares loss quadratically penalizes every
 predicition where the resulting `agreement <= 1`.
-It is locally Lipshitz continuous and convex, but not stricktly convex.
+It is locally Lipshitz continuous and convex, but not strictly convex.
 
 $L(y, ŷ) = max(0, 1 - y⋅ŷ)²$
 
@@ -177,7 +177,7 @@ doc"""
     SmoothedL1HingeLoss <: MarginLoss
 
 As the name suggests a smoothed version of the L1 hinge loss.
-It is Lipshitz continuous and convex, but not stricktly convex.
+It is Lipshitz continuous and convex, but not strictly convex.
 
 $L(y, ŷ) = 0.5 / γ * max(0, 1 - y⋅ŷ)²    ... y⋅ŷ ≥ 1 - γ$
 $L(y, ŷ) = 1 - γ / 2 - y⋅ŷ               ... otherwise$
@@ -237,7 +237,7 @@ doc"""
     ModifiedHuberLoss <: MarginLoss
 
 A special (scaled) case of the `SmoothedL1HingeLoss` with `γ=4`.
-It is Lipshitz continuous and convex, but not stricktly convex.
+It is Lipshitz continuous and convex, but not strictly convex.
 
 $L(y, ŷ) = max(0, 1 - y⋅ŷ)^2    ... y⋅ŷ >= -1$
 $L(y, ŷ) = -4⋅y⋅ŷ               ... otherwise$

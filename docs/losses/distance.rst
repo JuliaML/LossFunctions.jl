@@ -15,7 +15,7 @@ LPDistLoss
 
    The :math:`p`-th power absolute distance loss.
    It is Lipschitz continuous iff :math:`p = 1`, convex if and only
-   if :math:`p \ge 1`, and stricktly convex iff :math:`p > 1`.
+   if :math:`p \ge 1`, and strictly convex iff :math:`p > 1`.
 
 .. math::
 
@@ -29,7 +29,7 @@ L1DistLoss
 
    The absolute distance loss. Special case of the :class:`LPDistLoss`
    with ``P=1``.
-   It is Lipshitz continuous and convex, but not stricktly convex.
+   It is Lipshitz continuous and convex, but not strictly convex.
 
 .. math::
 
@@ -41,7 +41,7 @@ L2DistLoss
 .. class:: L2DistLoss
 
    The least squares loss. Special case of the :class:`LPDistLoss`
-   with ``P=2``. It is stricktly convex.
+   with ``P=2``. It is strictly convex.
 
 .. math::
 
@@ -53,7 +53,7 @@ LogitDistLoss
 .. class:: LogitDistLoss
 
    The distance-based logistic loss for regression.
-   It is stricktly convex and Lipshitz continuous.
+   It is strictly convex and Lipshitz continuous.
 
 .. math::
 
@@ -70,7 +70,7 @@ HuberLoss
    For large values of :math:`\alpha` it becomes close to the
    :class:`L1DistLoss`, while for small values of :math:`\alpha`
    it resembles the :class:`L2DistLoss`.
-   It is Lipshitz continuous and convex, but not stricktly convex.
+   It is Lipshitz continuous and convex, but not strictly convex.
 
 .. math::
 
@@ -86,7 +86,7 @@ L1EpsilonInsLoss
    The :math:`\epsilon`-insensitive loss. Typically used in linear
    support vector regression. It ignores deviances smaller than
    :math:`\epsilon` , but penalizes larger deviances linarily.
-   It is Lipshitz continuous and convex, but not stricktly convex.
+   It is Lipshitz continuous and convex, but not strictly convex.
 
 .. math::
 
@@ -102,7 +102,7 @@ L2EpsilonInsLoss
    The :math:`\epsilon`-insensitive loss. Typically used in linear
    support vector regression. It ignores deviances smaller than
    :math:`\epsilon` , but penalizes larger deviances quadratically.
-   It is convex, but not stricktly convex.
+   It is convex, but not strictly convex.
 
 .. math::
 

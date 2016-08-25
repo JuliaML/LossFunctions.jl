@@ -17,7 +17,7 @@ PerceptronLoss
 
    The perceptron loss linearly penalizes every prediction where the
    resulting ``agreement`` :math:`a \le 0`.
-   It is Lipshitz continuous and convex, but not stricktly convex.
+   It is Lipshitz continuous and convex, but not strictly convex.
 
 .. math::
 
@@ -30,7 +30,7 @@ L1HingeLoss
 
    The hinge loss linearly penalizes every predicition where the
    resulting ``agreement`` :math:`a \le 1` .
-   It is Lipshitz continuous and convex, but not stricktly convex.
+   It is Lipshitz continuous and convex, but not strictly convex.
 
 .. math::
 
@@ -45,7 +45,7 @@ L2HingeLoss
    The truncated least squares loss quadratically penalizes every
    predicition where the resulting ``agreement`` :math:`a \le 1` .
    It is locally Lipshitz continuous and convex,
-   but not stricktly convex.
+   but not strictly convex.
 
 .. math::
 
@@ -71,7 +71,7 @@ SmoothedL1HingeLoss
    .. attribute:: γ
 
    As the name suggests a smoothed version of the L1 hinge loss.
-   It is Lipshitz continuous and convex, but not stricktly convex.
+   It is Lipshitz continuous and convex, but not strictly convex.
 
 .. math::
 
@@ -84,7 +84,7 @@ ModifiedHuberLoss
 
    A special (scaled) case of the :class:`SmoothedL1HingeLoss` with
    :math:`\gamma = 4`.
-   It is Lipshitz continuous and convex, but not stricktly convex.
+   It is Lipshitz continuous and convex, but not strictly convex.
 
 .. math::
 
