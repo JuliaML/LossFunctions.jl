@@ -1,4 +1,4 @@
-#__precompile__()
+__precompile__(true)
 
 module Losses
 
@@ -56,4 +56,3 @@ include("supervised/other.jl")
 include("supervised/io.jl")
 
 end # module
-
