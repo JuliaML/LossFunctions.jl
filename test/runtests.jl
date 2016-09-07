@@ -1,13 +1,7 @@
 using LearnBase
 using Losses
 using DualNumbers
-
-if VERSION >= v"0.5-"
-    using Base.Test
-else
-    using BaseTestNext
-    const Test = BaseTestNext
-end
+using Base.Test
 
 tests = [
     "tst_loss.jl",
