@@ -10,7 +10,6 @@ using Base.Cartesian
 # to be replaced with Reexport as soon as it's importall issues are fixed
 importall LearnBase
 eval(Expr(:toplevel, Expr(:export, setdiff(names(LearnBase), [:LearnBase])...)))
-using Compat
 
 export
 
