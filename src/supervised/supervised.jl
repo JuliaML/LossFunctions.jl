@@ -18,18 +18,19 @@ end
     _value_deriv
 end
 
+# --------------------------------------------------------------
+# Fallback implementations
+
 isminimizable(c::SupervisedLoss) = isconvex(c)
 isdifferentiable(c::SupervisedLoss) = istwicedifferentiable(c)
 istwicedifferentiable(::SupervisedLoss) = false
 isdifferentiable(c::SupervisedLoss, at) = isdifferentiable(c)
 istwicedifferentiable(c::SupervisedLoss, at) = istwicedifferentiable(c)
-isconvex(::SupervisedLoss) = false
-isstronglyconvex(::SupervisedLoss) = false
 
 isnemitski(loss::SupervisedLoss) = islocallylipschitzcont(loss)
+isclipable(::SupervisedLoss) = false
 islipschitzcont(::SupervisedLoss) = false
 islocallylipschitzcont(::SupervisedLoss) = false
-isclipable(::SupervisedLoss) = false
 islipschitzcont_deriv(::SupervisedLoss) = false
 
 ismarginbased(::SupervisedLoss) = false

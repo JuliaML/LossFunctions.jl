@@ -75,6 +75,7 @@ istwicedifferentiable(::PerceptronLoss, at) = at != 0
 islipschitzcont(::PerceptronLoss) = true
 islipschitzcont_deriv(::PerceptronLoss) = true
 isconvex(::PerceptronLoss) = true
+isstrictlyconvex(::PerceptronLoss) = false
 isstronglyconvex(::PerceptronLoss) = false
 isclipable(::PerceptronLoss) = true
 
@@ -116,7 +117,8 @@ istwicedifferentiable(::LogitMarginLoss, at) = true
 islipschitzcont(::LogitMarginLoss) = true
 islipschitzcont_deriv(::LogitMarginLoss) = true
 isconvex(::LogitMarginLoss) = true
-isstronglyconvex(::LogitMarginLoss) = true
+isstrictlyconvex(::LogitMarginLoss) = true
+isstronglyconvex(::LogitMarginLoss) = false
 isclipable(::LogitMarginLoss) = false
 
 # ============================================================
@@ -159,6 +161,7 @@ istwicedifferentiable(::L1HingeLoss, at) = at != 1
 islipschitzcont(::L1HingeLoss) = true
 islipschitzcont_deriv(::L1HingeLoss) = true
 isconvex(::L1HingeLoss) = true
+isstrictlyconvex(::L1HingeLoss) = false
 isstronglyconvex(::L1HingeLoss) = false
 isclipable(::L1HingeLoss) = true
 
@@ -202,6 +205,7 @@ islocallylipschitzcont(::L2HingeLoss) = true
 islipschitzcont(::L2HingeLoss) = false
 islipschitzcont_deriv(::L2HingeLoss) = true
 isconvex(::L2HingeLoss) = true
+isstrictlyconvex(::L2HingeLoss) = true
 isstronglyconvex(::L2HingeLoss) = true
 isclipable(::L2HingeLoss) = true
 
@@ -262,6 +266,7 @@ islocallylipschitzcont(::SmoothedL1HingeLoss) = true
 islipschitzcont(::SmoothedL1HingeLoss) = true
 islipschitzcont_deriv(::SmoothedL1HingeLoss) = true
 isconvex(::SmoothedL1HingeLoss) = true
+isstrictlyconvex(::SmoothedL1HingeLoss) = false
 isstronglyconvex(::SmoothedL1HingeLoss) = false
 isclipable(::SmoothedL1HingeLoss) = true
 
@@ -315,6 +320,7 @@ islocallylipschitzcont(::ModifiedHuberLoss) = true
 islipschitzcont(::ModifiedHuberLoss) = true
 islipschitzcont_deriv(::ModifiedHuberLoss) = true
 isconvex(::ModifiedHuberLoss) = true
+isstrictlyconvex(::ModifiedHuberLoss) = false
 isstronglyconvex(::ModifiedHuberLoss) = false
 isclipable(::ModifiedHuberLoss) = true
 

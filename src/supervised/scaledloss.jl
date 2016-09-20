@@ -19,7 +19,8 @@ for fun in (:value, :deriv, :deriv2)
 end
 
 for prop in [:isminimizable, :isdifferentiable,
-             :istwicedifferentiable, :isconvex,
+             :istwicedifferentiable,
+             :isconvex, :isstrictlyconvex,
              :isstronglyconvex, :isnemitski,
              :isunivfishercons, :isfishercons,
              :islipschitzcont, :islocallylipschitzcont,
