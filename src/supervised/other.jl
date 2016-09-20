@@ -50,34 +50,3 @@ isconvex(::CrossentropyLoss) = true
 # ===============================================================
 # L(target, output) = sign(agreement) < 0 ? 1 : 0
 
-"""
-    ZeroOneLoss <: SupervisedLoss
-
-              Lossfunction                     Derivative
-      ┌────────────┬────────────┐      ┌────────────┬────────────┐
-    1 │------------┐            │    1 │                         │
-      │            |            │      │                         │
-      │            |            │      │                         │
-      │            |            │      │_________________________│
-      │            |            │      │                         │
-      │            |            │      │                         │
-      │            |            │      │                         │
-    0 │            └------------│   -1 │                         │
-      └────────────┴────────────┘      └────────────┴────────────┘
-      -2                        2      -2                        2
-                y * h(x)                         y * h(x)
-"""
-immutable ZeroOneLoss <: SupervisedLoss end
-
-value(loss::ZeroOneLoss, target::Number, output::Number) = value(loss, target * output)
-deriv(loss::ZeroOneLoss, target::Number, output::Number) = zero(output)
-deriv2(loss::ZeroOneLoss, target::Number, output::Number) = zero(output)
-
-value{T<:Number}(loss::ZeroOneLoss, agreement::T) = sign(agreement) < 0 ? one(T) : zero(T)
-deriv{T<:Number}(loss::ZeroOneLoss, agreement::T) = zero(T)
-deriv2{T<:Number}(loss::ZeroOneLoss, agreement::T) = zero(T)
-
-isdifferentiable(::ZeroOneLoss) = false
-isconvex(::ZeroOneLoss) = false
-isclasscalibrated(loss::ZeroOneLoss) = true
-

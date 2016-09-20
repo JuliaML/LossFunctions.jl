@@ -12,7 +12,7 @@ Base.print(io::IO, loss::ScaledLoss, args...) = print(io, typeof(loss).name.name
 # -------------------------------------------------------------
 # Plot Recipes
 
-_loss_xguide(loss::Union{MarginLoss, ZeroOneLoss}) = "y ⋅ h(x)"
+_loss_xguide(loss::MarginLoss) = "y ⋅ h(x)"
 _loss_xguide(loss::DistanceLoss) = "h(x) - y"
 
 @recipe function plot(loss::SupervisedLoss, xmin = -2, xmax = 2)

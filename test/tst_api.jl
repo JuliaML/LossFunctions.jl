@@ -1,14 +1,14 @@
 @testset "Broadcasting higher-order arrays" begin
     for f in (value,deriv,sumvalue,sumderiv,meanvalue,meanderiv)
         @testset "$f" begin
-            
+
             m,n,k = 100,99,98
             loss = L2DistLoss()
-            
+
             targ1 = randn(m)
             targ2 = repeat(targ1,outer=(1,n))
             targ3 = repeat(targ1,outer=(1,n,k))
-            
+
             out1 = randn(m,n)
             out2 = randn(m,n,k)
 

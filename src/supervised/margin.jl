@@ -5,6 +5,40 @@
 # ============================================================
 
 doc"""
+    ZeroOneLoss <: MarginLoss
+
+              Lossfunction                     Derivative
+      ┌────────────┬────────────┐      ┌────────────┬────────────┐
+    1 │------------┐            │    1 │                         │
+      │            |            │      │                         │
+      │            |            │      │                         │
+      │            |            │      │_________________________│
+      │            |            │      │                         │
+      │            |            │      │                         │
+      │            |            │      │                         │
+    0 │            └------------│   -1 │                         │
+      └────────────┴────────────┘      └────────────┴────────────┘
+      -2                        2      -2                        2
+                y * h(x)                         y * h(x)
+"""
+immutable ZeroOneLoss <: MarginLoss end
+
+value(loss::ZeroOneLoss, target::Number, output::Number) = value(loss, target * output)
+deriv(loss::ZeroOneLoss, target::Number, output::Number) = zero(output)
+deriv2(loss::ZeroOneLoss, target::Number, output::Number) = zero(output)
+
+value{T<:Number}(loss::ZeroOneLoss, agreement::T) = sign(agreement) < 0 ? one(T) : zero(T)
+deriv{T<:Number}(loss::ZeroOneLoss, agreement::T) = zero(T)
+deriv2{T<:Number}(loss::ZeroOneLoss, agreement::T) = zero(T)
+
+isdifferentiable(::ZeroOneLoss) = false
+isconvex(::ZeroOneLoss) = false
+isclasscalibrated(loss::ZeroOneLoss) = true
+isclipable(::ZeroOneLoss) = true
+
+# ============================================================
+
+doc"""
     PerceptronLoss <: MarginLoss
 
 The perceptron loss linearly penalizes every prediction where the

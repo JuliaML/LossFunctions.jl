@@ -234,7 +234,7 @@ end
     end
     test_value_float64_forcing(2.0 * LogitDistLoss())
     test_value_float64_forcing(2.0 * LogitMarginLoss())
-    
+
     # Losses that should return an AbstractFloat, preserving type if possible
     for loss in [PeriodicLoss(Float32(1)), PeriodicLoss(Float32(0.5)),
                  LogitDistLoss(), LogitMarginLoss(),
@@ -246,6 +246,9 @@ end
 end
 
 @testset "Test margin-based loss against reference function" begin
+    _zerooneloss(y, t) = sign(y*t) < 0 ? 1 : 0
+    test_value(ZeroOneLoss(), _zerooneloss, [-1.,1], -10:0.1:10)
+
     _hingeloss(y, t) = max(0, 1 - y.*t)
     test_value(HingeLoss(), _hingeloss, [-1.,1], -10:0.1:10)
 
@@ -334,16 +337,13 @@ end
     _crossentropyloss(y, t) = -y*log(t) - (1-y)*log(1-t)
     test_value(CrossentropyLoss(), _crossentropyloss, 0:0.01:1, 0.01:0.01:0.99)
 
-    _zerooneloss(y, t) = sign(y*t) < 0 ? 1 : 0
-    test_value(ZeroOneLoss(), _zerooneloss, [-1.,1], -10:0.1:10)
-
     _poissonloss(y, t) = exp(t) - t*y
     test_value(PoissonLoss(), _poissonloss, 0:10, linspace(0,10,11))
 end
 
 margin_losses = [LogitMarginLoss(), L1HingeLoss(), L2HingeLoss(), PerceptronLoss(),
                  SmoothedL1HingeLoss(.5), SmoothedL1HingeLoss(1), SmoothedL1HingeLoss(2),
-                 ModifiedHuberLoss()]
+                 ModifiedHuberLoss(), ZeroOneLoss()]
 
 @testset "Test first derivatives of margin-based losses" begin
     for loss in margin_losses
