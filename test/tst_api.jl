@@ -1,5 +1,5 @@
 @testset "Broadcasting higher-order arrays" begin
-    for f in (value,deriv,sumvalue,sumderiv,meanvalue,meanderiv)
+    for f in (Losses.value,deriv,sumvalue,sumderiv,meanvalue,meanderiv)
         @testset "$f" begin
 
             m,n,k = 100,99,98
