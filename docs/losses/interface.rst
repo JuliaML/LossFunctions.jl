@@ -168,6 +168,8 @@ that can be queried by functions defined in *LearnBase.jl*.
 
 .. function:: isconvex(loss)
 
+.. function:: isstrictlyconvex(loss)
+
 .. function:: isstronglyconvex(loss)
 
 .. function:: isdifferentiable(loss[, at])
