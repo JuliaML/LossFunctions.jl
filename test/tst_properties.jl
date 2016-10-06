@@ -510,3 +510,57 @@ end
     @test isclasscalibrated(loss) == true
 end
 
+# --------------------------------------------------------------
+function compare_losses(l1, l2)
+    @test isminimizable(l1) == isminimizable(l2)
+
+    @test isdifferentiable(l1) == isdifferentiable(l2)
+    @test isdifferentiable(l1, 0) == isdifferentiable(l2, 0)
+    @test isdifferentiable(l1, 1) == isdifferentiable(l2, 1)
+    @test istwicedifferentiable(l1) == istwicedifferentiable(l2)
+    @test istwicedifferentiable(l1, 0) == istwicedifferentiable(l2, 0)
+    @test istwicedifferentiable(l1, 1) == istwicedifferentiable(l2, 1)
+    @test istwicedifferentiable(l1, 2) == istwicedifferentiable(l2, 2)
+
+    @test isstronglyconvex(l1) == isstronglyconvex(l2)
+    @test isstrictlyconvex(l1) == isstrictlyconvex(l2)
+    @test isconvex(l1) == isconvex(l2)
+
+    @test isnemitski(l1) == isnemitski(l2)
+    @test islipschitzcont(l1) == islipschitzcont(l2)
+    @test islocallylipschitzcont(l1) == islocallylipschitzcont(l2)
+    @test isclipable(l1) == isclipable(l2)
+    @test ismarginbased(l1) == ismarginbased(l2)
+    @test isdistancebased(l1) == isdistancebased(l2)
+    @test issymmetric(l1) == issymmetric(l2)
+    @test isclasscalibrated(l1) == isclasscalibrated(l2)
+end
+
+@testset "Scaled Margin-based" begin
+    margins = [LogitMarginLoss(), L1HingeLoss(), L2HingeLoss(),
+               PerceptronLoss(), SmoothedL1HingeLoss(.5),
+               SmoothedL1HingeLoss(1), SmoothedL1HingeLoss(2),
+               ModifiedHuberLoss(), ZeroOneLoss()]
+    for loss in margins
+        @testset "$loss" begin
+            compare_losses(loss, 2*loss)
+            compare_losses(loss, 0.5*loss)
+        end
+    end
+end
+
+@testset "Scaled Distance-based" begin
+    distance = [L2DistLoss(), LPDistLoss(2.0), L1DistLoss(),
+                LPDistLoss(1.0), LPDistLoss(0.5), LPDistLoss(1.5),
+                LPDistLoss(3), LogitDistLoss(), L1EpsilonInsLoss(0.5),
+                EpsilonInsLoss(1.5), L2EpsilonInsLoss(0.5),
+                L2EpsilonInsLoss(1.5), PeriodicLoss(1),
+                HuberLoss(1), HuberLoss(1.5)]
+    for loss in distance
+        @testset "$loss" begin
+            compare_losses(loss, 2*loss)
+            compare_losses(loss, 0.5*loss)
+        end
+    end
+end
+
