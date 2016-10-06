@@ -21,7 +21,6 @@ isdifferentiable(::PoissonLoss, y, t) = true
 istwicedifferentiable(::PoissonLoss) = true
 istwicedifferentiable(::PoissonLoss, y, t) = true
 islipschitzcont(::PoissonLoss) = false
-islipschitzcont_deriv(::PoissonLoss) = false
 isconvex(::PoissonLoss) = true
 # TODO: isstrictlyconvex(::PoissonLoss) = ?
 isstronglyconvex(::PoissonLoss) = false

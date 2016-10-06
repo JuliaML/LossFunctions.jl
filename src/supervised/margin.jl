@@ -23,15 +23,21 @@ doc"""
 """
 immutable ZeroOneLoss <: MarginLoss end
 
-value(loss::ZeroOneLoss, target::Number, output::Number) = value(loss, target * output)
 deriv(loss::ZeroOneLoss, target::Number, output::Number) = zero(output)
 deriv2(loss::ZeroOneLoss, target::Number, output::Number) = zero(output)
 
 value{T<:Number}(loss::ZeroOneLoss, agreement::T) = sign(agreement) < 0 ? one(T) : zero(T)
 deriv{T<:Number}(loss::ZeroOneLoss, agreement::T) = zero(T)
 deriv2{T<:Number}(loss::ZeroOneLoss, agreement::T) = zero(T)
+value_deriv{T<:Number}(loss::ZeroOneLoss, agreement::T) = sign(agreement) < 0 ? (one(T), zero(T)) : (zero(T), zero(T))
 
+isminimizable(::ZeroOneLoss) = true
 isdifferentiable(::ZeroOneLoss) = false
+isdifferentiable(::ZeroOneLoss, at) = at != 0
+istwicedifferentiable(::ZeroOneLoss) = false
+istwicedifferentiable(::ZeroOneLoss, at) = at != 0
+isnemitski(::ZeroOneLoss) = true
+islipschitzcont(::ZeroOneLoss) = true
 isconvex(::ZeroOneLoss) = false
 isclasscalibrated(loss::ZeroOneLoss) = true
 isclipable(::ZeroOneLoss) = true
@@ -73,7 +79,6 @@ isdifferentiable(::PerceptronLoss, at) = at != 0
 istwicedifferentiable(::PerceptronLoss) = false
 istwicedifferentiable(::PerceptronLoss, at) = at != 0
 islipschitzcont(::PerceptronLoss) = true
-islipschitzcont_deriv(::PerceptronLoss) = true
 isconvex(::PerceptronLoss) = true
 isstrictlyconvex(::PerceptronLoss) = false
 isstronglyconvex(::PerceptronLoss) = false
@@ -115,7 +120,6 @@ isdifferentiable(::LogitMarginLoss, at) = true
 istwicedifferentiable(::LogitMarginLoss) = true
 istwicedifferentiable(::LogitMarginLoss, at) = true
 islipschitzcont(::LogitMarginLoss) = true
-islipschitzcont_deriv(::LogitMarginLoss) = true
 isconvex(::LogitMarginLoss) = true
 isstrictlyconvex(::LogitMarginLoss) = true
 isstronglyconvex(::LogitMarginLoss) = false
@@ -154,12 +158,12 @@ deriv{T<:Number}(loss::L1HingeLoss, agreement::T) = agreement >= 1 ? zero(T) : -
 deriv2{T<:Number}(loss::L1HingeLoss, agreement::T) = zero(T)
 value_deriv{T<:Number}(loss::L1HingeLoss, agreement::T) = agreement >= 1 ? (zero(T), zero(T)) : (one(T) - agreement, -one(T))
 
+isfishercons(::L1HingeLoss) = true
 isdifferentiable(::L1HingeLoss) = false
 isdifferentiable(::L1HingeLoss, at) = at != 1
 istwicedifferentiable(::L1HingeLoss) = false
 istwicedifferentiable(::L1HingeLoss, at) = at != 1
 islipschitzcont(::L1HingeLoss) = true
-islipschitzcont_deriv(::L1HingeLoss) = true
 isconvex(::L1HingeLoss) = true
 isstrictlyconvex(::L1HingeLoss) = false
 isstronglyconvex(::L1HingeLoss) = false
@@ -197,16 +201,16 @@ deriv{T<:Number}(loss::L2HingeLoss, agreement::T) = agreement >= 1 ? zero(T) : T
 deriv2{T<:Number}(loss::L2HingeLoss, agreement::T) = agreement >= 1 ? zero(T) : T(2)
 value_deriv{T<:Number}(loss::L2HingeLoss, agreement::T) = agreement >= 1 ? (zero(T), zero(T)) : (abs2(one(T) - agreement), T(2) * (agreement - one(T)))
 
+isunivfishercons(::L2HingeLoss) = true
 isdifferentiable(::L2HingeLoss) = true
 isdifferentiable(::L2HingeLoss, at) = true
 istwicedifferentiable(::L2HingeLoss) = false
 istwicedifferentiable(::L2HingeLoss, at) = at != 1
 islocallylipschitzcont(::L2HingeLoss) = true
 islipschitzcont(::L2HingeLoss) = false
-islipschitzcont_deriv(::L2HingeLoss) = true
 isconvex(::L2HingeLoss) = true
-isstrictlyconvex(::L2HingeLoss) = true
-isstronglyconvex(::L2HingeLoss) = true
+isstrictlyconvex(::L2HingeLoss) = false
+isstronglyconvex(::L2HingeLoss) = false
 isclipable(::L2HingeLoss) = true
 
 # ============================================================
@@ -264,7 +268,6 @@ istwicedifferentiable(::SmoothedL1HingeLoss) = false
 istwicedifferentiable(loss::SmoothedL1HingeLoss, at) = at != 1 && at != 1 - loss.gamma
 islocallylipschitzcont(::SmoothedL1HingeLoss) = true
 islipschitzcont(::SmoothedL1HingeLoss) = true
-islipschitzcont_deriv(::SmoothedL1HingeLoss) = true
 isconvex(::SmoothedL1HingeLoss) = true
 isstrictlyconvex(::SmoothedL1HingeLoss) = false
 isstronglyconvex(::SmoothedL1HingeLoss) = false
@@ -318,7 +321,6 @@ istwicedifferentiable(::ModifiedHuberLoss) = false
 istwicedifferentiable(loss::ModifiedHuberLoss, at) = at != 1 && at != -1
 islocallylipschitzcont(::ModifiedHuberLoss) = true
 islipschitzcont(::ModifiedHuberLoss) = true
-islipschitzcont_deriv(::ModifiedHuberLoss) = true
 isconvex(::ModifiedHuberLoss) = true
 isstrictlyconvex(::ModifiedHuberLoss) = false
 isstronglyconvex(::ModifiedHuberLoss) = false

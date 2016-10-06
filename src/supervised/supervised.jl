@@ -21,17 +21,21 @@ end
 # --------------------------------------------------------------
 # Fallback implementations
 
-isminimizable(c::SupervisedLoss) = isconvex(c)
-isdifferentiable(c::SupervisedLoss) = istwicedifferentiable(c)
+isstronglyconvex(::SupervisedLoss) = false
+isminimizable(l::SupervisedLoss) = isconvex(l)
+isdifferentiable(l::SupervisedLoss) = istwicedifferentiable(l)
 istwicedifferentiable(::SupervisedLoss) = false
-isdifferentiable(c::SupervisedLoss, at) = isdifferentiable(c)
-istwicedifferentiable(c::SupervisedLoss, at) = istwicedifferentiable(c)
+isdifferentiable(l::SupervisedLoss, at) = isdifferentiable(l)
+istwicedifferentiable(l::SupervisedLoss, at) = istwicedifferentiable(l)
 
-isnemitski(loss::SupervisedLoss) = islocallylipschitzcont(loss)
+# Every convex function is locally lipschitz continuous
+islocallylipschitzcont(l::SupervisedLoss) = isconvex(l) || islipschitzcont(l)
+
+# If a loss if locally lipsschitz continuous then it is a
+# nemitski loss
+isnemitski(l::SupervisedLoss) = islocallylipschitzcont(l)
 isclipable(::SupervisedLoss) = false
 islipschitzcont(::SupervisedLoss) = false
-islocallylipschitzcont(::SupervisedLoss) = false
-islipschitzcont_deriv(::SupervisedLoss) = false
 
 ismarginbased(::SupervisedLoss) = false
 isclasscalibrated(::SupervisedLoss) = false
@@ -223,8 +227,14 @@ end
 isunivfishercons(::MarginLoss) = false
 isfishercons(loss::MarginLoss) = isunivfishercons(loss)
 isnemitski(::MarginLoss) = true
-islocallylipschitzcont(loss::MarginLoss) = isconvex(loss)
 ismarginbased(::MarginLoss) = true
+
+# For every convex margin based loss L(a) the following statements
+# are equivalent:
+#   - L is classification calibrated
+#   - L is differentiable at 0 and L'(0) < 0
+# We use this here as fallback implementation.
+# The other direction of the implication is not implemented however.
 isclasscalibrated(loss::MarginLoss) = isconvex(loss) && isdifferentiable(loss, 0) && deriv(loss, 0) < 0
 
 # ==============================================================
@@ -240,4 +250,5 @@ value_deriv(loss::DistanceLoss, target::Number, output::Number) = value_deriv(lo
 
 isdistancebased(::DistanceLoss) = true
 issymmetric(::DistanceLoss) = false
+isclipable(::DistanceLoss) = true
 

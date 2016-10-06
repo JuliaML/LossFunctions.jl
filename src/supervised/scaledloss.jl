@@ -24,7 +24,7 @@ for prop in [:isminimizable, :isdifferentiable,
              :isstronglyconvex, :isnemitski,
              :isunivfishercons, :isfishercons,
              :islipschitzcont, :islocallylipschitzcont,
-             :islipschitzcont_deriv, :isclipable,
+             :isclipable,
              :ismarginbased, :isclasscalibrated,
              :isdistancebased, :issymmetric]
     @eval ($prop)(l::ScaledLoss) = ($prop)(l.loss)

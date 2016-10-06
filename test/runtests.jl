@@ -5,7 +5,8 @@ using Base.Test
 
 tests = [
     "tst_loss.jl",
-    "tst_api.jl"
+    "tst_api.jl",
+    "tst_properties.jl"
 ]
 
 perf = [
