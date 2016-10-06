@@ -36,7 +36,6 @@ islocallylipschitzcont(l::SupervisedLoss) = isconvex(l) || islipschitzcont(l)
 isnemitski(l::SupervisedLoss) = islocallylipschitzcont(l)
 isclipable(::SupervisedLoss) = false
 islipschitzcont(::SupervisedLoss) = false
-islipschitzcont_deriv(::SupervisedLoss) = false
 
 ismarginbased(::SupervisedLoss) = false
 isclasscalibrated(::SupervisedLoss) = false
