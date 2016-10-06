@@ -317,3 +317,196 @@ end
     @test issymmetric(loss) == true
 end
 
+# --------------------------------------------------------------
+
+@testset "ZeroOneLoss" begin
+    loss = ZeroOneLoss()
+
+    @test isminimizable(loss) == true
+
+    @test isdifferentiable(loss) == false
+    @test isdifferentiable(loss, 0) == false
+    @test isdifferentiable(loss, 1) == true
+    @test istwicedifferentiable(loss) == false
+    @test istwicedifferentiable(loss, 1) == true
+
+    @test isstronglyconvex(loss) == false
+    @test isstrictlyconvex(loss) == false
+    @test isconvex(loss) == false
+
+    @test isnemitski(loss) == true
+    @test islipschitzcont(loss) == true
+    @test islocallylipschitzcont(loss) == true
+    @test isclipable(loss) == true
+    @test ismarginbased(loss) == true
+    @test isdistancebased(loss) == false
+    @test issymmetric(loss) == false
+    @test isclasscalibrated(loss) == true
+end
+
+@testset "PerceptronLoss" begin
+    loss = PerceptronLoss()
+
+    @test isminimizable(loss) == true
+
+    @test isdifferentiable(loss) == false
+    @test isdifferentiable(loss, 0) == false
+    @test isdifferentiable(loss, 1) == true
+    @test istwicedifferentiable(loss) == false
+    @test istwicedifferentiable(loss, 0) == false
+    @test istwicedifferentiable(loss, 1) == true
+
+    @test isstronglyconvex(loss) == false
+    @test isstrictlyconvex(loss) == false
+    @test isconvex(loss) == true
+
+    @test isnemitski(loss) == true
+    @test islipschitzcont(loss) == true
+    @test islocallylipschitzcont(loss) == true
+    @test isclipable(loss) == true
+    @test ismarginbased(loss) == true
+    @test isdistancebased(loss) == false
+    @test issymmetric(loss) == false
+    @test isclasscalibrated(loss) == false
+end
+
+@testset "LogitMarginLoss" begin
+    loss = LogitMarginLoss()
+
+    @test isminimizable(loss) == true
+
+    @test isdifferentiable(loss) == true
+    @test isdifferentiable(loss, 0) == true
+    @test isdifferentiable(loss, 1) == true
+    @test istwicedifferentiable(loss) == true
+    @test istwicedifferentiable(loss, 0) == true
+    @test istwicedifferentiable(loss, 1) == true
+
+    @test isstronglyconvex(loss) == false
+    @test isstrictlyconvex(loss) == true
+    @test isconvex(loss) == true
+
+    @test isnemitski(loss) == true
+    @test islipschitzcont(loss) == true
+    @test islocallylipschitzcont(loss) == true
+    @test isclipable(loss) == false
+    @test ismarginbased(loss) == true
+    @test isdistancebased(loss) == false
+    @test issymmetric(loss) == false
+    @test isclasscalibrated(loss) == true
+    @test isfishercons(loss) == true
+    @test isunivfishercons(loss) == true
+end
+
+@testset "L1HingeLoss" begin
+    loss = L1HingeLoss()
+
+    @test isminimizable(loss) == true
+
+    @test isdifferentiable(loss) == false
+    @test isdifferentiable(loss, 0) == true
+    @test isdifferentiable(loss, 1) == false
+    @test istwicedifferentiable(loss) == false
+    @test istwicedifferentiable(loss, 0) == true
+    @test istwicedifferentiable(loss, 1) == false
+
+    @test isstronglyconvex(loss) == false
+    @test isstrictlyconvex(loss) == false
+    @test isconvex(loss) == true
+
+    @test isnemitski(loss) == true
+    @test islipschitzcont(loss) == true
+    @test islocallylipschitzcont(loss) == true
+    @test isclipable(loss) == true
+    @test ismarginbased(loss) == true
+    @test isdistancebased(loss) == false
+    @test issymmetric(loss) == false
+    @test isclasscalibrated(loss) == true
+    @test isfishercons(loss) == true
+    @test isunivfishercons(loss) == false
+end
+
+@testset "L2HingeLoss" begin
+    loss = L2HingeLoss()
+
+    @test isminimizable(loss) == true
+
+    @test isdifferentiable(loss) == true
+    @test isdifferentiable(loss, 0) == true
+    @test isdifferentiable(loss, 1) == true
+    @test istwicedifferentiable(loss) == false
+    @test istwicedifferentiable(loss, 0) == true
+    @test istwicedifferentiable(loss, 1) == false
+
+    @test isstronglyconvex(loss) == false
+    @test isstrictlyconvex(loss) == false
+    @test isconvex(loss) == true
+
+    @test isnemitski(loss) == true
+    @test islipschitzcont(loss) == false
+    @test islocallylipschitzcont(loss) == true
+    @test isclipable(loss) == true
+    @test ismarginbased(loss) == true
+    @test isdistancebased(loss) == false
+    @test issymmetric(loss) == false
+    @test isclasscalibrated(loss) == true
+    @test isfishercons(loss) == true
+    @test isunivfishercons(loss) == true
+end
+
+@testset "SmoothedL1HingeLoss" begin
+    loss = SmoothedL1HingeLoss(2)
+
+    @test isminimizable(loss) == true
+
+    @test isdifferentiable(loss) == true
+    @test isdifferentiable(loss, 0) == true
+    @test isdifferentiable(loss, 1) == true
+    @test istwicedifferentiable(loss) == false
+    @test istwicedifferentiable(loss, -1) == false
+    @test istwicedifferentiable(loss, 0) == true
+    @test istwicedifferentiable(loss, 1) == false
+    @test istwicedifferentiable(loss, 2) == true
+
+    @test isstronglyconvex(loss) == false
+    @test isstrictlyconvex(loss) == false
+    @test isconvex(loss) == true
+
+    @test isnemitski(loss) == true
+    @test islipschitzcont(loss) == true
+    @test islocallylipschitzcont(loss) == true
+    @test isclipable(loss) == true
+    @test ismarginbased(loss) == true
+    @test isdistancebased(loss) == false
+    @test issymmetric(loss) == false
+    @test isclasscalibrated(loss) == true
+end
+
+@testset "ModifiedHuberLoss" begin
+    loss = ModifiedHuberLoss()
+
+    @test isminimizable(loss) == true
+
+    @test isdifferentiable(loss) == true
+    @test isdifferentiable(loss, 0) == true
+    @test isdifferentiable(loss, 1) == true
+    @test istwicedifferentiable(loss) == false
+    @test istwicedifferentiable(loss, -1) == false
+    @test istwicedifferentiable(loss, 0) == true
+    @test istwicedifferentiable(loss, 1) == false
+    @test istwicedifferentiable(loss, 2) == true
+
+    @test isstronglyconvex(loss) == false
+    @test isstrictlyconvex(loss) == false
+    @test isconvex(loss) == true
+
+    @test isnemitski(loss) == true
+    @test islipschitzcont(loss) == true
+    @test islocallylipschitzcont(loss) == true
+    @test isclipable(loss) == true
+    @test ismarginbased(loss) == true
+    @test isdistancebased(loss) == false
+    @test issymmetric(loss) == false
+    @test isclasscalibrated(loss) == true
+end
+
