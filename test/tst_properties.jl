@@ -93,6 +93,7 @@ immutable TstMarginLoss <: MarginLoss end
     @test isdistancebased(TstMarginLoss()) == false
     @test issymmetric(TstMarginLoss()) == false
 
+    @test isclasscalibrated(TstMarginLoss()) == false
     @test isfishercons(TstMarginLoss()) == false
     @test isunivfishercons(TstMarginLoss()) == false
 end
@@ -119,5 +120,200 @@ immutable TstDistanceLoss <: DistanceLoss end
     @test ismarginbased(TstDistanceLoss()) == false
     @test isdistancebased(TstDistanceLoss()) == true
     @test issymmetric(TstDistanceLoss()) == false
+end
+
+# --------------------------------------------------------------
+
+@testset "LPDistLoss{0.5}" begin
+    loss = LPDistLoss(0.5)
+
+    @test isminimizable(loss) == true
+
+    @test isdifferentiable(loss) == false
+    @test isdifferentiable(loss, 0) == false
+    @test isdifferentiable(loss, 1) == true
+    @test istwicedifferentiable(loss) == false
+    @test istwicedifferentiable(loss, 1) == true
+
+    @test isstronglyconvex(loss) == false
+    @test isstrictlyconvex(loss) == false
+    @test isconvex(loss) == false
+
+    @test isnemitski(loss) == false
+    @test islipschitzcont(loss) == false
+    @test islocallylipschitzcont(loss) == false
+    @test isclipable(loss) == true
+    @test ismarginbased(loss) == false
+    @test isdistancebased(loss) == true
+    @test issymmetric(loss) == true
+end
+
+@testset "L1DistLoss" begin
+    loss = L1DistLoss()
+
+    @test isminimizable(loss) == true
+
+    @test isdifferentiable(loss) == false
+    @test isdifferentiable(loss, 0) == false
+    @test isdifferentiable(loss, 1) == true
+    @test istwicedifferentiable(loss) == false
+    @test istwicedifferentiable(loss, 1) == true
+
+    @test isstronglyconvex(loss) == false
+    @test isstrictlyconvex(loss) == false
+    @test isconvex(loss) == true
+
+    @test isnemitski(loss) == true
+    @test islipschitzcont(loss) == true
+    @test islocallylipschitzcont(loss) == true
+    @test isclipable(loss) == true
+    @test ismarginbased(loss) == false
+    @test isdistancebased(loss) == true
+    @test issymmetric(loss) == true
+end
+
+@testset "L2DistLoss" begin
+    loss = L2DistLoss()
+
+    @test isminimizable(loss) == true
+
+    @test isdifferentiable(loss) == true
+    @test isdifferentiable(loss, 0) == true
+    @test istwicedifferentiable(loss) == true
+    @test istwicedifferentiable(loss, 0) == true
+
+    @test isstronglyconvex(loss) == true
+    @test isstrictlyconvex(loss) == true
+    @test isconvex(loss) == true
+
+    @test isnemitski(loss) == true
+    @test islipschitzcont(loss) == false
+    @test islocallylipschitzcont(loss) == true
+    @test isclipable(loss) == true
+    @test ismarginbased(loss) == false
+    @test isdistancebased(loss) == true
+    @test issymmetric(loss) == true
+end
+
+@testset "LPDistLoss{3}" begin
+    loss = LPDistLoss(3)
+
+    @test isminimizable(loss) == true
+
+    @test isdifferentiable(loss) == true
+    @test isdifferentiable(loss, 0) == true
+    @test istwicedifferentiable(loss) == true
+    @test istwicedifferentiable(loss, 0) == true
+
+    @test isstronglyconvex(loss) == true
+    @test isstrictlyconvex(loss) == true
+    @test isconvex(loss) == true
+
+    @test isnemitski(loss) == true
+    @test islipschitzcont(loss) == false
+    @test islocallylipschitzcont(loss) == true
+    @test isclipable(loss) == true
+    @test ismarginbased(loss) == false
+    @test isdistancebased(loss) == true
+    @test issymmetric(loss) == true
+end
+
+@testset "HuberLoss(1)" begin
+    loss = HuberLoss(1)
+
+    @test isminimizable(loss) == true
+
+    @test isdifferentiable(loss) == true
+    @test isdifferentiable(loss, 0) == true
+    @test isdifferentiable(loss, 1) == true
+    @test istwicedifferentiable(loss) == false
+    @test istwicedifferentiable(loss, 0) == true
+    @test istwicedifferentiable(loss, 1) == false
+
+    @test isstronglyconvex(loss) == false
+    @test isstrictlyconvex(loss) == false
+    @test isconvex(loss) == true
+
+    @test isnemitski(loss) == true
+    @test islipschitzcont(loss) == true
+    @test islocallylipschitzcont(loss) == true
+    @test isclipable(loss) == true
+    @test ismarginbased(loss) == false
+    @test isdistancebased(loss) == true
+    @test issymmetric(loss) == true
+end
+
+@testset "L1EpsilonInsLoss(1)" begin
+    loss = L1EpsilonInsLoss(1)
+
+    @test isminimizable(loss) == true
+
+    @test isdifferentiable(loss) == false
+    @test isdifferentiable(loss, 0) == true
+    @test isdifferentiable(loss, 1) == false
+    @test istwicedifferentiable(loss) == false
+    @test istwicedifferentiable(loss, 0) == true
+
+    @test isstronglyconvex(loss) == false
+    @test isstrictlyconvex(loss) == false
+    @test isconvex(loss) == true
+
+    @test isnemitski(loss) == true
+    @test islipschitzcont(loss) == true
+    @test islocallylipschitzcont(loss) == true
+    @test isclipable(loss) == true
+    @test ismarginbased(loss) == false
+    @test isdistancebased(loss) == true
+    @test issymmetric(loss) == true
+end
+
+@testset "L2EpsilonInsLoss(1)" begin
+    loss = L2EpsilonInsLoss(1)
+
+    @test isminimizable(loss) == true
+
+    @test isdifferentiable(loss) == true
+    @test isdifferentiable(loss, 0) == true
+    @test isdifferentiable(loss, 1) == true
+    @test istwicedifferentiable(loss) == false
+    @test istwicedifferentiable(loss, 0) == true
+    @test istwicedifferentiable(loss, 1) == false
+
+    @test isstronglyconvex(loss) == true
+    @test isstrictlyconvex(loss) == true
+    @test isconvex(loss) == true
+
+    @test isnemitski(loss) == true
+    @test islipschitzcont(loss) == false
+    @test islocallylipschitzcont(loss) == true
+    @test isclipable(loss) == true
+    @test ismarginbased(loss) == false
+    @test isdistancebased(loss) == true
+    @test issymmetric(loss) == true
+end
+
+@testset "LogitDistLoss()" begin
+    loss = LogitDistLoss()
+
+    @test isminimizable(loss) == true
+
+    @test isdifferentiable(loss) == true
+    @test isdifferentiable(loss, 0) == true
+    @test isdifferentiable(loss, 1) == true
+    @test istwicedifferentiable(loss) == true
+    @test istwicedifferentiable(loss, 0) == true
+    @test istwicedifferentiable(loss, 1) == true
+
+    @test isstronglyconvex(loss) == false
+    @test isstrictlyconvex(loss) == true
+    @test isconvex(loss) == true
+
+    @test isnemitski(loss) == true
+    @test islipschitzcont(loss) == true
+    @test islocallylipschitzcont(loss) == true
+    @test isclipable(loss) == true
+    @test ismarginbased(loss) == false
+    @test isdistancebased(loss) == true
+    @test issymmetric(loss) == true
 end
 

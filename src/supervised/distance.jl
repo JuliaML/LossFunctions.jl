@@ -30,12 +30,14 @@ function deriv2{P,T<:Number}(loss::LPDistLoss{P}, difference::T)
 end
 value_deriv{P}(loss::LPDistLoss{P}, difference::Number) = (value(loss,difference), deriv(loss,difference))
 
+isminimizable{P}(::LPDistLoss{P}) = true
 issymmetric{P}(::LPDistLoss{P}) = true
 isdifferentiable{P}(::LPDistLoss{P}) = P > 1
 isdifferentiable{P}(::LPDistLoss{P}, at) = P > 1 || at != 0
 istwicedifferentiable{P}(::LPDistLoss{P}) = P > 1
 istwicedifferentiable{P}(::LPDistLoss{P}, at) = P > 1 || at != 0
 islipschitzcont{P}(::LPDistLoss{P}) = P == 1
+islocallylipschitzcont{P}(::LPDistLoss{P}) = P >= 1
 islipschitzcont_deriv{P}(::LPDistLoss{P}) = 1 <= P <= 2
 isconvex{P}(::LPDistLoss{P}) = P >= 1
 isstrictlyconvex{P}(::LPDistLoss{P}) = P > 1
@@ -75,8 +77,8 @@ value_deriv(loss::L1DistLoss, difference::Number) = (abs(difference), sign(diffe
 
 isdifferentiable(::L1DistLoss) = false
 isdifferentiable(::L1DistLoss, at) = at != 0
-istwicedifferentiable(::L1DistLoss) = true
-istwicedifferentiable(::L1DistLoss, at) = true
+istwicedifferentiable(::L1DistLoss) = false
+istwicedifferentiable(::L1DistLoss, at) = at != 0
 islipschitzcont(::L1DistLoss) = true
 islipschitzcont_deriv(::L1DistLoss) = true
 isconvex(::L1DistLoss) = true
@@ -244,6 +246,7 @@ islipschitzcont_deriv(::HuberLoss) = false
 isconvex(::HuberLoss) = true
 isstrictlyconvex(::HuberLoss) = false
 isstronglyconvex(::HuberLoss) = false
+issymmetric(::HuberLoss) = true
 
 # ===========================================================
 
@@ -309,7 +312,7 @@ end
 issymmetric(::L1EpsilonInsLoss) = true
 isdifferentiable(::L1EpsilonInsLoss) = false
 isdifferentiable(loss::L1EpsilonInsLoss, at) = abs(at) != loss.ε
-istwicedifferentiable(::L1EpsilonInsLoss) = true
+istwicedifferentiable(::L1EpsilonInsLoss) = false
 istwicedifferentiable(loss::L1EpsilonInsLoss, at) = abs(at) != loss.ε
 islipschitzcont(::L1EpsilonInsLoss) = true
 islipschitzcont_deriv(::L1EpsilonInsLoss) = true
@@ -377,7 +380,7 @@ isdifferentiable(::L2EpsilonInsLoss) = true
 isdifferentiable(::L2EpsilonInsLoss, at) = true
 istwicedifferentiable(::L2EpsilonInsLoss) = false
 istwicedifferentiable(loss::L2EpsilonInsLoss, at) = abs(at) != loss.ε
-islipschitzcont(::L2EpsilonInsLoss) = true
+islipschitzcont(::L2EpsilonInsLoss) = false
 islipschitzcont_deriv(::L2EpsilonInsLoss) = true
 isconvex(::L2EpsilonInsLoss) = true
 isstrictlyconvex(::L2EpsilonInsLoss) = true
