@@ -1,12 +1,12 @@
-# Losses
+# LossFunctions
 
-_Losses.jl is a Julia package that provides efficient and
+_LossFunctions.jl is a Julia package that provides efficient and
 well-tested implementations for a diverse set of loss functions
 that are commonly used in Machine Learning._
 
 | **Package Status** | **Package Evaluator** | **Build Status**  |
 |:------------------:|:---------------------:|:-----------------:|
-| [![License](http://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat)](LICENSE.md) [![Documentation Status](http://readthedocs.org/projects/lossesjl/badge/?version=latest)](http://lossesjl.readthedocs.io/en/latest/?badge=latest) | [![Pkg Eval v5](http://pkg.julialang.org/badges/Losses.5.svg)](http://pkg.julialang.org/?pkg=Losses&ver=0.6) [![Pkg Eval v6](http://pkg.julialang.org/badges/Losses.6.svg)](http://pkg.julialang.org/?pkg=Losses&ver=0.6) | [![Build Status](https://travis-ci.org/JuliaML/Losses.jl.svg?branch=master)](https://travis-ci.org/JuliaML/Losses.jl) [![Build status](https://ci.appveyor.com/api/projects/status/xbwc2fiel40bajsp/branch/master?svg=true)](https://ci.appveyor.com/project/Evizero/losses-jl/branch/master) [![Coverage Status](https://coveralls.io/repos/github/JuliaML/Losses.jl/badge.svg?branch=master)](https://coveralls.io/github/JuliaML/Losses.jl?branch=master) |
+| [![License](http://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat)](LICENSE.md) [![Documentation Status](http://readthedocs.org/projects/lossesjl/badge/?version=latest)](http://lossesjl.readthedocs.io/en/latest/?badge=latest) | [![Pkg Eval v5](http://pkg.julialang.org/badges/LossFunctions.5.svg)](http://pkg.julialang.org/?pkg=LossFunctions&ver=0.5) [![Pkg Eval v6](http://pkg.julialang.org/badges/LossFunctions.6.svg)](http://pkg.julialang.org/?pkg=LossFunctions&ver=0.6) | [![Build Status](https://travis-ci.org/JuliaML/LossFunctions.jl.svg?branch=master)](https://travis-ci.org/JuliaML/LossFunctions.jl) [![Build status](https://ci.appveyor.com/api/projects/status/xbwc2fiel40bajsp?svg=true)](https://ci.appveyor.com/project/Evizero/losses-jl) [![Coverage Status](https://coveralls.io/repos/github/JuliaML/LossFunctions.jl/badge.svg?branch=master)](https://coveralls.io/github/JuliaML/LossFunctions.jl?branch=master) |
 
 ## Available Losses
 
@@ -22,7 +22,7 @@ The following code snippets show a simple "hello world" scenario
 of how a `Loss` can be used to compute the element-wise values.
 
 ```julia
-using Losses
+using LossFunctions
 
 true_targets = [  1,  0, -2]
 pred_outputs = [0.5,  1, -1]
@@ -87,7 +87,7 @@ on `HingeLoss` within Julia's REPL:
 This package is registered in `METADATA.jl` and can be installed as usual
 
 ```julia
-Pkg.add("Losses")
+Pkg.add("LossFunctions")
 ```
 
 ## License

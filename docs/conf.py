@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Losses.jl documentation build configuration file, created by
+# LossFunctions.jl documentation build configuration file, created by
 # sphinx-quickstart on Sun Aug 21 13:02:26 2016.
 #
 # This file is execfile()d with the current directory set to its
@@ -50,7 +50,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Losses.jl'
+project = u'LossFunctions.jl'
 copyright = u'2016, Christof Stocker, Tom Breloff, Alex Williams, and others'
 author = u'Christof Stocker, Tom Breloff, Alex Williams'
 
@@ -204,7 +204,7 @@ html_static_path = ['_static']
 #html_search_scorer = 'scorer.js'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'Lossesjldoc'
+htmlhelp_basename = 'LossFunctionsjldoc'
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -226,7 +226,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'Lossesjl.tex', u'Losses.jl Documentation',
+    (master_doc, 'LossFunctionsjl.tex', u'LossFunctions.jl Documentation',
      u'Christof Stocker, Tom Breloff, Alex Williams', 'manual'),
 ]
 
@@ -256,7 +256,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'lossesjl', u'Losses.jl Documentation',
+    (master_doc, 'lossfunctionsjl', u'LossFunctions.jl Documentation',
      [author], 1)
 ]
 
@@ -270,8 +270,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'Lossesjl', u'Losses.jl Documentation',
-     author, 'Lossesjl', 'Julia implementation of common Loss-functions for Machine Learning',
+    (master_doc, 'lossfunctionsjl', u'LossFunctions.jl Documentation',
+     author, 'LossFunctionsjl', 'Julia implementation of common Loss-functions for Machine Learning',
      'Miscellaneous'),
 ]
 

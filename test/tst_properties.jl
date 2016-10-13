@@ -22,7 +22,7 @@ end
 
 
 immutable TstStronglyConvexLoss <: SupervisedLoss end
-Losses.isstronglyconvex(::TstStronglyConvexLoss) = true
+LossFunctions.isstronglyconvex(::TstStronglyConvexLoss) = true
 
 @testset "Fallback implementations; strongly convex" begin
     @test isminimizable(TstStronglyConvexLoss()) == true
@@ -47,7 +47,7 @@ end
 
 
 immutable TstTwiceDiffLoss <: SupervisedLoss end
-Losses.istwicedifferentiable(::TstTwiceDiffLoss) = true
+LossFunctions.istwicedifferentiable(::TstTwiceDiffLoss) = true
 
 @testset "Fallback implementations; twice differentiable" begin
     @test isminimizable(TstTwiceDiffLoss()) == false

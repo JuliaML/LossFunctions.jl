@@ -1,5 +1,5 @@
 using LearnBase
-using Losses
+using LossFunctions
 using DualNumbers
 using Base.Test
 

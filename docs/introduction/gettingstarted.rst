@@ -2,7 +2,7 @@ Getting Started
 ================
 
 This section outlines the basic steps needed to start utilizing
-the Losses.jl package.
+the LossFunctions.jl package.
 To that end we will provide a condensed overview of the package.
 
 .. note::
@@ -11,15 +11,15 @@ To that end we will provide a condensed overview of the package.
     background information or theory on the losses here in detail.
 
 
-Using Losses.jl
+Using LossFunctions.jl
 ----------------
 
-Once installed the Losses package can be imported just as any
+Once installed the LossFunctions package can be imported just as any
 other Julia package.
 
 .. code-block:: julia
 
-    using Losses
+    using LossFunctions
 
 To get help on specific functionality you can either look up the
 information here, or if you prefer you can make use of Julia's
@@ -40,7 +40,7 @@ The following code snippets show a simple scenario of how a
 
 .. code-block:: julia
 
-    using Losses
+    using LossFunctions
 
     true_targets = [  1,  0, -2]
     pred_outputs = [0.5,  1, -1]
@@ -147,7 +147,7 @@ expressed as a univariate function ``output * target``.
     Throughout the codebase we refer to the result of
     ``output * target`` as ``agreement``.
     The discussion that lead to this convention can be found
-    `issue #9 <https://github.com/JuliaML/Losses.jl/issues/9#issuecomment-190321549>`_
+    `issue #9 <https://github.com/JuliaML/LossFunctions.jl/issues/9#issuecomment-190321549>`_
 
 Margin-based losses are usually used for binary classification.
 In contrast to other formalism, they do not natively provide

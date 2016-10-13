@@ -1,4 +1,4 @@
-The Losses.jl package is licensed under the MIT "Expat" License:
+The LossFunctions.jl package is licensed under the MIT "Expat" License:
 
 > Copyright (c) 2015: Christof Stocker, Tom Breloff, Alex Williams, and other contributers.
 >

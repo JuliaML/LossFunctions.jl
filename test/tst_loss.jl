@@ -6,11 +6,11 @@ function test_value_typestable(l::SupervisedLoss)
                 T = promote_type(typeof(y), typeof(t))
 
                 # test basic loss
-                val = Losses.value(l, y, t)
+                val = LossFunctions.value(l, y, t)
                 @test typeof(val) <: T
 
                 # test scaled version of loss
-                @test typeof(Losses.value(T(2)*l, y, t)) <: T
+                @test typeof(LossFunctions.value(T(2)*l, y, t)) <: T
             end
         end
     end
@@ -20,7 +20,7 @@ function test_value_float32_preserving(l::SupervisedLoss)
     @testset "$(l): " begin
         for y in (-1, 1, Int32(-1), Int32(1), -1.5, 1.5, Float32(-.5), Float32(.5))
             for t in (-2, 2, Int32(-1), Int32(1), -.5, .5, Float32(-1), Float32(1))
-                val = Losses.value(l, y, t)
+                val = LossFunctions.value(l, y, t)
                 T = promote_type(typeof(y),typeof(t))
                 if !(T <: AbstractFloat)
                     # cast Integers to a float
@@ -41,7 +41,7 @@ function test_value_float64_forcing(l::SupervisedLoss)
     @testset "$(l): " begin
         for y in (-1, 1, Int32(-1), Int32(1), -1.5, 1.5, Float32(-.5), Float32(.5))
             for t in (-2, 2, Int32(-1), Int32(1), -.5, .5, Float32(-1), Float32(1))
-                val = Losses.value(l, y, t)
+                val = LossFunctions.value(l, y, t)
                 @test (typeof(val) <: Float64)
             end
         end
@@ -51,7 +51,7 @@ end
 function test_value(l::SupervisedLoss, f::Function, y_vec, t_vec)
     @testset "$(l): " begin
         for y in y_vec, t in t_vec
-            @test abs(Losses.value(l, y, t) - f(y, t)) < 1e-10
+            @test abs(LossFunctions.value(l, y, t) - f(y, t)) < 1e-10
         end
     end
 end
@@ -60,18 +60,18 @@ function test_deriv(l::MarginLoss, t_vec)
     @testset "$(l): " begin
         for y in [-1., 1], t in t_vec
             if isdifferentiable(l, y*t)
-                d_dual = epsilon(Losses.value(l, dual(y, 0), dual(t, 1)))
+                d_dual = epsilon(LossFunctions.value(l, dual(y, 0), dual(t, 1)))
                 d_comp = deriv(l, y, t)
                 @test abs(d_dual - d_comp) < 1e-10
-                val = Losses.value(l, y, t)
+                val = LossFunctions.value(l, y, t)
                 val2, d_comp2 = value_deriv(l, y, t)
                 val3, d_comp3 = value_deriv_fun(l)(y, t)
                 val4, d_comp4 = value_deriv(l, y * t)
                 @test_approx_eq val val2
                 @test_approx_eq val val3
                 @test_approx_eq val val4
-                @test_approx_eq val Losses.value(l, y, t)
-                @test_approx_eq val Losses.value(l, y*t)
+                @test_approx_eq val LossFunctions.value(l, y, t)
+                @test_approx_eq val LossFunctions.value(l, y*t)
                 @test_approx_eq val value_fun(l)(y, t)
                 @test_approx_eq val value_fun(l)(y*t)
                 @test_approx_eq d_comp d_comp2
@@ -92,18 +92,18 @@ function test_deriv(l::DistanceLoss, t_vec)
     @testset "$(l): " begin
         for y in -20:.2:20, t in t_vec
             if isdifferentiable(l, t-y)
-                d_dual = epsilon(Losses.value(l, dual(t-y, 1)))
+                d_dual = epsilon(LossFunctions.value(l, dual(t-y, 1)))
                 d_comp = deriv(l, y, t)
                 @test abs(d_dual - d_comp) < 1e-10
-                val = Losses.value(l, y, t)
+                val = LossFunctions.value(l, y, t)
                 val2, d_comp2 = value_deriv(l, y, t)
                 val3, d_comp3 = value_deriv_fun(l)(y, t)
                 val4, d_comp4 = value_deriv(l, t-y)
                 @test_approx_eq val val2
                 @test_approx_eq val val3
                 @test_approx_eq val val4
-                @test_approx_eq val Losses.value(l, y, t)
-                @test_approx_eq val Losses.value(l, t-y)
+                @test_approx_eq val LossFunctions.value(l, y, t)
+                @test_approx_eq val LossFunctions.value(l, t-y)
                 @test_approx_eq val value_fun(l)(y, t)
                 @test_approx_eq val value_fun(l)(t-y)
                 @test_approx_eq d_comp d_comp2
@@ -124,15 +124,15 @@ function test_deriv(l::SupervisedLoss, t_vec)
     @testset "$(l): " begin
         for y in -20:.2:20, t in t_vec
             if isdifferentiable(l, y, t)
-                d_dual = epsilon(Losses.value(l, y, dual(t, 1)))
+                d_dual = epsilon(LossFunctions.value(l, y, dual(t, 1)))
                 d_comp = deriv(l, y, t)
                 @test abs(d_dual - d_comp) < 1e-10
-                val = Losses.value(l, y, t)
+                val = LossFunctions.value(l, y, t)
                 val2, d_comp2 = value_deriv(l, y, t)
                 val3, d_comp3 = value_deriv_fun(l)(y, t)
                 @test_approx_eq val val2
                 @test_approx_eq val val3
-                @test_approx_eq val Losses.value(l, y, t)
+                @test_approx_eq val LossFunctions.value(l, y, t)
                 @test_approx_eq val value_fun(l)(y, t)
                 @test_approx_eq d_comp d_comp2
                 @test_approx_eq d_comp d_comp3
@@ -191,7 +191,7 @@ function test_scaledloss(l::Loss, t_vec, y_vec)
             @test sl == λ * l
             for t in t_vec
                 for y in y_vec
-                    @test Losses.value(ScaledLoss(l,λ),t,y) == λ*Losses.value(l,t,y)
+                    @test LossFunctions.value(ScaledLoss(l,λ),t,y) == λ*LossFunctions.value(l,t,y)
                     @test deriv(ScaledLoss(l,λ),t,y) == λ*deriv(l,t,y)
                     @test deriv2(ScaledLoss(l,λ),t,y) == λ*deriv2(l,t,y)
                 end
@@ -206,7 +206,7 @@ function test_scaledloss(l::Loss, n_vec)
             sl = ScaledLoss(l,λ)
             @test sl == λ * l
             for n in n_vec
-                @test Losses.value(ScaledLoss(l,λ),n) == λ*Losses.value(l,n)
+                @test LossFunctions.value(ScaledLoss(l,λ),n) == λ*LossFunctions.value(l,n)
                 @test deriv(ScaledLoss(l,λ),n) == λ*deriv(l,n)
                 @test deriv2(ScaledLoss(l,λ),n) == λ*deriv2(l,n)
             end

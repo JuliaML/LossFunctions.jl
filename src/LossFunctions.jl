@@ -1,6 +1,6 @@
 __precompile__(true)
 
-module Losses
+module LossFunctions
 
 using RecipesBase
 
