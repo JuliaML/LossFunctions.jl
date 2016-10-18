@@ -101,6 +101,34 @@ preallocated buffer, which has to be the same size as the parameters.
     end
 end
 
+##
+# Function for sparse arrays
+@generated function value!{T,N,Q,Ti,M}(
+        buffer::AbstractArray,
+        loss::MarginLoss,
+        target::AbstractSparseArray{Q,Ti,M},
+        output::AbstractArray{T,N}
+    )
+    M > N && throw(ArgumentError("target has more dimensions than output; broadcasting not supported in this direction."))
+    quote
+      @_dimcheck size(buffer) == size(output)
+      @nexprs $M (n)->@_dimcheck(size(target,n) == size(output,n))
+      zeroQ = zero(Q)
+      negQ = Q(-1)
+      @simd for I in CartesianRange(size(output))
+          @nexprs $N n->(i_n = I[n])
+          tgt = @nref($M,target,i)
+          if tgt == zeroQ
+              # convention is that zeros in a sparse array are interpreted as negative one
+              @inbounds @nref($N,buffer,i) = value(loss, negQ, @nref($N,output,i))
+          else
+              @inbounds @nref($N,buffer,i) = value(loss, tgt, @nref($N,output,i))
+          end
+      end
+      buffer
+    end
+end
+
 """
     deriv!(buffer::AbstractArray, loss::SupervisedLoss, target::AbstractArray, output::AbstractArray)
 

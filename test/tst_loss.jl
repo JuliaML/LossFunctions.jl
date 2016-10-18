@@ -393,3 +393,42 @@ end
     end
 end
 
+@testset "Test sparse array conventions for margin-based losses" begin
+    @testset "sparse vector target, vector output" begin
+        N = 50
+
+        # sparse vector of {0,1}
+        sparse_target = sprand(N,0.5)
+        nz = sparse_target .> 0.0
+        sparse_target[nz] = 1.0
+        @test typeof(sparse_target) <: AbstractSparseArray
+
+        # dense vector of {-1,1}
+        target = [ t == 0.0 ? -1.0 : 1.0 for t in sparse_target ]
+        
+        output = randn(N)
+
+        for loss in margin_losses
+            @test isapprox(value(loss,sparse_target,output), value(loss,target,output)) 
+        end
+    end
+
+    @testset "sparse vector target, matrix output" begin
+        N = 50
+
+        # sparse vector of {0,1}
+        sparse_target = sprand(N,0.5)
+        nz = sparse_target .> 0.0
+        sparse_target[nz] = 1.0
+        @test typeof(sparse_target) <: AbstractSparseArray
+
+        # dense vector of {-1,1}
+        target = [ t == 0.0 ? -1.0 : 1.0 for t in sparse_target ]
+        
+        output = randn(N,N)
+
+        for loss in margin_losses
+            @test isapprox(value(loss,sparse_target,output), value(loss,target,output)) 
+        end
+    end
+end
