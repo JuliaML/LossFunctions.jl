@@ -317,6 +317,34 @@ end
     @test issymmetric(loss) == true
 end
 
+@testset "QuantileLoss" begin
+    l1 = QuantileLoss(.5)
+    l2 = QuantileLoss(.7)
+
+    @test issymmetric(l1) == true
+    @test issymmetric(l2) == false
+
+    @test isminimizable(l2) == true
+
+    @test isdifferentiable(l2) == false
+    @test isdifferentiable(l2, 0) == false
+    @test isdifferentiable(l2, 1) == true
+    @test istwicedifferentiable(l2) == false
+    @test istwicedifferentiable(l2, 0) == false
+    @test istwicedifferentiable(l2, 1) == true
+
+    @test isstronglyconvex(l2) == false
+    @test isstrictlyconvex(l2) == false
+    @test isconvex(l2) == true
+
+    # @test isnemitski(l2) == ?
+    @test islipschitzcont(l2) == true
+    @test islocallylipschitzcont(l2) == true
+    # @test isclipable(l2) == ?
+    @test ismarginbased(l2) == false
+    @test isdistancebased(l2) == true
+end
+
 # --------------------------------------------------------------
 
 @testset "ZeroOneLoss" begin
@@ -563,4 +591,3 @@ end
         end
     end
 end
-

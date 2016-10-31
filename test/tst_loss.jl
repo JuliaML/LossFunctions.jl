@@ -331,6 +331,11 @@ end
 
     _logitdistloss(y, t) = -log((4*exp(t-y))/(1+exp(t-y))^2)
     test_value(LogitDistLoss(), _logitdistloss, yr, tr)
+
+    function _quantileloss(y, t)
+        (y - t) * (0.7 - (y - t < 0))
+    end
+    test_value(QuantileLoss(.7), _quantileloss, yr, tr)
 end
 
 @testset "Test other loss against reference function" begin
