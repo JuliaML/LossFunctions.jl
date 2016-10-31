@@ -436,3 +436,37 @@ isstrictlyconvex(::LogitDistLoss) = true
 isstronglyconvex(::LogitDistLoss) = false
 
 
+# ===========================================================
+doc"""
+    QuantileLoss <: DistanceLoss
+
+The distance-based quantile loss.
+
+``L(y, ŷ) = (ŷ - y) * ((ŷ > y) - τ))``
+"""
+immutable QuantileLoss{T <: AbstractFloat} <: DistanceLoss
+    τ::T
+end
+function value{T1, T2 <: Number}(loss::QuantileLoss{T1}, diff::T2)
+    T = promote_type(T1, T2)
+    diff * (T(diff > 0) - loss.τ)
+end
+function deriv{T1, T2 <: Number}(loss::QuantileLoss{T1}, diff::T2)
+    T = promote_type(T1, T2)
+    T(diff > 0) - loss.τ
+end
+deriv2{T1, T2 <: Number}(::QuantileLoss{T1}, diff::T2) = zero(promote_type(T1, T2))
+function value_deriv{T1, T2 <: Number}(loss::QuantileLoss{T1}, diff::T2)
+    value(loss, diff), deriv(loss, diff)
+end
+
+issymmetric(loss::QuantileLoss) = loss.τ == 0.5
+isdifferentiable(::QuantileLoss) = false
+isdifferentiable(::QuantileLoss, at) = at != 0
+istwicedifferentiable(::QuantileLoss) = false
+istwicedifferentiable(::QuantileLoss, at) = at != 0
+islipschitzcont(::QuantileLoss) = true
+islipschitzcont_deriv(::QuantileLoss) = true
+isconvex(::QuantileLoss) = true
+isstrictlyconvex(::QuantileLoss) = false
+isstronglyconvex(::QuantileLoss) = false

@@ -1,3 +1,4 @@
+module LossFunctionsTests
 using LearnBase
 using LossFunctions
 using DualNumbers
@@ -27,3 +28,4 @@ for p in perf
         include(p)
     end
 end
+end #Test Module
