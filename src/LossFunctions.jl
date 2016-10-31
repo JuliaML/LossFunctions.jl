@@ -37,6 +37,7 @@ export
     L1EpsilonInsLoss,
     L2EpsilonInsLoss,
     LogitDistLoss,
+    QuantileLoss,
 
     PoissonLoss,
     LogitProbLoss,

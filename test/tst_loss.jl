@@ -368,7 +368,7 @@ distance_losses = [L2DistLoss(), LPDistLoss(2.0), L1DistLoss(), LPDistLoss(1.0),
                    LPDistLoss(0.5), LPDistLoss(1.5), LPDistLoss(3),
                    LogitDistLoss(), L1EpsilonInsLoss(0.5), EpsilonInsLoss(1.5),
                    L2EpsilonInsLoss(0.5), L2EpsilonInsLoss(1.5), PeriodicLoss(1),
-                   HuberLoss(1), HuberLoss(1.5)]
+                   HuberLoss(1), HuberLoss(1.5), QuantileLoss(.8)]
 
 @testset "Test first derivatives of distance-based losses" begin
     for loss in distance_losses
@@ -405,7 +405,7 @@ end
 
         # dense vector of {-1,1}
         target = [ t == 0.0 ? -1.0 : 1.0 for t in sparse_target ]
-        
+
         output = randn(N)
 
         for loss in margin_losses
@@ -424,7 +424,7 @@ end
 
         # dense vector of {-1,1}
         target = [ t == 0.0 ? -1.0 : 1.0 for t in sparse_target ]
-        
+
         output = randn(N,N)
 
         for loss in margin_losses
