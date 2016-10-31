@@ -228,7 +228,7 @@ end
     # Losses that should always return Float64
     for loss in [SmoothedL1HingeLoss(0.5), SmoothedL1HingeLoss(1), L1EpsilonInsLoss(0.5),
                  L1EpsilonInsLoss(1), L2EpsilonInsLoss(0.5), L2EpsilonInsLoss(1),
-                 PeriodicLoss(1), PeriodicLoss(1.5), HuberLoss(1.0)]
+                 PeriodicLoss(1), PeriodicLoss(1.5), HuberLoss(1.0), QuantileLoss(.8)]
         test_value_float64_forcing(loss)
         test_value_float64_forcing(2.0 * loss)
     end
@@ -368,7 +368,8 @@ distance_losses = [L2DistLoss(), LPDistLoss(2.0), L1DistLoss(), LPDistLoss(1.0),
                    LPDistLoss(0.5), LPDistLoss(1.5), LPDistLoss(3),
                    LogitDistLoss(), L1EpsilonInsLoss(0.5), EpsilonInsLoss(1.5),
                    L2EpsilonInsLoss(0.5), L2EpsilonInsLoss(1.5), PeriodicLoss(1),
-                   HuberLoss(1), HuberLoss(1.5), QuantileLoss(.8)]
+                   HuberLoss(1), HuberLoss(1.5),
+                   QuantileLoss(.2), QuantileLoss(.5), QuantileLoss(.8)]
 
 @testset "Test first derivatives of distance-based losses" begin
     for loss in distance_losses
