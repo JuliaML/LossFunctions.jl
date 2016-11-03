@@ -326,3 +326,31 @@ isstrictlyconvex(::ModifiedHuberLoss) = false
 isstronglyconvex(::ModifiedHuberLoss) = false
 isclipable(::ModifiedHuberLoss) = true
 
+# ============================================================
+
+doc"""
+    L2MarginLoss <: MarginLoss
+
+Margin-based least-squares loss.
+It is locally Lipschitz continuous and strictly convex.
+
+$L(y, ŷ) = (1 - y⋅ŷ)^2$
+"""
+immutable L2MarginLoss <: MarginLoss end
+
+value{T<:Number}(loss::L2MarginLoss, agreement::T) = abs2(one(T) - agreement)
+deriv{T<:Number}(loss::L2MarginLoss, agreement::T) = T(2) * (agreement - one(T))
+deriv2{T<:Number}(loss::L2MarginLoss, agreement::T) = T(2)
+value_deriv{T<:Number}(loss::L2MarginLoss, agreement::T) = (abs2(one(T) - agreement), T(2) * (agreement - one(T)))
+
+isunivfishercons(::L2MarginLoss) = true
+isdifferentiable(::L2MarginLoss) = true
+isdifferentiable(::L2MarginLoss, at) = true
+istwicedifferentiable(::L2MarginLoss) = true
+istwicedifferentiable(::L2MarginLoss, at) = true
+islocallylipschitzcont(::L2MarginLoss) = true
+islipschitzcont(::L2MarginLoss) = false
+isconvex(::L2MarginLoss) = true
+isstrictlyconvex(::L2MarginLoss) = true
+isstronglyconvex(::L2MarginLoss) = true
+isclipable(::L2MarginLoss) = true

@@ -27,6 +27,7 @@ export
     L2HingeLoss,
     SmoothedL1HingeLoss,
     ModifiedHuberLoss,
+    L2MarginLoss,
 
     LPDistLoss,
     L1DistLoss,

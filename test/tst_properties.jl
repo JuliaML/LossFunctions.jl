@@ -538,6 +538,34 @@ end
     @test isclasscalibrated(loss) == true
 end
 
+@testset "L2MarginLoss" begin
+    loss = L2MarginLoss()
+
+    @test isminimizable(loss) == true
+
+    @test isdifferentiable(loss) == true
+    @test isdifferentiable(loss, 0) == true
+    @test isdifferentiable(loss, 1) == true
+    @test istwicedifferentiable(loss) == true
+    @test istwicedifferentiable(loss, 0) == true
+    @test istwicedifferentiable(loss, 1) == true
+
+    @test isstronglyconvex(loss) == true
+    @test isstrictlyconvex(loss) == true
+    @test isconvex(loss) == true
+
+    @test isnemitski(loss) == true
+    @test islipschitzcont(loss) == false
+    @test islocallylipschitzcont(loss) == true
+    @test isclipable(loss) == true
+    @test ismarginbased(loss) == true
+    @test isdistancebased(loss) == false
+    @test issymmetric(loss) == false
+    @test isclasscalibrated(loss) == true
+    @test isfishercons(loss) == true
+    @test isunivfishercons(loss) == true
+end
+
 # --------------------------------------------------------------
 function compare_losses(l1, l2)
     @test isminimizable(l1) == isminimizable(l2)
