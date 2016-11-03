@@ -218,7 +218,7 @@ end
 
 @testset "Test typestable supervised loss for type stability" begin
     for loss in [L1HingeLoss(), L2HingeLoss(), ModifiedHuberLoss(), PerceptronLoss(),
-                LPDistLoss(1), LPDistLoss(2), LPDistLoss(3)]
+                LPDistLoss(1), LPDistLoss(2), LPDistLoss(3), L2MarginLoss()]
         test_value_typestable(loss)
         # TODO: add ZeroOneLoss after scaling works...
     end
@@ -283,6 +283,9 @@ end
         end
     end
     test_value(ModifiedHuberLoss(), _modhuberloss, [-1.,1], -10:0.1:10)
+
+    _l2marginloss(y, t) = (1 - y.*t)^2
+    test_value(L2MarginLoss(), _l2marginloss, [-1.,1], -10:0.1:10)
 end
 
 @testset "Test distance-based loss against reference function" begin
@@ -348,7 +351,7 @@ end
 
 margin_losses = [LogitMarginLoss(), L1HingeLoss(), L2HingeLoss(), PerceptronLoss(),
                  SmoothedL1HingeLoss(.5), SmoothedL1HingeLoss(1), SmoothedL1HingeLoss(2),
-                 ModifiedHuberLoss(), ZeroOneLoss()]
+                 ModifiedHuberLoss(), ZeroOneLoss(), L2MarginLoss()]
 
 @testset "Test first derivatives of margin-based losses" begin
     for loss in margin_losses
