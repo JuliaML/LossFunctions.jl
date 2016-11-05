@@ -39,6 +39,7 @@ export
     L2EpsilonInsLoss,
     LogitDistLoss,
     QuantileLoss,
+    PinballLoss,
 
     PoissonLoss,
     LogitProbLoss,

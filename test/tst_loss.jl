@@ -216,6 +216,14 @@ end
 
 # ====================================================================
 
+@testset "Test typealias" begin
+    @test PinballLoss === QuantileLoss
+    @test L1DistLoss === LPDistLoss{1}
+    @test L2DistLoss === LPDistLoss{2}
+    @test HingeLoss === L1HingeLoss
+    @test EpsilonInsLoss === L1EpsilonInsLoss
+end
+
 @testset "Test typestable supervised loss for type stability" begin
     for loss in [L1HingeLoss(), L2HingeLoss(), ModifiedHuberLoss(), PerceptronLoss(),
                 LPDistLoss(1), LPDistLoss(2), LPDistLoss(3), L2MarginLoss()]

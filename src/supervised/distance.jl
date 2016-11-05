@@ -440,13 +440,33 @@ isstronglyconvex(::LogitDistLoss) = false
 doc"""
     QuantileLoss <: DistanceLoss
 
-The distance-based quantile loss.
+The distance-based quantile loss, also known as pinball loss,
+can be used to estimate conditional τ-quantiles.
+It is Lipschitz continuous and convex, but not strictly convex.
+Furthermore it is symmetric if and only if `τ = 1/2`.
 
-``L(y, ŷ) = (ŷ - y) * ((ŷ > y) - τ))``
+$L(y, ŷ) = (ŷ - y) ⋅ ((ŷ > y) - τ))$
+
+              Lossfunction (τ=0.7)             Derivative
+      ┌────────────┬────────────┐      ┌────────────┬────────────┐
+    2 │'\                       │  0.3 │            ┌------------│
+      │  \.                     │      │            |            │
+      │   '\                    │      │_           |           _│
+      │     \.                  │      │            |            │
+    L │      '\              ._-│   L' │            |            │
+      │        \.         ..-'  │      │            |            │
+      │         '.     _r/'     │      │            |            │
+    0 │           '_./'         │ -0.7 │------------┘            │
+      └────────────┴────────────┘      └────────────┴────────────┘
+      -3                        3      -3                        3
+                 ŷ - y                            ŷ - y
 """
 immutable QuantileLoss{T <: AbstractFloat} <: DistanceLoss
     τ::T
 end
+
+typealias PinballLoss QuantileLoss
+
 function value{T1, T2 <: Number}(loss::QuantileLoss{T1}, diff::T2)
     T = promote_type(T1, T2)
     diff * (T(diff > 0) - loss.τ)
@@ -470,3 +490,4 @@ islipschitzcont_deriv(::QuantileLoss) = true
 isconvex(::QuantileLoss) = true
 isstrictlyconvex(::QuantileLoss) = false
 isstronglyconvex(::QuantileLoss) = false
+

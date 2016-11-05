@@ -354,3 +354,4 @@ isconvex(::L2MarginLoss) = true
 isstrictlyconvex(::L2MarginLoss) = true
 isstronglyconvex(::L2MarginLoss) = true
 isclipable(::L2MarginLoss) = true
+

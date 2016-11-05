@@ -121,3 +121,19 @@ PeriodicLoss
 
    L(r) = 1 - \cos \left ( \frac{2 r \pi}{c} \right )
 
+QuantileLoss
+-------------
+
+.. class:: QuantileLoss
+
+   .. attribute:: τ
+
+    The quantile loss, aka pinball loss. Typically used to estimate
+    the conditional :math:`\tau`-quantiles.
+    It is convex, but not strictly convex. Furthermore it is
+    Lipschitz continuous.
+
+.. math::
+
+   L(r) = \begin{cases} -\left( 1 - \tau  \right) r & \quad \text{if } r < 0 \\ \tau r & \quad \text{if } r \ge 0 \\ \end{cases}
+
