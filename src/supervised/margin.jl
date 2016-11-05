@@ -7,6 +7,15 @@
 doc"""
     ZeroOneLoss <: MarginLoss
 
+The classical classification loss. It penalizes every missclassified
+observation with a loss of `1` while every correctly classified
+observation has a loss of `0`.
+It is not convex nor continuous and thus seldomly used directly.
+Instead one usually works with some classification-calibrated
+surrogate loss, such as one of those listed below.
+
+`L(a) = a < 0 ? 1 : 0`
+
               Lossfunction                     Derivative
       ┌────────────┬────────────┐      ┌────────────┬────────────┐
     1 │------------┐            │    1 │                         │

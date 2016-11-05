@@ -184,8 +184,6 @@ that can be queried by functions defined in *LearnBase.jl*.
 
 .. function:: isclipable(loss)
 
-.. function:: islipschitzcont_deriv(loss)
-
 .. function:: ismarginbased(loss)
 
 .. function:: isclasscalibrated(loss)

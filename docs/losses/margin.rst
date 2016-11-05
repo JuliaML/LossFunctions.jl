@@ -8,7 +8,21 @@ that are implemented in this package.
 
    Margin-based Losses (Classification)
 
-   Note: The ZeroOneLoss itself is not margin-based
+ZeroOneLoss
+------------
+
+.. class:: ZeroOneLoss
+
+   The classical classification loss. It penalizes every
+   missclassified observation with a loss of `1` while every
+   correctly classified observation has a loss of `0`.
+   It is not convex nor continuous and thus seldomly used directly.
+   Instead one usually works with some classification-calibrated
+   surrogate loss, such as one of those listed below.
+
+.. math::
+
+   L(a) = \begin{cases} 1 & \quad \text{if } a < 0 \\ 0 & \quad \text{if } a >= 0\\ \end{cases}
 
 PerceptronLoss
 ---------------
