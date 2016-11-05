@@ -91,3 +91,16 @@ ModifiedHuberLoss
    L(a) = \begin{cases} \max \{ 0, 1 - a \} ^2 & \quad \text{if } a \ge -1 \\ - 4 a & \quad \text{otherwise}\\ \end{cases}
 
 
+L2MarginLoss
+-------------
+
+.. class:: L2MarginLoss
+
+   The margin-based least-squares loss for classification, which
+   quadratically penalizes every prediction where :math:`a \ne 1`.
+   It is locally Lipschitz continuous and strongly convex.
+
+.. math::
+
+   L(a) = {\left( 1 - a \right)}^2
+

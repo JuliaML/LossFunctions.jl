@@ -331,10 +331,25 @@ isclipable(::ModifiedHuberLoss) = true
 doc"""
     L2MarginLoss <: MarginLoss
 
-Margin-based least-squares loss.
-It is locally Lipschitz continuous and strictly convex.
+The margin-based least-squares loss for classification,
+which penalizes every prediction where `agreement != 1` quadratically.
+It is locally Lipschitz continuous and strongly convex.
 
 $L(y, ŷ) = (1 - y⋅ŷ)^2$
+
+              Lossfunction                     Derivative
+      ┌────────────┬────────────┐      ┌────────────┬────────────┐
+    5 │     .                   │    2 │                       ,r│
+      │     '.                  │      │                     ,/  │
+      │      '\                 │      │                   ,/    │
+      │        \                │      ├                 ,/      ┤
+    L │         '.              │   L' │               ./        │
+      │          '.             │      │             ./          │
+      │            \.          .│      │           ./            │
+    0 │              '-.____.-' │   -3 │         ./              │
+      └────────────┴────────────┘      └────────────┴────────────┘
+      -2                        2      -2                        2
+                 y ⋅ ŷ                            y ⋅ ŷ
 """
 immutable L2MarginLoss <: MarginLoss end
 
