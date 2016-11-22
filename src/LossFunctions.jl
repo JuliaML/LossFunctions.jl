@@ -57,4 +57,16 @@ include("supervised/scaledloss.jl")
 include("supervised/other.jl")
 include("supervised/io.jl")
 
+# allow using SupervisedLoss as function
+for T in filter(isleaftype,subtypes(SupervisedLoss))
+    @eval (loss::$T)(target, output) = value(loss, target, output)
+end
+
+# allow using MarginLoss and DistanceLoss as function
+for T in union(subtypes(DistanceLoss), subtypes(MarginLoss))
+    @eval (loss::$T)(target, output) = value(loss, target, output)
+    @eval (loss::$T)(x) = value(loss, x)
+end
+
 end # module
+

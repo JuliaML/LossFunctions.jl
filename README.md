@@ -36,7 +36,14 @@ value(L2DistLoss(), true_targets, pred_outputs)
  1.0
 ```
 
-The same function signatures also apply to the derivatives.
+Alternatively, one can also use the loss like a function
+
+```julia
+myloss = L2DistLoss()
+myloss(true_targets, pred_outputs) # same result as above
+```
+
+The function signatures of `value` also apply to the derivatives.
 
 ```julia
 deriv(L2DistLoss(), true_targets, pred_outputs)
