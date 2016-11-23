@@ -67,6 +67,8 @@ function test_deriv(l::MarginLoss, t_vec)
                 val2, d_comp2 = @inferred value_deriv(l, y, t)
                 val3, d_comp3 = value_deriv_fun(l)(y, t)
                 val4, d_comp4 = @inferred value_deriv(l, y * t)
+                @test_approx_eq val @inferred(l(y, t))
+                @test_approx_eq val @inferred(l(y*t))
                 @test_approx_eq val val2
                 @test_approx_eq val val3
                 @test_approx_eq val val4
@@ -99,6 +101,8 @@ function test_deriv(l::DistanceLoss, t_vec)
                 val2, d_comp2 = @inferred value_deriv(l, y, t)
                 val3, d_comp3 = value_deriv_fun(l)(y, t)
                 val4, d_comp4 = @inferred value_deriv(l, t-y)
+                @test_approx_eq val @inferred(l(y, t))
+                @test_approx_eq val @inferred(l(t-y))
                 @test_approx_eq val val2
                 @test_approx_eq val val3
                 @test_approx_eq val val4
@@ -130,6 +134,7 @@ function test_deriv(l::SupervisedLoss, t_vec)
                 val = @inferred LossFunctions.value(l, y, t)
                 val2, d_comp2 = @inferred value_deriv(l, y, t)
                 val3, d_comp3 = value_deriv_fun(l)(y, t)
+                @test_approx_eq val @inferred(l(y, t))
                 @test_approx_eq val val2
                 @test_approx_eq val val3
                 @test_approx_eq val LossFunctions.value(l, y, t)
@@ -191,9 +196,10 @@ function test_scaledloss(l::Loss, t_vec, y_vec)
             @test sl == λ * l
             for t in t_vec
                 for y in y_vec
-                    @test @inferred(LossFunctions.value(ScaledLoss(l,λ),t,y)) == λ*LossFunctions.value(l,t,y)
-                    @test @inferred(deriv(ScaledLoss(l,λ),t,y)) == λ*deriv(l,t,y)
-                    @test @inferred(deriv2(ScaledLoss(l,λ),t,y)) == λ*deriv2(l,t,y)
+                    @test LossFunctions.value(sl,t,y) == @inferred(sl(t,y))
+                    @test @inferred(LossFunctions.value(sl,t,y)) == λ*LossFunctions.value(l,t,y)
+                    @test @inferred(deriv(sl,t,y)) == λ*deriv(l,t,y)
+                    @test @inferred(deriv2(sl,t,y)) == λ*deriv2(l,t,y)
                 end
             end
         end
@@ -206,9 +212,10 @@ function test_scaledloss(l::Loss, n_vec)
             sl = ScaledLoss(l,λ)
             @test sl == λ * l
             for n in n_vec
-                @test @inferred(LossFunctions.value(ScaledLoss(l,λ),n)) == λ*LossFunctions.value(l,n)
-                @test @inferred(deriv(ScaledLoss(l,λ),n)) == λ*deriv(l,n)
-                @test @inferred(deriv2(ScaledLoss(l,λ),n)) == λ*deriv2(l,n)
+                @test LossFunctions.value(sl,n) == @inferred(sl(n))
+                @test @inferred(LossFunctions.value(sl,n)) == λ*LossFunctions.value(l,n)
+                @test @inferred(deriv(sl,n)) == λ*deriv(l,n)
+                @test @inferred(deriv2(sl,n)) == λ*deriv2(l,n)
             end
         end
     end

@@ -54,7 +54,15 @@ The following code snippets show a simple scenario of how a
      1.0
      1.0
 
-The same function signatures also apply to the derivatives.
+Alternatively, one can also use the loss like a function to
+compute its :func:`value`.
+
+.. code-block:: julia
+
+    myloss = L2DistLoss()
+    myloss(true_targets, pred_outputs) # same result as above
+
+The function signatures of :func:`value` also apply to the derivatives.
 
 .. code-block:: julia
 
