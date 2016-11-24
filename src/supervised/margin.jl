@@ -379,3 +379,35 @@ isstrictlyconvex(::L2MarginLoss) = true
 isstronglyconvex(::L2MarginLoss) = true
 isclipable(::L2MarginLoss) = true
 
+
+# ============================================================
+
+doc"""
+    ExpLoss <: MarginLoss
+
+The margin-based exponential loss for classification,
+which penalizes every prediction where `agreement != 1` exponentially.
+It is infinitely many times differentiable, locally Lipschitz continuous
+and strictly convex.
+
+$L(y, ŷ) = exp(-y⋅ŷ)$
+
+"""
+
+immutable ExpLoss <: MarginLoss end
+
+value{T<:Number}(loss::ExpLoss, agreement::T) = exp(-agreement)
+deriv{T<:Number}(loss::ExpLoss, agreement::T) = -exp(agreement)
+deriv2{T<:Number}(loss::ExpLoss, agreement::T) = exp(-agreement)
+value_deriv{T<:Number}(loss::ExpLoss, agreement::T) = (eᵗ = exp(-agreement); eᵗ, -eᵗ)
+
+isunivfishercons(::ExpLoss) = true
+isdifferentiable(::ExpLoss) = true
+isdifferentiable(::ExpLoss, at) = true
+istwicedifferentiable(::ExpLoss) = true
+istwicedifferentiable(::ExpLoss, at) = true
+islipschitzcont(::ExpLoss) = true
+isconvex(::ExpLoss) = true
+isstrictlyconvex(::ExpLoss) = true
+isstronglyconvex(::ExpLoss) = false
+isclipable(::ExpLoss) = false
