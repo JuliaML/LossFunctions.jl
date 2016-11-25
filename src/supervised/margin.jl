@@ -7,10 +7,10 @@
 doc"""
     ZeroOneLoss <: MarginLoss
 
-The classical classification loss. It penalizes every missclassified
+The classical classification loss. It penalizes every misclassified
 observation with a loss of `1` while every correctly classified
 observation has a loss of `0`.
-It is not convex nor continuous and thus seldomly used directly.
+It is not convex nor continuous and thus seldom used directly.
 Instead one usually works with some classification-calibrated
 surrogate loss, such as one of those listed below.
 
@@ -440,6 +440,7 @@ istwicedifferentiable(::SigmoidLoss) = true
 istwicedifferentiable(::SigmoidLoss, at) = true
 islocallylipschitzcont(::SigmoidLoss) = true
 islipschitzcont(::SigmoidLoss) = true
+isclasscalibrated(::SigmoidLoss) = true
 isconvex(::SigmoidLoss) = false
 isstrictlyconvex(::SigmoidLoss) = false
 isstronglyconvex(::SigmoidLoss) = false

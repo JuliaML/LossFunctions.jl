@@ -243,11 +243,14 @@ end
     # Losses that should always return Float64
     for loss in [SmoothedL1HingeLoss(0.5), SmoothedL1HingeLoss(1), L1EpsilonInsLoss(0.5),
                  L1EpsilonInsLoss(1), L2EpsilonInsLoss(0.5), L2EpsilonInsLoss(1),
-                 PeriodicLoss(1), PeriodicLoss(1.5), HuberLoss(1.0), QuantileLoss(.8),
-                 LogitDistLoss(), LogitMarginLoss(), ExpLoss(), SigmoidLoss()]
+                 PeriodicLoss(1), PeriodicLoss(1.5), HuberLoss(1.0), QuantileLoss(.8)]
         test_value_float64_forcing(loss)
         test_value_float64_forcing(2.0 * loss)
     end
+    test_value_float64_forcing(2.0 * LogitDistLoss())
+    test_value_float64_forcing(2.0 * LogitMarginLoss())
+    test_value_float64_forcing(2.0 * ExpLoss())
+    test_value_float64_forcing(2.0 * SigmoidLoss())
 
     # Losses that should return an AbstractFloat, preserving type if possible
     for loss in [PeriodicLoss(Float32(1)), PeriodicLoss(Float32(0.5)),
