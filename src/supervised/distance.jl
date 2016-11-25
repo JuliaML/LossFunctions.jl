@@ -48,7 +48,7 @@ doc"""
     L1DistLoss <: DistanceLoss
 
 The absolute distance loss. Special case of the `LPDistLoss` with `P=1`.
-It is Lipshitz continuous and convex, but not strictly convex.
+It is Lipschitz continuous and convex, but not strictly convex.
 
 $L(y, ŷ) = |ŷ - y|$
 
@@ -170,7 +170,7 @@ doc"""
 Loss function commonly used for robustness to outliers.
 For large values of `d` it becomes close to the `L1DistLoss`,
 while for small values of `d` it resembles the `L2DistLoss`.
-It is Lipshitz continuous and convex, but not strictly convex.
+It is Lipschitz continuous and convex, but not strictly convex.
 
 $L(y, ŷ) =  1/2 ⋅ (ŷ-y)²    , if |ŷ-y| < d$
 $L(y, ŷ) =  d⋅(|ŷ-y| - d/2) , otherwise$
@@ -251,7 +251,7 @@ doc"""
 The `ϵ`-insensitive loss. Typically used in linear support vector
 regression. It ignores deviances smaller than `ϵ`, but penalizes
 larger deviances linarily.
-It is Lipshitz continuous and convex, but not strictly convex.
+It is Lipschitz continuous and convex, but not strictly convex.
 
 $L(y, ŷ) = max(0, |ŷ - y| - ɛ)$
 
@@ -385,7 +385,7 @@ doc"""
     LogitDistLoss <: DistanceLoss
 
 The distance-based logistic loss for regression.
-It is strictly convex and Lipshitz continuous.
+It is strictly convex and Lipschitz continuous.
 
 $L(y, ŷ) = -ln(4 ⋅ exp(ŷ - y) / (1 + exp(ŷ - y))²)$
 
@@ -490,4 +490,3 @@ islipschitzcont_deriv(::QuantileLoss) = true
 isconvex(::QuantileLoss) = true
 isstrictlyconvex(::QuantileLoss) = false
 isstronglyconvex(::QuantileLoss) = false
-
