@@ -430,7 +430,7 @@ immutable SigmoidLoss <: MarginLoss end
 
 value(loss::SigmoidLoss, agreement::Number) = one(agreement) - tanh(agreement)
 deriv(loss::SigmoidLoss, agreement::Number) = -abs2(sech(agreement))
-deriv2(loss::SigmoidLoss, agreement::Number) = (T=typeof(agreement); T(2) * tanh(agreement) * abs2(sech(agreement)))
+deriv2{T<:Number}(loss::SigmoidLoss, agreement::T) = T(2) * tanh(agreement) * abs2(sech(agreement))
 value_deriv(loss::SigmoidLoss, agreement::Number) = (one(agreement) - tanh(agreement), -abs2(sech(agreement)))
 
 isunivfishercons(::SigmoidLoss) = true
