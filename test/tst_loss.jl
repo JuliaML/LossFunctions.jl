@@ -233,7 +233,7 @@ end
 
 @testset "Test typestable supervised loss for type stability" begin
     for loss in [L1HingeLoss(), L2HingeLoss(), ModifiedHuberLoss(), PerceptronLoss(),
-                LPDistLoss(1), LPDistLoss(2), LPDistLoss(3), L2MarginLoss(), ExpLoss()]
+                LPDistLoss(1), LPDistLoss(2), LPDistLoss(3), L2MarginLoss()]
         test_value_typestable(loss)
         # TODO: add ZeroOneLoss after scaling works...
     end
@@ -243,16 +243,15 @@ end
     # Losses that should always return Float64
     for loss in [SmoothedL1HingeLoss(0.5), SmoothedL1HingeLoss(1), L1EpsilonInsLoss(0.5),
                  L1EpsilonInsLoss(1), L2EpsilonInsLoss(0.5), L2EpsilonInsLoss(1),
-                 PeriodicLoss(1), PeriodicLoss(1.5), HuberLoss(1.0), QuantileLoss(.8)]
+                 PeriodicLoss(1), PeriodicLoss(1.5), HuberLoss(1.0), QuantileLoss(.8),
+                 LogitDistLoss(), LogitMarginLoss(), ExpLoss(), SigmoidLoss()]
         test_value_float64_forcing(loss)
         test_value_float64_forcing(2.0 * loss)
     end
-    test_value_float64_forcing(2.0 * LogitDistLoss())
-    test_value_float64_forcing(2.0 * LogitMarginLoss())
 
     # Losses that should return an AbstractFloat, preserving type if possible
     for loss in [PeriodicLoss(Float32(1)), PeriodicLoss(Float32(0.5)),
-                 LogitDistLoss(), LogitMarginLoss(),
+                 LogitDistLoss(), LogitMarginLoss(), ExpLoss(), SigmoidLoss(),
                  L1EpsilonInsLoss(Float32(1)), L1EpsilonInsLoss(Float32(0.5)),
                  L2EpsilonInsLoss(Float32(1)), L2EpsilonInsLoss(Float32(0.5))]
         test_value_float32_preserving(loss)
@@ -304,6 +303,9 @@ end
 
     _exploss(y, t) = exp(-y.*t)
     test_value(ExpLoss(), _exploss, [-1.,1], -10:0.1:10)
+
+    _sigmoidloss(y, t) = (1-tanh(y.*t))
+    test_value(SigmoidLoss(), _sigmoidloss, [-1., 1], -10:0.1:10)
 end
 
 @testset "Test distance-based loss against reference function" begin
@@ -369,7 +371,8 @@ end
 
 margin_losses = [LogitMarginLoss(), L1HingeLoss(), L2HingeLoss(), PerceptronLoss(),
                  SmoothedL1HingeLoss(.5), SmoothedL1HingeLoss(1), SmoothedL1HingeLoss(2),
-                 ModifiedHuberLoss(), ZeroOneLoss(), L2MarginLoss(), ExpLoss()]
+                 ModifiedHuberLoss(), ZeroOneLoss(), L2MarginLoss(),
+                 ExpLoss(), SigmoidLoss()]
 
 @testset "Test first derivatives of margin-based losses" begin
     for loss in margin_losses

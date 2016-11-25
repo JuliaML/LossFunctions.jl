@@ -29,6 +29,7 @@ export
     ModifiedHuberLoss,
     L2MarginLoss,
     ExpLoss,
+    SigmoidLoss,
 
     LPDistLoss,
     L1DistLoss,

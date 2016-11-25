@@ -58,7 +58,7 @@ doc"""
 
 The perceptron loss linearly penalizes every prediction where the
 resulting `agreement <= 0`.
-It is Lipshitz continuous and convex, but not strictly convex.
+It is Lipschitz continuous and convex, but not strictly convex.
 
 $L(y, ŷ) = max(0, -y⋅ŷ)$
 
@@ -141,7 +141,7 @@ doc"""
 
 The hinge loss linearly penalizes every predicition where the
 resulting `agreement <= 1` .
-It is Lipshitz continuous and convex, but not strictly convex.
+It is Lipschitz continuous and convex, but not strictly convex.
 
 $L(y, ŷ) = max(0, 1 - y⋅ŷ)$
 
@@ -185,7 +185,7 @@ doc"""
 
 The truncated least squares loss quadratically penalizes every
 predicition where the resulting `agreement <= 1`.
-It is locally Lipshitz continuous and convex, but not strictly convex.
+It is locally Lipschitz continuous and convex, but not strictly convex.
 
 $L(y, ŷ) = max(0, 1 - y⋅ŷ)²$
 
@@ -228,7 +228,7 @@ doc"""
     SmoothedL1HingeLoss <: MarginLoss
 
 As the name suggests a smoothed version of the L1 hinge loss.
-It is Lipshitz continuous and convex, but not strictly convex.
+It is Lipschitz continuous and convex, but not strictly convex.
 
 $L(y, ŷ) = 0.5 / γ * max(0, 1 - y⋅ŷ)²    ... y⋅ŷ ≥ 1 - γ$
 $L(y, ŷ) = 1 - γ / 2 - y⋅ŷ               ... otherwise$
@@ -288,7 +288,7 @@ doc"""
     ModifiedHuberLoss <: MarginLoss
 
 A special (scaled) case of the `SmoothedL1HingeLoss` with `γ=4`.
-It is Lipshitz continuous and convex, but not strictly convex.
+It is Lipschitz continuous and convex, but not strictly convex.
 
 $L(y, ŷ) = max(0, 1 - y⋅ŷ)^2    ... y⋅ŷ >= -1$
 $L(y, ŷ) = -4⋅y⋅ŷ               ... otherwise$
@@ -396,18 +396,51 @@ $L(y, ŷ) = exp(-y⋅ŷ)$
 
 immutable ExpLoss <: MarginLoss end
 
-value{T<:Number}(loss::ExpLoss, agreement::T) = exp(-agreement)
-deriv{T<:Number}(loss::ExpLoss, agreement::T) = -exp(agreement)
-deriv2{T<:Number}(loss::ExpLoss, agreement::T) = exp(-agreement)
-value_deriv{T<:Number}(loss::ExpLoss, agreement::T) = (eᵗ = exp(-agreement); eᵗ, -eᵗ)
+value(loss::ExpLoss, agreement::Number) = exp(-agreement)
+deriv(loss::ExpLoss, agreement::Number) = -exp(-agreement)
+deriv2(loss::ExpLoss, agreement::Number) = exp(-agreement)
+value_deriv(loss::ExpLoss, agreement::Number) = (eᵗ = exp(-agreement); (eᵗ, -eᵗ))
 
 isunivfishercons(::ExpLoss) = true
 isdifferentiable(::ExpLoss) = true
 isdifferentiable(::ExpLoss, at) = true
 istwicedifferentiable(::ExpLoss) = true
 istwicedifferentiable(::ExpLoss, at) = true
-islipschitzcont(::ExpLoss) = true
+islocallylipschitzcont(::ExpLoss) = true
+islipschitzcont(::ExpLoss) = false
 isconvex(::ExpLoss) = true
 isstrictlyconvex(::ExpLoss) = true
 isstronglyconvex(::ExpLoss) = false
 isclipable(::ExpLoss) = false
+
+
+# ============================================================
+
+doc"""
+    SigmoidLoss <: MarginLoss
+
+Continuous loss which penalizes every prediction in the range (0,2).
+It is infinitely many times differentiable, Lipschitz continuous but nonconvex.
+
+$L(y, ŷ) = 1 - tanh(y⋅ŷ)$
+
+"""
+
+immutable SigmoidLoss <: MarginLoss end
+
+value(loss::SigmoidLoss, agreement::Number) = one(agreement) - tanh(agreement)
+deriv(loss::SigmoidLoss, agreement::Number) = -abs2(sech(agreement))
+deriv2(loss::SigmoidLoss, agreement::Number) = (T=typeof(agreement); T(2) * tanh(agreement) * abs2(sech(agreement)))
+value_deriv(loss::SigmoidLoss, agreement::Number) = (one(agreement) - tanh(agreement), -abs2(sech(agreement)))
+
+isunivfishercons(::SigmoidLoss) = true
+isdifferentiable(::SigmoidLoss) = true
+isdifferentiable(::SigmoidLoss, at) = true
+istwicedifferentiable(::SigmoidLoss) = true
+istwicedifferentiable(::SigmoidLoss, at) = true
+islocallylipschitzcont(::SigmoidLoss) = true
+islipschitzcont(::SigmoidLoss) = true
+isconvex(::SigmoidLoss) = false
+isstrictlyconvex(::SigmoidLoss) = false
+isstronglyconvex(::SigmoidLoss) = false
+isclipable(::SigmoidLoss) = false

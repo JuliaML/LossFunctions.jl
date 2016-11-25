@@ -584,7 +584,7 @@ end
     @test isconvex(loss) == true
 
     @test isnemitski(loss) == true
-    @test islipschitzcont(loss) == true
+    @test islipschitzcont(loss) == false
     @test islocallylipschitzcont(loss) == true
     @test isclipable(loss) == false
     @test ismarginbased(loss) == true
@@ -595,6 +595,34 @@ end
     @test isunivfishercons(loss) == true
 end
 
+
+@testset "SigmoidLoss" begin
+    loss = SigmoidLoss()
+
+    @test isminimizable(loss) == false
+
+    @test isdifferentiable(loss) == true
+    @test isdifferentiable(loss, 0) == true
+    @test isdifferentiable(loss, 1) == true
+    @test istwicedifferentiable(loss) == true
+    @test istwicedifferentiable(loss, 0) == true
+    @test istwicedifferentiable(loss, 1) == true
+
+    @test isstronglyconvex(loss) == false
+    @test isstrictlyconvex(loss) == false
+    @test isconvex(loss) == false
+
+    @test isnemitski(loss) == true
+    @test islipschitzcont(loss) == true
+    @test islocallylipschitzcont(loss) == true
+    @test isclipable(loss) == false
+    @test ismarginbased(loss) == true
+    @test isdistancebased(loss) == false
+    @test issymmetric(loss) == false
+    @test isclasscalibrated(loss) == true
+    @test isfishercons(loss) == true
+    @test isunivfishercons(loss) == true
+end
 
 # --------------------------------------------------------------
 function compare_losses(l1, l2)
@@ -627,7 +655,7 @@ end
                PerceptronLoss(), SmoothedL1HingeLoss(.5),
                SmoothedL1HingeLoss(1), SmoothedL1HingeLoss(2),
                ModifiedHuberLoss(), ZeroOneLoss(),
-               L2MarginLoss(), ExpLoss()]
+               L2MarginLoss(), ExpLoss(), SigmoidLoss()]
     for loss in margins
         @testset "$loss" begin
             compare_losses(loss, 2*loss)
