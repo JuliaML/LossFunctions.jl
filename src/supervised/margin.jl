@@ -445,3 +445,55 @@ isconvex(::SigmoidLoss) = false
 isstrictlyconvex(::SigmoidLoss) = false
 isstronglyconvex(::SigmoidLoss) = false
 isclipable(::SigmoidLoss) = false
+
+
+
+# ============================================================
+
+doc"""
+    DWDMarginLoss <: MarginLoss
+
+DWDMarginLoss stands for Distance Weighted Discrimination Margin loss.
+Serves as an alternative to SVM loss function, with similar performance.
+It is Lipschitz continuous and convex, but not strictly convex.
+
+$L(y, ŷ) =  1 - y⋅ŷ                           ... y⋅ŷ ≤ q/(q+1)$
+$L(y, ŷ) = (q^q/(q+1)^(q+1)) / (y⋅ŷ)^q        ... otherwise$
+
+"""
+immutable DWDMarginLoss <: MarginLoss
+    q::Float64
+    function DWDMarginLoss(q::Number)
+        q > 0 || error("q must be strictly positive")
+        new(convert(Float64, q))
+    end
+end
+
+function value{T<:Number}(loss::DWDMarginLoss, agreement::T)
+    q = loss.q
+    agreement <= q/(q+1) ? T(1) - agreement : (q^q/(q+1)^(q+1)) / agreement^q
+end
+function deriv{T<:Number}(loss::DWDMarginLoss, agreement::T)
+    q = loss.q
+    agreement <= q/(q+1) ? -one(T) : -(q/(q+1))^(q+1) / agreement^(q+1)
+end
+
+function deriv2{T<:Number}(loss::DWDMarginLoss, agreement::T)
+    q = loss.q
+    agreement <= q/(q+1) ? zero(T) : ( (q^(q+1))/((q+1)^q) ) / agreement^(q+2)
+end
+
+value_deriv(loss::DWDMarginLoss, agreement::Number) = (value(loss, agreement), deriv(loss, agreement))
+
+isdifferentiable(::DWDMarginLoss) = true
+isdifferentiable(::DWDMarginLoss, at) = true
+istwicedifferentiable(::DWDMarginLoss) = true
+istwicedifferentiable(loss::DWDMarginLoss, at) = true
+islocallylipschitzcont(::DWDMarginLoss) = true
+islipschitzcont(::DWDMarginLoss) = true
+isconvex(::DWDMarginLoss) = true
+isstrictlyconvex(::DWDMarginLoss) = false
+isstronglyconvex(::DWDMarginLoss) = false
+isfishercons(::DWDMarginLoss) = true
+isunivfishercons(::DWDMarginLoss) = true
+isclipable(::DWDMarginLoss) = false

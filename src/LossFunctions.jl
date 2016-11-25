@@ -30,6 +30,7 @@ export
     L2MarginLoss,
     ExpLoss,
     SigmoidLoss,
+    DWDMarginLoss,
 
     LPDistLoss,
     L1DistLoss,
