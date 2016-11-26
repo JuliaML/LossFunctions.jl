@@ -99,7 +99,7 @@ doc"""
     LogitMarginLoss <: MarginLoss
 
 The margin version of the logistic loss. It is infinitely many
-times differentiable, strictly convex, and lipschitz continuous.
+times differentiable, strictly convex, and Lipschitz continuous.
 
 $L(y, ŷ) = ln(1 + exp(-y⋅ŷ))$
 
@@ -471,16 +471,21 @@ end
 
 function value{T<:Number}(loss::DWDMarginLoss, agreement::T)
     q = loss.q
-    agreement <= q/(q+1) ? T(1) - agreement : (q^q/(q+1)^(q+1)) / agreement^q
+    if agreement <= q/(q+1)
+        result_type = promote_type(Float64, T)
+        convert(result_type, T(1) - agreement)
+    else
+        (q^q/(q+1)^(q+1)) / agreement^q
+    end
 end
 function deriv{T<:Number}(loss::DWDMarginLoss, agreement::T)
     q = loss.q
-    agreement <= q/(q+1) ? -one(T) : -(q/(q+1))^(q+1) / agreement^(q+1)
+    agreement <= q/(q+1) ? -one(Float64) : -(q/(q+1))^(q+1) / agreement^(q+1)
 end
 
 function deriv2{T<:Number}(loss::DWDMarginLoss, agreement::T)
     q = loss.q
-    agreement <= q/(q+1) ? zero(T) : ( (q^(q+1))/((q+1)^q) ) / agreement^(q+2)
+    agreement <= q/(q+1) ? zero(Float64) : ( (q^(q+1))/((q+1)^q) ) / agreement^(q+2)
 end
 
 value_deriv(loss::DWDMarginLoss, agreement::Number) = (value(loss, agreement), deriv(loss, agreement))

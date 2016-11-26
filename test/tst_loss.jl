@@ -243,7 +243,8 @@ end
     # Losses that should always return Float64
     for loss in [SmoothedL1HingeLoss(0.5), SmoothedL1HingeLoss(1), L1EpsilonInsLoss(0.5),
                  L1EpsilonInsLoss(1), L2EpsilonInsLoss(0.5), L2EpsilonInsLoss(1),
-                 PeriodicLoss(1), PeriodicLoss(1.5), HuberLoss(1.0), QuantileLoss(.8)]
+                 PeriodicLoss(1), PeriodicLoss(1.5), HuberLoss(1.0), QuantileLoss(.8),
+                 DWDMarginLoss(0.5), DWDMarginLoss(1), DWDMarginLoss(2)]
         test_value_float64_forcing(loss)
         test_value_float64_forcing(2.0 * loss)
     end
@@ -251,9 +252,6 @@ end
     test_value_float64_forcing(2.0 * LogitMarginLoss())
     test_value_float64_forcing(2.0 * ExpLoss())
     test_value_float64_forcing(2.0 * SigmoidLoss())
-    test_value_float64_forcing(2.0 * DWDMarginLoss(0.5))
-    test_value_float64_forcing(2.0 * DWDMarginLoss(1))
-    test_value_float64_forcing(2.0 * DWDMarginLoss(2))
 
     # Losses that should return an AbstractFloat, preserving type if possible
     for loss in [PeriodicLoss(Float32(1)), PeriodicLoss(Float32(0.5)),
@@ -316,7 +314,7 @@ end
     function _dwdmarginloss(q)
         function _value(y, t)
             if y.*t <= q/(q+1)
-                1 - y.*t
+                convert(Float64, 1 - y.*t)
             else
                 ((q^q)/(q+1)^(q+1)) / (y.*t)^q
             end
