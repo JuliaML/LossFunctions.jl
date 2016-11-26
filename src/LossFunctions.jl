@@ -28,6 +28,9 @@ export
     SmoothedL1HingeLoss,
     ModifiedHuberLoss,
     L2MarginLoss,
+    ExpLoss,
+    SigmoidLoss,
+    DWDMarginLoss,
 
     LPDistLoss,
     L1DistLoss,
@@ -69,4 +72,3 @@ for T in union(subtypes(DistanceLoss), subtypes(MarginLoss))
 end
 
 end # module
-

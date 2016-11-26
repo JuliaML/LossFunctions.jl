@@ -7,10 +7,10 @@
 doc"""
     ZeroOneLoss <: MarginLoss
 
-The classical classification loss. It penalizes every missclassified
+The classical classification loss. It penalizes every misclassified
 observation with a loss of `1` while every correctly classified
 observation has a loss of `0`.
-It is not convex nor continuous and thus seldomly used directly.
+It is not convex nor continuous and thus seldom used directly.
 Instead one usually works with some classification-calibrated
 surrogate loss, such as one of those listed below.
 
@@ -58,7 +58,7 @@ doc"""
 
 The perceptron loss linearly penalizes every prediction where the
 resulting `agreement <= 0`.
-It is Lipshitz continuous and convex, but not strictly convex.
+It is Lipschitz continuous and convex, but not strictly convex.
 
 $L(y, ŷ) = max(0, -y⋅ŷ)$
 
@@ -99,7 +99,7 @@ doc"""
     LogitMarginLoss <: MarginLoss
 
 The margin version of the logistic loss. It is infinitely many
-times differentiable, strictly convex, and lipschitz continuous.
+times differentiable, strictly convex, and Lipschitz continuous.
 
 $L(y, ŷ) = ln(1 + exp(-y⋅ŷ))$
 
@@ -141,7 +141,7 @@ doc"""
 
 The hinge loss linearly penalizes every predicition where the
 resulting `agreement <= 1` .
-It is Lipshitz continuous and convex, but not strictly convex.
+It is Lipschitz continuous and convex, but not strictly convex.
 
 $L(y, ŷ) = max(0, 1 - y⋅ŷ)$
 
@@ -185,7 +185,7 @@ doc"""
 
 The truncated least squares loss quadratically penalizes every
 predicition where the resulting `agreement <= 1`.
-It is locally Lipshitz continuous and convex, but not strictly convex.
+It is locally Lipschitz continuous and convex, but not strictly convex.
 
 $L(y, ŷ) = max(0, 1 - y⋅ŷ)²$
 
@@ -228,7 +228,7 @@ doc"""
     SmoothedL1HingeLoss <: MarginLoss
 
 As the name suggests a smoothed version of the L1 hinge loss.
-It is Lipshitz continuous and convex, but not strictly convex.
+It is Lipschitz continuous and convex, but not strictly convex.
 
 $L(y, ŷ) = 0.5 / γ * max(0, 1 - y⋅ŷ)²    ... y⋅ŷ ≥ 1 - γ$
 $L(y, ŷ) = 1 - γ / 2 - y⋅ŷ               ... otherwise$
@@ -288,7 +288,7 @@ doc"""
     ModifiedHuberLoss <: MarginLoss
 
 A special (scaled) case of the `SmoothedL1HingeLoss` with `γ=4`.
-It is Lipshitz continuous and convex, but not strictly convex.
+It is Lipschitz continuous and convex, but not strictly convex.
 
 $L(y, ŷ) = max(0, 1 - y⋅ŷ)^2    ... y⋅ŷ >= -1$
 $L(y, ŷ) = -4⋅y⋅ŷ               ... otherwise$
@@ -379,3 +379,126 @@ isstrictlyconvex(::L2MarginLoss) = true
 isstronglyconvex(::L2MarginLoss) = true
 isclipable(::L2MarginLoss) = true
 
+
+# ============================================================
+
+doc"""
+    ExpLoss <: MarginLoss
+
+The margin-based exponential loss for classification,
+which penalizes every prediction where `agreement != 1` exponentially.
+It is infinitely many times differentiable, locally Lipschitz continuous
+and strictly convex.
+
+$L(y, ŷ) = exp(-y⋅ŷ)$
+
+"""
+
+immutable ExpLoss <: MarginLoss end
+
+value(loss::ExpLoss, agreement::Number) = exp(-agreement)
+deriv(loss::ExpLoss, agreement::Number) = -exp(-agreement)
+deriv2(loss::ExpLoss, agreement::Number) = exp(-agreement)
+value_deriv(loss::ExpLoss, agreement::Number) = (eᵗ = exp(-agreement); (eᵗ, -eᵗ))
+
+isunivfishercons(::ExpLoss) = true
+isdifferentiable(::ExpLoss) = true
+isdifferentiable(::ExpLoss, at) = true
+istwicedifferentiable(::ExpLoss) = true
+istwicedifferentiable(::ExpLoss, at) = true
+islocallylipschitzcont(::ExpLoss) = true
+islipschitzcont(::ExpLoss) = false
+isconvex(::ExpLoss) = true
+isstrictlyconvex(::ExpLoss) = true
+isstronglyconvex(::ExpLoss) = false
+isclipable(::ExpLoss) = false
+
+
+# ============================================================
+
+doc"""
+    SigmoidLoss <: MarginLoss
+
+Continuous loss which penalizes every prediction in the range (0,2).
+It is infinitely many times differentiable, Lipschitz continuous but nonconvex.
+
+$L(y, ŷ) = 1 - tanh(y⋅ŷ)$
+
+"""
+
+immutable SigmoidLoss <: MarginLoss end
+
+value(loss::SigmoidLoss, agreement::Number) = one(agreement) - tanh(agreement)
+deriv(loss::SigmoidLoss, agreement::Number) = -abs2(sech(agreement))
+deriv2{T<:Number}(loss::SigmoidLoss, agreement::T) = T(2) * tanh(agreement) * abs2(sech(agreement))
+value_deriv(loss::SigmoidLoss, agreement::Number) = (one(agreement) - tanh(agreement), -abs2(sech(agreement)))
+
+isunivfishercons(::SigmoidLoss) = true
+isdifferentiable(::SigmoidLoss) = true
+isdifferentiable(::SigmoidLoss, at) = true
+istwicedifferentiable(::SigmoidLoss) = true
+istwicedifferentiable(::SigmoidLoss, at) = true
+islocallylipschitzcont(::SigmoidLoss) = true
+islipschitzcont(::SigmoidLoss) = true
+isclasscalibrated(::SigmoidLoss) = true
+isconvex(::SigmoidLoss) = false
+isstrictlyconvex(::SigmoidLoss) = false
+isstronglyconvex(::SigmoidLoss) = false
+isclipable(::SigmoidLoss) = false
+
+
+
+# ============================================================
+
+doc"""
+    DWDMarginLoss <: MarginLoss
+
+DWDMarginLoss stands for Distance Weighted Discrimination Margin loss.
+Serves as an alternative to SVM loss function, with similar performance.
+It is Lipschitz continuous and convex, but not strictly convex.
+
+$L(y, ŷ) =  1 - y⋅ŷ                           ... y⋅ŷ ≤ q/(q+1)$
+$L(y, ŷ) = (q^q/(q+1)^(q+1)) / (y⋅ŷ)^q        ... otherwise$
+
+"""
+immutable DWDMarginLoss <: MarginLoss
+    q::Float64
+    function DWDMarginLoss(q::Number)
+        q > 0 || error("q must be strictly positive")
+        new(convert(Float64, q))
+    end
+end
+
+function value{T<:Number}(loss::DWDMarginLoss, agreement::T)
+    q = loss.q
+    if agreement <= q/(q+1)
+        result_type = promote_type(Float64, T)
+        convert(result_type, T(1) - agreement)
+    else
+        (q^q/(q+1)^(q+1)) / agreement^q
+    end
+end
+function deriv{T<:Number}(loss::DWDMarginLoss, agreement::T)
+    q = loss.q
+    agreement <= q/(q+1) ? -one(Float64) : -(q/(q+1))^(q+1) / agreement^(q+1)
+end
+
+function deriv2{T<:Number}(loss::DWDMarginLoss, agreement::T)
+    q = loss.q
+    agreement <= q/(q+1) ? zero(Float64) : ( (q^(q+1))/((q+1)^q) ) / agreement^(q+2)
+end
+
+value_deriv(loss::DWDMarginLoss, agreement::Number) = (value(loss, agreement), deriv(loss, agreement))
+
+isdifferentiable(::DWDMarginLoss) = true
+isdifferentiable(::DWDMarginLoss, at) = true
+istwicedifferentiable(::DWDMarginLoss) = true
+istwicedifferentiable(loss::DWDMarginLoss, at) = true
+islocallylipschitzcont(::DWDMarginLoss) = true
+islipschitzcont(::DWDMarginLoss) = true
+isconvex(::DWDMarginLoss) = true
+isstrictlyconvex(::DWDMarginLoss) = false
+isstronglyconvex(::DWDMarginLoss) = false
+isfishercons(::DWDMarginLoss) = true
+isunivfishercons(::DWDMarginLoss) = true
+isclipable(::DWDMarginLoss) = false

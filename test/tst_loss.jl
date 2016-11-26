@@ -243,16 +243,19 @@ end
     # Losses that should always return Float64
     for loss in [SmoothedL1HingeLoss(0.5), SmoothedL1HingeLoss(1), L1EpsilonInsLoss(0.5),
                  L1EpsilonInsLoss(1), L2EpsilonInsLoss(0.5), L2EpsilonInsLoss(1),
-                 PeriodicLoss(1), PeriodicLoss(1.5), HuberLoss(1.0), QuantileLoss(.8)]
+                 PeriodicLoss(1), PeriodicLoss(1.5), HuberLoss(1.0), QuantileLoss(.8),
+                 DWDMarginLoss(0.5), DWDMarginLoss(1), DWDMarginLoss(2)]
         test_value_float64_forcing(loss)
         test_value_float64_forcing(2.0 * loss)
     end
     test_value_float64_forcing(2.0 * LogitDistLoss())
     test_value_float64_forcing(2.0 * LogitMarginLoss())
+    test_value_float64_forcing(2.0 * ExpLoss())
+    test_value_float64_forcing(2.0 * SigmoidLoss())
 
     # Losses that should return an AbstractFloat, preserving type if possible
     for loss in [PeriodicLoss(Float32(1)), PeriodicLoss(Float32(0.5)),
-                 LogitDistLoss(), LogitMarginLoss(),
+                 LogitDistLoss(), LogitMarginLoss(), ExpLoss(), SigmoidLoss(),
                  L1EpsilonInsLoss(Float32(1)), L1EpsilonInsLoss(Float32(0.5)),
                  L2EpsilonInsLoss(Float32(1)), L2EpsilonInsLoss(Float32(0.5))]
         test_value_float32_preserving(loss)
@@ -301,6 +304,27 @@ end
 
     _l2marginloss(y, t) = (1 - y.*t)^2
     test_value(L2MarginLoss(), _l2marginloss, [-1.,1], -10:0.1:10)
+
+    _exploss(y, t) = exp(-y.*t)
+    test_value(ExpLoss(), _exploss, [-1.,1], -10:0.1:10)
+
+    _sigmoidloss(y, t) = (1-tanh(y.*t))
+    test_value(SigmoidLoss(), _sigmoidloss, [-1., 1], -10:0.1:10)
+
+    function _dwdmarginloss(q)
+        function _value(y, t)
+            if y.*t <= q/(q+1)
+                convert(Float64, 1 - y.*t)
+            else
+                ((q^q)/(q+1)^(q+1)) / (y.*t)^q
+            end
+        end
+        _value
+    end
+    test_value(DWDMarginLoss(0.5), _dwdmarginloss(0.5), [-1., 1], -10:0.1:10)
+    test_value(DWDMarginLoss(1), _dwdmarginloss(1), [-1., 1], -10:0.1:10)
+    test_value(DWDMarginLoss(2), _dwdmarginloss(2), [-1., 1], -10:0.1:10)
+
 end
 
 @testset "Test distance-based loss against reference function" begin
@@ -366,7 +390,8 @@ end
 
 margin_losses = [LogitMarginLoss(), L1HingeLoss(), L2HingeLoss(), PerceptronLoss(),
                  SmoothedL1HingeLoss(.5), SmoothedL1HingeLoss(1), SmoothedL1HingeLoss(2),
-                 ModifiedHuberLoss(), ZeroOneLoss(), L2MarginLoss()]
+                 ModifiedHuberLoss(), ZeroOneLoss(), L2MarginLoss(), ExpLoss(),
+                 SigmoidLoss(), DWDMarginLoss(.5), DWDMarginLoss(1), DWDMarginLoss(2)]
 
 @testset "Test first derivatives of margin-based losses" begin
     for loss in margin_losses
