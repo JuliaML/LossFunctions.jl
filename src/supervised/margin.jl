@@ -385,15 +385,14 @@ isclipable(::L2MarginLoss) = true
 doc"""
     ExpLoss <: MarginLoss
 
-The margin-based exponential loss for classification,
-which penalizes every prediction where `agreement != 1` exponentially.
-It is infinitely many times differentiable, locally Lipschitz continuous
-and strictly convex.
+The margin-based exponential loss for classification, which
+penalizes every prediction exponentially. It is infinitely many
+times differentiable, locally Lipschitz continuous and strictly
+convex.
 
 $L(y, ŷ) = exp(-y⋅ŷ)$
 
 """
-
 immutable ExpLoss <: MarginLoss end
 
 value(loss::ExpLoss, agreement::Number) = exp(-agreement)
@@ -419,13 +418,13 @@ isclipable(::ExpLoss) = false
 doc"""
     SigmoidLoss <: MarginLoss
 
-Continuous loss which penalizes every prediction in the range (0,2).
-It is infinitely many times differentiable, Lipschitz continuous but nonconvex.
+Continuous loss which penalizes every prediction with a loss
+within in the range (0,2). It is infinitely many times
+differentiable, Lipschitz continuous but nonconvex.
 
 $L(y, ŷ) = 1 - tanh(y⋅ŷ)$
 
 """
-
 immutable SigmoidLoss <: MarginLoss end
 
 value(loss::SigmoidLoss, agreement::Number) = one(agreement) - tanh(agreement)
@@ -502,3 +501,4 @@ isstronglyconvex(::DWDMarginLoss) = false
 isfishercons(::DWDMarginLoss) = true
 isunivfishercons(::DWDMarginLoss) = true
 isclipable(::DWDMarginLoss) = false
+

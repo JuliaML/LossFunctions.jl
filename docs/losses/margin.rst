@@ -4,7 +4,7 @@ Margin-based Losses
 This section lists all the subtypes of :class:`MarginLoss`
 that are implemented in this package.
 
-.. figure:: https://cloud.githubusercontent.com/assets/10854026/20031937/634516e4-a380-11e6-85e4-a337f01c65af.png
+.. figure:: https://cloud.githubusercontent.com/assets/10854026/20660787/9aeb2c28-b54b-11e6-91ca-1dbe265d0ff1.png
 
    Margin-based Losses (Classification)
 
@@ -117,4 +117,47 @@ L2MarginLoss
 .. math::
 
    L(a) = {\left( 1 - a \right)}^2
+
+ExpLoss
+--------
+
+.. class:: ExpLoss
+
+   The margin-based exponential Loss used for classification,
+   which penalizes every prediction exponentially. It is
+   infinitely many times differentiable, locally Lipschitz
+   continuous and strictly convex, but not clipable.
+
+.. math::
+
+   L(a) = e^{-a}
+
+SigmoidLoss
+------------
+
+.. class:: SigmoidLoss
+
+   The so called sigmoid loss is a continuous margin-base loss
+   which penalizes every prediction with a loss within in the
+   range (0,2). It is infinitely many times differentiable,
+   Lipschitz continuous but nonconvex.
+
+.. math::
+
+   L(a) = 1 - \tanh(a)
+
+DWDMarginLoss
+-------------
+
+.. class:: DWDMarginLoss
+
+   .. attribute:: q
+
+   The distance weighted discrimination margin loss.
+   A differentiable generalization of the L1 hinge loss that is
+   different than the :class:`SmoothedL1HingeLoss`
+
+.. math::
+
+   L(a) = \begin{cases} 1 - a & \quad \text{if } a \ge \frac{q}{q+1} \\ \frac{1}{a^q} \frac{q^q}{(q+1)^{q+1}} & \quad \text{otherwise}\\ \end{cases}
 

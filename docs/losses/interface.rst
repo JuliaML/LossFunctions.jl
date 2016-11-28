@@ -222,7 +222,7 @@ Distance-based Losses
 .. function:: deriv(loss, difference)
 
    Computes the derivative of the loss function for each
-   observation in ``difference` individually and returns the result
+   observation in ``difference`` individually and returns the result
    as an array of the same size as the parameter.
 
    :param loss: An instance of the loss we are interested in.
@@ -256,7 +256,7 @@ Margin-based Losses
 .. function:: value(loss, agreement)
 
    Computes the value of the loss function for each
-   observation in ``agreement` individually and returns the result
+   observation in ``agreement`` individually and returns the result
    as an array of the same size as the parameter.
 
    :param loss: An instance of the loss we are interested in.
