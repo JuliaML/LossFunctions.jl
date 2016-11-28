@@ -10,30 +10,36 @@ To that end we will provide a condensed overview of the package.
     In order to keep this overview consise, we will not discuss any
     background information or theory on the losses here in detail.
 
+Installation
+--------------
 
-Using LossFunctions.jl
-----------------
-
-Once installed the LossFunctions package can be imported just as any
-other Julia package.
-
-.. code-block:: julia
-
-    using LossFunctions
-
-To get help on specific functionality you can either look up the
-information here, or if you prefer you can make use of Julia's
-native doc-system.
-The following example shows how to get additional information
-on :class:`L1HingeLoss` within Julia's REPL:
+To install LossFunctions.jl, start up Julia and type the following
+code-snipped into the REPL. It makes use of the native Julia
+package manger.
 
 .. code-block:: julia
 
-    ?L1HingeLoss
+    Pkg.add("LossFunctions")
+
+Additionally, for example if you encounter any sudden issues,
+or in the case you would like to contribute to the package,
+you can manually choose to be on the latest (untagged) version.
+
+.. code-block:: julia
+
+    Pkg.checkout("LossFunctions")
 
 
 Hello World
 ------------
+
+This package is registered in the Julia package ecosystem. Once
+installed the package can be imported just as any other Julia
+package.
+
+.. code-block:: julia
+
+    using LossFunctions
 
 The following code snippets show a simple scenario of how a
 `Loss` can be used to compute the element-wise values.
@@ -166,4 +172,58 @@ probabilities as output.
     Even though distance-based losses and margin-based losses
     can be expressed in univariate form, we still provide the
     bivariate form of ``value`` for both.
+
+
+Getting Help
+-------------
+
+To get help on specific functionality you can either look up the
+information here, or if you prefer you can make use of Julia's
+native doc-system.
+The following example shows how to get additional information
+on :class:`L1HingeLoss` within Julia's REPL:
+
+.. code-block:: julia
+
+    ?L1HingeLoss
+
+.. code-block:: none
+
+   search: L1HingeLoss SmoothedL1HingeLoss
+
+     L1HingeLoss <: MarginLoss
+
+      The hinge loss linearly penalizes every predicition where the resulting
+      agreement <= 1 . It is Lipschitz continuous and convex, but not strictly
+      convex.
+
+    L(y, ŷ) = max(0, 1 - y⋅ŷ)
+
+                Lossfunction                     Derivative
+        ┌────────────┬────────────┐      ┌────────────┬────────────┐
+      3 │'\.                      │    0 │                  ┌------│
+        │  ''_                    │      │                  |      │
+        │     \.                  │      │                  |      │
+        │       '.                │      │                  |      │
+      L │         ''_             │   L' │                  |      │
+        │            \.           │      │                  |      │
+        │              '.         │      │                  |      │
+      0 │                ''_______│   -1 │------------------┘      │
+        └────────────┴────────────┘      └────────────┴────────────┘
+        -2                        2      -2                        2
+                   y ⋅ ŷ                            y ⋅ ŷ
+
+
+If you find yourself stuck or have other questions concerning the
+package you can find us at gitter or the *Machine Learning*
+domain on discourse.julialang.org
+
+- `Julia ML on Gitter <https://gitter.im/JuliaML/chat>`_
+
+- `Machine Learning on Julialang <https://discourse.julialang.org/c/domain/ML>`_
+
+If you encounter a bug or would like to participate in the
+further development of this package come find us on Github.
+
+- `JuliaML/LossFunctions.jl <https://github.com/JuliaML/LossFunctions.jl>`_
 
