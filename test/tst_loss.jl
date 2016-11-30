@@ -76,6 +76,8 @@ function test_deriv(l::MarginLoss, t_vec)
                 @test_approx_eq val LossFunctions.value(l, y*t)
                 @test_approx_eq val value_fun(l)(y, t)
                 @test_approx_eq val value_fun(l)(y*t)
+                @test_approx_eq d_comp @inferred(l'(y,t))
+                @test_approx_eq d_comp y*@inferred(l'(y*t))
                 @test_approx_eq d_comp d_comp2
                 @test_approx_eq d_comp d_comp3
                 @test_approx_eq d_comp y*d_comp4
@@ -110,6 +112,8 @@ function test_deriv(l::DistanceLoss, t_vec)
                 @test_approx_eq val LossFunctions.value(l, t-y)
                 @test_approx_eq val value_fun(l)(y, t)
                 @test_approx_eq val value_fun(l)(t-y)
+                @test_approx_eq d_comp @inferred(l'(y,t))
+                @test_approx_eq d_comp @inferred(l'(t-y))
                 @test_approx_eq d_comp d_comp2
                 @test_approx_eq d_comp d_comp3
                 @test_approx_eq d_comp d_comp4
@@ -139,6 +143,7 @@ function test_deriv(l::SupervisedLoss, t_vec)
                 @test_approx_eq val val3
                 @test_approx_eq val LossFunctions.value(l, y, t)
                 @test_approx_eq val value_fun(l)(y, t)
+                @test_approx_eq d_comp @inferred(l'(y, t))
                 @test_approx_eq d_comp d_comp2
                 @test_approx_eq d_comp d_comp3
                 @test_approx_eq d_comp deriv(l, y, t)
@@ -158,6 +163,8 @@ function test_deriv2(l::MarginLoss, t_vec)
                 d2_dual = epsilon(deriv(l, dual(y, 0), dual(t, 1)))
                 d2_comp = @inferred deriv2(l, y, t)
                 @test abs(d2_dual - d2_comp) < 1e-10
+                @test_approx_eq d2_comp @inferred(l''(y, t))
+                @test_approx_eq d2_comp @inferred(l''(y*t))
                 @test_approx_eq d2_comp @inferred deriv2(l, y, t)
                 @test_approx_eq d2_comp @inferred deriv2(l, y*t)
                 @test_approx_eq d2_comp deriv2_fun(l)(y, t)
@@ -177,6 +184,8 @@ function test_deriv2(l::DistanceLoss, t_vec)
                 d2_dual = epsilon(deriv(l, dual(t-y, 1)))
                 d2_comp = @inferred deriv2(l, y, t)
                 @test abs(d2_dual - d2_comp) < 1e-10
+                @test_approx_eq d2_comp @inferred(l''(y, t))
+                @test_approx_eq d2_comp @inferred(l''(t-y))
                 @test_approx_eq d2_comp @inferred deriv2(l, y, t)
                 @test_approx_eq d2_comp @inferred deriv2(l, t-y)
                 @test_approx_eq d2_comp deriv2_fun(l)(y, t)
@@ -198,7 +207,9 @@ function test_scaledloss(l::Loss, t_vec, y_vec)
                 for y in y_vec
                     @test LossFunctions.value(sl,t,y) == @inferred(sl(t,y))
                     @test @inferred(LossFunctions.value(sl,t,y)) == λ*LossFunctions.value(l,t,y)
+                    @test @inferred(deriv(sl,t,y)) == @inferred(sl'(t,y))
                     @test @inferred(deriv(sl,t,y)) == λ*deriv(l,t,y)
+                    @test @inferred(deriv2(sl,t,y)) == @inferred(sl''(t,y))
                     @test @inferred(deriv2(sl,t,y)) == λ*deriv2(l,t,y)
                 end
             end
@@ -214,7 +225,9 @@ function test_scaledloss(l::Loss, n_vec)
             for n in n_vec
                 @test LossFunctions.value(sl,n) == @inferred(sl(n))
                 @test @inferred(LossFunctions.value(sl,n)) == λ*LossFunctions.value(l,n)
+                @test @inferred(deriv(sl,n)) == @inferred(sl'(n))
                 @test @inferred(deriv(sl,n)) == λ*deriv(l,n)
+                @test @inferred(deriv2(sl,n)) == @inferred(sl''(n))
                 @test @inferred(deriv2(sl,n)) == λ*deriv2(l,n)
             end
         end
@@ -232,8 +245,9 @@ end
 end
 
 @testset "Test typestable supervised loss for type stability" begin
-    for loss in [L1HingeLoss(), L2HingeLoss(), ModifiedHuberLoss(), PerceptronLoss(),
-                LPDistLoss(1), LPDistLoss(2), LPDistLoss(3), L2MarginLoss()]
+    for loss in [L1HingeLoss(), L2HingeLoss(), ModifiedHuberLoss(),
+                 PerceptronLoss(), LPDistLoss(1), LPDistLoss(2),
+                 LPDistLoss(3), L2MarginLoss()]
         test_value_typestable(loss)
         # TODO: add ZeroOneLoss after scaling works...
     end
@@ -241,9 +255,11 @@ end
 
 @testset "Test float-forcing supervised loss for type stability" begin
     # Losses that should always return Float64
-    for loss in [SmoothedL1HingeLoss(0.5), SmoothedL1HingeLoss(1), L1EpsilonInsLoss(0.5),
-                 L1EpsilonInsLoss(1), L2EpsilonInsLoss(0.5), L2EpsilonInsLoss(1),
-                 PeriodicLoss(1), PeriodicLoss(1.5), HuberLoss(1.0), QuantileLoss(.8),
+    for loss in [SmoothedL1HingeLoss(0.5), SmoothedL1HingeLoss(1),
+                 L1EpsilonInsLoss(0.5), L1EpsilonInsLoss(1),
+                 L2EpsilonInsLoss(0.5), L2EpsilonInsLoss(1),
+                 PeriodicLoss(1), PeriodicLoss(1.5),
+                 HuberLoss(1.0), QuantileLoss(.8),
                  DWDMarginLoss(0.5), DWDMarginLoss(1), DWDMarginLoss(2)]
         test_value_float64_forcing(loss)
         test_value_float64_forcing(2.0 * loss)
@@ -388,10 +404,12 @@ end
     test_value(PoissonLoss(), _poissonloss, 0:10, linspace(0,10,11))
 end
 
-margin_losses = [LogitMarginLoss(), L1HingeLoss(), L2HingeLoss(), PerceptronLoss(),
-                 SmoothedL1HingeLoss(.5), SmoothedL1HingeLoss(1), SmoothedL1HingeLoss(2),
-                 ModifiedHuberLoss(), ZeroOneLoss(), L2MarginLoss(), ExpLoss(),
-                 SigmoidLoss(), DWDMarginLoss(.5), DWDMarginLoss(1), DWDMarginLoss(2)]
+margin_losses = [LogitMarginLoss(), L1HingeLoss(), L2HingeLoss(),
+                 PerceptronLoss(), SmoothedL1HingeLoss(.5),
+                 SmoothedL1HingeLoss(1), SmoothedL1HingeLoss(2),
+                 ModifiedHuberLoss(), ZeroOneLoss(), L2MarginLoss(),
+                 ExpLoss(), SigmoidLoss(),
+                 DWDMarginLoss(.5), DWDMarginLoss(1), DWDMarginLoss(2)]
 
 @testset "Test first derivatives of margin-based losses" begin
     for loss in margin_losses
@@ -412,16 +430,19 @@ end
     end
 end
 
-distance_losses = [L2DistLoss(), LPDistLoss(2.0), L1DistLoss(), LPDistLoss(1.0),
-                   LPDistLoss(0.5), LPDistLoss(1.5), LPDistLoss(3),
-                   LogitDistLoss(), L1EpsilonInsLoss(0.5), EpsilonInsLoss(1.5),
-                   L2EpsilonInsLoss(0.5), L2EpsilonInsLoss(1.5), PeriodicLoss(1),
+distance_losses = [L2DistLoss(), LPDistLoss(2.0), L1DistLoss(),
+                   LPDistLoss(1.0), LPDistLoss(0.5),
+                   LPDistLoss(1.5), LPDistLoss(3),
+                   LogitDistLoss(), L1EpsilonInsLoss(0.5),
+                   EpsilonInsLoss(1.5),
+                   L2EpsilonInsLoss(0.5), L2EpsilonInsLoss(1.5),
+                   PeriodicLoss(1),
                    HuberLoss(1), HuberLoss(1.5),
                    QuantileLoss(.2), QuantileLoss(.5), QuantileLoss(.8)]
 
 @testset "Test first derivatives of distance-based losses" begin
     for loss in distance_losses
-        test_deriv(loss, -30:0.5:30)
+        test_deriv(loss, -20:0.5:20)
     end
 end
 
@@ -431,14 +452,14 @@ end
 
 @testset "Test second derivatives of distance-based losses" begin
     for loss in distance_losses
-        test_deriv2(loss, -30:0.5:30)
+        test_deriv2(loss, -20:0.5:20)
     end
 end
 
 @testset "Test distance-based scaled loss" begin
     for loss in distance_losses
-        test_scaledloss(loss, -20:.2:20, -30:0.5:30)
-        test_scaledloss(loss, -30:0.5:30)
+        test_scaledloss(loss, -20:.2:20, -20:0.5:20)
+        test_scaledloss(loss, -20:0.5:20)
     end
 end
 

@@ -19,6 +19,29 @@ end
 end
 
 # --------------------------------------------------------------
+# These non-exported types allow for the convenience syntax
+# `myloss'(y,yhat)` and `myloss''(y,yhat)` without performance
+# penalty
+
+immutable Deriv{L<:SupervisedLoss}
+    loss::L
+end
+
+Base.transpose(loss::SupervisedLoss) = Deriv(loss)
+
+(d::Deriv)(t, y) = deriv(d.loss, t, y)
+(d::Deriv)(x)    = deriv(d.loss, x)
+
+immutable Deriv2{L<:SupervisedLoss}
+    loss::L
+end
+
+Base.transpose(d::Deriv) = Deriv2(d.loss)
+
+(d::Deriv2)(t, y) = deriv2(d.loss, t, y)
+(d::Deriv2)(x)    = deriv2(d.loss, x)
+
+# --------------------------------------------------------------
 # Fallback implementations
 
 isstronglyconvex(::SupervisedLoss) = false
