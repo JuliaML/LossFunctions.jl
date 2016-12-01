@@ -1,3 +1,6 @@
+# --------------------------------------------------------------
+# convenience closures
+
 @inline function value_fun(c::SupervisedLoss)
     _value(args...) = value(c, args...)
     _value
@@ -42,6 +45,18 @@ Base.transpose(d::Deriv) = Deriv2(d.loss)
 (d::Deriv2)(x)    = deriv2(d.loss, x)
 
 # --------------------------------------------------------------
+# Make broadcast work for losses
+
+Base.getindex(l::Loss, idx) = l
+Base.size(::Loss) = (1,)
+
+Base.getindex(l::Deriv, idx) = l
+Base.size(::Deriv) = (1,)
+
+Base.getindex(l::Deriv2, idx) = l
+Base.size(::Deriv2) = (1,)
+
+# --------------------------------------------------------------
 # Fallback implementations
 
 isstronglyconvex(::SupervisedLoss) = false
@@ -65,122 +80,6 @@ isclasscalibrated(::SupervisedLoss) = false
 isdistancebased(::SupervisedLoss) = false
 issymmetric(::SupervisedLoss) = false
 
-# --------------------------------------------------------------
-
-"""
-    value(loss::SupervisedLoss, target::AbstractArray, output::AbstractArray)
-
-Computes the value of the loss function for each observation-pair
-in targets and outputs individual and returns the result as an array
-of the same size as the parameters.
-"""
-@inline function value(loss::SupervisedLoss, target::AbstractArray, output::AbstractArray)
-    buffer = similar(output)
-    value!(buffer, loss, target, output)
-end
-
-"""
-    deriv(loss::SupervisedLoss, target::AbstractArray, output::AbstractArray)
-
-Computes the derivative of the loss function for each
-observation-pair in targets and outputs individually and returns
-the result as an array of the same size as the parameters.
-"""
-@inline function deriv(loss::SupervisedLoss, target::AbstractArray, output::AbstractArray)
-    buffer = similar(output)
-    deriv!(buffer, loss, target, output)
-end
-
-# TODO: same for deriv2
-
-# TODO: same for value_deriv
-
-# --------------------------------------------------------------
-# value!, deriv!
-# `output` can have more dimensions than `target`, in which case do broadcasting
-
-"""
-    value!(buffer::AbstractArray, loss::SupervisedLoss, target::AbstractArray, output::AbstractArray)
-
-Computes the values of the loss function for each observation-pair
-in targets and outputs individually and stores them in the
-preallocated buffer, which has to be the same size as the parameters.
-"""
-@generated function value!{T,N,Q,M}(
-        buffer::AbstractArray,
-        loss::SupervisedLoss,
-        target::AbstractArray{Q,M},
-        output::AbstractArray{T,N}
-    )
-    M > N && throw(ArgumentError("target has more dimensions than output; broadcasting not supported in this direction."))
-    quote
-      @_dimcheck size(buffer) == size(output)
-      @nexprs $M (n)->@_dimcheck(size(target,n) == size(output,n))
-      @simd for I in CartesianRange(size(output))
-          @nexprs $N n->(i_n = I[n])
-          @inbounds @nref($N,buffer,i) = value(loss, @nref($M,target,i), @nref($N,output,i))
-      end
-      buffer
-    end
-end
-
-##
-# Function for sparse arrays
-@generated function value!{T,N,Q,Ti,M}(
-        buffer::AbstractArray,
-        loss::MarginLoss,
-        target::AbstractSparseArray{Q,Ti,M},
-        output::AbstractArray{T,N}
-    )
-    M > N && throw(ArgumentError("target has more dimensions than output; broadcasting not supported in this direction."))
-    quote
-      @_dimcheck size(buffer) == size(output)
-      @nexprs $M (n)->@_dimcheck(size(target,n) == size(output,n))
-      zeroQ = zero(Q)
-      negQ = Q(-1)
-      @simd for I in CartesianRange(size(output))
-          @nexprs $N n->(i_n = I[n])
-          tgt = @nref($M,target,i)
-          if tgt == zeroQ
-              # convention is that zeros in a sparse array are interpreted as negative one
-              @inbounds @nref($N,buffer,i) = value(loss, negQ, @nref($N,output,i))
-          else
-              @inbounds @nref($N,buffer,i) = value(loss, tgt, @nref($N,output,i))
-          end
-      end
-      buffer
-    end
-end
-
-"""
-    deriv!(buffer::AbstractArray, loss::SupervisedLoss, target::AbstractArray, output::AbstractArray)
-
-Computes the derivative of the loss function for each
-observation-pair in targets and outputs individually and stores
-them in the preallocated buffer, which has to be the same size
-as the parameters
-"""
-@generated function deriv!{T,N,Q,M}(
-        buffer::AbstractArray,
-        loss::SupervisedLoss,
-        target::AbstractArray{Q,M},
-        output::AbstractArray{T,N}
-    )
-    M > N && throw(ArgumentError("target has more dimensions than output; broadcasting not supported in this direction."))
-    quote
-      @_dimcheck size(buffer) == size(output)
-      @nexprs $M (n)->@_dimcheck(size(target,n) == size(output,n))
-      @simd for I in CartesianRange(size(output))
-          @nexprs $N n->(i_n = I[n])
-          @inbounds @nref($N,buffer,i) = deriv(loss, @nref($M,target,i), @nref($N,output,i))
-      end
-      buffer
-    end
-end
-
-# TODO: same for deriv2
-
-# TODO: same for value_deriv
 
 # --------------------------------------------------------------
 @generated function sumvalue{T,N,Q,M}(

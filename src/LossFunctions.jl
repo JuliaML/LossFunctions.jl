@@ -54,11 +54,14 @@ export
 include("common.jl")
 
 include("supervised/supervised.jl")
+include("supervised/sparse.jl")
 include("supervised/distance.jl")
 include("supervised/margin.jl")
 include("supervised/scaledloss.jl")
 include("supervised/other.jl")
 include("supervised/io.jl")
+
+include("deprecate.jl")
 
 # allow using SupervisedLoss as function
 for T in filter(isleaftype,subtypes(SupervisedLoss))

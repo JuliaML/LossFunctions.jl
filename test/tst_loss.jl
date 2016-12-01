@@ -479,7 +479,7 @@ end
         output = randn(N)
 
         for loss in margin_losses
-            @test isapprox(@inferred(LossFunctions.value(loss,sparse_target,output)), LossFunctions.value(loss,target,output))
+            @test isapprox(@inferred(LossFunctions.value(loss,sparse_target,output)), LossFunctions.value.(loss,target,output))
         end
     end
 
@@ -498,7 +498,7 @@ end
         output = randn(N,N)
 
         for loss in margin_losses
-            @test isapprox(@inferred(LossFunctions.value(loss,sparse_target,output)), LossFunctions.value(loss,target,output))
+            @test isapprox(@inferred(LossFunctions.value(loss,sparse_target,output)), LossFunctions.value.(loss,target,output))
         end
     end
 end

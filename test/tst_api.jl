@@ -1,3 +1,38 @@
+function test_vector_value(l::MarginLoss, t, y)
+    @testset "$(l): " begin
+        ref = [ LossFunctions.value(l,t[i],y[i]) for i in 1:length(y) ]
+        @test LossFunctions.value.(l, t, y) == ref
+        @test LossFunctions.value.(l, t .* y) == ref
+        @test l.(t, y) == ref
+        @test l.(t .* y) == ref
+    end
+end
+
+function test_vector_value(l::DistanceLoss, t, y)
+    @testset "$(l): " begin
+        ref = [ LossFunctions.value(l,t[i],y[i]) for i in 1:length(y) ]
+        @test LossFunctions.value.(l, t, y) == ref
+        @test LossFunctions.value.(l, y - t) == ref
+        @test l.(t, y) == ref
+        @test l.(y - t) == ref
+    end
+end
+
+@testset "Vectorized API" begin
+    targets = rand([-1,1], 10)
+    outputs = (rand(10)-.5) * 20
+
+    for loss in margin_losses
+        test_vector_value(loss, targets, outputs)
+    end
+
+    targets = (rand(10)-.5) * 20
+    outputs = (rand(10)-.5) * 20
+    for loss in distance_losses
+        test_vector_value(loss, targets, outputs)
+    end
+end
+
 @testset "Broadcasting higher-order arrays" begin
     for f in (LossFunctions.value,deriv,sumvalue,sumderiv,meanvalue,meanderiv)
         @testset "$f" begin
@@ -16,9 +51,7 @@
             @test isapprox(f(loss,targ1,out2), f(loss,targ2,out2))
             @test isapprox(f(loss,targ1,out2), f(loss,targ3,out2))
             @test isapprox(f(loss,targ2,out2), f(loss,targ3,out2))
-
-            # can't broadcast in this direction (yet)
-            @test_throws Exception f(loss,targ3,out1)
         end
     end
 end
+
