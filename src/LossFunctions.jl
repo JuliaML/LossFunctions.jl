@@ -72,3 +72,4 @@ for T in union(subtypes(DistanceLoss), subtypes(MarginLoss))
 end
 
 end # module
+
