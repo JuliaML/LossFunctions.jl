@@ -2,6 +2,10 @@ function test_value_typestable(l::SupervisedLoss)
     @testset "$(l): " begin
         for y in (-1, 1, Int32(-1), Int32(1), -1.5, 1.5, Float32(-.5), Float32(.5))
             for t in (-2, 2, Int32(-1), Int32(1), -.5, .5, Float32(-1), Float32(1))
+                # check inference
+                @inferred deriv(l, y, t)
+                @inferred deriv2(l, y, t)
+
                 # get expected return type
                 T = promote_type(typeof(y), typeof(t))
 
@@ -20,6 +24,10 @@ function test_value_float32_preserving(l::SupervisedLoss)
     @testset "$(l): " begin
         for y in (-1, 1, Int32(-1), Int32(1), -1.5, 1.5, Float32(-.5), Float32(.5))
             for t in (-2, 2, Int32(-1), Int32(1), -.5, .5, Float32(-1), Float32(1))
+                # check inference
+                @inferred deriv(l, y, t)
+                @inferred deriv2(l, y, t)
+
                 val = @inferred LossFunctions.value(l, y, t)
                 T = promote_type(typeof(y),typeof(t))
                 if !(T <: AbstractFloat)
@@ -41,6 +49,10 @@ function test_value_float64_forcing(l::SupervisedLoss)
     @testset "$(l): " begin
         for y in (-1, 1, Int32(-1), Int32(1), -1.5, 1.5, Float32(-.5), Float32(.5))
             for t in (-2, 2, Int32(-1), Int32(1), -.5, .5, Float32(-1), Float32(1))
+                # check inference
+                @inferred deriv(l, y, t)
+                @inferred deriv2(l, y, t)
+
                 val = @inferred LossFunctions.value(l, y, t)
                 @test (typeof(val) <: Float64)
             end
@@ -270,12 +282,14 @@ end
     test_value_float64_forcing(2.0 * SigmoidLoss())
 
     # Losses that should return an AbstractFloat, preserving type if possible
-    for loss in [PeriodicLoss(Float32(1)), PeriodicLoss(Float32(0.5)),
+    for loss in [SmoothedL1HingeLoss(0.5f0), SmoothedL1HingeLoss(1f0),
+                 PeriodicLoss(1f0), PeriodicLoss(0.5f0),
                  LogitDistLoss(), LogitMarginLoss(), ExpLoss(), SigmoidLoss(),
-                 L1EpsilonInsLoss(Float32(1)), L1EpsilonInsLoss(Float32(0.5)),
-                 L2EpsilonInsLoss(Float32(1)), L2EpsilonInsLoss(Float32(0.5))]
+                 L1EpsilonInsLoss(1f0), L1EpsilonInsLoss(0.5f0),
+                 L2EpsilonInsLoss(1f0), L2EpsilonInsLoss(0.5f0),
+                 HuberLoss(1.0f0), QuantileLoss(.8f0), DWDMarginLoss(0.5f0)]
         test_value_float32_preserving(loss)
-        test_value_float32_preserving(Float32(2) * loss)
+        test_value_float32_preserving(2f0 * loss)
     end
 end
 
@@ -479,7 +493,7 @@ end
         output = randn(N)
 
         for loss in margin_losses
-            @test isapprox(@inferred(LossFunctions.value(loss,sparse_target,output)), LossFunctions.value(loss,target,output))
+            @test isapprox(@inferred(LossFunctions.value(loss,sparse_target,output)), LossFunctions.value.(loss,target,output))
         end
     end
 
@@ -498,7 +512,7 @@ end
         output = randn(N,N)
 
         for loss in margin_losses
-            @test isapprox(@inferred(LossFunctions.value(loss,sparse_target,output)), LossFunctions.value(loss,target,output))
+            @test isapprox(@inferred(LossFunctions.value(loss,sparse_target,output)), LossFunctions.value.(loss,target,output))
         end
     end
 end

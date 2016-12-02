@@ -14,21 +14,20 @@ end
 LPDistLoss(p::Number) = LPDistLoss{p}()
 
 value{P}(loss::LPDistLoss{P}, difference::Number) = abs(difference)^P
-function deriv{P,T<:Number}(loss::LPDistLoss{P}, difference::T)
+function deriv{P,T<:Number}(loss::LPDistLoss{P}, difference::T)::promote_type(typeof(P),T)
     if difference == 0
         zero(difference)
     else
         P * difference * abs(difference)^(P-convert(typeof(P), 2))
     end
 end
-function deriv2{P,T<:Number}(loss::LPDistLoss{P}, difference::T)
+function deriv2{P,T<:Number}(loss::LPDistLoss{P}, difference::T)::promote_type(typeof(P),T)
     if difference == 0
         zero(difference)
     else
         (abs2(P)-P) * abs(difference)^P / abs2(difference)
     end
 end
-value_deriv{P}(loss::LPDistLoss{P}, difference::Number) = (value(loss,difference), deriv(loss,difference))
 
 isminimizable{P}(::LPDistLoss{P}) = true
 issymmetric{P}(::LPDistLoss{P}) = true
@@ -72,7 +71,6 @@ sumvalue(loss::L1DistLoss, difference::AbstractArray) = sumabs(difference)
 value(loss::L1DistLoss, difference::Number) = abs(difference)
 deriv{T<:Number}(loss::L1DistLoss, difference::T) = convert(T, sign(difference))
 deriv2{T<:Number}(loss::L1DistLoss, difference::T) = zero(T)
-value_deriv(loss::L1DistLoss, difference::Number) = (abs(difference), sign(difference))
 
 isdifferentiable(::L1DistLoss) = false
 isdifferentiable(::L1DistLoss, at) = at != 0
@@ -113,7 +111,6 @@ sumvalue(loss::L2DistLoss, difference::AbstractArray) = sumabs2(difference)
 value(loss::L2DistLoss, difference::Number) = abs2(difference)
 deriv{T<:Number}(loss::L2DistLoss, difference::T) = T(2) * difference
 deriv2{T<:Number}(loss::L2DistLoss, difference::T) = T(2)
-value_deriv{T<:Number}(loss::L2DistLoss, difference::T) = (abs2(difference), T(2) * difference)
 
 isdifferentiable(::L2DistLoss) = true
 isdifferentiable(::L2DistLoss, at) = true
@@ -279,15 +276,7 @@ immutable L1EpsilonInsLoss{T<:AbstractFloat} <: DistanceLoss
 end
 typealias EpsilonInsLoss L1EpsilonInsLoss
 L1EpsilonInsLoss{T<:AbstractFloat}(ε::T) = L1EpsilonInsLoss{T}(ε)
-L1EpsilonInsLoss(ε) = L1EpsilonInsLoss{Float64}(Float64(ε))
-
-function L1EpsilonInsLoss{T<:Number}(ε::T)
-    if T <: AbstractFloat
-        L1EpsilonInsLoss{T}(ε)
-    else # cast to Float64
-        L1EpsilonInsLoss{Float64}(Float64(ε))
-    end
-end
+L1EpsilonInsLoss(ε::Number) = L1EpsilonInsLoss{Float64}(Float64(ε))
 
 function value{T1,T2<:Number}(loss::L1EpsilonInsLoss{T1}, difference::T2)
     T = promote_type(T1,T2)
@@ -295,13 +284,13 @@ function value{T1,T2<:Number}(loss::L1EpsilonInsLoss{T1}, difference::T2)
 end
 function deriv{T1,T2<:Number}(loss::L1EpsilonInsLoss{T1}, difference::T2)
     T = promote_type(T1,T2)
-    abs(difference) <= loss.ε ? zero(T) : sign(difference)
+    abs(difference) <= loss.ε ? zero(T) : T(sign(difference))
 end
 deriv2{T1,T2<:Number}(loss::L1EpsilonInsLoss{T1}, difference::T2) = zero(promote_type(T1,T2))
 function value_deriv{T1,T2<:Number}(loss::L1EpsilonInsLoss{T1}, difference::T2)
     T = promote_type(T1,T2)
     absr = abs(difference)
-    absr <= loss.ε ? (zero(T), zero(T)) : (absr - loss.ε, sign(difference))
+    absr <= loss.ε ? (zero(T), zero(T)) : (absr - loss.ε, T(sign(difference)))
 end
 
 issymmetric(::L1EpsilonInsLoss) = true
@@ -476,9 +465,6 @@ function deriv{T1, T2 <: Number}(loss::QuantileLoss{T1}, diff::T2)
     T(diff > 0) - loss.τ
 end
 deriv2{T1, T2 <: Number}(::QuantileLoss{T1}, diff::T2) = zero(promote_type(T1, T2))
-function value_deriv{T1, T2 <: Number}(loss::QuantileLoss{T1}, diff::T2)
-    value(loss, diff), deriv(loss, diff)
-end
 
 issymmetric(loss::QuantileLoss) = loss.τ == 0.5
 isdifferentiable(::QuantileLoss) = false
@@ -490,3 +476,4 @@ islipschitzcont_deriv(::QuantileLoss) = true
 isconvex(::QuantileLoss) = true
 isstrictlyconvex(::QuantileLoss) = false
 isstronglyconvex(::QuantileLoss) = false
+
