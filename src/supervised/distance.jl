@@ -14,14 +14,14 @@ end
 LPDistLoss(p::Number) = LPDistLoss{p}()
 
 value{P}(loss::LPDistLoss{P}, difference::Number) = abs(difference)^P
-function deriv{P,T<:Number}(loss::LPDistLoss{P}, difference::T)
+function deriv{P,T<:Number}(loss::LPDistLoss{P}, difference::T)::promote_type(typeof(P),T)
     if difference == 0
         zero(difference)
     else
         P * difference * abs(difference)^(P-convert(typeof(P), 2))
     end
 end
-function deriv2{P,T<:Number}(loss::LPDistLoss{P}, difference::T)
+function deriv2{P,T<:Number}(loss::LPDistLoss{P}, difference::T)::promote_type(typeof(P),T)
     if difference == 0
         zero(difference)
     else
@@ -276,15 +276,7 @@ immutable L1EpsilonInsLoss{T<:AbstractFloat} <: DistanceLoss
 end
 typealias EpsilonInsLoss L1EpsilonInsLoss
 L1EpsilonInsLoss{T<:AbstractFloat}(ε::T) = L1EpsilonInsLoss{T}(ε)
-L1EpsilonInsLoss(ε) = L1EpsilonInsLoss{Float64}(Float64(ε))
-
-function L1EpsilonInsLoss{T<:Number}(ε::T)
-    if T <: AbstractFloat
-        L1EpsilonInsLoss{T}(ε)
-    else # cast to Float64
-        L1EpsilonInsLoss{Float64}(Float64(ε))
-    end
-end
+L1EpsilonInsLoss(ε::Number) = L1EpsilonInsLoss{Float64}(Float64(ε))
 
 function value{T1,T2<:Number}(loss::L1EpsilonInsLoss{T1}, difference::T2)
     T = promote_type(T1,T2)
@@ -292,13 +284,13 @@ function value{T1,T2<:Number}(loss::L1EpsilonInsLoss{T1}, difference::T2)
 end
 function deriv{T1,T2<:Number}(loss::L1EpsilonInsLoss{T1}, difference::T2)
     T = promote_type(T1,T2)
-    abs(difference) <= loss.ε ? zero(T) : sign(difference)
+    abs(difference) <= loss.ε ? zero(T) : T(sign(difference))
 end
 deriv2{T1,T2<:Number}(loss::L1EpsilonInsLoss{T1}, difference::T2) = zero(promote_type(T1,T2))
 function value_deriv{T1,T2<:Number}(loss::L1EpsilonInsLoss{T1}, difference::T2)
     T = promote_type(T1,T2)
     absr = abs(difference)
-    absr <= loss.ε ? (zero(T), zero(T)) : (absr - loss.ε, sign(difference))
+    absr <= loss.ε ? (zero(T), zero(T)) : (absr - loss.ε, T(sign(difference)))
 end
 
 issymmetric(::L1EpsilonInsLoss) = true

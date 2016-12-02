@@ -2,6 +2,10 @@ function test_value_typestable(l::SupervisedLoss)
     @testset "$(l): " begin
         for y in (-1, 1, Int32(-1), Int32(1), -1.5, 1.5, Float32(-.5), Float32(.5))
             for t in (-2, 2, Int32(-1), Int32(1), -.5, .5, Float32(-1), Float32(1))
+                # check inference
+                @inferred deriv(l, y, t)
+                @inferred deriv2(l, y, t)
+
                 # get expected return type
                 T = promote_type(typeof(y), typeof(t))
 
@@ -20,6 +24,10 @@ function test_value_float32_preserving(l::SupervisedLoss)
     @testset "$(l): " begin
         for y in (-1, 1, Int32(-1), Int32(1), -1.5, 1.5, Float32(-.5), Float32(.5))
             for t in (-2, 2, Int32(-1), Int32(1), -.5, .5, Float32(-1), Float32(1))
+                # check inference
+                @inferred deriv(l, y, t)
+                @inferred deriv2(l, y, t)
+
                 val = @inferred LossFunctions.value(l, y, t)
                 T = promote_type(typeof(y),typeof(t))
                 if !(T <: AbstractFloat)
@@ -41,6 +49,10 @@ function test_value_float64_forcing(l::SupervisedLoss)
     @testset "$(l): " begin
         for y in (-1, 1, Int32(-1), Int32(1), -1.5, 1.5, Float32(-.5), Float32(.5))
             for t in (-2, 2, Int32(-1), Int32(1), -.5, .5, Float32(-1), Float32(1))
+                # check inference
+                @inferred deriv(l, y, t)
+                @inferred deriv2(l, y, t)
+
                 val = @inferred LossFunctions.value(l, y, t)
                 @test (typeof(val) <: Float64)
             end
