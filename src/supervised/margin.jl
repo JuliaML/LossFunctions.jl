@@ -247,26 +247,32 @@ $L(y, ŷ) = 1 - γ / 2 - y⋅ŷ               ... otherwise$
       -2                        2      -2                        2
                  y ⋅ ŷ                            y ⋅ ŷ
 """
-immutable SmoothedL1HingeLoss <: MarginLoss
-    gamma::Float64
+immutable SmoothedL1HingeLoss{T<:AbstractFloat} <: MarginLoss
+    gamma::T
 
-    function SmoothedL1HingeLoss(γ::Number)
+    function SmoothedL1HingeLoss(γ::T)
         γ > 0 || error("γ must be strictly positive")
-        new(convert(Float64, γ))
+        new(γ)
     end
 end
+SmoothedL1HingeLoss{T<:AbstractFloat}(γ::T) = SmoothedL1HingeLoss{T}(γ)
+SmoothedL1HingeLoss(γ) = SmoothedL1HingeLoss(Float64(γ))
 
-function value{T<:Number}(loss::SmoothedL1HingeLoss, agreement::T)
-    agreement >= 1 - loss.gamma ? 0.5 / loss.gamma * abs2(max(zero(T), one(T) - agreement)) : one(T) - loss.gamma / 2 - agreement
+function value{R,T<:Number}(loss::SmoothedL1HingeLoss{R}, agreement::T)::promote_type(R,T)
+    if agreement >= 1 - loss.gamma
+        R(0.5) / loss.gamma * abs2(max(zero(T), one(T) - agreement))
+    else
+        one(T) - loss.gamma / R(2) - agreement
+    end
 end
-function deriv{T<:Number}(loss::SmoothedL1HingeLoss, agreement::T)
+function deriv{R,T<:Number}(loss::SmoothedL1HingeLoss{R}, agreement::T)::promote_type(R,T)
     if agreement >= 1 - loss.gamma
         agreement >= 1 ? zero(T) : (agreement - one(T)) / loss.gamma
     else
         -one(T)
     end
 end
-function deriv2{T<:Number}(loss::SmoothedL1HingeLoss, agreement::T)
+function deriv2{R,T<:Number}(loss::SmoothedL1HingeLoss{R}, agreement::T)::promote_type(R,T)
     agreement < 1 - loss.gamma || agreement > 1 ? zero(T) : one(T) / loss.gamma
 end
 
@@ -376,7 +382,6 @@ isstrictlyconvex(::L2MarginLoss) = true
 isstronglyconvex(::L2MarginLoss) = true
 isclipable(::L2MarginLoss) = true
 
-
 # ============================================================
 
 doc"""
@@ -409,7 +414,6 @@ isstrictlyconvex(::ExpLoss) = true
 isstronglyconvex(::ExpLoss) = false
 isclipable(::ExpLoss) = false
 
-
 # ============================================================
 
 doc"""
@@ -441,8 +445,6 @@ isstrictlyconvex(::SigmoidLoss) = false
 isstronglyconvex(::SigmoidLoss) = false
 isclipable(::SigmoidLoss) = false
 
-
-
 # ============================================================
 
 doc"""
@@ -456,31 +458,33 @@ $L(y, ŷ) =  1 - y⋅ŷ                           ... y⋅ŷ ≤ q/(q+1)$
 $L(y, ŷ) = (q^q/(q+1)^(q+1)) / (y⋅ŷ)^q        ... otherwise$
 
 """
-immutable DWDMarginLoss <: MarginLoss
-    q::Float64
-    function DWDMarginLoss(q::Number)
+immutable DWDMarginLoss{T<:AbstractFloat} <: MarginLoss
+    q::T
+    function DWDMarginLoss(q::T)
         q > 0 || error("q must be strictly positive")
-        new(convert(Float64, q))
+        new(q)
     end
 end
+DWDMarginLoss{T<:AbstractFloat}(q::T) = DWDMarginLoss{T}(q)
+DWDMarginLoss(q) = DWDMarginLoss(Float64(q))
 
-function value{T<:Number}(loss::DWDMarginLoss, agreement::T)
+function value{R,T<:Number}(loss::DWDMarginLoss{R}, agreement::T)::promote_type(R, T)
     q = loss.q
     if agreement <= q/(q+1)
-        result_type = promote_type(Float64, T)
-        convert(result_type, T(1) - agreement)
+        R(1) - agreement
     else
         (q^q/(q+1)^(q+1)) / agreement^q
     end
 end
-function deriv{T<:Number}(loss::DWDMarginLoss, agreement::T)
+
+function deriv{R,T<:Number}(loss::DWDMarginLoss{R}, agreement::T)::promote_type(R, T)
     q = loss.q
-    agreement <= q/(q+1) ? -one(Float64) : -(q/(q+1))^(q+1) / agreement^(q+1)
+    agreement <= q/(q+1) ? -one(T) : -(q/(q+1))^(q+1) / agreement^(q+1)
 end
 
-function deriv2{T<:Number}(loss::DWDMarginLoss, agreement::T)
+function deriv2{R,T<:Number}(loss::DWDMarginLoss{R}, agreement::T)::promote_type(R, T)
     q = loss.q
-    agreement <= q/(q+1) ? zero(Float64) : ( (q^(q+1))/((q+1)^q) ) / agreement^(q+2)
+    agreement <= q/(q+1) ? zero(T) : ( (q^(q+1))/((q+1)^q) ) / agreement^(q+2)
 end
 
 isdifferentiable(::DWDMarginLoss) = true

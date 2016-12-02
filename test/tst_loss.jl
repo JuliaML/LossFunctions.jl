@@ -270,12 +270,14 @@ end
     test_value_float64_forcing(2.0 * SigmoidLoss())
 
     # Losses that should return an AbstractFloat, preserving type if possible
-    for loss in [PeriodicLoss(Float32(1)), PeriodicLoss(Float32(0.5)),
+    for loss in [SmoothedL1HingeLoss(0.5f0), SmoothedL1HingeLoss(1f0),
+                 PeriodicLoss(1f0), PeriodicLoss(0.5f0),
                  LogitDistLoss(), LogitMarginLoss(), ExpLoss(), SigmoidLoss(),
-                 L1EpsilonInsLoss(Float32(1)), L1EpsilonInsLoss(Float32(0.5)),
-                 L2EpsilonInsLoss(Float32(1)), L2EpsilonInsLoss(Float32(0.5))]
+                 L1EpsilonInsLoss(1f0), L1EpsilonInsLoss(0.5f0),
+                 L2EpsilonInsLoss(1f0), L2EpsilonInsLoss(0.5f0),
+                 HuberLoss(1.0f0), QuantileLoss(.8f0), DWDMarginLoss(0.5f0)]
         test_value_float32_preserving(loss)
-        test_value_float32_preserving(Float32(2) * loss)
+        test_value_float32_preserving(2f0 * loss)
     end
 end
 
