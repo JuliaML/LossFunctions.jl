@@ -4,7 +4,7 @@ Distance-based Losses
 This section lists all the subtypes of :class:`DistanceLoss`
 that are implemented in this package.
 
-.. figure:: https://cloud.githubusercontent.com/assets/10854026/20031932/5b2868d0-a380-11e6-92bc-3ee048ecde13.png
+.. figure:: https://rawgithub.com/JuliaML/FileStorage/master/LossFunctions/distance.svg
 
    Distance-based Losses (Regression)
 

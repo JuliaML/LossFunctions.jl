@@ -4,7 +4,7 @@ Margin-based Losses
 This section lists all the subtypes of :class:`MarginLoss`
 that are implemented in this package.
 
-.. figure:: https://cloud.githubusercontent.com/assets/10854026/20660787/9aeb2c28-b54b-11e6-91ca-1dbe265d0ff1.png
+.. figure:: https://rawgithub.com/JuliaML/FileStorage/master/LossFunctions/margin.svg
 
    Margin-based Losses (Classification)
 

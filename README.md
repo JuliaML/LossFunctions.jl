@@ -12,7 +12,7 @@ that are commonly used in Machine Learning._
 
  **Distance-based (Regression)** | **Margin-based (Classification)**
 :-------------------------------:|:----------------------------------:
-![distance_losses](https://cloud.githubusercontent.com/assets/10854026/20031932/5b2868d0-a380-11e6-92bc-3ee048ecde13.png) | ![margin_losses](https://cloud.githubusercontent.com/assets/10854026/20660787/9aeb2c28-b54b-11e6-91ca-1dbe265d0ff1.png)
+![distance_losses](https://rawgithub.com/JuliaML/FileStorage/master/LossFunctions/distance.svg) | ![margin_losses](https://rawgithub.com/JuliaML/FileStorage/master/LossFunctions/margin.svg)
 
 Others: `PeriodicLoss`, `PoissonLoss`, `ScaledLoss`
 
