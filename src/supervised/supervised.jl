@@ -172,6 +172,9 @@ function value_deriv(loss::MarginLoss, target::Number, output::Number)
     (v, target*d)
 end
 
+# Fallback for losses that don't want to take advantage of this
+value_deriv(loss::MarginLoss, agreement::Number) = (value(loss, agreement), deriv(loss, agreement))
+
 # TODO: consider meanvalue(loss, agreement) etc
 
 isunivfishercons(::MarginLoss) = false
@@ -195,6 +198,9 @@ value(loss::DistanceLoss, target::Number, output::Number) = value(loss, output -
 deriv(loss::DistanceLoss, target::Number, output::Number) = deriv(loss, output - target)
 deriv2(loss::DistanceLoss, target::Number, output::Number) = deriv2(loss, output - target)
 value_deriv(loss::DistanceLoss, target::Number, output::Number) = value_deriv(loss, output - target)
+
+# Fallback for losses that don't want to take advantage of this
+value_deriv(loss::DistanceLoss, difference::Number) = (value(loss, difference), deriv(loss, difference))
 
 # TODO: consider meanvalue(loss, difference) etc
 

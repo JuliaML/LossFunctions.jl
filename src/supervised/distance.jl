@@ -28,7 +28,6 @@ function deriv2{P,T<:Number}(loss::LPDistLoss{P}, difference::T)
         (abs2(P)-P) * abs(difference)^P / abs2(difference)
     end
 end
-value_deriv{P}(loss::LPDistLoss{P}, difference::Number) = (value(loss,difference), deriv(loss,difference))
 
 isminimizable{P}(::LPDistLoss{P}) = true
 issymmetric{P}(::LPDistLoss{P}) = true
@@ -72,7 +71,6 @@ sumvalue(loss::L1DistLoss, difference::AbstractArray) = sumabs(difference)
 value(loss::L1DistLoss, difference::Number) = abs(difference)
 deriv{T<:Number}(loss::L1DistLoss, difference::T) = convert(T, sign(difference))
 deriv2{T<:Number}(loss::L1DistLoss, difference::T) = zero(T)
-value_deriv(loss::L1DistLoss, difference::Number) = (abs(difference), sign(difference))
 
 isdifferentiable(::L1DistLoss) = false
 isdifferentiable(::L1DistLoss, at) = at != 0
@@ -113,7 +111,6 @@ sumvalue(loss::L2DistLoss, difference::AbstractArray) = sumabs2(difference)
 value(loss::L2DistLoss, difference::Number) = abs2(difference)
 deriv{T<:Number}(loss::L2DistLoss, difference::T) = T(2) * difference
 deriv2{T<:Number}(loss::L2DistLoss, difference::T) = T(2)
-value_deriv{T<:Number}(loss::L2DistLoss, difference::T) = (abs2(difference), T(2) * difference)
 
 isdifferentiable(::L2DistLoss) = true
 isdifferentiable(::L2DistLoss, at) = true
@@ -476,9 +473,6 @@ function deriv{T1, T2 <: Number}(loss::QuantileLoss{T1}, diff::T2)
     T(diff > 0) - loss.τ
 end
 deriv2{T1, T2 <: Number}(::QuantileLoss{T1}, diff::T2) = zero(promote_type(T1, T2))
-function value_deriv{T1, T2 <: Number}(loss::QuantileLoss{T1}, diff::T2)
-    value(loss, diff), deriv(loss, diff)
-end
 
 issymmetric(loss::QuantileLoss) = loss.τ == 0.5
 isdifferentiable(::QuantileLoss) = false
@@ -490,3 +484,4 @@ islipschitzcont_deriv(::QuantileLoss) = true
 isconvex(::QuantileLoss) = true
 isstrictlyconvex(::QuantileLoss) = false
 isstronglyconvex(::QuantileLoss) = false
+

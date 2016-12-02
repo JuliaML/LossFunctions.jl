@@ -269,7 +269,6 @@ end
 function deriv2{T<:Number}(loss::SmoothedL1HingeLoss, agreement::T)
     agreement < 1 - loss.gamma || agreement > 1 ? zero(T) : one(T) / loss.gamma
 end
-value_deriv(loss::SmoothedL1HingeLoss, agreement::Number) = (value(loss, agreement), deriv(loss, agreement))
 
 isdifferentiable(::SmoothedL1HingeLoss) = true
 isdifferentiable(::SmoothedL1HingeLoss, at) = true
@@ -322,7 +321,6 @@ end
 function deriv2{T<:Number}(loss::ModifiedHuberLoss, agreement::T)
     agreement < -1 || agreement > 1 ? zero(T) : T(2)
 end
-value_deriv(loss::ModifiedHuberLoss, agreement::Number) = (value(loss, agreement), deriv(loss, agreement))
 
 isdifferentiable(::ModifiedHuberLoss) = true
 isdifferentiable(::ModifiedHuberLoss, at) = true
@@ -365,7 +363,6 @@ immutable L2MarginLoss <: MarginLoss end
 value{T<:Number}(loss::L2MarginLoss, agreement::T) = abs2(one(T) - agreement)
 deriv{T<:Number}(loss::L2MarginLoss, agreement::T) = T(2) * (agreement - one(T))
 deriv2{T<:Number}(loss::L2MarginLoss, agreement::T) = T(2)
-value_deriv{T<:Number}(loss::L2MarginLoss, agreement::T) = (abs2(one(T) - agreement), T(2) * (agreement - one(T)))
 
 isunivfishercons(::L2MarginLoss) = true
 isdifferentiable(::L2MarginLoss) = true
@@ -430,7 +427,6 @@ immutable SigmoidLoss <: MarginLoss end
 value(loss::SigmoidLoss, agreement::Number) = one(agreement) - tanh(agreement)
 deriv(loss::SigmoidLoss, agreement::Number) = -abs2(sech(agreement))
 deriv2{T<:Number}(loss::SigmoidLoss, agreement::T) = T(2) * tanh(agreement) * abs2(sech(agreement))
-value_deriv(loss::SigmoidLoss, agreement::Number) = (one(agreement) - tanh(agreement), -abs2(sech(agreement)))
 
 isunivfishercons(::SigmoidLoss) = true
 isdifferentiable(::SigmoidLoss) = true
@@ -486,8 +482,6 @@ function deriv2{T<:Number}(loss::DWDMarginLoss, agreement::T)
     q = loss.q
     agreement <= q/(q+1) ? zero(Float64) : ( (q^(q+1))/((q+1)^q) ) / agreement^(q+2)
 end
-
-value_deriv(loss::DWDMarginLoss, agreement::Number) = (value(loss, agreement), deriv(loss, agreement))
 
 isdifferentiable(::DWDMarginLoss) = true
 isdifferentiable(::DWDMarginLoss, at) = true
