@@ -14,8 +14,10 @@ It is not convex nor continuous and thus seldom used directly.
 Instead one usually works with some classification-calibrated
 surrogate loss, such as one of those listed below.
 
-`L(a) = a < 0 ? 1 : 0`
+``L(a) = \begin{cases} 1 & \quad \text{if } a < 0 \\ 0 & \quad \text{if } a >= 0\\ \end{cases}``
 
+---
+```
               Lossfunction                     Derivative
       ┌────────────┬────────────┐      ┌────────────┬────────────┐
     1 │------------┐            │    1 │                         │
@@ -29,6 +31,7 @@ surrogate loss, such as one of those listed below.
       └────────────┴────────────┘      └────────────┴────────────┘
       -2                        2      -2                        2
                 y * h(x)                         y * h(x)
+```
 """
 immutable ZeroOneLoss <: MarginLoss end
 
@@ -60,8 +63,10 @@ The perceptron loss linearly penalizes every prediction where the
 resulting `agreement <= 0`.
 It is Lipschitz continuous and convex, but not strictly convex.
 
-$L(y, ŷ) = max(0, -y⋅ŷ)$
+``L(a) = \max \{ 0, -a \}``
 
+---
+```
               Lossfunction                     Derivative
       ┌────────────┬────────────┐      ┌────────────┬────────────┐
     2 │\.                       │    0 │            ┌------------│
@@ -75,6 +80,7 @@ $L(y, ŷ) = max(0, -y⋅ŷ)$
       └────────────┴────────────┘      └────────────┴────────────┘
       -2                        2      -2                        2
                  y ⋅ ŷ                            y ⋅ ŷ
+```
 """
 immutable PerceptronLoss <: MarginLoss end
 
@@ -101,8 +107,10 @@ doc"""
 The margin version of the logistic loss. It is infinitely many
 times differentiable, strictly convex, and Lipschitz continuous.
 
-$L(y, ŷ) = ln(1 + exp(-y⋅ŷ))$
+``L(a) = \ln (1 + e^{-a})``
 
+---
+```
               Lossfunction                     Derivative
       ┌────────────┬────────────┐      ┌────────────┬────────────┐
     2 │ \.                      │    0 │                  ._--/""│
@@ -116,6 +124,7 @@ $L(y, ŷ) = ln(1 + exp(-y⋅ŷ))$
       └────────────┴────────────┘      └────────────┴────────────┘
       -2                        2      -4                        4
                  y ⋅ ŷ                            y ⋅ ŷ
+```
 """
 immutable LogitMarginLoss <: MarginLoss end
 value(loss::LogitMarginLoss, agreement::Number) = log1p(exp(-agreement))
@@ -143,8 +152,10 @@ The hinge loss linearly penalizes every predicition where the
 resulting `agreement <= 1` .
 It is Lipschitz continuous and convex, but not strictly convex.
 
-$L(y, ŷ) = max(0, 1 - y⋅ŷ)$
+``L(a) = \max \{ 0, 1 - a \}``
 
+---
+```
               Lossfunction                     Derivative
       ┌────────────┬────────────┐      ┌────────────┬────────────┐
     3 │'\.                      │    0 │                  ┌------│
@@ -158,6 +169,7 @@ $L(y, ŷ) = max(0, 1 - y⋅ŷ)$
       └────────────┴────────────┘      └────────────┴────────────┘
       -2                        2      -2                        2
                  y ⋅ ŷ                            y ⋅ ŷ
+```
 """
 immutable L1HingeLoss <: MarginLoss end
 typealias HingeLoss L1HingeLoss
@@ -187,8 +199,10 @@ The truncated least squares loss quadratically penalizes every
 predicition where the resulting `agreement <= 1`.
 It is locally Lipschitz continuous and convex, but not strictly convex.
 
-$L(y, ŷ) = max(0, 1 - y⋅ŷ)²$
+``L(a) = \max \{ 0, 1 - a \}^2``
 
+---
+```
               Lossfunction                     Derivative
       ┌────────────┬────────────┐      ┌────────────┬────────────┐
     5 │     .                   │    0 │                 ,r------│
@@ -202,6 +216,7 @@ $L(y, ŷ) = max(0, 1 - y⋅ŷ)²$
       └────────────┴────────────┘      └────────────┴────────────┘
       -2                        2      -2                        2
                  y ⋅ ŷ                            y ⋅ ŷ
+```
 """
 immutable L2HingeLoss <: MarginLoss end
 
@@ -230,9 +245,10 @@ doc"""
 As the name suggests a smoothed version of the L1 hinge loss.
 It is Lipschitz continuous and convex, but not strictly convex.
 
-$L(y, ŷ) = 0.5 / γ * max(0, 1 - y⋅ŷ)²    ... y⋅ŷ ≥ 1 - γ$
-$L(y, ŷ) = 1 - γ / 2 - y⋅ŷ               ... otherwise$
+``L(a) = \begin{cases} \frac{0.5}{\gamma} \cdot \max \{ 0, 1 - a \} ^2 & \quad \text{if } a \ge 1 - \gamma \\ 1 - \frac{\gamma}{2} - a & \quad \text{otherwise}\\ \end{cases}``
 
+---
+```
               Lossfunction (γ=1)               Derivative
       ┌────────────┬────────────┐      ┌────────────┬────────────┐
     2 │\.                       │    0 │                 ,r------│
@@ -246,6 +262,7 @@ $L(y, ŷ) = 1 - γ / 2 - y⋅ŷ               ... otherwise$
       └────────────┴────────────┘      └────────────┴────────────┘
       -2                        2      -2                        2
                  y ⋅ ŷ                            y ⋅ ŷ
+```
 """
 immutable SmoothedL1HingeLoss{T<:AbstractFloat} <: MarginLoss
     gamma::T
@@ -295,9 +312,10 @@ doc"""
 A special (scaled) case of the `SmoothedL1HingeLoss` with `γ=4`.
 It is Lipschitz continuous and convex, but not strictly convex.
 
-$L(y, ŷ) = max(0, 1 - y⋅ŷ)^2    ... y⋅ŷ >= -1$
-$L(y, ŷ) = -4⋅y⋅ŷ               ... otherwise$
+``L(a) = \begin{cases} \max \{ 0, 1 - a \} ^2 & \quad \text{if } a \ge -1 \\ - 4 a & \quad \text{otherwise}\\ \end{cases}``
 
+---
+```
               Lossfunction                     Derivative
       ┌────────────┬────────────┐      ┌────────────┬────────────┐
     5 │    '.                   │    0 │                .+-------│
@@ -311,6 +329,7 @@ $L(y, ŷ) = -4⋅y⋅ŷ               ... otherwise$
       └────────────┴────────────┘      └────────────┴────────────┘
       -2                        2      -2                        2
                  y ⋅ ŷ                            y ⋅ ŷ
+```
 """
 immutable ModifiedHuberLoss <: MarginLoss end
 
@@ -348,8 +367,10 @@ The margin-based least-squares loss for classification,
 which penalizes every prediction where `agreement != 1` quadratically.
 It is locally Lipschitz continuous and strongly convex.
 
-$L(y, ŷ) = (1 - y⋅ŷ)^2$
+``L(a) = {\left( 1 - a \right)}^2``
 
+---
+```
               Lossfunction                     Derivative
       ┌────────────┬────────────┐      ┌────────────┬────────────┐
     5 │     .                   │    2 │                       ,r│
@@ -363,6 +384,7 @@ $L(y, ŷ) = (1 - y⋅ŷ)^2$
       └────────────┴────────────┘      └────────────┴────────────┘
       -2                        2      -2                        2
                  y ⋅ ŷ                            y ⋅ ŷ
+```
 """
 immutable L2MarginLoss <: MarginLoss end
 
@@ -392,7 +414,7 @@ penalizes every prediction exponentially. It is infinitely many
 times differentiable, locally Lipschitz continuous and strictly
 convex.
 
-$L(y, ŷ) = exp(-y⋅ŷ)$
+``L(a) = e^{-a}``
 
 """
 immutable ExpLoss <: MarginLoss end
@@ -423,7 +445,7 @@ Continuous loss which penalizes every prediction with a loss
 within in the range (0,2). It is infinitely many times
 differentiable, Lipschitz continuous but nonconvex.
 
-$L(y, ŷ) = 1 - tanh(y⋅ŷ)$
+``L(a) = 1 - \tanh(a)``
 
 """
 immutable SigmoidLoss <: MarginLoss end
@@ -454,8 +476,7 @@ DWDMarginLoss stands for Distance Weighted Discrimination Margin loss.
 Serves as an alternative to SVM loss function, with similar performance.
 It is Lipschitz continuous and convex, but not strictly convex.
 
-$L(y, ŷ) =  1 - y⋅ŷ                           ... y⋅ŷ ≤ q/(q+1)$
-$L(y, ŷ) = (q^q/(q+1)^(q+1)) / (y⋅ŷ)^q        ... otherwise$
+``L(a) = \begin{cases} 1 - a & \quad \text{if } a \ge \frac{q}{q+1} \\ \frac{1}{a^q} \frac{q^q}{(q+1)^{q+1}} & \quad \text{otherwise}\\ \end{cases}``
 
 """
 immutable DWDMarginLoss{T<:AbstractFloat} <: MarginLoss

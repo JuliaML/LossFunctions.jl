@@ -5,7 +5,7 @@ The P-th power absolute distance loss. It is Lipschitz continuous
 iff `P == 1`, convex if and only if `P >= 1`, and strictly convex
 iff `P > 1`.
 
-$L(y, ŷ) = |ŷ - y|^P$
+``L(r) = |r|^P``
 """
 immutable LPDistLoss{P} <: DistanceLoss
     LPDistLoss() = typeof(P) <: Number ? new() : error()
@@ -49,8 +49,10 @@ doc"""
 The absolute distance loss. Special case of the `LPDistLoss` with `P=1`.
 It is Lipschitz continuous and convex, but not strictly convex.
 
-$L(y, ŷ) = |ŷ - y|$
+``L(r) = |r|``
 
+---
+```
               Lossfunction                     Derivative
       ┌────────────┬────────────┐      ┌────────────┬────────────┐
     3 │\.                     ./│    1 │            ┌------------│
@@ -64,6 +66,7 @@ $L(y, ŷ) = |ŷ - y|$
       └────────────┴────────────┘      └────────────┴────────────┘
       -3                        3      -3                        3
                  ŷ - y                            ŷ - y
+```
 """
 typealias L1DistLoss LPDistLoss{1}
 
@@ -89,8 +92,10 @@ doc"""
 The least squares loss. Special case of the `LPDistLoss` with `P=2`.
 It is strictly convex.
 
-$L(y, ŷ) = |ŷ - y|²$
+``L(r) = |r|^2``
 
+---
+```
               Lossfunction                     Derivative
       ┌────────────┬────────────┐      ┌────────────┬────────────┐
     9 │\                       /│    3 │                   .r/   │
@@ -104,6 +109,7 @@ $L(y, ŷ) = |ŷ - y|²$
       └────────────┴────────────┘      └────────────┴────────────┘
       -3                        3      -2                        2
                  ŷ - y                            ŷ - y
+```
 """
 typealias L2DistLoss LPDistLoss{2}
 
@@ -129,7 +135,7 @@ doc"""
 
 Measures distance on a circle of specified circumference `c`.
 
-$L(y, ŷ) = 1 - cos((ŷ-y)*2π/c)$
+``L(r) = 1 - \cos \left( \frac{2 r \pi}{c} \right)``
 """
 immutable PeriodicLoss{T<:AbstractFloat} <: DistanceLoss
     k::T   # k = 2π/circumference
@@ -169,9 +175,10 @@ For large values of `d` it becomes close to the `L1DistLoss`,
 while for small values of `d` it resembles the `L2DistLoss`.
 It is Lipschitz continuous and convex, but not strictly convex.
 
-$L(y, ŷ) =  1/2 ⋅ (ŷ-y)²    , if |ŷ-y| < d$
-$L(y, ŷ) =  d⋅(|ŷ-y| - d/2) , otherwise$
+``L(r) = \begin{cases} \frac{r^2}{2} & \quad \text{if } | r | \le \alpha \\ \alpha | r | - \frac{\alpha^3}{2} & \quad \text{otherwise}\\ \end{cases}``
 
+---
+```
               Lossfunction (d=1)               Derivative
       ┌────────────┬────────────┐      ┌────────────┬────────────┐
     2 │                         │    1 │                .+-------│
@@ -185,6 +192,7 @@ $L(y, ŷ) =  d⋅(|ŷ-y| - d/2) , otherwise$
       └────────────┴────────────┘      └────────────┴────────────┘
       -2                        2      -2                        2
                  ŷ - y                            ŷ - y
+```
 """
 type HuberLoss{T<:AbstractFloat} <: DistanceLoss
     d::T   # boundary between quadratic and linear loss
@@ -250,9 +258,11 @@ regression. It ignores deviances smaller than `ϵ`, but penalizes
 larger deviances linarily.
 It is Lipschitz continuous and convex, but not strictly convex.
 
-$L(y, ŷ) = max(0, |ŷ - y| - ɛ)$
+``L(r) = \max \{ 0, | r | - \epsilon \}``
 
-              Lossfunction (ɛ=1)               Derivative
+---
+```
+              Lossfunction (ϵ=1)               Derivative
       ┌────────────┬────────────┐      ┌────────────┬────────────┐
     2 │\                       /│    1 │                  ┌------│
       │ \                     / │      │                  |      │
@@ -265,6 +275,7 @@ $L(y, ŷ) = max(0, |ŷ - y| - ɛ)$
       └────────────┴────────────┘      └────────────┴────────────┘
       -3                        3      -2                        2
                  ŷ - y                            ŷ - y
+```
 """
 immutable L1EpsilonInsLoss{T<:AbstractFloat} <: DistanceLoss
     ε::T
@@ -312,9 +323,11 @@ The `ϵ`-insensitive loss. Typically used in linear support vector
 regression. It ignores deviances smaller than `ϵ`, but penalizes
 larger deviances quadratically. It is convex, but not strictly convex.
 
-$L(y, ŷ) = max(0, |ŷ - y| - ɛ)²$
+``L(r) = \max \{ 0, | r | - \epsilon \}^2``
 
-              Lossfunction (ɛ=0.5)             Derivative
+---
+```
+              Lossfunction (ϵ=0.5)             Derivative
       ┌────────────┬────────────┐      ┌────────────┬────────────┐
     8 │                         │    1 │                  /      │
       │:                       :│      │                 /       │
@@ -327,6 +340,7 @@ $L(y, ŷ) = max(0, |ŷ - y| - ɛ)²$
       └────────────┴────────────┘      └────────────┴────────────┘
       -3                        3      -2                        2
                  ŷ - y                            ŷ - y
+```
 """
 immutable L2EpsilonInsLoss{T<:AbstractFloat} <: DistanceLoss
     ε::T
@@ -376,8 +390,10 @@ doc"""
 The distance-based logistic loss for regression.
 It is strictly convex and Lipschitz continuous.
 
-$L(y, ŷ) = -ln(4 ⋅ exp(ŷ - y) / (1 + exp(ŷ - y))²)$
+``L(r) = - \ln \frac{4 e^r}{(1 + e^r)^2}``
 
+---
+```
               Lossfunction                     Derivative
       ┌────────────┬────────────┐      ┌────────────┬────────────┐
     2 │                         │    1 │                   _--'''│
@@ -391,6 +407,7 @@ $L(y, ŷ) = -ln(4 ⋅ exp(ŷ - y) / (1 + exp(ŷ - y))²)$
       └────────────┴────────────┘      └────────────┴────────────┘
       -3                        3      -4                        4
                  ŷ - y                            ŷ - y
+```
 """
 immutable LogitDistLoss <: DistanceLoss end
 
@@ -434,8 +451,10 @@ can be used to estimate conditional τ-quantiles.
 It is Lipschitz continuous and convex, but not strictly convex.
 Furthermore it is symmetric if and only if `τ = 1/2`.
 
-$L(y, ŷ) = (ŷ - y) ⋅ ((ŷ > y) - τ))$
+``L(r) = \begin{cases} -\left( 1 - \tau  \right) r & \quad \text{if } r < 0 \\ \tau r & \quad \text{if } r \ge 0 \\ \end{cases}``
 
+---
+```
               Lossfunction (τ=0.7)             Derivative
       ┌────────────┬────────────┐      ┌────────────┬────────────┐
     2 │'\                       │  0.3 │            ┌------------│
@@ -449,6 +468,7 @@ $L(y, ŷ) = (ŷ - y) ⋅ ((ŷ > y) - τ))$
       └────────────┴────────────┘      └────────────┴────────────┘
       -3                        3      -3                        3
                  ŷ - y                            ŷ - y
+```
 """
 immutable QuantileLoss{T <: AbstractFloat} <: DistanceLoss
     τ::T
