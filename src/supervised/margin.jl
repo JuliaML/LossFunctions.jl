@@ -149,7 +149,7 @@ doc"""
     L1HingeLoss <: MarginLoss
 
 The hinge loss linearly penalizes every predicition where the
-resulting `agreement <= 1` .
+resulting `agreement < 1` .
 It is Lipschitz continuous and convex, but not strictly convex.
 
 ``L(a) = \max \{ 0, 1 - a \}``
@@ -196,7 +196,7 @@ doc"""
     L2HingeLoss <: MarginLoss
 
 The truncated least squares loss quadratically penalizes every
-predicition where the resulting `agreement <= 1`.
+predicition where the resulting `agreement < 1`.
 It is locally Lipschitz continuous and convex, but not strictly convex.
 
 ``L(a) = \max \{ 0, 1 - a \}^2``
@@ -309,7 +309,7 @@ isclipable(::SmoothedL1HingeLoss) = true
 doc"""
     ModifiedHuberLoss <: MarginLoss
 
-A special (scaled) case of the `SmoothedL1HingeLoss` with `γ=4`.
+A special (4 times scaled) case of the `SmoothedL1HingeLoss` with `γ=2`.
 It is Lipschitz continuous and convex, but not strictly convex.
 
 ``L(a) = \begin{cases} \max \{ 0, 1 - a \} ^2 & \quad \text{if } a \ge -1 \\ - 4 a & \quad \text{otherwise}\\ \end{cases}``

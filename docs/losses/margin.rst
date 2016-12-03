@@ -14,15 +14,20 @@ ZeroOneLoss
 .. class:: ZeroOneLoss
 
    The classical classification loss. It penalizes every
-   missclassified observation with a loss of `1` while every
-   correctly classified observation has a loss of `0`.
+   missclassified observation with a loss of :math:`1` while every
+   correctly classified observation has a loss of :math:`0`.
    It is not convex nor continuous and thus seldomly used directly.
    Instead one usually works with some classification-calibrated
    surrogate loss, such as one of those listed below.
 
-.. math::
++--------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------+
+| Lossfunction                                                                                           | Derivative                                                                                             |
++========================================================================================================+========================================================================================================+
+| .. image:: https://rawgit.com/JuliaML/FileStorage/master/LossFunctions/ZeroOneLoss1.svg                | .. image:: https://rawgit.com/JuliaML/FileStorage/master/LossFunctions/ZeroOneLoss2.svg                |
++--------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------+
+| .. math:: L(a) = \begin{cases} 1 & \quad \text{if } a < 0 \\ 0 & \quad \text{otherwise}\\ \end{cases}  | .. math:: L'(a) = 0                                                                                    |
++--------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------+
 
-   L(a) = \begin{cases} 1 & \quad \text{if } a < 0 \\ 0 & \quad \text{if } a >= 0\\ \end{cases}
 
 PerceptronLoss
 ---------------
@@ -30,12 +35,17 @@ PerceptronLoss
 .. class:: PerceptronLoss
 
    The perceptron loss linearly penalizes every prediction where the
-   resulting ``agreement`` :math:`a \le 0`.
-   It is Lipshitz continuous and convex, but not strictly convex.
+   resulting agreement :math:`a < 0`.
+   It is Lipschitz continuous and convex, but not strictly convex.
 
-.. math::
++---------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------+
+| Lossfunction                                                                                            | Derivative                                                                                              |
++=========================================================================================================+=========================================================================================================+
+| .. image:: https://rawgit.com/JuliaML/FileStorage/master/LossFunctions/PerceptronLoss1.svg              | .. image:: https://rawgit.com/JuliaML/FileStorage/master/LossFunctions/PerceptronLoss2.svg              |
++---------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------+
+| .. math:: L(a) = \max \{ 0, - a \}                                                                      | .. math:: L'(a) = \begin{cases} -1 & \quad \text{if } a < 0 \\ 0 & \quad \text{otherwise}\\ \end{cases} |
++---------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------+
 
-   L(a) = \max \{ 0, - a \}
 
 L1HingeLoss
 ------------
@@ -43,39 +53,17 @@ L1HingeLoss
 .. class:: L1HingeLoss
 
    The hinge loss linearly penalizes every predicition where the
-   resulting ``agreement`` :math:`a \le 1` .
-   It is Lipshitz continuous and convex, but not strictly convex.
+   resulting agreement :math:`a < 1` .
+   It is Lipschitz continuous and convex, but not strictly convex.
 
-.. math::
++---------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------+
+| Lossfunction                                                                                            | Derivative                                                                                              |
++=========================================================================================================+=========================================================================================================+
+| .. image:: https://rawgit.com/JuliaML/FileStorage/master/LossFunctions/L1HingeLoss1.svg                 | .. image:: https://rawgit.com/JuliaML/FileStorage/master/LossFunctions/L1HingeLoss2.svg                 |
++---------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------+
+| .. math:: L(a) = \max \{ 0, 1 - a \}                                                                    | .. math:: L'(a) = \begin{cases} -1 & \quad \text{if } a < 1 \\ 0 & \quad \text{otherwise}\\ \end{cases} |
++---------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------+
 
-   L(a) = \max \{ 0, 1 - a \}
-
-
-L2HingeLoss
-------------
-
-.. class:: L2HingeLoss
-
-   The truncated least squares loss quadratically penalizes every
-   predicition where the resulting ``agreement`` :math:`a \le 1` .
-   It is locally Lipshitz continuous and convex,
-   but not strictly convex.
-
-.. math::
-
-   L(a) = \max \{ 0, 1 - a \} ^2
-
-LogitMarginLoss
-----------------
-
-.. class:: LogitMarginLoss
-
-   The margin version of the logistic loss. It is infinitely many
-   times differentiable, strictly convex, and lipschitz continuous.
-
-.. math::
-
-   L(a) = \ln (1 + e^{-a})
 
 SmoothedL1HingeLoss
 ---------------------
@@ -85,66 +73,34 @@ SmoothedL1HingeLoss
    .. attribute:: γ
 
    As the name suggests a smoothed version of the L1 hinge loss.
-   It is Lipshitz continuous and convex, but not strictly convex.
+   It is Lipschitz continuous and convex, but not strictly convex.
 
-.. math::
++-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Lossfunction                                                                                                                                                                            | Derivative                                                                                                                                                                              |
++=========================================================================================================================================================================================+=========================================================================================================================================================================================+
+| .. image:: https://rawgit.com/JuliaML/FileStorage/master/LossFunctions/SmoothedL1HingeLoss1.svg                                                                                         | .. image:: https://rawgit.com/JuliaML/FileStorage/master/LossFunctions/SmoothedL1HingeLoss2.svg                                                                                         |
++-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| .. math:: L(a) = \begin{cases} \frac{1}{2 \gamma} \cdot \max \{ 0, 1 - a \} ^2 & \quad \text{if } a \ge 1 - \gamma \\ 1 - \frac{\gamma}{2} - a & \quad \text{otherwise}\\ \end{cases}   | .. math:: L'(a) = \text{...}                                                                                                                                                            |
++-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
-   L(a) = \begin{cases} \frac{0.5}{\gamma} \cdot \max \{ 0, 1 - a \} ^2 & \quad \text{if } a \ge 1 - \gamma \\ 1 - \frac{\gamma}{2} - a & \quad \text{otherwise}\\ \end{cases}
 
 ModifiedHuberLoss
 -------------------
 
 .. class:: ModifiedHuberLoss
 
-   A special (scaled) case of the :class:`SmoothedL1HingeLoss` with
-   :math:`\gamma = 4`.
-   It is Lipshitz continuous and convex, but not strictly convex.
+   A special (4 times scaled) case of the :class:`SmoothedL1HingeLoss`
+   with :math:`\gamma = 2`.
+   It is Lipschitz continuous and convex, but not strictly convex.
 
-.. math::
++--------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
+| Lossfunction                                                                                                                         | Derivative                                                                                                                           |
++======================================================================================================================================+======================================================================================================================================+
+| .. image:: https://rawgit.com/JuliaML/FileStorage/master/LossFunctions/ModifiedHuberLoss1.svg                                        | .. image:: https://rawgit.com/JuliaML/FileStorage/master/LossFunctions/ModifiedHuberLoss2.svg                                        |
++--------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
+| .. math::  L(a) = \begin{cases} \max \{ 0, 1 - a \} ^2 & \quad \text{if } a \ge -1 \\ - 4 a & \quad \text{otherwise}\\ \end{cases}   | .. math:: L'(a) = \text{...}                                                                                                         |
++--------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
 
-   L(a) = \begin{cases} \max \{ 0, 1 - a \} ^2 & \quad \text{if } a \ge -1 \\ - 4 a & \quad \text{otherwise}\\ \end{cases}
-
-
-L2MarginLoss
--------------
-
-.. class:: L2MarginLoss
-
-   The margin-based least-squares loss for classification, which
-   quadratically penalizes every prediction where :math:`a \ne 1`.
-   It is locally Lipschitz continuous and strongly convex.
-
-.. math::
-
-   L(a) = {\left( 1 - a \right)}^2
-
-ExpLoss
---------
-
-.. class:: ExpLoss
-
-   The margin-based exponential Loss used for classification,
-   which penalizes every prediction exponentially. It is
-   infinitely many times differentiable, locally Lipschitz
-   continuous and strictly convex, but not clipable.
-
-.. math::
-
-   L(a) = e^{-a}
-
-SigmoidLoss
-------------
-
-.. class:: SigmoidLoss
-
-   The so called sigmoid loss is a continuous margin-base loss
-   which penalizes every prediction with a loss within in the
-   range (0,2). It is infinitely many times differentiable,
-   Lipschitz continuous but nonconvex.
-
-.. math::
-
-   L(a) = 1 - \tanh(a)
 
 DWDMarginLoss
 -------------
@@ -157,7 +113,104 @@ DWDMarginLoss
    A differentiable generalization of the L1 hinge loss that is
    different than the :class:`SmoothedL1HingeLoss`
 
-.. math::
++-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Lossfunction                                                                                                                                                                            | Derivative                                                                                                                                                                              |
++=========================================================================================================================================================================================+=========================================================================================================================================================================================+
+| .. image:: https://rawgit.com/JuliaML/FileStorage/master/LossFunctions/DWDMarginLoss1.svg                                                                                               | .. image:: https://rawgit.com/JuliaML/FileStorage/master/LossFunctions/DWDMarginLoss2.svg                                                                                               |
++-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| .. math:: L(a) = \begin{cases} 1 - a & \quad \text{if } a \ge \frac{q}{q+1} \\ \frac{1}{a^q} \frac{q^q}{(q+1)^{q+1}} & \quad \text{otherwise}\\ \end{cases}                             | .. math:: L'(a) = \text{...}                                                                                                                                                            |
++-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
-   L(a) = \begin{cases} 1 - a & \quad \text{if } a \ge \frac{q}{q+1} \\ \frac{1}{a^q} \frac{q^q}{(q+1)^{q+1}} & \quad \text{otherwise}\\ \end{cases}
+
+L2MarginLoss
+-------------
+
+.. class:: L2MarginLoss
+
+   The margin-based least-squares loss for classification, which
+   quadratically penalizes every prediction where :math:`a \ne 1`.
+   It is locally Lipschitz continuous and strongly convex.
+
++-----------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
+| Lossfunction                                                                                                                | Derivative                                                                                                                  |
++=============================================================================================================================+=============================================================================================================================+
+| .. image:: https://rawgit.com/JuliaML/FileStorage/master/LossFunctions/L2MarginLoss1.svg                                    | .. image:: https://rawgit.com/JuliaML/FileStorage/master/LossFunctions/L2MarginLoss2.svg                                    |
++-----------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
+| .. math:: L(a) = {\left( 1 - a \right)}^2                                                                                   | .. math:: L'(a) = 2 \left( a - 1 \right)                                                                                    |
++-----------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
+
+
+L2HingeLoss
+------------
+
+.. class:: L2HingeLoss
+
+   The truncated version of the least-squares loss. It quadratically
+   penalizes every predicition where the resulting agreement
+   :math:`a < 1` . It is locally Lipschitz continuous and convex,
+   but not strictly convex.
+
++-----------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
+| Lossfunction                                                                                                                | Derivative                                                                                                                  |
++=============================================================================================================================+=============================================================================================================================+
+| .. image:: https://rawgit.com/JuliaML/FileStorage/master/LossFunctions/L2HingeLoss1.svg                                     | .. image:: https://rawgit.com/JuliaML/FileStorage/master/LossFunctions/L2HingeLoss2.svg                                     |
++-----------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
+| .. math:: L(a) = \max \{ 0, 1 - a \} ^2                                                                                     | .. math:: L'(a) = \begin{cases} 2 \left( a - 1 \right) & \quad \text{if } a < 1 \\ 0 & \quad \text{otherwise}\\ \end{cases} |
++-----------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
+
+
+LogitMarginLoss
+----------------
+
+.. class:: LogitMarginLoss
+
+   The margin version of the logistic loss. It is infinitely many
+   times differentiable, strictly convex, and Lipschitz continuous.
+
++-----------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
+| Lossfunction                                                                                                                | Derivative                                                                                                                  |
++=============================================================================================================================+=============================================================================================================================+
+| .. image:: https://rawgit.com/JuliaML/FileStorage/master/LossFunctions/LogitMarginLoss1.svg                                 | .. image:: https://rawgit.com/JuliaML/FileStorage/master/LossFunctions/LogitMarginLoss2.svg                                 |
++-----------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
+| .. math:: L(a) = \ln (1 + e^{-a})                                                                                           | .. math:: L'(a) = - \frac{1}{1 + e^a}                                                                                       |
++-----------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
+
+
+ExpLoss
+--------
+
+.. class:: ExpLoss
+
+   The margin-based exponential Loss used for classification,
+   which penalizes every prediction exponentially. It is
+   infinitely many times differentiable, locally Lipschitz
+   continuous and strictly convex, but not clipable.
+
++----------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------+
+| Lossfunction                                                                           | Derivative                                                                             |
++========================================================================================+========================================================================================+
+| .. image:: https://rawgit.com/JuliaML/FileStorage/master/LossFunctions/ExpLoss1.svg    | .. image:: https://rawgit.com/JuliaML/FileStorage/master/LossFunctions/ExpLoss2.svg    |
++----------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------+
+| .. math:: L(a) = e^{-a}                                                                | .. math:: L'(a) = - e^{-a}                                                             |
++----------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------+
+
+
+SigmoidLoss
+------------
+
+.. class:: SigmoidLoss
+
+   The so called sigmoid loss is a continuous margin-base loss
+   which penalizes every prediction with a loss within in the
+   range (0,2). It is infinitely many times differentiable,
+   Lipschitz continuous but nonconvex.
+
++-----------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------+
+| Lossfunction                                                                            | Derivative                                                                              |
++=========================================================================================+=========================================================================================+
+| .. image:: https://rawgit.com/JuliaML/FileStorage/master/LossFunctions/SigmoidLoss1.svg | .. image:: https://rawgit.com/JuliaML/FileStorage/master/LossFunctions/SigmoidLoss2.svg |
++-----------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------+
+| .. math:: L(a) = 1 - \tanh(a)                                                           | .. math:: L'(a) = - \textrm{sech}^2 (a)                                                 |
++-----------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------+
+
 
