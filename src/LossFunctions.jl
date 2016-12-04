@@ -49,7 +49,8 @@ export
     CrossentropyLoss,
     ZeroOneLoss,
 
-    ScaledLoss
+    ScaledLoss,
+    scaledloss
 
 include("common.jl")
 
