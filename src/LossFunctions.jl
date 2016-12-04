@@ -49,6 +49,7 @@ export
     CrossentropyLoss,
     ZeroOneLoss,
 
+    weightedloss,
     scaledloss
 
 include("common.jl")
@@ -58,6 +59,7 @@ include("supervised/sparse.jl")
 include("supervised/distance.jl")
 include("supervised/margin.jl")
 include("supervised/scaledloss.jl")
+include("supervised/weightedbinary.jl")
 include("supervised/other.jl")
 include("supervised/io.jl")
 
@@ -65,6 +67,7 @@ include("deprecate.jl")
 
 # allow using some special losses as function
 (loss::ScaledSupervisedLoss)(target, output) = value(loss, target, output)
+(loss::WeightedBinaryLoss)(target, output) = value(loss, target, output)
 
 # allow using SupervisedLoss as function
 for T in filter(isleaftype,subtypes(SupervisedLoss))

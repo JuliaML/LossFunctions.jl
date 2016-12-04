@@ -12,6 +12,22 @@ Base.print(io::IO, loss::DWDMarginLoss, args...) = print(io, typeof(loss).name.n
 Base.print(io::IO, loss::PeriodicLoss, args...) = print(io, typeof(loss).name.name, " with c = $(round(2π / loss.k,1))", args...)
 Base.print{T,K}(io::IO, loss::ScaledLoss{T,K}, args...) = print(io, "$(K) * ($(loss.loss))", args...)
 
+# Pretty print weighted loss
+_round(num) = round(num) == round(num,1) ? round(Int, num) : round(num, 1)
+function _relation(num)
+    if num <= 0
+        "negative only"
+    elseif num >= 1
+        "positive only"
+    elseif num < 0.5
+        "1:$(_round((1-num)/num)) weighted"
+    else
+        "$(_round(num/(1-num))):1 weighted"
+    end
+end
+
+Base.print{T,W}(io::IO, loss::WeightedBinaryLoss{T,W}, args...) = print(io, "$(_relation(W)) $(loss.loss)", args...)
+
 # -------------------------------------------------------------
 # Plot Recipes
 

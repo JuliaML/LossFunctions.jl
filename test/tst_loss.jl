@@ -266,6 +266,20 @@ function test_scaledloss(l::Loss, n_vec)
     end
 end
 
+function test_weightedloss(l::MarginLoss, t_vec, y_vec)
+    @testset "Weighted version for $(l): " begin
+        for w in (0.2, 0.7)
+            wl = weightedloss(l, w)
+            @test typeof(wl) <: LossFunctions.WeightedBinaryLoss{typeof(l),w}
+            @test wl == @inferred(weightedloss(l, Val{w}))
+            for t in t_vec
+                for y in y_vec
+                end
+            end
+        end
+    end
+end
+
 # ====================================================================
 
 @testset "Test typealias" begin
@@ -464,6 +478,13 @@ end
     for loss in margin_losses
         test_scaledloss(loss, [-1.,1], -10:0.1:10)
         test_scaledloss(loss, -10:0.1:10)
+    end
+end
+
+@testset "Test margin-based weighted loss" begin
+    for loss in margin_losses
+        test_weightedloss(loss, [-1.,1], -10:0.1:10)
+        #test_weightedloss(loss, -10:0.1:10)
     end
 end
 
