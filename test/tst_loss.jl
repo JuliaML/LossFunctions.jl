@@ -213,7 +213,8 @@ end
 function test_scaledloss(l::Loss, t_vec, y_vec)
     @testset "Scaling for $(l): " begin
         for λ = (2.0, 2)
-            sl = ScaledLoss(l,λ)
+            sl = scaledloss(l,λ)
+            @test sl == @inferred(scaledloss(l,Val{λ}))
             @test sl == λ * l
             for t in t_vec
                 for y in y_vec
@@ -232,7 +233,8 @@ end
 function test_scaledloss(l::Loss, n_vec)
     @testset "Scaling for $(l): " begin
         for λ = (2.0, 2)
-            sl = ScaledLoss(l,λ)
+            sl = scaledloss(l,λ)
+            @test sl == @inferred(scaledloss(l,Val{λ}))
             @test sl == λ * l
             for n in n_vec
                 @test LossFunctions.value(sl,n) == @inferred(sl(n))
@@ -470,11 +472,17 @@ end
     end
 end
 
+typealias FooLoss LossFunctions.ScaledDistanceLoss{L2EpsilonInsLoss,2}
+
 @testset "Test distance-based scaled loss" begin
     for loss in distance_losses
         test_scaledloss(loss, -20:.2:20, -20:0.5:20)
         test_scaledloss(loss, -20:0.5:20)
     end
+
+    l = @inferred FooLoss(1.2)
+    @test l.loss == L2EpsilonInsLoss(1.2)
+    @test l(7.2) == 2 * l.loss(7.2)
 end
 
 @testset "Test sparse array conventions for margin-based losses" begin

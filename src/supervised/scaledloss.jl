@@ -1,21 +1,25 @@
 for KIND in (:MarginLoss, :DistanceLoss)
+    SCALEDKIND = Symbol("Scaled", KIND)
     @eval begin
-        immutable $(Symbol("Scaled", KIND)){L<:$KIND,T<:Number} <: $KIND
+        immutable ($SCALEDKIND){L<:$KIND,K} <: $KIND
             loss::L
-            factor::T
+
+            ($SCALEDKIND)(args...) = typeof(K) <: Number ? new(L(args...)) : error()
+            ($SCALEDKIND)(loss::L) = typeof(K) <: Number ? new(loss) : error()
         end
-        (*)(factor::Number, loss::$KIND) = $(Symbol("Scaled", KIND))(loss, factor)
+
+        scaledloss{T<:$KIND,K}(loss::T, ::Type{Val{K}}) = ($SCALEDKIND){T,K}(loss)
+        ($SCALEDKIND){T}(loss::T, k::Number) = ($SCALEDKIND){T,k}(loss)
+        (*)(k::Number, loss::$KIND) = ($SCALEDKIND)(loss, k)
     end
 end
 
-typealias ScaledLoss Union{ScaledMarginLoss, ScaledDistanceLoss}
+typealias ScaledLoss{T,K} Union{ScaledMarginLoss{T,K}, ScaledDistanceLoss{T,K}}
 
-ScaledLoss(l::Loss, factor::Number) = factor * l
-
-value_deriv(l::ScaledLoss, num::Number) = (l.factor * value(l.loss, num), l.factor * deriv(l.loss, num))
+scaledloss(l::Loss, k::Number) = k * l
 
 for fun in (:value, :deriv, :deriv2)
-    @eval ($fun)(l::ScaledLoss, num::Number) = l.factor .* ($fun)(l.loss, num)
+    @eval ($fun){T,K}(l::ScaledLoss{T,K}, num::Number) = K .* ($fun)(l.loss, num)
 end
 
 for prop in [:isminimizable, :isdifferentiable,
