@@ -214,6 +214,15 @@ function test_scaledloss(l::Loss, t_vec, y_vec)
     @testset "Scaling for $(l): " begin
         for λ = (2.0, 2)
             sl = scaledloss(l,λ)
+            if typeof(l) <: MarginLoss
+                @test typeof(sl) <: LossFunctions.ScaledMarginLoss{typeof(l),λ}
+            elseif typeof(l) <: DistanceLoss
+                @test typeof(sl) <: LossFunctions.ScaledDistanceLoss{typeof(l),λ}
+            else
+                @test typeof(sl) <: LossFunctions.ScaledSupervisedLoss{typeof(l),λ}
+            end
+            @test 3 * sl == @inferred(scaledloss(sl,Val{3}))
+            @test (λ*3) * l == @inferred(scaledloss(sl,Val{3}))
             @test sl == @inferred(scaledloss(l,Val{λ}))
             @test sl == λ * l
             for t in t_vec
@@ -234,6 +243,13 @@ function test_scaledloss(l::Loss, n_vec)
     @testset "Scaling for $(l): " begin
         for λ = (2.0, 2)
             sl = scaledloss(l,λ)
+            if typeof(l) <: MarginLoss
+                @test typeof(sl) <: LossFunctions.ScaledMarginLoss{typeof(l),λ}
+            elseif typeof(l) <: DistanceLoss
+                @test typeof(sl) <: LossFunctions.ScaledDistanceLoss{typeof(l),λ}
+            else
+                @test typeof(sl) <: LossFunctions.ScaledSupervisedLoss{typeof(l),λ}
+            end
             @test sl == @inferred(scaledloss(l,Val{λ}))
             @test sl == λ * l
             for n in n_vec
@@ -418,7 +434,10 @@ end
 
     _poissonloss(y, t) = exp(t) - t*y
     test_value(PoissonLoss(), _poissonloss, 0:10, linspace(0,10,11))
+    test_scaledloss(PoissonLoss(), 0:10, linspace(0,10,11))
 end
+
+# --------------------------------------------------------------
 
 margin_losses = [LogitMarginLoss(), L1HingeLoss(), L2HingeLoss(),
                  PerceptronLoss(), SmoothedL1HingeLoss(.5),
@@ -446,13 +465,15 @@ end
     end
 end
 
+# --------------------------------------------------------------
+
 distance_losses = [L2DistLoss(), LPDistLoss(2.0), L1DistLoss(),
                    LPDistLoss(1.0), LPDistLoss(0.5),
                    LPDistLoss(1.5), LPDistLoss(3),
-                   LogitDistLoss(), L1EpsilonInsLoss(0.5),
-                   EpsilonInsLoss(1.5),
+                   LogitDistLoss(),
+                   L1EpsilonInsLoss(0.5), EpsilonInsLoss(1.5),
                    L2EpsilonInsLoss(0.5), L2EpsilonInsLoss(1.5),
-                   PeriodicLoss(1),
+                   PeriodicLoss(1), PeriodicLoss(1.5),
                    HuberLoss(1), HuberLoss(1.5),
                    QuantileLoss(.2), QuantileLoss(.5), QuantileLoss(.8)]
 
@@ -484,6 +505,8 @@ typealias FooLoss LossFunctions.ScaledDistanceLoss{L2EpsilonInsLoss,2}
     @test l.loss == L2EpsilonInsLoss(1.2)
     @test l(7.2) == 2 * l.loss(7.2)
 end
+
+# --------------------------------------------------------------
 
 @testset "Test sparse array conventions for margin-based losses" begin
     @testset "sparse vector target, vector output" begin
@@ -524,3 +547,4 @@ end
         end
     end
 end
+

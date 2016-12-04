@@ -59,6 +59,10 @@ Base.size(::Deriv2) = (1,)
 # --------------------------------------------------------------
 # Fallback implementations
 
+function value_deriv(l::SupervisedLoss, target::Number, output::Number)
+    value(l, target, output), deriv(l, target, output)
+end
+
 isstronglyconvex(::SupervisedLoss) = false
 isminimizable(l::SupervisedLoss) = isconvex(l)
 isdifferentiable(l::SupervisedLoss) = istwicedifferentiable(l)
@@ -80,8 +84,8 @@ isclasscalibrated(::SupervisedLoss) = false
 isdistancebased(::SupervisedLoss) = false
 issymmetric(::SupervisedLoss) = false
 
-
 # --------------------------------------------------------------
+
 @generated function sumvalue{T,N,Q,M}(
         loss::SupervisedLoss,
         target::AbstractArray{Q,M},

@@ -679,6 +679,9 @@ function compare_losses(l1, l2)
     @test isclasscalibrated(l1) == isclasscalibrated(l2)
 end
 
+compare_losses(PoissonLoss(), 2*PoissonLoss())
+compare_losses(PoissonLoss(), 0.5*PoissonLoss())
+
 @testset "Scaled Margin-based" begin
     margins = [LogitMarginLoss(), L1HingeLoss(), L2HingeLoss(),
                PerceptronLoss(), SmoothedL1HingeLoss(.5),
