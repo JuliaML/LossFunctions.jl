@@ -412,10 +412,26 @@ doc"""
 The margin-based exponential loss for classification, which
 penalizes every prediction exponentially. It is infinitely many
 times differentiable, locally Lipschitz continuous and strictly
-convex.
+convex, but not clipable.
 
 ``L(a) = e^{-a}``
 
+---
+```
+              Lossfunction                     Derivative
+      ┌────────────┬────────────┐      ┌────────────┬────────────┐
+    5 │  \.                     │    0 │               _,,---:'""│
+      │   l                     │      │           _r/"'         │
+      │    l.                   │      │        .r/'             │
+      │     ":                  │      │      .r'                │
+    L │       \.                │   L' │     ./                  │
+      │        "\..             │      │    .'                   │
+      │           '":,_         │      │   ,'                    │
+    0 │                ""---:.__│   -5 │  ./                     │
+      └────────────┴────────────┘      └────────────┴────────────┘
+      -2                        2      -2                        2
+                 y ⋅ ŷ                            y ⋅ ŷ
+```
 """
 immutable ExpLoss <: MarginLoss end
 
