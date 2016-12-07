@@ -249,7 +249,7 @@ It is Lipschitz continuous and convex, but not strictly convex.
 
 ---
 ```
-              Lossfunction (γ=1)               Derivative
+              Lossfunction (γ=2)               Derivative
       ┌────────────┬────────────┐      ┌────────────┬────────────┐
     2 │\.                       │    0 │                 ,r------│
       │ '.                      │      │               ./'       │
@@ -510,6 +510,22 @@ It is Lipschitz continuous and convex, but not strictly convex.
 
 ``L(a) = \begin{cases} 1 - a & \quad \text{if } a \ge \frac{q}{q+1} \\ \frac{1}{a^q} \frac{q^q}{(q+1)^{q+1}} & \quad \text{otherwise}\\ \end{cases}``
 
+---
+```
+              Lossfunction (q=1)               Derivative
+      ┌────────────┬────────────┐      ┌────────────┬────────────┐
+    2 │      ".                 │    0 │                     ._r-│
+      │        \.               │      │                   ./    │
+      │         ',              │      │                 ./      │
+      │           \.            │      │                 /       │
+    L │            "\.          │   L' │                .        │
+      │              \.         │      │                /        │
+      │               ":__      │      │               ;         │
+    0 │                   '""---│   -1 │---------------┘         │
+      └────────────┴────────────┘      └────────────┴────────────┘
+      -2                        2      -2                        2
+                 y ⋅ ŷ                            y ⋅ ŷ
+```
 """
 immutable DWDMarginLoss{T<:AbstractFloat} <: MarginLoss
     q::T
