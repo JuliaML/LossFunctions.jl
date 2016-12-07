@@ -225,6 +225,7 @@ function test_scaledloss(l::Loss, t_vec, y_vec)
             @test (λ*3) * l == @inferred(scaledloss(sl,Val{3}))
             @test sl == @inferred(scaledloss(l,Val{λ}))
             @test sl == λ * l
+            @test sl == @inferred(Val{λ} * l)
             for t in t_vec
                 for y in y_vec
                     @test LossFunctions.value(sl,t,y) == @inferred(sl(t,y))
@@ -252,6 +253,7 @@ function test_scaledloss(l::Loss, n_vec)
             end
             @test sl == @inferred(scaledloss(l,Val{λ}))
             @test sl == λ * l
+            @test sl == @inferred(Val{λ} * l)
             for n in n_vec
                 @test LossFunctions.value(sl,n) == @inferred(sl(n))
                 @test @inferred(LossFunctions.value(sl,n)) == λ*LossFunctions.value(l,n)

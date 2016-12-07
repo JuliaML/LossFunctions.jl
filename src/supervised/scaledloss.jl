@@ -1,40 +1,56 @@
 """
-    scaledloss(loss::SupervisedLoss, k)
+    scaledloss(loss::SupervisedLoss, K)
 
-Returns a version of `loss` that is uniformly scaled by `k`.
+Returns a version of `loss` that is uniformly scaled by `K`.
 This function dispatches on the type of `loss` in order to choose
 the appropriate type of scaled loss that will be used as the decorator.
 For example, if `typeof(loss) <: DistanceLoss` then the given `loss`
 will be boxed into a `ScaledDistanceLoss`.
 
-Note: If `typeof(k) <: Number`, then this method will poison the
-type-inference of the calling scope. This is because `k` will be
+Note: If `typeof(K) <: Number`, then this method will poison the
+type-inference of the calling scope. This is because `K` will be
 promoted to a type parameter. For a typestable version use the
-following signature: `scaledloss(loss, Val{k})`
+following signature: `scaledloss(loss, Val{K})`
 """
 function scaledloss end
+
+_serror() = throw(ArgumentError("Scale factor K has to be strictly positive."))
 
 for KIND in (:MarginLoss, :DistanceLoss, :SupervisedLoss)
     SCALEDKIND = Symbol(:Scaled, KIND)
     @eval begin
         @doc """
-            $($(string(SCALEDKIND))) <: $($(string(KIND)))
+            $($(string(SCALEDKIND))){L,K} <: $($(string(KIND)))
 
-        Can an be used to represent a scaled version for a given loss
+        Can an be used to represent a `K` times scaled version of a
+        given type of loss `L`, which must be a subtype of
+        `$($(string(KIND)))`.
+        For example: To create a typealias for a `1.5` times scaled
+        version of some loss `My$($(string(KIND)))`, type:
 
-        Use `scaledloss(my$($(lowercase(string(KIND)))), Val{k})`
-        to create an instance of it.
+        ```julia
+        typealias MyScaled$($(string(KIND))) LossFunctions.$($(string(SCALEDKIND))){My$($(string(KIND))),1.5}
+        ```
+
+        This new loss-type can then be instantiated in the same
+        manner and with the same parameters as the original unscaled
+        loss-type.
+
+        In contrast, in order to only create a `K` times scaled
+        instance of some specific loss you can use
+        `scaledloss(my$($(lowercase(string(KIND)))), Val{K})`.
         See `?scaledloss` for more information.
         """ ->
         immutable ($SCALEDKIND){L<:$KIND,K} <: $KIND
             loss::L
 
-            ($SCALEDKIND)(args...) = typeof(K) <: Number ? new(L(args...)) : error()
-            ($SCALEDKIND)(loss::L) = typeof(K) <: Number ? new(loss) : error()
+            ($SCALEDKIND)(args...) = typeof(K) <: Number && K > 0 ? new(L(args...)) : _serror()
+            ($SCALEDKIND)(loss::L) = typeof(K) <: Number && K > 0 ? new(loss) : _serror()
         end
 
         ($SCALEDKIND){T,K}(loss::T, ::Type{Val{K}}) = ($SCALEDKIND){T,K}(loss)
         ($SCALEDKIND){T}(loss::T, k::Number) = ($SCALEDKIND)(loss, Val{k})
+        (*){K}(::Type{Val{K}}, loss::$KIND) = ($SCALEDKIND)(loss, Val{K})
         (*)(k::Number, loss::$KIND) = ($SCALEDKIND)(loss, Val{k})
         scaledloss{T<:$KIND,K}(loss::T, ::Type{Val{K}}) = ($SCALEDKIND)(loss, Val{K})
 
