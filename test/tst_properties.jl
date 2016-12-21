@@ -654,7 +654,7 @@ end
 end
 
 # --------------------------------------------------------------
-function compare_losses(l1, l2)
+function compare_losses(l1, l2, ccal = true)
     @test isminimizable(l1) == isminimizable(l2)
 
     @test isdifferentiable(l1) == isdifferentiable(l2)
@@ -676,19 +676,30 @@ function compare_losses(l1, l2)
     @test ismarginbased(l1) == ismarginbased(l2)
     @test isdistancebased(l1) == isdistancebased(l2)
     @test issymmetric(l1) == issymmetric(l2)
-    @test isclasscalibrated(l1) == isclasscalibrated(l2)
+    @test (ccal && isclasscalibrated(l1)) == isclasscalibrated(l2)
 end
 
 compare_losses(PoissonLoss(), 2*PoissonLoss())
 compare_losses(PoissonLoss(), 0.5*PoissonLoss())
 
+margins = [LogitMarginLoss(), L1HingeLoss(), L2HingeLoss(),
+           PerceptronLoss(), SmoothedL1HingeLoss(.5),
+           SmoothedL1HingeLoss(1), SmoothedL1HingeLoss(2),
+           ModifiedHuberLoss(), ZeroOneLoss(),
+           L2MarginLoss(), ExpLoss(), SigmoidLoss(),
+           DWDMarginLoss(0.5), DWDMarginLoss(1), DWDMarginLoss(2)]
+
+@testset "Weighted Margin-based" begin
+    for loss in margins
+        @testset "$loss" begin
+            compare_losses(loss, weightedloss(loss,0.2), false)
+            compare_losses(loss, weightedloss(loss,0.5), true)
+            compare_losses(loss, weightedloss(loss,0.7), false)
+        end
+    end
+end
+
 @testset "Scaled Margin-based" begin
-    margins = [LogitMarginLoss(), L1HingeLoss(), L2HingeLoss(),
-               PerceptronLoss(), SmoothedL1HingeLoss(.5),
-               SmoothedL1HingeLoss(1), SmoothedL1HingeLoss(2),
-               ModifiedHuberLoss(), ZeroOneLoss(),
-               L2MarginLoss(), ExpLoss(), SigmoidLoss(),
-               DWDMarginLoss(0.5), DWDMarginLoss(1), DWDMarginLoss(2)]
     for loss in margins
         @testset "$loss" begin
             compare_losses(loss, 2*loss)

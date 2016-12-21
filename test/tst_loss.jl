@@ -268,12 +268,24 @@ end
 
 function test_weightedloss(l::MarginLoss, t_vec, y_vec)
     @testset "Weighted version for $(l): " begin
-        for w in (0.2, 0.7)
+        for w in (0., 0.2, 0.7, 1.)
             wl = weightedloss(l, w)
             @test typeof(wl) <: LossFunctions.WeightedBinaryLoss{typeof(l),w}
             @test wl == @inferred(weightedloss(l, Val{w}))
+            @test weightedloss(l, w * 0.1) == weightedloss(wl, 0.1)
             for t in t_vec
                 for y in y_vec
+                    @test @inferred(LossFunctions.value(wl,t,y)) == @inferred(wl(t,y))
+                    @test @inferred(deriv(wl,t,y)) == @inferred(wl'(t,y))
+                    if t == 1
+                        @test LossFunctions.value(wl,t,y) == w*LossFunctions.value(l,t,y)
+                        @test deriv(wl,t,y) == w*deriv(l,t,y)
+                        @test deriv2(wl,t,y) == w*deriv2(l,t,y)
+                    else
+                        @test LossFunctions.value(wl,t,y) == (1-w)*LossFunctions.value(l,t,y)
+                        @test deriv(wl,t,y) == (1-w)*deriv(l,t,y)
+                        @test deriv2(wl,t,y) == (1-w)*deriv2(l,t,y)
+                    end
                 end
             end
         end
@@ -481,10 +493,18 @@ end
     end
 end
 
+typealias BarLoss LossFunctions.WeightedBinaryLoss{SmoothedL1HingeLoss,0.2}
+
 @testset "Test margin-based weighted loss" begin
     for loss in margin_losses
         test_weightedloss(loss, [-1.,1], -10:0.1:10)
-        #test_weightedloss(loss, -10:0.1:10)
+    end
+    l = @inferred BarLoss(1.2)
+    @test l.loss == SmoothedL1HingeLoss(1.2)
+    @test l(1, -7.2) == 0.2 * l.loss(1, -7.2)
+    @test l(-1, 7.2) == 0.8 * l.loss(-1, 7.2)
+    for w in (0., 0.2, 0.7, 1.)
+        println(weightedloss(L2HingeLoss(),w))
     end
 end
 
