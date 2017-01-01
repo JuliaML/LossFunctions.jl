@@ -48,13 +48,13 @@ Base.transpose(d::Deriv) = Deriv2(d.loss)
 # Make broadcast work for losses
 
 Base.getindex(l::Loss, idx) = l
-Base.size(::Loss) = (1,)
+Base.size(::Loss) = ()
 
 Base.getindex(l::Deriv, idx) = l
-Base.size(::Deriv) = (1,)
+Base.size(::Deriv) = ()
 
 Base.getindex(l::Deriv2, idx) = l
-Base.size(::Deriv2) = (1,)
+Base.size(::Deriv2) = ()
 
 # --------------------------------------------------------------
 # Fallback implementations
@@ -86,85 +86,187 @@ issymmetric(::SupervisedLoss) = false
 
 # --------------------------------------------------------------
 
-@generated function sumvalue{T,N,Q,M}(
-        loss::SupervisedLoss,
-        target::AbstractArray{Q,M},
-        output::AbstractArray{T,N}
-    )
-    M > N && throw(ArgumentError("target has more dimensions than output; broadcasting not supported in this direction."))
-    quote
-      @nexprs $M (n)->@_dimcheck(size(target,n) == size(output,n))
-      val = zero(T) # TODO: this might be not be type-stable?
-      @simd for I in CartesianRange(size(output))
-          @nexprs $N n->(i_n = I[n])
-          @inbounds val += value(loss, @nref($M,target,i), @nref($N,output,i))
-      end
-      val
-    end
-end
+for FUN in (:value, :deriv, :deriv2)
+    @eval begin
+        # By default compute the element-wise result
+        function ($FUN)(loss::SupervisedLoss,
+                        target::AbstractArray,
+                        output::AbstractArray)
+            ($FUN)(loss, target, output, AvgMode.None())
+        end
 
-@generated function sumderiv{T,N,Q,M}(
-        loss::SupervisedLoss,
-        target::AbstractArray{Q,M},
-        output::AbstractArray{T,N}
-    )
-    M > N && throw(ArgumentError("target has more dimensions than output; broadcasting not supported in this direction."))
-    quote
-      @nexprs $M (n)->@_dimcheck(size(target,n) == size(output,n))
-      val = zero(T) # TODO: this might be not be type-stable?
-      @simd for I in CartesianRange(size(output))
-          @nexprs $N n->(i_n = I[n])
-          @inbounds val += deriv(loss, @nref($M,target,i), @nref($N,output,i))
-      end
-      val
+        # Translate ObsDim.Last to the correct ObsDim.Constant (for code reduction)
+        function ($FUN){T,Q,N}(loss::SupervisedLoss,
+                               target::AbstractArray{Q,N},
+                               output::AbstractArray{T,N},
+                               avg::AverageMode,
+                               ::ObsDim.Last)
+            ($FUN)(loss, target, output, avg, ObsDim.Constant{N}())
+        end
+
+        # Compute element-wise (returns an array)
+        @generated function ($FUN){T,N,Q,M}(
+                loss::SupervisedLoss,
+                target::AbstractArray{Q,M},
+                output::AbstractArray{T,N},
+                ::AvgMode.None)
+            quote
+                S = typeof(($($FUN))(loss, one(Q), one(T)))
+                ($($FUN)).(loss, target, output)::Array{S,$(max(N,M))}
+            end
+        end
+
+        # Compute the sum per observation (returns a Vector)
+        @generated function ($FUN){T,N,Q,O}(
+                loss::SupervisedLoss,
+                target::AbstractArray{Q,N},
+                output::AbstractArray{T,N},
+                ::AvgMode.Sum,
+                ::ObsDim.Constant{O})
+            O > N && throw(ArgumentError("The specified obsdim is larger as the available dimensions."))
+            quote
+                @_dimcheck size(target) == size(output)
+                k = prod(@ntuple($N, n -> n == $O ? 1 : size(output,n)))
+                S = typeof(zero(($($FUN))(loss, one(Q), one(T))))
+                out = zeros(S, size(output, $O))
+                @inbounds @simd for I in CartesianRange(size(output))
+                    @nexprs $N n->(i_n = I[n])
+                    out[I[$O]] += ($($FUN))(loss, @nref($N,target,i), @nref($N,output,i))
+                end
+                out
+            end
+        end
+
+        # Compute the sum (returns a Number)
+        @generated function ($FUN){T,N,Q,M}(
+                loss::SupervisedLoss,
+                target::AbstractArray{Q,M},
+                output::AbstractArray{T,N},
+                ::AvgMode.Sum)
+            M > N && throw(ArgumentError("target has more dimensions than output; broadcasting not supported in this direction."))
+            quote
+                @nexprs $M (n)->@_dimcheck(size(target,n) == size(output,n))
+                out = zero(($($FUN))(loss, one(Q), one(T)))
+                @inbounds @simd for I in CartesianRange(size(output))
+                    @nexprs $N n->(i_n = I[n])
+                    out += ($($FUN))(loss, @nref($M,target,i), @nref($N,output,i))
+                end
+                out
+            end
+        end
+
+        # Compute the average per observation (returns a Vector)
+        @generated function ($FUN){T,N,Q,O}(
+                loss::SupervisedLoss,
+                target::AbstractArray{Q,N},
+                output::AbstractArray{T,N},
+                ::Mean,
+                ::ObsDim.Constant{O})
+            O > N && throw(ArgumentError("The specified obsdim is larger as the available dimensions."))
+            quote
+                @_dimcheck size(target) == size(output)
+                k = prod(@ntuple($N, n -> n == $O ? 1 : size(output,n)))
+                S = typeof(zero(($($FUN))(loss, one(Q), one(T))) / k)
+                out = zeros(S, size(output, $O))
+                tmp = zero(S)
+                @inbounds @simd for I in CartesianRange(size(output))
+                    @nexprs $N n->(i_n = I[n])
+                    tmp = S(($($FUN))(loss, @nref($N,target,i), @nref($N,output,i)))
+                    tmp /= k
+                    out[I[$O]] += tmp
+                end
+                out
+            end
+        end
+
+        # Compute the total average (returns a Number)
+        @generated function ($FUN){T,N,Q,M}(
+                loss::SupervisedLoss,
+                target::AbstractArray{Q,M},
+                output::AbstractArray{T,N},
+                ::Mean)
+            M > N && throw(ArgumentError("target has more dimensions than output; broadcasting not supported in this direction."))
+            quote
+                @nexprs $M (n)->@_dimcheck(size(target,n) == size(output,n))
+                len = length(output)
+                out = zero(($($FUN))(loss, one(Q), one(T))) / len
+                tmp = out
+                @inbounds @simd for I in CartesianRange(size(output))
+                    @nexprs $N n->(i_n = I[n])
+                    tmp = ($($FUN))(loss, @nref($M,target,i), @nref($N,output,i))
+                    tmp /= len
+                    out += tmp
+                end
+                out
+            end
+        end
+
+        # Compute the total weighted average (returns a Number)
+        @generated function ($FUN){T,N,Q,O}(
+                loss::SupervisedLoss,
+                target::AbstractArray{Q,N},
+                output::AbstractArray{T,N},
+                avg::AvgMode.Weighted,
+                ::ObsDim.Constant{O})
+            O > N && throw(ArgumentError("The specified obsdim is larger as the available dimensions."))
+            quote
+                @_dimcheck size(target) == size(output)
+                @_dimcheck size(output,$O) == length(avg.weights)
+                k = prod(@ntuple($N, n -> n == $O ? 1 : size(output,n))) * sum(avg.weights)
+                out = zero(($($FUN))(loss, one(Q), one(T))) * (avg.weights[1] / k)
+                tmp = out
+                @inbounds @simd for I in CartesianRange(size(output))
+                    @nexprs $N n->(i_n = I[n])
+                    tmp = ($($FUN))(loss, @nref($N,target,i), @nref($N,output,i))
+                    tmp *= (avg.weights[I[$N]] / k)
+                    out += tmp
+                end
+                out
+            end
+        end
+    end
+
+    for KIND in (:MarginLoss, :DistanceLoss)
+        @eval begin
+            # By default compute the element-wise result
+            function ($FUN)(loss::$KIND, numbers::AbstractArray)
+                ($FUN)(loss, numbers, AvgMode.None())
+            end
+
+            # Compute element-wise (returns an array)
+            function ($FUN){T,N}(
+                    loss::$KIND,
+                    numbers::AbstractArray{T,N},
+                    ::AvgMode.None)
+                S = typeof(($FUN)(loss, one(T)))
+                ($FUN).(loss, numbers)::Array{S,N}
+            end
+
+            # Compute the sum (returns a Number)
+            function ($FUN){T,N}(
+                    loss::$KIND,
+                    numbers::AbstractArray{T,N},
+                    ::AvgMode.Sum)
+                S = typeof(($FUN)(loss, one(T)))
+                reduce(+, zero(S),
+                       (($FUN)(loss, num) for num in numbers))
+            end
+
+            # Compute the mean (returns a Number)
+            function ($FUN){T,N}(
+                    loss::$KIND,
+                    numbers::AbstractArray{T,N},
+                    ::Mean)
+                len = length(numbers)
+                S = typeof(($FUN)(loss, one(T)) / len)
+                reduce(+, zero(S),
+                       (($FUN)(loss, num) / len for num in numbers))
+            end
+        end
     end
 end
 
 # --------------------------------------------------------------
-
-@generated function meanvalue{T,N,Q,M}(
-        loss::SupervisedLoss,
-        target::AbstractArray{Q,M},
-        output::AbstractArray{T,N}
-    )
-    M > N && throw(ArgumentError("target has more dimensions than output; broadcasting not supported in this direction."))
-    quote
-      @nexprs $M (n)->@_dimcheck(size(target,n) == size(output,n))
-      val = zero(T) # TODO: this might be not be type-stable?
-      tmp = zero(T) # TODO: this might be not be type-stable?
-      len = length(output)
-      @simd for I in CartesianRange(size(output))
-          @nexprs $N n->(i_n = I[n])
-          @inbounds tmp = value(loss, @nref($M,target,i), @nref($N,output,i))
-          tmp /= len
-          val += tmp
-      end
-      val
-    end
-end
-
-@generated function meanderiv{T,N,Q,M}(
-        loss::SupervisedLoss,
-        target::AbstractArray{Q,M},
-        output::AbstractArray{T,N}
-    )
-    M > N && throw(ArgumentError("target has more dimensions than output; broadcasting not supported in this direction."))
-    quote
-      @nexprs $M (n)->@_dimcheck(size(target,n) == size(output,n))
-      val = zero(T) # TODO: this might be not be type-stable?
-      tmp = zero(T) # TODO: this might be not be type-stable?
-      len = length(output)
-      @simd for I in CartesianRange(size(output))
-          @nexprs $N n->(i_n = I[n])
-          @inbounds tmp = deriv(loss, @nref($M,target,i), @nref($N,output,i))
-          tmp /= len
-          val += tmp
-      end
-      val
-    end
-end
-
-# ==============================================================
 
 # abstract MarginLoss <: SupervisedLoss
 
@@ -179,8 +281,6 @@ end
 # Fallback for losses that don't want to take advantage of this
 value_deriv(loss::MarginLoss, agreement::Number) = (value(loss, agreement), deriv(loss, agreement))
 
-# TODO: consider meanvalue(loss, agreement) etc
-
 isunivfishercons(::MarginLoss) = false
 isfishercons(loss::MarginLoss) = isunivfishercons(loss)
 isnemitski(::MarginLoss) = true
@@ -194,7 +294,7 @@ ismarginbased(::MarginLoss) = true
 # The other direction of the implication is not implemented however.
 isclasscalibrated(loss::MarginLoss) = isconvex(loss) && isdifferentiable(loss, 0) && deriv(loss, 0) < 0
 
-# ==============================================================
+# --------------------------------------------------------------
 
 # abstract DistanceLoss <: SupervisedLoss
 
@@ -205,8 +305,6 @@ value_deriv(loss::DistanceLoss, target::Number, output::Number) = value_deriv(lo
 
 # Fallback for losses that don't want to take advantage of this
 value_deriv(loss::DistanceLoss, difference::Number) = (value(loss, difference), deriv(loss, difference))
-
-# TODO: consider meanvalue(loss, difference) etc
 
 isdistancebased(::DistanceLoss) = true
 issymmetric(::DistanceLoss) = false
