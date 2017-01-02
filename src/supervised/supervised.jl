@@ -168,12 +168,9 @@ for FUN in (:value, :deriv, :deriv2)
                 k = prod(@ntuple($N, n -> n == $O ? 1 : size(output,n)))
                 S = typeof(zero(($($FUN))(loss, one(Q), one(T))) / k)
                 out = zeros(S, size(output, $O))
-                tmp = zero(S)
                 @inbounds @simd for I in CartesianRange(size(output))
                     @nexprs $N n->(i_n = I[n])
-                    tmp = S(($($FUN))(loss, @nref($N,target,i), @nref($N,output,i)))
-                    tmp /= k
-                    out[I[$O]] += tmp
+                    out[I[$O]] = ($($FUN))(loss, @nref($N,target,i), @nref($N,output,i)) / k
                 end
                 out
             end
@@ -190,12 +187,9 @@ for FUN in (:value, :deriv, :deriv2)
                 @nexprs $M (n)->@_dimcheck(size(target,n) == size(output,n))
                 len = length(output)
                 out = zero(($($FUN))(loss, one(Q), one(T))) / len
-                tmp = out
                 @inbounds @simd for I in CartesianRange(size(output))
                     @nexprs $N n->(i_n = I[n])
-                    tmp = ($($FUN))(loss, @nref($M,target,i), @nref($N,output,i))
-                    tmp /= len
-                    out += tmp
+                    out += ($($FUN))(loss, @nref($M,target,i), @nref($N,output,i)) / len
                 end
                 out
             end
@@ -212,14 +206,12 @@ for FUN in (:value, :deriv, :deriv2)
             quote
                 @_dimcheck size(target) == size(output)
                 @_dimcheck size(output,$O) == length(avg.weights)
-                k = prod(@ntuple($N, n -> n == $O ? 1 : size(output,n))) * sum(avg.weights)
-                out = zero(($($FUN))(loss, one(Q), one(T))) * (avg.weights[1] / k)
-                tmp = out
+                k = prod(@ntuple($N, n -> n == $O ? 1 : size(output,n)))
+                nrm = k * sum(avg.weights)
+                out = zero(($($FUN))(loss, one(Q), one(T)) * (avg.weights[1] / nrm))
                 @inbounds @simd for I in CartesianRange(size(output))
                     @nexprs $N n->(i_n = I[n])
-                    tmp = ($($FUN))(loss, @nref($N,target,i), @nref($N,output,i))
-                    tmp *= (avg.weights[I[$N]] / k)
-                    out += tmp
+                    out += ($($FUN))(loss, @nref($N,target,i), @nref($N,output,i)) * (avg.weights[I[$O]] / nrm)
                 end
                 out
             end
