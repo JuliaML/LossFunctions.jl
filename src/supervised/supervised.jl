@@ -140,12 +140,13 @@ for FUN in (:value, :deriv, :deriv2)
                 target::AbstractArray{Q,M},
                 output::AbstractArray{T,N},
                 ::AvgMode.Sum)
-            M > N && throw(ArgumentError("target has more dimensions than output; broadcasting not supported in this direction."))
+            bigger = M > N ? :target : :output
+            S, B = min(M,N), max(M,N)
             quote
-                @nexprs $M (n)->@_dimcheck(size(target, n) == size(output, n))
+                @nexprs $S (n)->@_dimcheck(size(target, n) == size(output, n))
                 out = zero(($($FUN))(loss, one(Q), one(T)))
-                @inbounds @simd for I in CartesianRange(size(output))
-                    @nexprs $N n->(i_n = I[n])
+                @inbounds @simd for I in CartesianRange(size($bigger))
+                    @nexprs $B n->(i_n = I[n])
                     out += ($($FUN))(loss, @nref($M,target,i), @nref($N,output,i))
                 end
                 out
@@ -176,13 +177,14 @@ for FUN in (:value, :deriv, :deriv2)
                 target::AbstractArray{Q,M},
                 output::AbstractArray{T,N},
                 ::AvgMode.Mean)
-            M > N && throw(ArgumentError("target has more dimensions than output; broadcasting not supported in this direction."))
+            bigger = M > N ? :target : :output
+            S, B = min(M,N), max(M,N)
             quote
-                @nexprs $M (n)->@_dimcheck(size(target, n) == size(output, n))
-                len = length(output)
+                @nexprs $S (n)->@_dimcheck(size(target, n) == size(output, n))
+                len = length($bigger)
                 out = zero(($($FUN))(loss, one(Q), one(T))) / len
-                @inbounds @simd for I in CartesianRange(size(output))
-                    @nexprs $N n->(i_n = I[n])
+                @inbounds @simd for I in CartesianRange(size($bigger))
+                    @nexprs $B n->(i_n = I[n])
                     out += ($($FUN))(loss, @nref($M,target,i), @nref($N,output,i)) / len
                 end
                 out
