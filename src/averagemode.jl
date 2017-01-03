@@ -11,16 +11,28 @@ module AvgMode
         Mean,
         Macro,
         Micro,
-        Weighted
+        WeightedMean,
+        WeightedSum
 
     immutable None <: AverageMode end
     immutable Sum <: AverageMode end
     immutable Macro <: AverageMode end
-    immutable Micro <: AverageMode end
-    immutable Weighted{T<:WeightVec} <: AverageMode
+    immutable Mean <: AverageMode end
+    typealias Micro Mean
+
+    immutable WeightedMean{T<:WeightVec} <: AverageMode
         weights::T
+        normalize::Bool
     end
-    Weighted(A::AbstractVector) = Weighted(weights(A))
+    WeightedMean(A::AbstractVector, normalize::Bool) = WeightedMean(weights(A), normalize)
+    WeightedMean(A::AbstractVector; normalize::Bool = true) = WeightedMean(weights(A), normalize)
+
+    immutable WeightedSum{T<:WeightVec} <: AverageMode
+        weights::T
+        normalize::Bool
+    end
+    WeightedSum(A::AbstractVector, normalize::Bool) = WeightedSum(weights(A), normalize)
+    WeightedSum(A::AbstractVector; normalize::Bool = true) = WeightedSum(weights(A), normalize)
 
 end
 

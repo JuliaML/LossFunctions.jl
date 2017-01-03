@@ -57,8 +57,6 @@ export
 include("common.jl")
 include("averagemode.jl")
 
-typealias Mean Union{AvgMode.Macro,AvgMode.Micro}
-
 include("supervised/supervised.jl")
 include("supervised/sparse.jl")
 include("supervised/distance.jl")

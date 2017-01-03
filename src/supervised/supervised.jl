@@ -126,7 +126,7 @@ for FUN in (:value, :deriv, :deriv2)
             O > N && throw(ArgumentError("The specified obsdim is larger as the available dimensions."))
             quote
                 @_dimcheck size(target) == size(output)
-                k = prod(@ntuple($N, n -> n == $O ? 1 : size(output,n)))
+                k = prod(@ntuple($N, n -> n == $O ? 1 : size(output, n)))
                 S = typeof(zero(($($FUN))(loss, one(Q), one(T))))
                 out = zeros(S, size(output, $O))
                 @inbounds @simd for I in CartesianRange(size(output))
@@ -145,7 +145,7 @@ for FUN in (:value, :deriv, :deriv2)
                 ::AvgMode.Sum)
             M > N && throw(ArgumentError("target has more dimensions than output; broadcasting not supported in this direction."))
             quote
-                @nexprs $M (n)->@_dimcheck(size(target,n) == size(output,n))
+                @nexprs $M (n)->@_dimcheck(size(target, n) == size(output, n))
                 out = zero(($($FUN))(loss, one(Q), one(T)))
                 @inbounds @simd for I in CartesianRange(size(output))
                     @nexprs $N n->(i_n = I[n])
@@ -160,12 +160,12 @@ for FUN in (:value, :deriv, :deriv2)
                 loss::SupervisedLoss,
                 target::AbstractArray{Q,N},
                 output::AbstractArray{T,N},
-                ::Mean,
+                ::AvgMode.Mean,
                 ::ObsDim.Constant{O})
             O > N && throw(ArgumentError("The specified obsdim is larger as the available dimensions."))
             quote
                 @_dimcheck size(target) == size(output)
-                k = prod(@ntuple($N, n -> n == $O ? 1 : size(output,n)))
+                k = prod(@ntuple($N, n -> n == $O ? 1 : size(output, n)))
                 S = typeof(zero(($($FUN))(loss, one(Q), one(T))) / k)
                 out = zeros(S, size(output, $O))
                 @inbounds @simd for I in CartesianRange(size(output))
@@ -181,10 +181,10 @@ for FUN in (:value, :deriv, :deriv2)
                 loss::SupervisedLoss,
                 target::AbstractArray{Q,M},
                 output::AbstractArray{T,N},
-                ::Mean)
+                ::AvgMode.Mean)
             M > N && throw(ArgumentError("target has more dimensions than output; broadcasting not supported in this direction."))
             quote
-                @nexprs $M (n)->@_dimcheck(size(target,n) == size(output,n))
+                @nexprs $M (n)->@_dimcheck(size(target, n) == size(output, n))
                 len = length(output)
                 out = zero(($($FUN))(loss, one(Q), one(T))) / len
                 @inbounds @simd for I in CartesianRange(size(output))
@@ -200,14 +200,35 @@ for FUN in (:value, :deriv, :deriv2)
                 loss::SupervisedLoss,
                 target::AbstractArray{Q,N},
                 output::AbstractArray{T,N},
-                avg::AvgMode.Weighted,
+                avg::AvgMode.WeightedMean,
                 ::ObsDim.Constant{O})
             O > N && throw(ArgumentError("The specified obsdim is larger as the available dimensions."))
             quote
                 @_dimcheck size(target) == size(output)
-                @_dimcheck size(output,$O) == length(avg.weights)
+                @_dimcheck size(output, $O) == length(avg.weights)
                 k = prod(@ntuple($N, n -> n == $O ? 1 : size(output,n)))
-                nrm = k * sum(avg.weights)
+                nrm = avg.normalize ? k * sum(avg.weights) : k * one(sum(avg.weights))
+                out = zero(($($FUN))(loss, one(Q), one(T)) * (avg.weights[1] / nrm))
+                @inbounds @simd for I in CartesianRange(size(output))
+                    @nexprs $N n->(i_n = I[n])
+                    out += ($($FUN))(loss, @nref($N,target,i), @nref($N,output,i)) * (avg.weights[I[$O]] / nrm)
+                end
+                out
+            end
+        end
+
+        # Compute the total weighted sum (returns a Number)
+        @generated function ($FUN){T,N,Q,O}(
+                loss::SupervisedLoss,
+                target::AbstractArray{Q,N},
+                output::AbstractArray{T,N},
+                avg::AvgMode.WeightedSum,
+                ::ObsDim.Constant{O})
+            O > N && throw(ArgumentError("The specified obsdim is larger as the available dimensions."))
+            quote
+                @_dimcheck size(target) == size(output)
+                @_dimcheck size(output, $O) == length(avg.weights)
+                nrm = avg.normalize ? sum(avg.weights) : one(sum(avg.weights))
                 out = zero(($($FUN))(loss, one(Q), one(T)) * (avg.weights[1] / nrm))
                 @inbounds @simd for I in CartesianRange(size(output))
                     @nexprs $N n->(i_n = I[n])
@@ -248,7 +269,7 @@ for FUN in (:value, :deriv, :deriv2)
             function ($FUN){T,N}(
                     loss::$KIND,
                     numbers::AbstractArray{T,N},
-                    ::Mean)
+                    ::AvgMode.Mean)
                 len = length(numbers)
                 S = typeof(($FUN)(loss, one(T)) / len)
                 reduce(+, zero(S),
