@@ -566,7 +566,6 @@ end
     @test isunivfishercons(loss) == true
 end
 
-
 @testset "ExpLoss" begin
     loss = ExpLoss()
 
@@ -595,7 +594,6 @@ end
     @test isunivfishercons(loss) == true
 end
 
-
 @testset "SigmoidLoss" begin
     loss = SigmoidLoss()
 
@@ -623,7 +621,6 @@ end
     @test isfishercons(loss) == true
     @test isunivfishercons(loss) == true
 end
-
 
 @testset "DWDMarginLoss" begin
     loss = DWDMarginLoss(2)
@@ -654,6 +651,7 @@ end
 end
 
 # --------------------------------------------------------------
+
 function compare_losses(l1, l2, ccal = true)
     @test isminimizable(l1) == isminimizable(l2)
 
@@ -682,15 +680,8 @@ end
 compare_losses(PoissonLoss(), 2*PoissonLoss())
 compare_losses(PoissonLoss(), 0.5*PoissonLoss())
 
-margins = [LogitMarginLoss(), L1HingeLoss(), L2HingeLoss(),
-           PerceptronLoss(), SmoothedL1HingeLoss(.5),
-           SmoothedL1HingeLoss(1), SmoothedL1HingeLoss(2),
-           ModifiedHuberLoss(), ZeroOneLoss(),
-           L2MarginLoss(), ExpLoss(), SigmoidLoss(),
-           DWDMarginLoss(0.5), DWDMarginLoss(1), DWDMarginLoss(2)]
-
 @testset "Weighted Margin-based" begin
-    for loss in margins
+    for loss in margin_losses
         @testset "$loss" begin
             compare_losses(loss, weightedloss(loss,0.2), false)
             compare_losses(loss, weightedloss(loss,0.5), true)
@@ -700,7 +691,7 @@ margins = [LogitMarginLoss(), L1HingeLoss(), L2HingeLoss(),
 end
 
 @testset "Scaled Margin-based" begin
-    for loss in margins
+    for loss in margin_losses
         @testset "$loss" begin
             compare_losses(loss, 2*loss)
             compare_losses(loss, 0.5*loss)
@@ -709,16 +700,11 @@ end
 end
 
 @testset "Scaled Distance-based" begin
-    distance = [L2DistLoss(), LPDistLoss(2.0), L1DistLoss(),
-                LPDistLoss(1.0), LPDistLoss(0.5), LPDistLoss(1.5),
-                LPDistLoss(3), LogitDistLoss(), L1EpsilonInsLoss(0.5),
-                EpsilonInsLoss(1.5), L2EpsilonInsLoss(0.5),
-                L2EpsilonInsLoss(1.5), PeriodicLoss(1),
-                HuberLoss(1), HuberLoss(1.5)]
-    for loss in distance
+    for loss in distance_losses
         @testset "$loss" begin
             compare_losses(loss, 2*loss)
             compare_losses(loss, 0.5*loss)
         end
     end
 end
+

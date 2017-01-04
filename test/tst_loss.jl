@@ -341,19 +341,19 @@ end
 
 @testset "Test margin-based loss against reference function" begin
     _zerooneloss(y, t) = sign(y*t) < 0 ? 1 : 0
-    test_value(ZeroOneLoss(), _zerooneloss, [-1.,1], -10:0.1:10)
+    test_value(ZeroOneLoss(), _zerooneloss, [-1.,1], -10:0.2:10)
 
     _hingeloss(y, t) = max(0, 1 - y.*t)
-    test_value(HingeLoss(), _hingeloss, [-1.,1], -10:0.1:10)
+    test_value(HingeLoss(), _hingeloss, [-1.,1], -10:0.2:10)
 
     _l2hingeloss(y, t) = max(0, 1 - y.*t)^2
-    test_value(L2HingeLoss(), _l2hingeloss, [-1.,1], -10:0.1:10)
+    test_value(L2HingeLoss(), _l2hingeloss, [-1.,1], -10:0.2:10)
 
     _perceptronloss(y, t) = max(0, -y.*t)
-    test_value(PerceptronLoss(), _perceptronloss, [-1.,1], -10:0.1:10)
+    test_value(PerceptronLoss(), _perceptronloss, [-1.,1], -10:0.2:10)
 
     _logitmarginloss(y, t) = log(1 + exp(-y.*t))
-    test_value(LogitMarginLoss(), _logitmarginloss, [-1.,1], -10:0.1:10)
+    test_value(LogitMarginLoss(), _logitmarginloss, [-1.,1], -10:0.2:10)
 
     function _smoothedl1hingeloss(γ)
         function _value(y, t)
@@ -365,9 +365,9 @@ end
         end
         _value
     end
-    test_value(SmoothedL1HingeLoss(.5), _smoothedl1hingeloss(.5), [-1.,1], -10:0.1:10)
-    test_value(SmoothedL1HingeLoss(1), _smoothedl1hingeloss(1), [-1.,1], -10:0.1:10)
-    test_value(SmoothedL1HingeLoss(2), _smoothedl1hingeloss(2), [-1.,1], -10:0.1:10)
+    test_value(SmoothedL1HingeLoss(.5), _smoothedl1hingeloss(.5), [-1.,1], -10:0.2:10)
+    test_value(SmoothedL1HingeLoss(1), _smoothedl1hingeloss(1), [-1.,1], -10:0.2:10)
+    test_value(SmoothedL1HingeLoss(2), _smoothedl1hingeloss(2), [-1.,1], -10:0.2:10)
 
     function _modhuberloss(y, t)
         if y.*t >= -1
@@ -376,16 +376,16 @@ end
             -4.*y.*t
         end
     end
-    test_value(ModifiedHuberLoss(), _modhuberloss, [-1.,1], -10:0.1:10)
+    test_value(ModifiedHuberLoss(), _modhuberloss, [-1.,1], -10:0.2:10)
 
     _l2marginloss(y, t) = (1 - y.*t)^2
-    test_value(L2MarginLoss(), _l2marginloss, [-1.,1], -10:0.1:10)
+    test_value(L2MarginLoss(), _l2marginloss, [-1.,1], -10:0.2:10)
 
     _exploss(y, t) = exp(-y.*t)
-    test_value(ExpLoss(), _exploss, [-1.,1], -10:0.1:10)
+    test_value(ExpLoss(), _exploss, [-1.,1], -10:0.2:10)
 
     _sigmoidloss(y, t) = (1-tanh(y.*t))
-    test_value(SigmoidLoss(), _sigmoidloss, [-1., 1], -10:0.1:10)
+    test_value(SigmoidLoss(), _sigmoidloss, [-1., 1], -10:0.2:10)
 
     function _dwdmarginloss(q)
         function _value(y, t)
@@ -397,9 +397,9 @@ end
         end
         _value
     end
-    test_value(DWDMarginLoss(0.5), _dwdmarginloss(0.5), [-1., 1], -10:0.1:10)
-    test_value(DWDMarginLoss(1), _dwdmarginloss(1), [-1., 1], -10:0.1:10)
-    test_value(DWDMarginLoss(2), _dwdmarginloss(2), [-1., 1], -10:0.1:10)
+    test_value(DWDMarginLoss(0.5), _dwdmarginloss(0.5), [-1., 1], -10:0.2:10)
+    test_value(DWDMarginLoss(1), _dwdmarginloss(1), [-1., 1], -10:0.2:10)
+    test_value(DWDMarginLoss(2), _dwdmarginloss(2), [-1., 1], -10:0.2:10)
 
 end
 
@@ -467,29 +467,22 @@ end
 
 # --------------------------------------------------------------
 
-margin_losses = [LogitMarginLoss(), L1HingeLoss(), L2HingeLoss(),
-                 PerceptronLoss(), SmoothedL1HingeLoss(.5),
-                 SmoothedL1HingeLoss(1), SmoothedL1HingeLoss(2),
-                 ModifiedHuberLoss(), ZeroOneLoss(), L2MarginLoss(),
-                 ExpLoss(), SigmoidLoss(),
-                 DWDMarginLoss(.5), DWDMarginLoss(1), DWDMarginLoss(2)]
-
 @testset "Test first derivatives of margin-based losses" begin
     for loss in margin_losses
-        test_deriv(loss, -10:0.1:10)
+        test_deriv(loss, -10:0.2:10)
     end
 end
 
 @testset "Test second derivatives of margin-based losses" begin
     for loss in margin_losses
-        test_deriv2(loss, -10:0.1:10)
+        test_deriv2(loss, -10:0.2:10)
     end
 end
 
 @testset "Test margin-based scaled loss" begin
     for loss in margin_losses
-        test_scaledloss(loss, [-1.,1], -10:0.1:10)
-        test_scaledloss(loss, -10:0.1:10)
+        test_scaledloss(loss, [-1.,1], -10:0.2:10)
+        test_scaledloss(loss, -10:0.2:10)
     end
 end
 
@@ -497,7 +490,7 @@ typealias BarLoss LossFunctions.WeightedBinaryLoss{SmoothedL1HingeLoss,0.2}
 
 @testset "Test margin-based weighted loss" begin
     for loss in margin_losses
-        test_weightedloss(loss, [-1.,1], -10:0.1:10)
+        test_weightedloss(loss, [-1.,1], -10:0.2:10)
     end
     l = @inferred BarLoss(1.2)
     @test l.loss == SmoothedL1HingeLoss(1.2)
@@ -509,16 +502,6 @@ typealias BarLoss LossFunctions.WeightedBinaryLoss{SmoothedL1HingeLoss,0.2}
 end
 
 # --------------------------------------------------------------
-
-distance_losses = [L2DistLoss(), LPDistLoss(2.0), L1DistLoss(),
-                   LPDistLoss(1.0), LPDistLoss(0.5),
-                   LPDistLoss(1.5), LPDistLoss(3),
-                   LogitDistLoss(),
-                   L1EpsilonInsLoss(0.5), EpsilonInsLoss(1.5),
-                   L2EpsilonInsLoss(0.5), L2EpsilonInsLoss(1.5),
-                   PeriodicLoss(1), PeriodicLoss(1.5),
-                   HuberLoss(1), HuberLoss(1.5),
-                   QuantileLoss(.2), QuantileLoss(.5), QuantileLoss(.8)]
 
 @testset "Test first derivatives of distance-based losses" begin
     for loss in distance_losses
