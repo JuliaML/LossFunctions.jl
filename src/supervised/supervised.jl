@@ -205,12 +205,11 @@ for FUN in (:value, :deriv, :deriv2)
                 output::AbstractArray{T,N},
                 avg::AvgMode.WeightedMean,
                 ::ObsDim.Constant{O})
-            N == 1 && throw(ArgumentError("Mean per observation non sensible for two Vectors. Try omitting the obsdim"))
             O > N && throw(ArgumentError("The specified obsdim is larger as the available dimensions."))
             @_dimcheck size(target) == size(output)
             @_dimcheck size(output, O) == length(avg.weights)
-            k = prod(size(output,n) for n in 1:N if n != O)::Int
-            nrm = avg.normalize ? 1 / (k * sum(avg.weights)) : 1 / (k * one(sum(avg.weights)))
+            k = prod(n != O ? size(output,n) : 1 for n in 1:N)::Int
+            nrm = avg.normalize ? inv(k * sum(avg.weights)) : inv(k * one(sum(avg.weights)))
             out = zero(($FUN)(loss, one(Q), one(T)) * (avg.weights[1] * nrm))
             @inbounds @simd for I in CartesianRange(size(output))
                 out += ($FUN)(loss, target[I], output[I]) * (avg.weights[I[O]] * nrm)
@@ -225,11 +224,10 @@ for FUN in (:value, :deriv, :deriv2)
                 output::AbstractArray{T,N},
                 avg::AvgMode.WeightedSum,
                 ::ObsDim.Constant{O})
-            N == 1 && throw(ArgumentError("Sum per observation non sensible for two Vectors. Try omitting the obsdim"))
             O > N && throw(ArgumentError("The specified obsdim is larger as the available dimensions."))
             @_dimcheck size(target) == size(output)
             @_dimcheck size(output, O) == length(avg.weights)
-            nrm = avg.normalize ? 1 / sum(avg.weights) : one(sum(avg.weights))
+            nrm = avg.normalize ? inv(sum(avg.weights)) : inv(one(sum(avg.weights)))
             out = zero(($FUN)(loss, one(Q), one(T)) * (avg.weights[1] * nrm))
             @inbounds @simd for I in CartesianRange(size(output))
                 out += ($FUN)(loss, target[I], output[I]) * (avg.weights[I[O]] * nrm)
@@ -238,7 +236,7 @@ for FUN in (:value, :deriv, :deriv2)
         end
 
         # ------------------------------------------------------
-        # PER OBSERVATION - SAME SIZE
+        # PER OBSERVATION - SAME SIZE - TO VECTOR
 
         # Compute the mean per observation (returns a Vector)
         function ($FUN){Q,T,N,O}(
@@ -247,7 +245,7 @@ for FUN in (:value, :deriv, :deriv2)
                 output::AbstractArray{T,N},
                 avg::AvgMode.Mean,
                 obsdim::ObsDim.Constant{O})
-            S = typeof(($FUN)(loss, one(Q), one(T)) / 1)
+            S = typeof(($FUN)(loss, one(Q), one(T)) / one(Int))
             buffer = zeros(S, size(output, O))
             ($(Symbol(FUN,:!)))(buffer, loss, target, output, avg, obsdim)
         end
@@ -307,10 +305,44 @@ for FUN in (:value, :deriv, :deriv2)
 
     for KIND in (:MarginLoss, :DistanceLoss)
         @eval begin
+
+            # --------------------------------------------------
+            # FALLBACK
+
             # By default compute the element-wise result
             @inline function ($FUN)(loss::$KIND, numbers::AbstractArray)
                 ($FUN)(loss, numbers, AvgMode.None())
             end
+
+            # (mutating) By default compute the element-wise result
+            @inline function ($(Symbol(FUN,:!)))(
+                    buffer::AbstractArray,
+                    loss::$KIND,
+                    numbers::AbstractArray)
+                ($(Symbol(FUN,:!)))(buffer, loss, numbers, AvgMode.None())
+            end
+
+            # Translate ObsDim.Last to the correct ObsDim.Constant (for code reduction)
+            @inline function ($FUN){T,N}(
+                    loss::$KIND,
+                    numbers::AbstractArray{T,N},
+                    avg::AverageMode,
+                    ::ObsDim.Last)
+                ($FUN)(loss, numbers, avg, ObsDim.Constant{N}())
+            end
+
+            # (mutating) Translate ObsDim.Last to the correct ObsDim.Constant (for code reduction)
+            @inline function ($(Symbol(FUN,:!))){T,N}(
+                    buffer::AbstractVector,
+                    loss::$KIND,
+                    numbers::AbstractArray{T,N},
+                    avg::AverageMode,
+                    ::ObsDim.Last)
+                ($(Symbol(FUN,:!)))(buffer, loss, numbers, avg, ObsDim.Constant{N}())
+            end
+
+            # --------------------------------------------------
+            # ELEMENT-WISE BROADCAST
 
             # Compute element-wise (returns an array)
             @inline function ($FUN){T,N}(
@@ -321,14 +353,27 @@ for FUN in (:value, :deriv, :deriv2)
                 ($FUN).(loss, numbers)::Array{S,N}
             end
 
+            # (mutating) Compute element-wise (returns an array)
+            function ($(Symbol(FUN,:!))){T,N}(
+                    buffer::AbstractArray,
+                    loss::$KIND,
+                    numbers::AbstractArray{T,N},
+                    ::AvgMode.None)
+                buffer .= ($FUN).(loss, numbers)
+                buffer
+            end
+
+            # --------------------------------------------------
+            # REDUCE TO NUMBER
+
             # Compute the mean (returns a Number)
             function ($FUN){T,N}(
                     loss::$KIND,
                     numbers::AbstractArray{T,N},
                     ::AvgMode.Mean)
-                len = length(numbers)
-                nrm = 1 / len
-                mapreduce(x -> loss(x) * nrm, +, numbers)
+                nrm = 1 / length(numbers)
+                S = typeof(($FUN)(loss, one(T)) * one(nrm))
+                mapreduce(x -> loss(x) * nrm, +, numbers)::S
             end
 
             # Compute the sum (returns a Number)
@@ -339,16 +384,15 @@ for FUN in (:value, :deriv, :deriv2)
                 mapreduce(loss, +, numbers)
             end
 
-            # Compute the total weighted average (returns a Number)
+            # Compute the total weighted mean (returns a Number)
             function ($FUN){T,N,O}(
                     loss::$KIND,
                     numbers::AbstractArray{T,N},
                     avg::AvgMode.WeightedMean,
                     ::ObsDim.Constant{O})
-                N == 1 && throw(ArgumentError("Mean per observation non sensible for a Vector. Try omitting the obsdim"))
                 @_dimcheck size(numbers, O) == length(avg.weights)
-                k = prod(size(numbers, n) for n in 1:N if n != O)::Int
-                nrm = avg.normalize ? 1 / (k * sum(avg.weights)) : 1 / (k * one(sum(avg.weights)))
+                k = prod(n != O ? size(numbers,n) : 1 for n in 1:N)::Int
+                nrm = avg.normalize ? inv(k * sum(avg.weights)) : inv(k * one(sum(avg.weights)))
                 out = zero(($FUN)(loss, one(T)) * (avg.weights[1] * nrm))
                 @inbounds @simd for I in CartesianRange(size(numbers))
                     out += ($FUN)(loss, numbers[I]) * (avg.weights[I[O]] * nrm)
@@ -362,14 +406,74 @@ for FUN in (:value, :deriv, :deriv2)
                     numbers::AbstractArray{T,N},
                     avg::AvgMode.WeightedSum,
                     ::ObsDim.Constant{O})
-                N == 1 && throw(ArgumentError("Sum per observation non sensible for a Vector. Try omitting the obsdim"))
                 @_dimcheck size(numbers, O) == length(avg.weights)
-                nrm = avg.normalize ? 1 / sum(avg.weights) : one(sum(avg.weights))
+                nrm = avg.normalize ? inv(sum(avg.weights)) : inv(one(sum(avg.weights)))
                 out = zero(($FUN)(loss, one(T)) * (avg.weights[1] * nrm))
                 @inbounds @simd for I in CartesianRange(size(numbers))
                     out += ($FUN)(loss, numbers[I]) * (avg.weights[I[O]] * nrm)
                 end
                 out
+            end
+
+            # --------------------------------------------------
+            # PER OBSERVATION - SAME SIZE - TO VECTOR
+
+            # Compute the mean per observation (returns a Vector)
+            function ($FUN){T,N,O}(
+                    loss::$KIND,
+                    numbers::AbstractArray{T,N},
+                    avg::AvgMode.Mean,
+                    obsdim::ObsDim.Constant{O})
+                S = typeof(($FUN)(loss, one(T)) / one(Int))
+                buffer = zeros(S, size(numbers, O))
+                ($(Symbol(FUN,:!)))(buffer, loss, numbers, avg, obsdim)
+            end
+
+            # (mutating) Compute the mean per observation (returns a Vector)
+            function ($(Symbol(FUN,:!))){B,T,N,O}(
+                    buffer::AbstractVector{B},
+                    loss::$KIND,
+                    numbers::AbstractArray{T,N},
+                    ::AvgMode.Mean,
+                    ::ObsDim.Constant{O})
+                N == 1 && throw(ArgumentError("Mean per observation non sensible for two Vectors. Try omitting the obsdim"))
+                O > N && throw(ArgumentError("The specified obsdim is larger as the available dimensions."))
+                @_dimcheck length(buffer) == size(numbers, O)
+                fill!(buffer, zero(B))
+                k = prod(size(numbers,n) for n in 1:N if n != O)::Int
+                nrm = 1 / k
+                @inbounds @simd for I in CartesianRange(size(numbers))
+                    buffer[I[O]] += ($FUN)(loss, numbers[I]) * nrm
+                end
+                buffer
+            end
+
+            # Compute the sum per observation (returns a Vector)
+            function ($FUN){T,N,O}(
+                    loss::$KIND,
+                    numbers::AbstractArray{T,N},
+                    avg::AvgMode.Sum,
+                    obsdim::ObsDim.Constant{O})
+                S = typeof(($FUN)(loss, one(T)))
+                buffer = zeros(S, size(numbers, O))
+                ($(Symbol(FUN,:!)))(buffer, loss, numbers, avg, obsdim)
+            end
+
+            # (mutating) Compute the sum per observation (returns a Vector)
+            function ($(Symbol(FUN,:!))){B,T,N,O}(
+                    buffer::AbstractVector{B},
+                    loss::$KIND,
+                    numbers::AbstractArray{T,N},
+                    ::AvgMode.Sum,
+                    ::ObsDim.Constant{O})
+                N == 1 && throw(ArgumentError("Sum per observation non sensible for two Vectors. Try omitting the obsdim"))
+                O > N && throw(ArgumentError("The specified obsdim is larger as the available dimensions."))
+                @_dimcheck length(buffer) == size(numbers, O)
+                fill!(buffer, zero(B))
+                @inbounds @simd for I in CartesianRange(size(numbers))
+                    buffer[I[O]] += ($FUN)(loss, numbers[I])
+                end
+                buffer
             end
         end
     end
