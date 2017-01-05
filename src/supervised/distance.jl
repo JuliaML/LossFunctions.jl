@@ -113,7 +113,6 @@ It is strictly convex.
 """
 typealias L2DistLoss LPDistLoss{2}
 
-sumvalue(loss::L2DistLoss, difference::AbstractArray) = sumabs2(difference)
 value(loss::L2DistLoss, difference::Number) = abs2(difference)
 deriv{T<:Number}(loss::L2DistLoss, difference::T) = T(2) * difference
 deriv2{T<:Number}(loss::L2DistLoss, difference::T) = T(2)

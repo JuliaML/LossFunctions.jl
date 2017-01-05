@@ -50,9 +50,12 @@ export
     ZeroOneLoss,
 
     weightedloss,
-    scaledloss
+    scaledloss,
+
+    AvgMode
 
 include("common.jl")
+include("averagemode.jl")
 
 include("supervised/supervised.jl")
 include("supervised/sparse.jl")
@@ -66,18 +69,17 @@ include("supervised/io.jl")
 include("deprecate.jl")
 
 # allow using some special losses as function
-(loss::ScaledSupervisedLoss)(target, output) = value(loss, target, output)
-(loss::WeightedBinaryLoss)(target, output) = value(loss, target, output)
+(loss::ScaledSupervisedLoss)(args...) = value(loss, args...)
+(loss::WeightedBinaryLoss)(args...)   = value(loss, args...)
 
 # allow using SupervisedLoss as function
-for T in filter(isleaftype,subtypes(SupervisedLoss))
-    @eval (loss::$T)(target, output) = value(loss, target, output)
+for T in filter(isleaftype, subtypes(SupervisedLoss))
+    @eval (loss::$T)(args...) = value(loss, args...)
 end
 
 # allow using MarginLoss and DistanceLoss as function
 for T in union(subtypes(DistanceLoss), subtypes(MarginLoss))
-    @eval (loss::$T)(target, output) = value(loss, target, output)
-    @eval (loss::$T)(x) = value(loss, x)
+    @eval (loss::$T)(args...) = value(loss, args...)
 end
 
 end # module
