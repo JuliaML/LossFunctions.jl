@@ -32,7 +32,7 @@ module AvgMode
         normalize::Bool
     end
     WeightedSum(A::AbstractVector, normalize::Bool) = WeightedSum(weights(A), normalize)
-    WeightedSum(A::AbstractVector; normalize::Bool = true) = WeightedSum(weights(A), normalize)
+    WeightedSum(A::AbstractVector; normalize::Bool = false) = WeightedSum(weights(A), normalize)
 
 end
 

@@ -52,12 +52,12 @@ function test_vector_value(l::MarginLoss, t, y)
     ## Weighted Sum
     @test_throws DimensionMismatch LossFunctions.value(l, t, y, AvgMode.WeightedSum(ones(n-1)), ObsDim.First())
     @test_throws DimensionMismatch LossFunctions.value(l, yt, AvgMode.WeightedSum(ones(n-1)), ObsDim.First())
-    @test @inferred(LossFunctions.value(l, t, y, AvgMode.WeightedSum(ones(n),normalize=false), ObsDim.First())) ≈ s
-    @test @inferred(LossFunctions.value(l, yt, AvgMode.WeightedSum(ones(n),normalize=false), ObsDim.First())) ≈ s
-    @test @inferred(LossFunctions.value(l, t, y, AvgMode.WeightedSum(ones(k),normalize=false), ObsDim.Last())) ≈ s
-    @test @inferred(LossFunctions.value(l, yt, AvgMode.WeightedSum(ones(k),normalize=false), ObsDim.Last())) ≈ s
-    @test @inferred(LossFunctions.value(l, t, y, AvgMode.WeightedSum(ones(k),normalize=false))) ≈ s
-    @test @inferred(LossFunctions.value(l, yt, AvgMode.WeightedSum(ones(k),normalize=false))) ≈ s
+    @test @inferred(LossFunctions.value(l, t, y, AvgMode.WeightedSum(ones(n)), ObsDim.First())) ≈ s
+    @test @inferred(LossFunctions.value(l, yt, AvgMode.WeightedSum(ones(n)), ObsDim.First())) ≈ s
+    @test @inferred(LossFunctions.value(l, t, y, AvgMode.WeightedSum(ones(k)), ObsDim.Last())) ≈ s
+    @test @inferred(LossFunctions.value(l, yt, AvgMode.WeightedSum(ones(k)), ObsDim.Last())) ≈ s
+    @test @inferred(LossFunctions.value(l, t, y, AvgMode.WeightedSum(ones(k)))) ≈ s
+    @test @inferred(LossFunctions.value(l, yt, AvgMode.WeightedSum(ones(k)))) ≈ s
     if typeof(t) <: AbstractVector
         @test_throws ArgumentError LossFunctions.value(l, t, y, AvgMode.Sum(), ObsDim.First())
         @test_throws ArgumentError LossFunctions.value(l, t, y, AvgMode.Mean(), ObsDim.First())
@@ -73,10 +73,10 @@ function test_vector_value(l::MarginLoss, t, y)
         @test @inferred(LossFunctions.value!(buffer2, l, yt, AvgMode.Sum(), ObsDim.Last())) ≈ sv
         @test buffer2 ≈ sv
         # Weighted sum compare
-        @test @inferred(LossFunctions.value(l, t, y, AvgMode.WeightedSum(1:k,normalize=false), ObsDim.Last())) ≈ sum(sv .* (1:k))
-        @test @inferred(LossFunctions.value(l, yt, AvgMode.WeightedSum(1:k,normalize=false), ObsDim.Last())) ≈ sum(sv .* (1:k))
-        @test round(@inferred(LossFunctions.value(l, t, y, AvgMode.WeightedSum(1:k), ObsDim.Last())),3) ≈ round(sum(sv .* ((1:k)/(sum(1:k)))),3)
-        @test round(@inferred(LossFunctions.value(l, yt, AvgMode.WeightedSum(1:k), ObsDim.Last())),3) ≈ round(sum(sv .* ((1:k)/(sum(1:k)))),3)
+        @test @inferred(LossFunctions.value(l, t, y, AvgMode.WeightedSum(1:k), ObsDim.Last())) ≈ sum(sv .* (1:k))
+        @test @inferred(LossFunctions.value(l, yt, AvgMode.WeightedSum(1:k), ObsDim.Last())) ≈ sum(sv .* (1:k))
+        @test round(@inferred(LossFunctions.value(l, t, y, AvgMode.WeightedSum(1:k,normalize=true), ObsDim.Last())),3) ≈ round(sum(sv .* ((1:k)/(sum(1:k)))),3)
+        @test round(@inferred(LossFunctions.value(l, yt, AvgMode.WeightedSum(1:k,normalize=true), ObsDim.Last())),3) ≈ round(sum(sv .* ((1:k)/(sum(1:k)))),3)
         # Mean per obs
         mv = vec(mean(ref, 1:(ndims(ref)-1)))
         @test @inferred(LossFunctions.value(l, t, y, AvgMode.Mean(), ObsDim.Last())) ≈ mv
