@@ -106,23 +106,23 @@ for FUN in (:value, :deriv, :deriv2)
         end
 
         # Translate ObsDim.Last to the correct ObsDim.Constant (for code reduction)
-        @inline function ($FUN){T,Q,N}(
+        @inline function ($FUN){T,N}(
                 loss::SupervisedLoss,
-                target::AbstractArray{Q,N},
+                target::AbstractArray,
                 output::AbstractArray{T,N},
                 avg::AverageMode,
-                ::ObsDim.Last)
+                ::ObsDim.Last = ObsDim.Last())
             ($FUN)(loss, target, output, avg, ObsDim.Constant{N}())
         end
 
         # (mutating) Translate ObsDim.Last to the correct ObsDim.Constant (for code reduction)
-        @inline function ($(Symbol(FUN,:!))){T,Q,N}(
-                buffer::AbstractVector,
+        @inline function ($(Symbol(FUN,:!))){T,N}(
+                buffer::AbstractArray,
                 loss::SupervisedLoss,
-                target::AbstractArray{Q,N},
+                target::AbstractArray,
                 output::AbstractArray{T,N},
                 avg::AverageMode,
-                ::ObsDim.Last)
+                ::ObsDim.Last = ObsDim.Last())
             ($(Symbol(FUN,:!)))(buffer, loss, target, output, avg, ObsDim.Constant{N}())
         end
 
@@ -327,17 +327,17 @@ for FUN in (:value, :deriv, :deriv2)
                     loss::$KIND,
                     numbers::AbstractArray{T,N},
                     avg::AverageMode,
-                    ::ObsDim.Last)
+                    ::ObsDim.Last = ObsDim.Last())
                 ($FUN)(loss, numbers, avg, ObsDim.Constant{N}())
             end
 
             # (mutating) Translate ObsDim.Last to the correct ObsDim.Constant (for code reduction)
             @inline function ($(Symbol(FUN,:!))){T,N}(
-                    buffer::AbstractVector,
+                    buffer::AbstractArray,
                     loss::$KIND,
                     numbers::AbstractArray{T,N},
                     avg::AverageMode,
-                    ::ObsDim.Last)
+                    ::ObsDim.Last = ObsDim.Last())
                 ($(Symbol(FUN,:!)))(buffer, loss, numbers, avg, ObsDim.Constant{N}())
             end
 
