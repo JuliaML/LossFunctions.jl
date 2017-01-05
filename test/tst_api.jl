@@ -254,7 +254,8 @@ end
                         (rand(T[-1,1],4),(rand(O,4)-O(.5)) .* O(20)),
                         (rand(T[-1,1],4,5),(rand(O,4,5)-O(.5)) .* O(20)),
                     )
-                    for loss in margin_losses
+                    for loss in (LogitMarginLoss(),ModifiedHuberLoss(),
+                                 L1HingeLoss(),SigmoidLoss())
                         @testset "$(loss): " begin
                             test_vector_value(loss, targets, outputs)
                             test_vector_deriv(loss, targets, outputs)
@@ -268,7 +269,8 @@ end
                         ((rand(T,4)-T(.5)) .* T(20),(rand(O,4)-O(.5)) .* O(20)),
                         ((rand(T,4,5)-T(.5)) .* T(20),(rand(O,4,5)-O(.5)) .* O(20)),
                     )
-                    for loss in distance_losses
+                    for loss in (QuantileLoss(0.75),L2DistLoss(),
+                                 EpsilonInsLoss(1))
                         @testset "$(loss): " begin
                             test_vector_value(loss, targets, outputs)
                             test_vector_deriv(loss, targets, outputs)
@@ -277,6 +279,7 @@ end
                     end
                 end
             end
+            println("<HEARTBEAT>")
         end
     end
 end

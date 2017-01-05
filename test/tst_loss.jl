@@ -106,7 +106,7 @@ end
 
 function test_deriv(l::DistanceLoss, t_vec)
     @testset "$(l): " begin
-        for y in -20:.2:20, t in t_vec
+        for y in -10:.2:10, t in t_vec
             if isdifferentiable(l, t-y)
                 d_dual = epsilon(LossFunctions.value(l, dual(t-y, 1)))
                 d_comp = @inferred deriv(l, y, t)
@@ -142,7 +142,7 @@ end
 
 function test_deriv(l::SupervisedLoss, t_vec)
     @testset "$(l): " begin
-        for y in -20:.2:20, t in t_vec
+        for y in -10:.2:10, t in t_vec
             if isdifferentiable(l, y, t)
                 d_dual = epsilon(LossFunctions.value(l, y, dual(t, 1)))
                 d_comp = @inferred deriv(l, y, t)
@@ -191,7 +191,7 @@ end
 
 function test_deriv2(l::DistanceLoss, t_vec)
     @testset "$(l): " begin
-        for y in -20:.2:20, t in t_vec
+        for y in -10:.2:10, t in t_vec
             if istwicedifferentiable(l, t-y) && isdifferentiable(l, t-y)
                 d2_dual = epsilon(deriv(l, dual(t-y, 1)))
                 d2_comp = @inferred deriv2(l, y, t)
@@ -505,7 +505,7 @@ end
 
 @testset "Test first derivatives of distance-based losses" begin
     for loss in distance_losses
-        test_deriv(loss, -20:0.5:20)
+        test_deriv(loss, -10:0.5:10)
     end
 end
 
@@ -515,7 +515,7 @@ end
 
 @testset "Test second derivatives of distance-based losses" begin
     for loss in distance_losses
-        test_deriv2(loss, -20:0.5:20)
+        test_deriv2(loss, -10:0.5:10)
     end
 end
 
@@ -523,8 +523,8 @@ typealias FooLoss LossFunctions.ScaledDistanceLoss{L2EpsilonInsLoss,2}
 
 @testset "Test distance-based scaled loss" begin
     for loss in distance_losses
-        test_scaledloss(loss, -20:.2:20, -20:0.5:20)
-        test_scaledloss(loss, -20:0.5:20)
+        test_scaledloss(loss, -10:.2:10, -10:0.5:10)
+        test_scaledloss(loss, -10:0.5:10)
     end
 
     l = @inferred FooLoss(1.2)
