@@ -1,25 +1,31 @@
 Getting Started
 ================
 
-This section outlines the basic steps needed to start utilizing
-the LossFunctions.jl package.
-To that end we will provide a condensed overview of the package.
+LossFunctions is the result of a collaborative effort to design
+an efficient but also convenient-to-use `Julia
+<http://julialang.org/>`_ library that provides the most commonly
+utilized loss functions in Machine Learning. As such, this
+package implements the functionality needed to query various
+properties about a loss (e.g. convexity), as well as a number of
+methods to compute its value, derivative, and second derivative
+for single observations or arrays of observations.
 
-.. note::
-
-    In order to keep this overview consise, we will not discuss any
-    background information or theory on the losses here in detail.
+In this section we will provide a condensed overview of the
+package. In order to keep this overview concise, we will not
+discuss any background information or theory on the losses here
+in detail.
 
 Installation
 --------------
 
-To install LossFunctions.jl, start up Julia and type the following
-code-snipped into the REPL. It makes use of the native Julia
-package manger.
+To install `LossFunctions.jl
+<https://github.com/JuliaML/LossFunctions.jl>`_, start up Julia
+and type the following code-snipped into the REPL. It makes use
+of the native Julia package manger.
 
 .. code-block:: julia
 
-    Pkg.add("LossFunctions")
+   Pkg.add("LossFunctions")
 
 Additionally, for example if you encounter any sudden issues,
 or in the case you would like to contribute to the package,
@@ -27,46 +33,113 @@ you can manually choose to be on the latest (untagged) version.
 
 .. code-block:: julia
 
-    Pkg.checkout("LossFunctions")
+   Pkg.checkout("LossFunctions")
 
-
-Hello World
+Overview
 ------------
 
-This package is registered in the Julia package ecosystem. Once
-installed the package can be imported just as any other Julia
-package.
+Let us take a look at a few examples to get a feeling of how one
+can use this library. This package is registered in the Julia
+package ecosystem. Once installed the package can be imported
+as usual.
 
 .. code-block:: julia
 
-    using LossFunctions
+   using LossFunctions
 
-The following code snippets show a simple scenario of how a
-`Loss` can be used to compute the element-wise values.
+Typically the losses we work with in Machine Learning are
+multivariate functions of the **true target** :math:`y`, which
+represents the "ground truth" (i.e. correct answer), and the
+**predicted output** :math:`\hat{y}`, which is what our model
+thinks the truth is. All losses that can be expressed this way
+will be referred to as supervised losses. The true targets are
+often expected to be of a specific set (e.g. in classification),
+which will refer to as :math:`Y`, while the predicted outputs may
+be any real number. A supervised loss is thus for our purposes
+defined as:
 
-.. code-block:: julia
+.. math::
 
-    using LossFunctions
+   L : Y \times \mathbb{R} \rightarrow [0,\infty)
 
-    true_targets = [  1,  0, -2]
-    pred_outputs = [0.5,  1, -1]
+Such a loss function takes these two variables and returns us a
+value that quantifies how "bad" our prediction is when comparing
+it to the truth. In other words: the lower the loss the better
+the prediction.
 
-    value(L2DistLoss(), true_targets, pred_outputs)
+From an implementation perspective we should point out that all
+the concrete loss "functions" that this package provides, are
+actually defined as immutable types instead of native Julia
+functions. To then compute the value of some loss we provide the
+function :func:`value`. To start off, note that at its core all
+the provided losses of this package are defined on single
+variables (i.e. numbers).
 
-.. code-block:: none
+.. code-block:: jlcon
 
-    3-element Array{Float64,1}:
-     0.25
-     1.0
-     1.0
+   #                loss       y    ŷ
+   julia> value(L2DistLoss(), 1.0, 0.5)
+   0.25
 
-Alternatively, one can also use the loss like a function to
-compute its :func:`value`.
+Calling the same function using arrays instead of numbers will
+default to returning the element-wise results, and thus basically
+just serve as a wrapper for broadcast.
 
-.. code-block:: julia
+.. code-block:: jlcon
 
-    myloss = L2DistLoss()
-    myloss(true_targets, pred_outputs) # same result as above
+   julia> true_targets = [  1,  0, -2];
+
+   julia> pred_outputs = [0.5,  2, -1];
+
+   julia> value(L2DistLoss(), true_targets, pred_outputs)
+   3-element Array{Float64,1}:
+    0.25
+    4.0
+    1.0
+
+Alternatively, one can also use an instance of a loss just like
+one would use any other Julia function. This can make the code
+significantly more readable while not impacting performance as it
+is a zero-cost abstraction (i.e. it compiles down to the same
+code).
+
+.. code-block:: jlcon
+
+   julia> loss = L2DistLoss()
+   LossFunctions.LPDistLoss{2}()
+
+   julia> loss(true_targets, pred_outputs) # same result as above
+   3-element Array{Float64,1}:
+    0.25
+    4.0
+    1.0
+
+   julia> loss(1, 0.5f0) # single observation
+   0.25f0
+
+If you are not actually interested in the element-wise results,
+but some accumulation of those (such as mean or sum), you can
+additionally specify an **average mode**. This will avoid
+allocating a temporary array and directly compute the result.
+
+.. code-block:: jlcon
+
+   julia> value(L2DistLoss(), true_targets, pred_outputs, AvgMode.Sum())
+   5.25
+
+   julia> value(L2DistLoss(), true_targets, pred_outputs, AvgMode.Mean())
+   1.75
+
+Aside from these standard unweighted average modes, we also
+provide weighted alternatives.
+
+.. code-block:: jlcon
+
+   julia> value(L2DistLoss(), true_targets, pred_outputs, AvgMode.WeightedSum([2,1,1]))
+   5.5
+
+   julia> value(L2DistLoss(), true_targets, pred_outputs, AvgMode.WeightedMean([2,1,1]))
+   1.375
 
 The function signatures of :func:`value` also apply to the derivatives.
 
@@ -88,39 +161,11 @@ Additionally, we provide mutating versions of most functions.
     buffer = zeros(3)
     deriv!(buffer, L2DistLoss(), true_targets, pred_outputs)
 
-If need be, one can also compute the :func:`meanvalue` or
-:func:`sumvalue` efficiently, without allocating a temporary array.
 
-.. code-block:: julia
-
-    # or meanvalue
-    sumvalue(L2DistLoss(), true_targets, pred_outputs)
-
-.. code-block:: none
-
-    0.75
-
-
-Overview
----------
-
-All the concrete loss "functions" that this package provides are
-defined as types and are subtypes of the abstract ``Loss``.
-
-Typically the losses we work with in Machine Learning are bivariate
-functions of the true ``target`` and the predicted ``output`` of
-some prediction model. All losses that can be expressed this way
-are subtypes for :class:`SupervisedLoss`.
-To compute the value of some :class:`SupervisedLoss` we use the
-function :func:`value`.
-
-.. code-block:: julia
-
-    value(L2DistLoss(), true_target, pred_output)
 
 We can further divide the supervised losses into two useful
-sub-categories: :class:`DistanceLoss` and :class:`MarginLoss`.
-
+sub-categories: :class:`DistanceLoss` for regression and
+:class:`MarginLoss` for classification.
 
 Losses for Regression
 ~~~~~~~~~~~~~~~~~~~~~~
