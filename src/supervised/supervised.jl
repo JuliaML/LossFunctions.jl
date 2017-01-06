@@ -167,7 +167,7 @@ for FUN in (:value, :deriv, :deriv2)
             quote
                 @nexprs $S (n)->@_dimcheck(size(target, n) == size(output, n))
                 nrm = 1 / length($bigger)
-                out = zero(($($FUN))(loss, one(Q), one(T))) * nrm
+                out = zero(($($FUN))(loss, one(Q), one(T)) * nrm)
                 @inbounds @simd for I in CartesianRange(size($bigger))
                     @nexprs $B n->(i_n = I[n])
                     out += ($($FUN))(loss, @nref($M,target,i), @nref($N,output,i)) * nrm
