@@ -1,14 +1,14 @@
 Getting Started
 ================
 
-LossFunctions is the result of a collaborative effort to design
-an efficient but also convenient-to-use `Julia
-<http://julialang.org/>`_ library that provides the most commonly
-utilized loss functions in Machine Learning. As such, this
-package implements the functionality needed to query various
-properties about a loss (e.g. convexity), as well as a number of
-methods to compute its value, derivative, and second derivative
-for single observations or arrays of observations.
+LossFunctions.jl is the result of a collaborative effort to
+design and implement an efficient but also convenient-to-use
+`Julia <http://julialang.org/>`_ library for, well, loss
+functions. As such, this package implements the functionality
+needed to query various properties about a loss function (such as
+convexity), as well as a number of methods to compute its value,
+derivative, and second derivative for single observations or
+arrays of observations.
 
 In this section we will provide a condensed overview of the
 package. In order to keep this overview concise, we will not
@@ -47,33 +47,32 @@ as usual.
 
    using LossFunctions
 
-Typically the losses we work with in Machine Learning are
-multivariate functions of the **true target** :math:`y`, which
-represents the "ground truth" (i.e. correct answer), and the
-**predicted output** :math:`\hat{y}`, which is what our model
-thinks the truth is. All losses that can be expressed this way
-will be referred to as supervised losses. The true targets are
-often expected to be of a specific set (e.g. in classification),
-which will refer to as :math:`Y`, while the predicted outputs may
-be any real number. A supervised loss is thus for our purposes
-defined as:
+Typically, the losses we work with in Machine Learning are
+multivariate functions of two variables, the **true target**
+:math:`y`, which represents the "ground truth" (i.e. correct
+answer), and the **predicted output** :math:`\hat{y}`, which is
+what our model thinks the truth is. All losses that can be
+expressed in this way will be referred to as supervised losses.
+The true targets are often expected to be of a specific set (e.g.
+:math:`\{1,-1\}` in classification), which we will refer to as
+:math:`Y`, while the predicted outputs may be any real number.
+So for our purposes we can define a supervised loss as follows
 
 .. math::
 
    L : Y \times \mathbb{R} \rightarrow [0,\infty)
 
-Such a loss function takes these two variables and returns us a
-value that quantifies how "bad" our prediction is when comparing
-it to the truth. In other words: the lower the loss the better
-the prediction.
+Such a loss function takes these two variables as input and
+returns a value that quantifies how "bad" our prediction is
+in comparison to the truth. In other words: the lower the
+loss, the better the prediction.
 
-From an implementation perspective we should point out that all
-the concrete loss "functions" that this package provides, are
-actually defined as immutable types instead of native Julia
-functions. To then compute the value of some loss we provide the
-function :func:`value`. To start off, note that at its core all
-the provided losses of this package are defined on single
-variables (i.e. numbers).
+From an implementation perspective, we should point out that all
+the concrete loss "functions" that this package provides are
+actually defined as immutable types, instead of native Julia
+functions. We can compute the value of some type of loss using
+the function :func:`value`. Let us start with an example of how
+to compute the loss of a single observation (i.e. two numbers).
 
 .. code-block:: jlcon
 
@@ -82,8 +81,8 @@ variables (i.e. numbers).
    0.25
 
 Calling the same function using arrays instead of numbers will
-default to returning the element-wise results, and thus basically
-just serve as a wrapper for broadcast.
+return the element-wise results, and thus basically just serve as
+a wrapper for broadcast (which by the way is also supported).
 
 .. code-block:: jlcon
 
@@ -99,8 +98,8 @@ just serve as a wrapper for broadcast.
 
 Alternatively, one can also use an instance of a loss just like
 one would use any other Julia function. This can make the code
-significantly more readable while not impacting performance as it
-is a zero-cost abstraction (i.e. it compiles down to the same
+significantly more readable while not impacting performance, as
+it is a zero-cost abstraction (i.e. it compiles down to the same
 code).
 
 .. code-block:: jlcon
@@ -117,10 +116,11 @@ code).
    julia> loss(1, 0.5f0) # single observation
    0.25f0
 
-If you are not actually interested in the element-wise results,
-but some accumulation of those (such as mean or sum), you can
-additionally specify an **average mode**. This will avoid
-allocating a temporary array and directly compute the result.
+If you are not actually interested in the element-wise results
+individually, but some accumulation of those (such as mean or
+sum), you can additionally specify an **average mode**. This will
+avoid allocating a temporary array and directly compute the
+result.
 
 .. code-block:: jlcon
 
@@ -131,7 +131,9 @@ allocating a temporary array and directly compute the result.
    1.75
 
 Aside from these standard unweighted average modes, we also
-provide weighted alternatives.
+provide weighted alternatives. These expect a weight-factor for
+each observation in the predicted outputs and so allow to give
+certain observations a stronger influence over the result.
 
 .. code-block:: jlcon
 
@@ -141,27 +143,114 @@ provide weighted alternatives.
    julia> value(L2DistLoss(), true_targets, pred_outputs, AvgMode.WeightedMean([2,1,1]))
    1.375
 
-The function signatures of :func:`value` also apply to the derivatives.
+We do not restrict the targets and outputs to be vectors, but
+instead allow them to be arrays of any arbitrary shape. The shape
+of an array may or may not have an interpretation that is
+relevant for computing the loss. Consequently, those methods that
+don't require this information can be invoked using the same
+method signature as before, because the results are simply
+computed element-wise or accumulated.
+
+.. code-block:: jlcon
+
+   julia> A = rand(2,3)
+   2×3 Array{Float64,2}:
+    0.0939946  0.97639   0.568107
+    0.183244   0.854832  0.962534
+
+   julia> B = rand(2,3)
+   2×3 Array{Float64,2}:
+    0.0538206  0.77055  0.996922
+    0.598317   0.72043  0.912274
+
+   julia> value(L2DistLoss(), A, B)
+   2×3 Array{Float64,2}:
+    0.00161395  0.0423701  0.183882
+    0.172286    0.0180639  0.00252607
+
+   julia> value(L2DistLoss(), A, B, AvgMode.Sum())
+   0.420741920634
+
+These methods even allow arrays of different dimensionality, in
+which case broadcast is performed. This also applies to computing
+the sum and mean, in which case we use custom broadcast
+implementations that avoid allocating a temporary array.
+
+.. code-block:: jlcon
+
+   julia> value(L2DistLoss(), rand(2), rand(2,2))
+   2×2 Array{Float64,2}:
+    0.228077  0.597212
+    0.789808  0.311914
+
+   julia> value(L2DistLoss(), rand(2), rand(2,2), AvgMode.Sum())
+   0.0860658081865589
+
+That said, it is possible to explicitly specify which dimension
+denotes the observations. This is particularly useful for
+multivariate regression where one could want to accumulate the
+loss per individual observation.
+
+.. code-block:: jlcon
+
+   julia> value(L2DistLoss(), A, B, AvgMode.Sum(), ObsDim.First())
+   2-element Array{Float64,1}:
+    0.227866
+    0.192876
+
+   julia> value(L2DistLoss(), A, B, AvgMode.Sum(), ObsDim.Last())
+   3-element Array{Float64,1}:
+    0.1739
+    0.060434
+    0.186408
+
+   julia> value(L2DistLoss(), A, B, AvgMode.WeightedSum([2,1]), ObsDim.First())
+   0.648608280735
+
+All these function signatures of :func:`value` also apply for
+computing the derivatives using :func:`deriv` and the second
+derivatives using :func:`deriv2`.
+
+.. code-block:: jlcon
+
+   julia> true_targets = [  1,  0, -2];
+
+   julia> pred_outputs = [0.5,  2, -1];
+
+   julia> deriv(L2DistLoss(), true_targets, pred_outputs)
+   3-element Array{Float64,1}:
+    -1.0
+     4.0
+     2.0
+
+   julia> deriv2(L2DistLoss(), true_targets, pred_outputs)
+   3-element Array{Float64,1}:
+    2.0
+    2.0
+    2.0
+
+Additionally, we provide mutating versions for the subset of
+methods that return an array. These have the same function
+signatures with the only difference of requiring an additional
+parameter as the first argument. This variable should always be
+the preallocated array that is to be used as stroage.
 
 .. code-block:: julia
 
-    deriv(L2DistLoss(), true_targets, pred_outputs)
+   julia> buffer = zeros(3)
+   3-element Array{Float64,1}:
+    0.0
+    0.0
+    0.0
 
-.. code-block:: none
-
-    3-element Array{Float64,1}:
-     -1.0
+   julia> deriv!(buffer, L2DistLoss(), true_targets, pred_outputs)
+   3-element Array{Float64,1}:
+    -1.0
+     4.0
      2.0
-     2.0
 
-Additionally, we provide mutating versions of most functions.
-
-.. code-block:: julia
-
-    buffer = zeros(3)
-    deriv!(buffer, L2DistLoss(), true_targets, pred_outputs)
-
-
+Regression vs Classification
+-----------------------------
 
 We can further divide the supervised losses into two useful
 sub-categories: :class:`DistanceLoss` for regression and
@@ -187,15 +276,16 @@ the :class:`PeriodicLoss`.
     In the literature that this package is partially based on,
     the convention for the distance-based losses is ``target - output``
     (see [STEINWART2008]_ p. 38).
-    We chose to diverge from this definition because that would
-    cause the the sign of the derivative to flip.
+    We chose to diverge from this definition because it would force
+    a difference between the results for the unary and the binary
+    version of the derivative.
 
 Losses for Classification
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Margin-base losses are supervised losses where the values of
-the targets are restricted to be in {-1, 1}, and which can be
-expressed as a univariate function ``output * target``.
+Margin-based losses are supervised losses where the values of the
+targets are restricted to be in :math:`\{1,-1\}`, and which can
+be expressed as a univariate function ``output * target``.
 
 .. code-block:: julia
 
@@ -211,13 +301,6 @@ expressed as a univariate function ``output * target``.
 Margin-based losses are usually used for binary classification.
 In contrast to other formalism, they do not natively provide
 probabilities as output.
-
-.. note::
-
-    Even though distance-based losses and margin-based losses
-    can be expressed in univariate form, we still provide the
-    bivariate form of ``value`` for both.
-
 
 Getting Help
 -------------
