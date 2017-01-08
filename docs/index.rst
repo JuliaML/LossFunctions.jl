@@ -15,8 +15,8 @@ of implemented loss functions as well as an API to query their
 properties such as convexity. Furthermore we expose methods to
 compute their values, derivatives, and second derivatives for
 single observations as well as arbitrarily sized arrays of
-observations.  In the case of arrays a user has the ability to
-define if an how element-wise loss values are averaged or summed
+observations. In the case of arrays a user has the ability to
+define if and how element-wise results are averaged or summed
 over.
 
 From an end-user's perspective one normally does not need to
@@ -35,6 +35,17 @@ check out the "Getting Started" section.
    :maxdepth: 2
 
    introduction/gettingstarted
+
+Introduction and Motivation
+------------------------------
+
+.. toctree::
+   :maxdepth: 2
+
+   introduction/motivation
+
+API Documentation
+--------------------------------
 
 For details on a specific aspect, see the documentation outlined below.
 
