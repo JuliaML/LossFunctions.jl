@@ -279,14 +279,14 @@ It is Lipschitz continuous and convex, but not strictly convex.
 immutable L1EpsilonInsLoss{T<:AbstractFloat} <: DistanceLoss
     ε::T
 
-    function L1EpsilonInsLoss(ɛ::Number)
+    @inline function L1EpsilonInsLoss(ɛ::T)
         ɛ > 0 || error("ɛ must be strictly positive")
-        new(convert(Float64, ɛ))
+        new(ɛ)
     end
 end
 typealias EpsilonInsLoss L1EpsilonInsLoss
-L1EpsilonInsLoss{T<:AbstractFloat}(ε::T) = L1EpsilonInsLoss{T}(ε)
-L1EpsilonInsLoss(ε::Number) = L1EpsilonInsLoss{Float64}(Float64(ε))
+@inline L1EpsilonInsLoss{T<:AbstractFloat}(ε::T) = L1EpsilonInsLoss{T}(ε)
+@inline L1EpsilonInsLoss(ε::Number) = L1EpsilonInsLoss{Float64}(Float64(ε))
 
 function value{T1,T2<:Number}(loss::L1EpsilonInsLoss{T1}, difference::T2)
     T = promote_type(T1,T2)
