@@ -53,9 +53,22 @@ For details on a specific aspect, see the documentation outlined below.
    :maxdepth: 2
 
    losses/interface
+   losses/avgmode
    losses/distance
    losses/margin
    losses/other
+
+Internals
+--------------------------------
+
+If you are interested in contributing to LossFunctions.jl, or
+simply want to understand how and why the package does then take
+a look at our developer documentation.
+
+.. toctree::
+   :maxdepth: 2
+
+   developer/design
 
 Indices and tables
 ==================
