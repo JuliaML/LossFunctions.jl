@@ -164,9 +164,10 @@ for FUN in (:value, :deriv, :deriv2)
                 ::AvgMode.Mean)
             bigger = M > N ? :target : :output
             S, B = min(M,N), max(M,N)
+            P = promote_type(Q,T)
             quote
                 @nexprs $S (n)->@_dimcheck(size(target, n) == size(output, n))
-                nrm = 1 / length($bigger)
+                nrm = 1 / $P(length($bigger))
                 out = zero(($($FUN))(loss, one(Q), one(T)) * nrm)
                 @inbounds @simd for I in CartesianRange(size($bigger))
                     @nexprs $B n->(i_n = I[n])
@@ -263,7 +264,8 @@ for FUN in (:value, :deriv, :deriv2)
             @_dimcheck size(target) == size(output)
             @_dimcheck length(buffer) == size(output, O)
             fill!(buffer, zero(B))
-            k = prod(size(output,n) for n in 1:N if n != O)::Int
+            P = promote_type(Q,T)
+            k = P(prod(size(output,n) for n in 1:N if n != O))
             nrm = 1 / k
             @inbounds @simd for I in CartesianRange(size(output))
                 buffer[I[O]] += ($FUN)(loss, target[I], output[I]) * nrm

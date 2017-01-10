@@ -128,10 +128,10 @@ function test_vector_value(l::DistanceLoss, t, y)
     @test @inferred(l(yt, AvgMode.Sum())) ≈ s
     # Mean
     m = mean(ref)
-    @test @inferred(LossFunctions.value(l, t, y, AvgMode.Mean())) ≈ m
-    @test @inferred(LossFunctions.value(l, yt, AvgMode.Mean())) ≈ m
-    @test @inferred(l(t, y, AvgMode.Mean())) ≈ m
-    @test @inferred(l(yt, AvgMode.Mean())) ≈ m
+    @test round(@inferred(LossFunctions.value(l, t, y, AvgMode.Mean())),5) ≈ round(m,5)
+    @test round(@inferred(LossFunctions.value(l, yt, AvgMode.Mean())),5) ≈ round(m,5)
+    @test round(@inferred(l(t, y, AvgMode.Mean())),5) ≈ round(m,5)
+    @test round(@inferred(l(yt, AvgMode.Mean())),5) ≈ round(m,5)
     # Obs specific
     n = size(t, 1)
     k = size(t, ndims(t))
