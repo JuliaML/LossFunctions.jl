@@ -4,18 +4,20 @@ Working with Losses
 Even though they are called loss "functions", this package
 implements them as immutable types instead of true Julia
 functions. There are good reasons for that. For example it allows
-us to specify the properties of losses explicitly (e.g.
+us to specify the properties of losse functions explicitly (e.g.
 ``isconvex(myloss)``). It also makes for a more consistent API
 when it comes to computing the value or the derivative. Some loss
 functions even have additional parameters that need to be
 specified, such as the :math:`\epsilon` in the case of the
-:math:`\epsilon`-insensitive loss. In order to avoid potential
-confusions with true Julia functions, we will refer to "loss
-functions" as "losses" instead.
+:math:`\epsilon`-insensitive loss. Here, types allow for member
+variables to hide that information away from the method
+signatures.
 
-The available losses share a common interface for the most part.
-This section will provide an overview of the basic functionality
-that is available for all the different types of losses. We will
+In order to avoid potential confusions with true Julia functions,
+we will refer to "loss functions" as "losses" instead. The
+available losses share a common interface for the most part. This
+section will provide an overview of the basic functionality that
+is available for all the different types of losses. We will
 discuss how to create a loss, how to compute its value and
 derivative, and how to query its properties.
 
@@ -51,12 +53,13 @@ However, that is a common oversimplification. Because all losses
 are immutable types, they can live on the stack and thus do not
 come with a heap-allocation overhead.
 
-Even more interesting, for such losses as :class:`L2DistLoss`,
-which don not have any constructor parameters or member variables,
-there is no additional code executed at all. Such singletons are
-only used for dispatch and don't even produce any additional
-code, which you can observe for yourself in the code below. As
-such they are zero-cost abstractions.
+Even more interesting in the example above, is that for such
+losses as :class:`L2DistLoss`, which do not have any constructor
+parameters or member variables, there is no additional code
+executed at all. Such singletons are only used for dispatch and
+don't even produce any additional code, which you can observe for
+yourself in the code below. As such they are zero-cost
+abstractions.
 
 .. code-block:: jlcon
 
@@ -81,11 +84,11 @@ such they are zero-cost abstractions.
    }
 
 On the other hand, some types of losses are actually more
-comparable to whole families of losses instead of a single one.
-For example, the immutable type :class:`L1EpsilonInsLoss` has a
-free parameter :math:`\epsilon`. Each concrete :math:`\epsilon`
-results in a different concrete loss of the same family of
-epsilon-insensitive losses.
+comparable to whole families of losses instead of just a single
+one. For example, the immutable type :class:`L1EpsilonInsLoss`
+has a free parameter :math:`\epsilon`. Each concrete
+:math:`\epsilon` results in a different concrete loss of the same
+family of epsilon-insensitive losses.
 
 .. code-block:: jlcon
 
@@ -109,8 +112,8 @@ Computing the Values
 
 The first thing we may want to do is compute the loss for some
 observation (singular). In fact, all losses are implemented on
-single values under the hood. The core function to compute the
-value of a loss is :func:`value`. We will see throughout the
+single observations under the hood. The core function to compute
+the value of a loss is :func:`value`. We will see throughout the
 documentation that it allows for a lot of different method
 signatures to accomplish a variety of tasks.
 
@@ -238,10 +241,10 @@ even utilizes ``broadcast!`` underneath.
    preallocated `buffer`, which has to be of the appropriate
    size.
 
-   In the case that the two parameters `targets` and `outputs`
+   In the case that the two parameters, `targets` and `outputs`,
    are arrays with a different number of dimensions, broadcast
-   will be performed. Note that the given parameters are
-   expected to have the same size in the dimensions they share.
+   will be performed. Note that the given parameters are expected
+   to have the same size in the dimensions they share.
 
    Note: This function should always be type-stable. If it isn't,
    you likely found a bug.
@@ -274,13 +277,15 @@ Computing the Derivatives
 
 Maybe the more interesting aspect of loss functions are their
 derivatives. In fact, most of the popular learning algorithm in
-ML, such as gradient descent, utilize the derivatives of the loss
-in one way or the other during the training process.
+Supervised Learning, such as gradient descent, utilize the
+derivatives of the loss in one way or the other during the
+training process.
 
 To compute the derivative of some loss we expose the function
 :func:`deriv`. It supports the same exact method signatures as
-:func:`value`. Note that we always compute the derivative in
-respect to the predicted output, since we are interested in which
+:func:`value`. It may be interesting to note explicitly, that we
+always compute the derivative in respect to the predicted
+``output``, since we are interested in deducing in which
 direction the output should change.
 
 .. function:: deriv(loss, target, output)
@@ -353,10 +358,10 @@ observation without allocating a temporary array.
      6.0
     -5.0
 
-We do expose a vectorized method natively. This is done mainly
-for API consistency reasons. Internally it even uses broadcast
-itself, but it does provide the additional benefit of a more
-reliable type-inference.
+While broadcast is supported, we do expose a vectorized method
+natively. This is done mainly for API consistency reasons.
+Internally it even uses broadcast itself, but it does provide the
+additional benefit of a more reliable type-inference.
 
 .. function:: deriv(loss, targets, outputs)
 
@@ -381,7 +386,7 @@ reliable type-inference.
    :param AbstractArray outputs: The array of predicted outputs
                                  :math:`\mathbf{\hat{y}}`.
    :return: The element-wise derivatives of the loss function for
-            all values in `targets` and `outputs`.
+            all elements in `targets` and `outputs`.
    :rtype: `AbstractArray`
 
 .. code-block:: jlcon
@@ -446,7 +451,7 @@ same time. For some losses that means less computation overhead.
    Returns the results of :func:`value` and :func:`deriv` as a
    tuple. In some cases this function can yield better
    performance, because the losses can make use of shared
-   variable when computing the values. Note that `target` and
+   variables when computing the results. Note that `target` and
    `output` can be of different numeric type, in which case
    promotion is performed in the manner appropriate for the given
    loss.
@@ -461,7 +466,9 @@ same time. For some losses that means less computation overhead.
    :param Number output: The predicted output :math:`\hat{y} \in
                          \mathbb{R}` for the observation.
    :return: The value and the derivative of the loss-function for
-            the given parameters.
+            the given parameters. They are returned as a Tuple in
+            which the first element is the value and the second
+            element the derivative.
    :rtype: `Tuple`
 
 .. code-block:: jlcon
@@ -470,29 +477,145 @@ same time. For some losses that means less computation overhead.
    julia> value_deriv(L2DistLoss(), -1.0, 3.0)
    (16.0,8.0)
 
-Closures
--------------
+
+Function Closures
+---------------------
 
 In some circumstances it may be convenient to have the loss function
-or its derivative as a proper Julia function. Closures provide
-just that as the following examples demonstrate.
-
-.. code-block:: julia
-
-   f = value_fun(L2DistLoss())
-   f(targets, outputs) # computes the value of L2DistLoss
-
-   d = deriv_fun(L2DistLoss())
-   d(targets, outputs) # computes the derivative of L2DistLoss
+or its derivative as a proper Julia function. Instead of
+exporting special function names for every implemented loss (like
+``l2distloss(...)``), we provide the ability to generate a true
+function on the fly given some loss.
 
 
 .. function:: value_fun(loss)
 
+   Returns a new function that computes the :func:`value` for the
+   given `loss`. This new function will support all the signatures
+   that :func:`value` does.
+
+   :param Loss loss: The loss we want the function for.
+
+   :rtype: Function
+
+.. code-block:: jlcon
+
+   julia> f = value_fun(L2DistLoss())
+   (::_value) (generic function with 1 method)
+
+   julia> f(-1.0, 3.0) # computes the value of L2DistLoss
+   16.0
+
+   julia> f.([1.,2], [4,7])
+   2-element Array{Float64,1}:
+     9.0
+    25.0
+
+
 .. function:: deriv_fun(loss)
+
+   Returns a new function that computes the :func:`deriv` for the
+   given `loss`. This new function will support all the signatures
+   that :func:`deriv` does.
+
+   :param Loss loss: The loss we want the derivative-function for.
+
+   :rtype: Function
+
+.. code-block:: julia
+
+   julia> g = deriv_fun(L2DistLoss())
+   (::_deriv) (generic function with 1 method)
+
+   julia> g(-1.0, 3.0) # computes the deriv of L2DistLoss
+   8.0
+
+   julia> g.([1.,2], [4,7])
+   2-element Array{Float64,1}:
+     6.0
+    10.0
+
 
 .. function:: deriv2_fun(loss)
 
+   Returns a new function that computes the :func:`deriv2` (i.e.
+   second derivative) for the given `loss`. This new function
+   will support all the signatures that :func:`deriv2` does.
+
+   :param Loss loss: The loss we want the second-derivative
+                     function for.
+
+   :rtype: Function
+
+.. code-block:: julia
+
+   julia> g2 = deriv2_fun(L2DistLoss())
+   (::_deriv2) (generic function with 1 method)
+
+   julia> g2(-1.0, 3.0) # computes the second derivative of L2DistLoss
+   2.0
+
+   julia> g2.([1.,2], [4,7])
+   2-element Array{Float64,1}:
+    2.0
+    2.0
+
+
 .. function:: value_deriv_fun(loss)
+
+   Returns a new function that computes the :func:`value_deriv`
+   for the given `loss`. This new function will support all the
+   signatures that :func:`value_deriv` does.
+
+   :param Loss loss: The loss we want the function for.
+
+   :rtype: Function
+
+.. code-block:: julia
+
+   julia> fg = value_deriv_fun(L2DistLoss())
+   (::_value_deriv) (generic function with 1 method)
+
+   julia> fg(-1.0, 3.0) # computes the second derivative of L2DistLoss
+   (16.0,8.0)
+
+
+Note, however, that these closures cause quite an overhead when
+executed in the global scope. If you want to use them
+efficiently, either don't create them in global scope, or make
+sure that you pass the closure to some other function before it
+is used. This way the compiler will most likely inline it and it
+will be a zero cost abstraction.
+
+.. code-block:: jlcon
+
+   julia> f = value_fun(L2DistLoss())
+   (::_value) (generic function with 1 method)
+
+   julia> @code_llvm f(-1.0, 3.0)
+   define %jl_value_t* @julia__value_70960(%jl_value_t*, %jl_value_t**, i32) #0 {
+   top:
+     %3 = alloca %jl_value_t**, align 8
+     store volatile %jl_value_t** %1, %jl_value_t*** %3, align 8
+     %ptls_i8 = call i8* asm "movq %fs:0, $0;\0Aaddq $$-2672, $0", "=r,~{dirflag},~{fpsr},~{flags}"() #2
+       [... many more lines of code ...]
+     %15 = call %jl_value_t* @jl_f__apply(%jl_value_t* null, %jl_value_t** %5, i32 3)
+     %16 = load i64, i64* %11, align 8
+     store i64 %16, i64* %9, align 8
+     ret %jl_value_t* %15
+   }
+
+   julia> foo(t,y) = (f = value_fun(L2DistLoss()); f(t,y))
+   foo (generic function with 1 method)
+
+   julia> @code_llvm foo(-1.0, 3.0)
+   define double @julia_foo_71242(double, double) #0 {
+   top:
+     %2 = fsub double %1, %0
+     %3 = fmul double %2, %2
+     ret double %3
+   }
+
 
 Querying loss properties
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
