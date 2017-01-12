@@ -270,8 +270,8 @@ even utilizes ``broadcast!`` underneath.
 
 
 
-Computing the Derivatives
----------------------------
+Computing the 1st Derivatives
+-------------------------------
 
 Maybe the more interesting aspect of loss functions are their
 derivatives. In fact, most of the popular learning algorithm in
@@ -473,6 +473,71 @@ same time. For some losses that means less computation overhead.
    (16.0,8.0)
 
 
+Computing the 2nd Derivatives
+-------------------------------
+
+Additionally to the first derivative, we also provide the
+corresponding methods for the second derivative through the
+function :func:`deriv2`. Note again, that we always compute the
+derivative in respect to the predicted ``output``.
+
+.. function:: deriv2(loss, target, output) -> Number
+
+   Computes the second derivative for the loss-function denoted
+   by the parameter `loss` in respect to the `output`. Note that
+   `target` and `output` can be of different numeric type, in
+   which case promotion is performed in the manner appropriate
+   for the given loss.
+
+   Note: This function should always be type-stable. If it isn't,
+   you likely found a bug.
+
+   :param loss: The loss-function :math:`L` we want to compute the
+                second derivative with.
+   :type loss: :class:`SupervisedLoss`
+   :param Number target: The ground truth :math:`y \in Y` of the
+                         observation.
+   :param Number output: The predicted output :math:`\hat{y} \in
+                         \mathbb{R}` for the observation.
+   :return: The second derivative of the loss-function for the given
+            parameters.
+
+.. code-block:: jlcon
+
+   #               loss             y    ŷ
+   julia> deriv2(LogitDistLoss(), -0.5, 0.3)
+   0.42781939304058886
+
+   julia> deriv2(LogitMarginLoss(), -1f0, 2f0)
+   0.104993574f0
+
+Just like :func:`deriv` and :func:`value`, this function also
+supports broadcasting and all the syntax benefits that come with
+it. Thus, one can make use of preallocated memory for storing the
+element-wise derivatives.
+
+.. code-block:: jlcon
+
+   julia> deriv2.(LogitDistLoss(), [-0.5, 1.2, 3], [0.3, 2.3, -2])
+   3-element Array{Float64,1}:
+    0.427819
+    0.37474
+    0.0132961
+
+   julia> buffer = zeros(3); # preallocate a buffer
+
+   julia> buffer .= deriv2.(LogitDistLoss(), [-0.5, 1.2, 3], [0.3, 2.3, -2])
+   3-element Array{Float64,1}:
+    0.427819
+    0.37474
+    0.0132961
+
+Furthermore :func:`deriv2` supports all the same method
+signatures as :func:`deriv` does. So to avoid repeating the same
+text over and over again, please look at the documentation of
+:func:`deriv` for more information.
+
+
 Function Closures
 ---------------------
 
@@ -480,8 +545,7 @@ In some circumstances it may be convenient to have the loss function
 or its derivative as a proper Julia function. Instead of
 exporting special function names for every implemented loss (like
 ``l2distloss(...)``), we provide the ability to generate a true
-function on the fly given some loss.
-
+function on the fly for any given loss.
 
 .. function:: value_fun(loss) -> Function
 
