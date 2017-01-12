@@ -4,52 +4,6 @@ Margin-based Losses
 This section lists all the subtypes of :class:`MarginLoss`
 that are implemented in this package.
 
-.. class:: MarginLoss
-
-   Abstract subtype of :class:`SupervisedLoss`.
-   A supervised loss, where the targets are in {-1, 1}, and which
-   can be simplified to ``L(targets, outputs) = L(targets * outputs)``
-   is considered margin-based.
-
-Shared Interface
--------------------
-
-.. function:: value(loss, agreement)
-
-   Computes the value of the loss function for each
-   observation in ``agreement`` individually and returns the result
-   as an array of the same size as the parameter.
-
-   :param loss: An instance of the loss we are interested in.
-   :type loss: :class:`MarginLoss`
-   :param agreement: The result of multiplying the true targets with
-                     the predicted outputs.
-   :type agreement: ``AbstractArray``
-   :return: The value of the loss function for the elements in
-            ``agreement``.
-   :rtype: ``AbstractArray``
-
-.. function:: deriv(loss, agreement)
-
-   Computes the derivative of the loss function for each
-   observation in ``agreement`` individually and returns the result
-   as an array of the same size as the parameter.
-
-   :param loss: An instance of the loss we are interested in.
-   :type loss: :class:`MarginLoss`
-   :param agreement: The result of multiplying the true targets with
-                     the predicted outputs.
-   :type agreement: ``AbstractArray``
-   :return: The derivatives of the loss function for the elements in
-            ``agreement``.
-   :rtype: ``AbstractArray``
-
-.. function:: value_deriv(loss, agreement)
-
-   Returns the results of :func:`value` and :func:`deriv` as a tuple.
-   In some cases this function can yield better performance, because
-   the losses can make use of shared variable when computing
-   the values.
 
 
 ZeroOneLoss
