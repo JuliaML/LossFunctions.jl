@@ -47,16 +47,57 @@ Introduction and Motivation
 API Documentation
 --------------------------------
 
-For details on a specific aspect, see the documentation outlined below.
+This section gives a more detailed treatment of the exposed
+functions and their available methods. We will start by
+describing the basic interface that all loss-functions share.
 
 .. toctree::
    :maxdepth: 2
 
    losses/interface
+
+Next we will consider how to average or sum the results of the
+loss-functions more efficiently. Because we are only interested
+in the sum or average we can avoid allocating a temporary array.
+
+.. toctree::
+   :maxdepth: 2
+
    losses/avgmode
-   losses/distance
-   losses/margin
    losses/other
+
+Provided Lossfunctions
+--------------------------------
+
+Aside from the interface, this package also provides a number of
+popular (and not so popular) loss functions out-of-the-box. Great
+effort has been put into ensuring a correct, efficient, and
+type-stable implementation for those. Most of them either belong
+to the family of distance-based or margin-based losses. These two
+categories are also indicative for if a loss is intended for
+regression or classification problems
+
++----------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------+
+| Distance-based Losses (Regression)                                                     | Margin-based Losses (Classification)                                                   |
++========================================================================================+========================================================================================+
+| .. image:: https://rawgithub.com/JuliaML/FileStorage/master/LossFunctions/distance.svg | .. image:: https://rawgithub.com/JuliaML/FileStorage/master/LossFunctions/margin.svg   |
++----------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------+
+
+The loss functions, that belong to the category "distance-based",
+are primarily used in regression problems. They utilize the
+numeric difference between the true target and the predicted
+output is used as a proxy variable to quantify the quality of
+individual predictions.
+
+.. toctree::
+   :maxdepth: 2
+
+   losses/distance
+
+.. toctree::
+   :maxdepth: 2
+
+   losses/margin
 
 Internals
 --------------------------------

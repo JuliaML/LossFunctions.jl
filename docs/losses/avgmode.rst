@@ -294,6 +294,7 @@ mutating version that can use a preallocated vector to write the
 results into.
 
 .. function:: value!(buffer, loss, targets, outputs, AvgMode.Sum, obsdim)
+.. function:: value!(buffer, loss, targets, outputs, AvgMode.Sum, obsdim)
 
    Computes the values of the loss function for each index-pair
    in `targets` and `outputs` individually, computes the
@@ -340,4 +341,8 @@ results into.
     0.36148
     0.600235
     0.665386
+
+
+Weighted Sum and Mean
+-------------------------
 

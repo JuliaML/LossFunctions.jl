@@ -117,7 +117,7 @@ the value of a loss is :func:`value`. We will see throughout the
 documentation that it allows for a lot of different method
 signatures to accomplish a variety of tasks.
 
-.. function:: value(loss, target, output)
+.. function:: value(loss, target, output) -> Number
 
    Computes the result for the loss-function denoted by the
    parameter `loss`. Note that `target` and `output` can be of
@@ -138,7 +138,6 @@ signatures to accomplish a variety of tasks.
                          \mathbb{R}` for the observation.
    :return: The (non-negative) numeric result of the loss-function
             for the given parameters.
-   :rtype: `Number`
 
 .. code-block:: jlcon
 
@@ -193,7 +192,7 @@ method natively. This is done mainly for API consistency reasons.
 Internally it even uses broadcast itself, but it does provide the
 additional benefit of a more reliable type-inference.
 
-.. function:: value(loss, targets, outputs)
+.. function:: value(loss, targets, outputs) -> Array
 
    Computes the value of the loss function for each index-pair
    in `targets` and `outputs` individually and returns the result
@@ -215,7 +214,6 @@ additional benefit of a more reliable type-inference.
                                  :math:`\mathbf{\hat{y}}`.
    :return: The element-wise results of the loss function for all
             values in `targets` and `outputs`.
-   :rtype: `AbstractArray`
 
 .. code-block:: jlcon
 
@@ -288,7 +286,7 @@ always compute the derivative in respect to the predicted
 ``output``, since we are interested in deducing in which
 direction the output should change.
 
-.. function:: deriv(loss, target, output)
+.. function:: deriv(loss, target, output) -> Number
 
    Computes the derivative for the loss-function denoted by the
    parameter `loss` in respect to the `output`. Note that
@@ -308,7 +306,6 @@ direction the output should change.
                          \mathbb{R}` for the observation.
    :return: The derivative of the loss-function for the given
             parameters.
-   :rtype: `Number`
 
 .. code-block:: jlcon
 
@@ -363,7 +360,7 @@ natively. This is done mainly for API consistency reasons.
 Internally it even uses broadcast itself, but it does provide the
 additional benefit of a more reliable type-inference.
 
-.. function:: deriv(loss, targets, outputs)
+.. function:: deriv(loss, targets, outputs) -> Array
 
    Computes the derivative of the loss function in respect to the
    output for each index-pair in `targets` and `outputs`
@@ -387,7 +384,6 @@ additional benefit of a more reliable type-inference.
                                  :math:`\mathbf{\hat{y}}`.
    :return: The element-wise derivatives of the loss function for
             all elements in `targets` and `outputs`.
-   :rtype: `AbstractArray`
 
 .. code-block:: jlcon
 
@@ -446,7 +442,7 @@ even utilizes ``broadcast!`` underneath.
 It is also possible to compute the value and derivative at the
 same time. For some losses that means less computation overhead.
 
-.. function:: value_deriv(loss, target, output)
+.. function:: value_deriv(loss, target, output) -> Tuple
 
    Returns the results of :func:`value` and :func:`deriv` as a
    tuple. In some cases this function can yield better
@@ -469,7 +465,6 @@ same time. For some losses that means less computation overhead.
             the given parameters. They are returned as a Tuple in
             which the first element is the value and the second
             element the derivative.
-   :rtype: `Tuple`
 
 .. code-block:: jlcon
 
@@ -488,15 +483,13 @@ exporting special function names for every implemented loss (like
 function on the fly given some loss.
 
 
-.. function:: value_fun(loss)
+.. function:: value_fun(loss) -> Function
 
    Returns a new function that computes the :func:`value` for the
    given `loss`. This new function will support all the signatures
    that :func:`value` does.
 
    :param Loss loss: The loss we want the function for.
-
-   :rtype: Function
 
 .. code-block:: jlcon
 
@@ -512,15 +505,13 @@ function on the fly given some loss.
     25.0
 
 
-.. function:: deriv_fun(loss)
+.. function:: deriv_fun(loss) -> Function
 
    Returns a new function that computes the :func:`deriv` for the
    given `loss`. This new function will support all the signatures
    that :func:`deriv` does.
 
    :param Loss loss: The loss we want the derivative-function for.
-
-   :rtype: Function
 
 .. code-block:: julia
 
@@ -536,7 +527,7 @@ function on the fly given some loss.
     10.0
 
 
-.. function:: deriv2_fun(loss)
+.. function:: deriv2_fun(loss) -> Function
 
    Returns a new function that computes the :func:`deriv2` (i.e.
    second derivative) for the given `loss`. This new function
@@ -544,8 +535,6 @@ function on the fly given some loss.
 
    :param Loss loss: The loss we want the second-derivative
                      function for.
-
-   :rtype: Function
 
 .. code-block:: julia
 
@@ -561,15 +550,13 @@ function on the fly given some loss.
     2.0
 
 
-.. function:: value_deriv_fun(loss)
+.. function:: value_deriv_fun(loss) -> Function
 
    Returns a new function that computes the :func:`value_deriv`
    for the given `loss`. This new function will support all the
    signatures that :func:`value_deriv` does.
 
    :param Loss loss: The loss we want the function for.
-
-   :rtype: Function
 
 .. code-block:: julia
 
@@ -617,135 +604,42 @@ will be a zero cost abstraction.
    }
 
 
-Querying loss properties
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Properties of a Loss
+------------------------
 
-The losses implemented in this package provide a range of properties
-that can be queried by functions defined in *LearnBase.jl*.
+In some situations it can be quite useful to assert certain
+properties about a loss-function. One such scenario could be when
+implementing an algorithm that requires the loss to be strictly
+convex or Lipschitz continuous.
 
-.. function:: isminimizable(loss)
+This package uses functions to represent individual properties of
+a loss. It follows a list of implemented property functions
+defined in `LearnBase.jl
+<https://github.com/JuliaML/LearnBase.jl>`_.
 
-.. function:: isconvex(loss)
+.. function:: isconvex(loss) -> Bool
 
-.. function:: isstrictlyconvex(loss)
+.. function:: isstrictlyconvex(loss) -> Bool
 
-.. function:: isstronglyconvex(loss)
+.. function:: isstronglyconvex(loss) -> Bool
 
-.. function:: isdifferentiable(loss[, at])
+.. function:: isdifferentiable(loss[, at]) -> Bool
 
-.. function:: istwicedifferentiable(loss[, at])
+.. function:: istwicedifferentiable(loss[, at]) -> Bool
 
-.. function:: isnemitski(loss)
+.. function:: isnemitski(loss) -> Bool
 
-.. function:: islipschitzcont(loss)
+.. function:: islipschitzcont(loss) -> Bool
 
-.. function:: islocallylipschitzcont(loss)
+.. function:: islocallylipschitzcont(loss) -> Bool
 
-.. function:: isclipable(loss)
+.. function:: isclipable(loss) -> Bool
 
-.. function:: ismarginbased(loss)
+.. function:: ismarginbased(loss) -> Bool
 
-.. function:: isclasscalibrated(loss)
+.. function:: isclasscalibrated(loss) -> Bool
 
-.. function:: isdistancebased(loss)
+.. function:: isdistancebased(loss) -> Bool
 
-.. function:: issymmetric(loss)
-
-
-
-Distance-based Losses
-----------------------
-
-.. class:: DistanceLoss
-
-   Abstract subtype of :class:`SupervisedLoss`.
-   A supervised loss that can be simplified to
-   ``L(targets, outputs) = L(targets - outputs)`` is considered
-   distance-based.
-
-.. function:: value(loss, difference)
-
-   Computes the value of the loss function for each
-   observation in ``difference`` individually and returns the result
-   as an array of the same size as the parameter.
-
-   :param loss: An instance of the loss we are interested in.
-   :type loss: :class:`DistanceLoss`
-   :param difference: The result of subtracting the true targets from
-                      the predicted outputs.
-   :type difference: ``AbstractArray``
-   :return: The value of the loss function for the elements in
-            ``difference``.
-   :rtype: ``AbstractArray``
-
-.. function:: deriv(loss, difference)
-
-   Computes the derivative of the loss function for each
-   observation in ``difference`` individually and returns the result
-   as an array of the same size as the parameter.
-
-   :param loss: An instance of the loss we are interested in.
-   :type loss: :class:`DistanceLoss`
-   :param difference: The result of subtracting the true targets from
-                      the predicted outputs.
-   :type difference: ``AbstractArray``
-   :return: The derivatives of the loss function for the elements in
-            ``difference``.
-   :rtype: ``AbstractArray``
-
-.. function:: value_deriv(loss, difference)
-
-   Returns the results of :func:`value` and :func:`deriv` as a tuple.
-   In some cases this function can yield better performance, because
-   the losses can make use of shared variable when computing
-   the values.
-
-
-
-Margin-based Losses
---------------------
-
-.. class:: MarginLoss
-
-   Abstract subtype of :class:`SupervisedLoss`.
-   A supervised loss, where the targets are in {-1, 1}, and which
-   can be simplified to ``L(targets, outputs) = L(targets * outputs)``
-   is considered margin-based.
-
-.. function:: value(loss, agreement)
-
-   Computes the value of the loss function for each
-   observation in ``agreement`` individually and returns the result
-   as an array of the same size as the parameter.
-
-   :param loss: An instance of the loss we are interested in.
-   :type loss: :class:`MarginLoss`
-   :param agreement: The result of multiplying the true targets with
-                     the predicted outputs.
-   :type agreement: ``AbstractArray``
-   :return: The value of the loss function for the elements in
-            ``agreement``.
-   :rtype: ``AbstractArray``
-
-.. function:: deriv(loss, agreement)
-
-   Computes the derivative of the loss function for each
-   observation in ``agreement`` individually and returns the result
-   as an array of the same size as the parameter.
-
-   :param loss: An instance of the loss we are interested in.
-   :type loss: :class:`MarginLoss`
-   :param agreement: The result of multiplying the true targets with
-                     the predicted outputs.
-   :type agreement: ``AbstractArray``
-   :return: The derivatives of the loss function for the elements in
-            ``agreement``.
-   :rtype: ``AbstractArray``
-
-.. function:: value_deriv(loss, agreement)
-
-   Returns the results of :func:`value` and :func:`deriv` as a tuple.
-   In some cases this function can yield better performance, because
-   the losses can make use of shared variable when computing
-   the values.
+.. function:: issymmetric(loss) -> Bool
 
