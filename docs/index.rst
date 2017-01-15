@@ -20,9 +20,9 @@ arrays a user additionally has the ability to define if and how
 element-wise results are averaged or summed over.
 
 From an end-user's perspective one normally does not need to
-import this package directly. That said it can provide a decent
-starting point for students that are interested in investigating
-the properties and behaviour of loss functions.
+import this package directly. That said, it should provide a
+decent starting point for any student that is interested in
+investigating the properties or behaviour of loss functions.
 
 Where to begin?
 ---------------------
