@@ -1,14 +1,14 @@
 Getting Started
 ================
 
-LossFunctions is the result of a collaborative effort to design
-and implement an efficient but also convenient-to-use `Julia
-<http://julialang.org/>`_ library that provides the most commonly
-utilized loss functions in Machine Learning. As such, this
-package implements the functionality needed to query various
-properties about a loss function (such as convexity), as well as
-a number of methods to compute its value, derivative, and second
-derivative for single observations or arrays of observations.
+LossFunctions.jl is the result of a collaborative effort to
+design and implement an efficient but also convenient-to-use
+`Julia <http://julialang.org/>`_ library for, well, loss
+functions. As such, this package implements the functionality
+needed to query various properties about a loss function (such as
+convexity), as well as a number of methods to compute its value,
+derivative, and second derivative for single observations or
+arrays of observations.
 
 In this section we will provide a condensed overview of the
 package. In order to keep this overview concise, we will not
@@ -47,7 +47,7 @@ as usual.
 
    using LossFunctions
 
-Typically the losses we work with in Machine Learning are
+Typically, the losses we work with in Machine Learning are
 multivariate functions of two variables, the **true target**
 :math:`y`, which represents the "ground truth" (i.e. correct
 answer), and the **predicted output** :math:`\hat{y}`, which is
@@ -67,9 +67,9 @@ returns a value that quantifies how "bad" our prediction is
 in comparison to the truth. In other words: the lower the
 loss, the better the prediction.
 
-From an implementation perspective we should point out that all
+From an implementation perspective, we should point out that all
 the concrete loss "functions" that this package provides are
-actually defined as immutable types instead of native Julia
+actually defined as immutable types, instead of native Julia
 functions. We can compute the value of some type of loss using
 the function :func:`value`. Let us start with an example of how
 to compute the loss of a single observation (i.e. two numbers).
@@ -213,6 +213,10 @@ derivatives using :func:`deriv2`.
 
 .. code-block:: jlcon
 
+   julia> true_targets = [  1,  0, -2];
+
+   julia> pred_outputs = [0.5,  2, -1];
+
    julia> deriv(L2DistLoss(), true_targets, pred_outputs)
    3-element Array{Float64,1}:
     -1.0
@@ -225,13 +229,25 @@ derivatives using :func:`deriv2`.
     2.0
     2.0
 
-Additionally, we provide mutating versions for the methods that
-return an array.
+Additionally, we provide mutating versions for the subset of
+methods that return an array. These have the same function
+signatures with the only difference of requiring an additional
+parameter as the first argument. This variable should always be
+the preallocated array that is to be used as stroage.
 
 .. code-block:: julia
 
-    buffer = zeros(3)
-    deriv!(buffer, L2DistLoss(), true_targets, pred_outputs)
+   julia> buffer = zeros(3)
+   3-element Array{Float64,1}:
+    0.0
+    0.0
+    0.0
+
+   julia> deriv!(buffer, L2DistLoss(), true_targets, pred_outputs)
+   3-element Array{Float64,1}:
+    -1.0
+     4.0
+     2.0
 
 Regression vs Classification
 -----------------------------
