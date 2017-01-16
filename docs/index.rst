@@ -90,9 +90,8 @@ Loss Functions for Regression
 
 Loss functions that belong to the category "distance-based" are
 primarily used in regression problems. They utilize the numeric
-difference between the true target and the predicted output is
-used as a proxy variable to quantify the quality of individual
-predictions.
+difference between the predicted output and the true target as a
+proxy variable to quantify the quality of individual predictions.
 
 +----------------------------------------------+----------------------------------------------------------------------------------------+
 | .. toctree::                                 | .. image:: https://rawgithub.com/JuliaML/FileStorage/master/LossFunctions/distance.svg |
