@@ -233,7 +233,7 @@ Additionally, we provide mutating versions for the subset of
 methods that return an array. These have the same function
 signatures with the only difference of requiring an additional
 parameter as the first argument. This variable should always be
-the preallocated array that is to be used as stroage.
+the preallocated array that is to be used as storage.
 
 .. code-block:: julia
 
@@ -248,59 +248,6 @@ the preallocated array that is to be used as stroage.
     -1.0
      4.0
      2.0
-
-Regression vs Classification
------------------------------
-
-We can further divide the supervised losses into two useful
-sub-categories: :class:`DistanceLoss` for regression and
-:class:`MarginLoss` for classification.
-
-Losses for Regression
-~~~~~~~~~~~~~~~~~~~~~~
-
-Supervised losses that can be expressed as a univariate function
-of ``output - target`` are referred to as distance-based losses.
-
-.. code-block:: julia
-
-    value(L2DistLoss(), difference)
-
-Distance-based losses are typically utilized for regression problems.
-That said, there are also other losses that are useful for
-regression problems that don't fall into this category, such as
-the :class:`PeriodicLoss`.
-
-.. note::
-
-    In the literature that this package is partially based on,
-    the convention for the distance-based losses is ``target - output``
-    (see [STEINWART2008]_ p. 38).
-    We chose to diverge from this definition because it would force
-    a difference between the results for the unary and the binary
-    version of the derivative.
-
-Losses for Classification
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Margin-based losses are supervised losses where the values of the
-targets are restricted to be in :math:`\{1,-1\}`, and which can
-be expressed as a univariate function ``output * target``.
-
-.. code-block:: julia
-
-    value(L1HingeLoss(), agreement)
-
-.. note::
-
-    Throughout the codebase we refer to the result of
-    ``output * target`` as ``agreement``.
-    The discussion that lead to this convention can be found
-    `issue #9 <https://github.com/JuliaML/LossFunctions.jl/issues/9#issuecomment-190321549>`_
-
-Margin-based losses are usually used for binary classification.
-In contrast to other formalism, they do not natively provide
-probabilities as output.
 
 Getting Help
 -------------

@@ -48,19 +48,19 @@ to make predictions, we are talking about a **prediction
 function**, denoted as :math:`h` and sometimes called "fitted
 hypothesis", or "fitted model". Note that we will avoid the term
 hypothesis for the simple reason that it is widely used in
-statistics for something completely different.
-We don't consider a prediction *function* as the same thing as a
-prediction *model*, because we think of a **prediction model** as
-a family of prediction functions. What that boils down to is that
-the prediction model represents the set of possible prediction
+statistics for something completely different. We don't consider
+a prediction *function* as the same thing as a prediction
+*model*, because we think of a **prediction model** as a family
+of prediction functions. What that boils down to is that the
+prediction model represents the set of possible prediction
 functions, while the final prediction function is the chosen
 function that best solves the problem. So in a way a prediction
-model can be thought of as the manifestation of all our
-assumptions about the problem, because it restricts the solution
-to a specific family of functions.  For example a linear
-prediction model for two features represents all possible linear
-functions that have two coefficients. A prediction function would
-in that scenario be a concrete linear function with a particular
+model can be thought of as the manifestation of our assumptions
+about the problem, because it restricts the solution to a
+specific family of functions.  For example a linear prediction
+model for two features represents all possible linear functions
+that have two coefficients. A prediction function would in that
+scenario be a concrete linear function with a particular fixed
 set of coefficients.
 
 The purpose of a prediction function is to take some input and
@@ -82,19 +82,21 @@ care about in this package.
 True Targets
     A true target (singular) represents the "desired" output for
     the input features of the observation. The targets are often
-    referred to as "ground truth" and we will denote them as
-    :math:`y \in Y`.  What the set :math:`Y` is will depend on
+    referred to as "ground truth" and we will denote a single
+    target as :math:`y \in Y`. When we talk about an array (e.g.
+    a vector) of targets, we will print it in bold as
+    :math:`\mathbf{y}`. What the set :math:`Y` is will depend on
     the subdomain of supervised learning that you are working in.
 
     - Real-valued Regression: :math:`Y \subseteq \mathbb{R}`.
 
-    - Multi-variable Regression: :math:`Y \subseteq \mathbb{R}^k`.
+    - Multioutput Regression: :math:`Y \subseteq \mathbb{R}^k`.
 
     - Margin-based Classification: :math:`Y = \{1,-1\}`.
 
     - Probabilistic Classification: :math:`Y = \{1,0\}`.
 
-    - Multinomial Classification: :math:`Y = \{1,2,\dots,k\}`
+    - Multiclass Classification: :math:`Y = \{1,2,\dots,k\}`
 
     See `MLLabelUtils
     <http://mllabelutilsjl.readthedocs.io/en/latest/api/targets.html>`_
@@ -103,12 +105,14 @@ True Targets
 Predicted Outputs
     A predicted output (singular) is the result of our prediction
     function given the features of some observation. We will
-    denote it as :math:`\hat{y} \in \mathbb{R}` (pronounced as
-    "why hat").  Note something unintuitive but important: The
-    variables :math:`y` and :math:`\hat{y}` don't have to be of
-    the same set. Even in a classification settings where
-    :math:`y \in \{1,-1\}`, it is typical that :math:`\hat{y} \in
-    \mathbb{R}`.
+    denote a single output as :math:`\hat{y} \in \mathbb{R}`
+    (pronounced as "why hat"). When we talk about an array of
+    outputs, we will print it in bold as
+    :math:`\mathbf{\hat{y}}`. Note something unintuitive but
+    important: The variables :math:`y` and :math:`\hat{y}` don't
+    have to be of the same set. Even in a classification setting
+    where :math:`y \in \{1,-1\}`, it is typical that
+    :math:`\hat{y} \in \mathbb{R}`.
 
     The fact that in classification the predictions can be
     fundamentally different than the targets is important to
@@ -127,25 +131,26 @@ perfectly correct prediction. This is because in margin-based
 classification the main thing that matters about the predicted
 output is that the sign agrees with the true target.
 
-More generally speaking, to be able to directly compare the
-predicted outputs to the targets in a classification setting, one
-first has to convert the predictions into the same form as the
-targets. When doing this, we say that we **classfiy** the
-prediction. We often refer to the initial predictions that are
-not yet classified as **raw predictions**.
+..  More generally speaking, to be able to directly compare the
+    predicted outputs to the targets in a classification setting, one
+    first has to convert the predictions into the same form as the
+    targets. When doing this, we say that we **classify** the
+    prediction. We often refer to the initial predictions that are
+    not yet classified as **raw predictions**.
 
 Definitions
 ----------------------
 
 We base most of our definitions on the work presented in
 [STEINWART2008]_. Note, however, that we will adapt or simplify
-in places at our discretion, if it makes sense to us considering
-the scope of this package.
+in places at our discretion. We do this in situations where it
+makes sense to us considering the scope of this package or
+because of implementation details.
 
 Let us again consider the term **prediction function**. More
 formally, a prediction function :math:`h` is a function that maps
 an input from the feature space :math:`X` to the real numbers
-:math:`\mathbb{R}`. So calling :math:`h` with some features
+:math:`\mathbb{R}`. So invoking :math:`h` with some features
 :math:`x \in X` will produce the prediction :math:`\hat{y} \in
 \mathbb{R}`.
 
@@ -154,11 +159,13 @@ an input from the feature space :math:`X` to the real numbers
    h : X \rightarrow \mathbb{R}
 
 This resulting prediction :math:`\hat{y}` is what we want to
-compare to the target :math:`y` using some supervised loss. We
+compare to the target :math:`y` in order to asses how bad the
+prediction is. The function we use for such an assessment will be
+of a family of functions we refer to as supervised losses. We
 think of a **supervised loss** as a function of two parameters,
-the true targets :math:`y \in Y` and the predicted outputs
+the true target :math:`y \in Y` and the predicted output
 :math:`\hat{y} \in \mathbb{R}`. The result of computing such a
-loss will be a non-negative real number. The larger the number of
+loss will be a non-negative real number. The larger the value of
 the loss, the worse the prediction.
 
 .. math::

@@ -13,7 +13,7 @@ a special purpose back-end for other ML libraries that require
 losses to accomplish their tasks. To that end we provide a
 considerable amount of carefully implemented loss functions, as
 well as an API to query their properties (e.g. convexity).
-Furthermore we expose methods to compute their values,
+Furthermore, we expose methods to compute their values,
 derivatives, and second derivatives for single observations as
 well as arbitrarily sized arrays of observations. In the case of
 arrays a user additionally has the ability to define if and how

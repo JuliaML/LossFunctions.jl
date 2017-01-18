@@ -114,8 +114,8 @@ The first thing we may want to do is compute the loss for some
 observation (singular). In fact, all losses are implemented on
 single observations under the hood. The core function to compute
 the value of a loss is :func:`value`. We will see throughout the
-documentation that it allows for a lot of different method
-signatures to accomplish a variety of tasks.
+documentation that this function allows for a lot of different
+method signatures to accomplish a variety of tasks.
 
 .. function:: value(loss, target, output) -> Number
 
@@ -684,13 +684,15 @@ defined in `LearnBase.jl
 .. function:: isconvex(loss) -> Bool
 
     Returns true if given loss is a convex function.
-    A function :math:`f : \mathbb{R}^n \rightarrow \mathbb{R}` is convex
-    if **dom f** is a convex set and if :math:`\forall` x, y in the domain,
-    and :math:`\theta` such that for :math: `0 \leq \theta \leq 1` , we have
+    A function :math:`f : \mathbb{R}^n \rightarrow \mathbb{R}` is
+    convex if **dom** :math:`f` is a convex set and if
+    :math:`\forall` x, y in the domain, and :math:`\theta` such
+    that for :math:`0 \leq \theta \leq 1` , we have
 
     .. math:: f(\theta x + (1 - \theta)y) \leq \theta f(x) + (1 - \theta) f(y)
 
-    For more about convex functions, check [this](https://en.wikipedia.org/wiki/Convex_function)
+    For more about convex functions, see [BOYD2004]_ or
+    https://en.wikipedia.org/wiki/Convex_function
 
     :param Loss loss: The loss we want to check for convexity.
 
@@ -706,13 +708,15 @@ defined in `LearnBase.jl
 .. function:: isstrictlyconvex(loss) -> Bool
 
     Returns true if given loss is a strictly convex function.
-    A function :math:`f : \mathbb{R}^n \rightarrow \mathbb{R}` is strictly convex
-    if **dom f** is a convex set and if :math:`\forall` x \neq y in the domain,
-    and :math:`\theta` such that for :math: `0 < \theta < 1` , we have
+    A function :math:`f : \mathbb{R}^n \rightarrow \mathbb{R}` is
+    strictly convex if **dom** :math:`f` is a convex set and if
+    :math:`\forall` x \neq y in the domain, and :math:`\theta`
+    such that for :math:`0 < \theta < 1` , we have
 
     .. math:: f(\theta x + (1 - \theta)y) < \theta f(x) + (1 - \theta) f(y)
 
-    For more about convex functions, check [this](https://en.wikipedia.org/wiki/Convex_function)
+    For more about convex functions, see [BOYD2004]_ or
+    https://en.wikipedia.org/wiki/Convex_function
 
     :param Loss loss: The loss we want to check for strict convexity.
 
@@ -745,3 +749,5 @@ defined in `LearnBase.jl
 .. function:: isdistancebased(loss) -> Bool
 
 .. function:: issymmetric(loss) -> Bool
+
+.. [BOYD2004] Stephen Boyd and Lieven Vandenberghe. `"Convex Optimization" <https://stanford.edu/~boyd/cvxbook/>`_. Cambridge University Press, 2004.
