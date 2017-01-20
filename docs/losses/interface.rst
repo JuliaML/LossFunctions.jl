@@ -683,7 +683,46 @@ defined in `LearnBase.jl
 
 .. function:: isconvex(loss) -> Bool
 
+    Returns true if given loss is a convex function.
+    A function :math:`f : \mathbb{R}^n \rightarrow \mathbb{R}` is convex
+    if **dom f** is a convex set and if :math:`\forall` x, y in the domain,
+    and :math:`\theta` such that for :math: `0 \leq \theta \leq 1` , we have
+
+    .. math:: f(\theta x + (1 - \theta)y) \leq \theta f(x) + (1 - \theta) f(y)
+
+    For more about convex functions, check [this](https://en.wikipedia.org/wiki/Convex_function)
+
+    :param Loss loss: The loss we want to check for convexity.
+
+.. code-block:: julia
+
+    julia> isconvex(LPDistLoss(0.1))
+    false
+
+    julia> isconvex(LPDistLoss(2))
+    true
+
+
 .. function:: isstrictlyconvex(loss) -> Bool
+
+    Returns true if given loss is a strictly convex function.
+    A function :math:`f : \mathbb{R}^n \rightarrow \mathbb{R}` is strictly convex
+    if **dom f** is a convex set and if :math:`\forall` x \neq y in the domain,
+    and :math:`\theta` such that for :math: `0 < \theta < 1` , we have
+
+    .. math:: f(\theta x + (1 - \theta)y) < \theta f(x) + (1 - \theta) f(y)
+
+    For more about convex functions, check [this](https://en.wikipedia.org/wiki/Convex_function)
+
+    :param Loss loss: The loss we want to check for strict convexity.
+
+.. code-block:: julia
+
+    julia> isstrictlyconvex(LPDistLoss(0.1))
+    false
+
+    julia> isstrictlyconvex(LPDistLoss(2))
+    true
 
 .. function:: isstronglyconvex(loss) -> Bool
 
@@ -706,4 +745,3 @@ defined in `LearnBase.jl
 .. function:: isdistancebased(loss) -> Bool
 
 .. function:: issymmetric(loss) -> Bool
-
