@@ -188,6 +188,6 @@ QuantileLoss
    The reason is that we have to correct for the fact that in our
    case :math:`r = \hat{y} - y` instead of
    :math:`r_{\textrm{usual}} = y - \hat{y}`, which means that our
-   defintion relates to that in the manner of
+   definition relates to that in the manner of
    :math:`r = -1 * r_{\textrm{usual}}`.
 
