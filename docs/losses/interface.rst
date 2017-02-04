@@ -683,18 +683,18 @@ defined in `LearnBase.jl
 
 .. function:: isconvex(loss) -> Bool
 
-    Returns true if given loss is a convex function.
-    A function :math:`f : \mathbb{R}^n \rightarrow \mathbb{R}` is
-    convex if **dom** :math:`f` is a convex set and if
-    :math:`\forall` x, y in the domain, and :math:`\theta` such
-    that for :math:`0 \leq \theta \leq 1` , we have
+   Returns true if given loss is a convex function.
+   A function :math:`f : \mathbb{R}^n \rightarrow \mathbb{R}` is
+   convex if **dom** :math:`f` is a convex set and if
+   :math:`\forall` x, y in the domain, and :math:`\theta` such
+   that for :math:`0 \leq \theta \leq 1` , we have
 
-    .. math:: f(\theta x + (1 - \theta)y) \leq \theta f(x) + (1 - \theta) f(y)
+   .. math:: f(\theta x + (1 - \theta)y) \leq \theta f(x) + (1 - \theta) f(y)
 
-    For more about convex functions, see [BOYD2004]_ or
-    https://en.wikipedia.org/wiki/Convex_function
+   For more about convex functions, see [BOYD2004]_ or
+   https://en.wikipedia.org/wiki/Convex_function
 
-    :param Loss loss: The loss we want to check for convexity.
+   :param Loss loss: The loss we want to check for convexity.
 
 .. code-block:: julia
 
@@ -730,20 +730,20 @@ defined in `LearnBase.jl
 
 .. function:: isstronglyconvex(loss) -> Bool
 
-    Returns true if given loss is a strongly convex function.
-    A function :math:`f : \mathbb{R}^n \rightarrow \mathbb{R}` is :math:`m-`strongly convex
-    if **domain f** is a convex set and if :math:`\forall` x :math:`\neq` y in the domain,
-    and :math:`\theta` such that for :math:`0` :math:`\leq` :math:`\theta` :math:`\leq` :math:`1` , we have
+   Returns true if given loss is a strongly convex function.
+   A function :math:`f : \mathbb{R}^n \rightarrow \mathbb{R}` is :math:`m-`strongly convex
+   if **domain f** is a convex set and if :math:`\forall` x :math:`\neq` y in the domain,
+   and :math:`\theta` such that for :math:`0` :math:`\le` :math:`\theta` :math:`\le` :math:`1` , we have
 
-    .. math:: f(\theta x + (1 - \theta)y) < \theta f(x) + (1 - \theta) f(y) - 0.5 m \theta (1 - \theta) {{|| x - y ||}^{2}}_{2}
+   .. math:: f(\theta x + (1 - \theta)y) < \theta f(x) + (1 - \theta) f(y) - 0.5 m \theta (1 - \theta) {{|| x - y ||}^{2}}_{2}
 
-    In a more familiar setting, if the loss function is differentiable we have
+   In a more familiar setting, if the loss function is differentiable we have
 
-    .. math:: (\grad f(x) - \grad f(y) )^{T} (x - y) \geq m {{|| x - y||}^{2}}_{2}
+   .. math:: (\grad f(x) - \grad f(y) )^{T} (x - y) \ge m {{|| x - y||}^{2}}_{2}
 
-    For more about convex functions, check `this<https://en.wikipedia.org/wiki/Convex_function>`_.
+   For more about convex functions, check `this<https://en.wikipedia.org/wiki/Convex_function>`_.
 
-    :param Loss loss: The loss we want to check for strong convexity.
+   :param Loss loss: The loss we want to check for strong convexity.
 
 .. code-block:: julia
 
@@ -796,18 +796,83 @@ defined in `LearnBase.jl
 
 .. function:: isnemitski(loss) -> Bool
 
-    Returns true if given loss is a Nemitski loss function.
-    We call a loss :math:`L : X \times Y \times \mathbb{R} → [0,∞) a Nemitski loss if there exist a measurable function b : X × Y → [0, ∞) and an increasing function h : [0, ∞) → [0, ∞) such that
-L(x,y,t)≤b(x,y)+h(|t|), (x,y,t)∈X×Y ×R. (2.9) Furthermore, we say that L is a Nemitski loss of order p ∈ (0, ∞) if there
-exists a constant c > 0 such that
-L(x,y,t) ≤ b(x,y) + c|t|p , (x,y,t) ∈ X × Y × R.
+   Returns true if given loss is a Nemitski loss function.
 
+   A given loss function :math:`L : X \times Y \times \mathbb{R} \rightarrow [0,\infty)` is called a Nemitski loss
+   if there exist a measurable function :math:`b : X \times Y \rightarrow [0, \infty)` and an increasing
+   function :math:`h : [0, \infty) \rightarrow [0, \infty) such that
+
+   .. math:: L(x,y,t) \le b(x,y) + h(|t|),  where (x,y,t)  \in X \times Y \times \mathbb{R}.
+
+   Furthermore, we say that L is a Nemitski loss of order :math:`p \in (0, \infty)` if there exists a constant c > 0
+   such that
+
+   .. math:: L(x,y,t) \le b(x,y) + c|t|^{p} , (x,y,t) \in X \times Y \times \mathbb{R}.
 
 .. function:: islipschitzcont(loss) -> Bool
 
+    Returns true if given loss function is Lipschitz continuous.
+
+    A loss function :math:`L : X \times Y \times \mathbb{R} \rightarrow [0, \infty)` is
+    Lipschitz continous if there exits a finite constant :math:`M < \infty` such that
+
+    .. math:: |L(x, y, t) - L(x, y, t')| \le M |t - t'| \forall (x, y, t) \in X \times Y \times \mathbb{R}
+
+    For more about Lipschitz-continuity check `this<https://en.wikipedia.org/wiki/Lipschitz_continuity>`_.
+
+    :param Loss loss: The loss we want to check for being Lipschitz continuous.
+
+.. code-block:: julia
+
+    julia> islipschitzcont(SigmoidLoss())
+    true
+
+    julia> islipschitzcont(ExpLoss())
+    false
+
 .. function:: islocallylipschitzcont(loss) -> Bool
 
+    Returns true if given loss function is locally-Lipschitz continous.
+
+    A loss :math:`L : X \times Y \times \mathbb{R} \rightarrow [0, \infty)` is called locally Lipschitz
+    continuous if :math:`\forall a \ge 0` there exists a constant :math:`c_a \ge 0` such that
+
+    .. math:: sup_{x \in X, y \in Y} |L(x,y,t) − L(x,y,t′)| \le c_a |t − t′|, where t,t′ \in [−a,a]
+
+    For more about locally Lipschitz-continuity check `this<https://en.wikipedia.org/wiki/Lipschitz_continuity>`_.
+
+    :param Loss loss: The loss we want to check for being locally Lipschitz-continous.
+
+.. code-block:: julia
+
+    julia> islocallylipschitzcont(ExpLoss())
+    true
+
+    julia> islocallylipschitzcont(SigmoidLoss())
+    true
+
 .. function:: isclipable(loss) -> Bool
+
+    Returns true if given loss function is clipable.
+
+    A loss :math:`L : X \times Y \times \mathbb{R} \rightarrow [0, \infty)` can be clipped at M > 0 if,
+    for all (x,y,t) :math:`\in X \times Y \times \mathbb{R},
+
+    .. math:: L(x, y, \hat{t}) \le L(x, y, t)
+
+    where \hat{t} denotes the clipped value of t at ±M. That is
+
+    .. math:: \hat{t} = \begin{cases} -M & \quad \text{if } t < -M \\ t & \quad \text{if } t \in [-M, M] \\ M & \quad \text{if } t > M \end{cases}
+
+    :param Loss loss: The loss we want to check for being clipable.
+
+.. code-block:: julia
+
+    julia> isclipable(ExpLoss())
+    false
+
+    julia> isclipable(L2DistLoss())
+    true
 
 .. function:: ismarginbased(loss) -> Bool
 
