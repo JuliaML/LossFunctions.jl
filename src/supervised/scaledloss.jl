@@ -14,7 +14,7 @@ following signature: `scaledloss(loss, Val{K})`
 """
 function scaledloss end
 
-_serror() = throw(ArgumentError("Scale factor K has to be strictly positive."))
+@inline _serror() = throw(ArgumentError("Scale factor K has to be strictly positive."))
 
 for KIND in (:MarginLoss, :DistanceLoss, :SupervisedLoss)
     SCALEDKIND = Symbol(:Scaled, KIND)
@@ -44,8 +44,9 @@ for KIND in (:MarginLoss, :DistanceLoss, :SupervisedLoss)
         immutable ($SCALEDKIND){L<:$KIND,K} <: $KIND
             loss::L
 
-            ($SCALEDKIND)(args...) = typeof(K) <: Number && K > 0 ? new(L(args...)) : _serror()
-            ($SCALEDKIND)(loss::L) = typeof(K) <: Number && K > 0 ? new(loss) : _serror()
+            ($SCALEDKIND)() = typeof(K) <: Number ? new(L()) : _serror()
+            ($SCALEDKIND)(args...) = typeof(K) <: Number ? new(L(args...)) : _serror()
+            ($SCALEDKIND)(loss::L) = typeof(K) <: Number ? new(loss) : _serror()
         end
 
         ($SCALEDKIND){T,K}(loss::T, ::Type{Val{K}}) = ($SCALEDKIND){T,K}(loss)
@@ -71,8 +72,8 @@ typealias ScaledLoss{T,K} Union{ScaledSupervisedLoss{T,K}, ScaledMarginLoss{T,K}
 scaledloss(l::Loss, k::Number) = scaledloss(l, Val{k})
 
 for fun in (:value, :deriv, :deriv2)
-    @eval ($fun){T,K}(l::ScaledLoss{T,K}, num::Number) = K .* ($fun)(l.loss, num)
-    @eval ($fun){T,K}(l::ScaledLoss{T,K}, target::Number, output::Number) = K .* ($fun)(l.loss, target, output)
+    @eval @fastmath ($fun){T,K}(l::ScaledLoss{T,K}, num::Number) = K * ($fun)(l.loss, num)
+    @eval @fastmath ($fun){T,K}(l::ScaledLoss{T,K}, target::Number, output::Number) = K * ($fun)(l.loss, target, output)
 end
 
 for prop in [:isminimizable, :isdifferentiable,
