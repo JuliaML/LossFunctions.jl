@@ -730,11 +730,78 @@ defined in `LearnBase.jl
 
 .. function:: isstronglyconvex(loss) -> Bool
 
+    Returns true if given loss is a strongly convex function.
+    A function :math:`f : \mathbb{R}^n \rightarrow \mathbb{R}` is :math:`m-`strongly convex
+    if **domain f** is a convex set and if :math:`\forall` x :math:`\neq` y in the domain,
+    and :math:`\theta` such that for :math:`0` :math:`\leq` :math:`\theta` :math:`\leq` :math:`1` , we have
+
+    .. math:: f(\theta x + (1 - \theta)y) < \theta f(x) + (1 - \theta) f(y) - 0.5 m \theta (1 - \theta) {{|| x - y ||}^{2}}_{2}
+
+    In a more familiar setting, if the loss function is differentiable we have
+
+    .. math:: (\grad f(x) - \grad f(y) )^{T} (x - y) \geq m {{|| x - y||}^{2}}_{2}
+
+    For more about convex functions, check `this<https://en.wikipedia.org/wiki/Convex_function>`_.
+
+    :param Loss loss: The loss we want to check for strong convexity.
+
+.. code-block:: julia
+
+    julia> isstronglyconvex(LPDistLoss(0.1))
+    false
+
+    julia> isstronglyconvex(LPDistLoss(2))
+    true
+
 .. function:: isdifferentiable(loss[, at]) -> Bool
+
+    Returns true if given loss is a differentiable function.
+    A function :math:`f : \mathbb{R}^{n} \rightarrow \mathbb{R}^{m}` is differentiable at a
+    point x in **int domain f** if there exists a row vector :math:`Df(x)` in :math:`\mathbb{R}^{mxn}`
+    such that the following limit exists
+
+    .. math:: \lim_{z \neq x, z \to x} \frac{{||f(z) - f(x) - Df(x)(z-x)||}_2}{{||z - x||}_2}
+
+    For more about differentiable functions, check `this<https://en.wikipedia.org/wiki/Differentiable_function>`_.
+
+    :param Loss loss: The loss we want to check for differentiability.
+
+.. code-block:: julia
+
+    julia> isdifferentiable(LPDistLoss(1))
+    false
+
+    julia> isdifferentiable(LPDistLoss(2))
+    true
 
 .. function:: istwicedifferentiable(loss[, at]) -> Bool
 
+    Returns true if given loss is a twice differentiable function.
+    A function :math:`f : \mathbb{R}^{n} \rightarrow \mathbb{R}` is said to be twice differentiable at a point x in
+    **int domain f** if the function derivative for \grad f exists at x.
+
+    .. math:: \grad^2 f(x) = D \grad f(x)
+
+    For more about differentiable functions, check `this<https://en.wikipedia.org/wiki/Differentiable_function>`_.
+
+    :param Loss loss: The loss we want to check for differentiability.
+
+.. code-block:: julia
+
+    julia> istwicedifferentiable(LPDistLoss(1))
+    false
+
+    julia> istwicedifferentiable(LPDistLoss(2))
+    true
+
 .. function:: isnemitski(loss) -> Bool
+
+    Returns true if given loss is a Nemitski loss function.
+    We call a loss :math:`L : X \times Y \times \mathbb{R} → [0,∞) a Nemitski loss if there exist a measurable function b : X × Y → [0, ∞) and an increasing function h : [0, ∞) → [0, ∞) such that
+L(x,y,t)≤b(x,y)+h(|t|), (x,y,t)∈X×Y ×R. (2.9) Furthermore, we say that L is a Nemitski loss of order p ∈ (0, ∞) if there
+exists a constant c > 0 such that
+L(x,y,t) ≤ b(x,y) + c|t|p , (x,y,t) ∈ X × Y × R.
+
 
 .. function:: islipschitzcont(loss) -> Bool
 
@@ -744,10 +811,63 @@ defined in `LearnBase.jl
 
 .. function:: ismarginbased(loss) -> Bool
 
+    Returns true if given loss is a Distance-based Loss.
+
+    A Supervised Loss function :math:`f : \mathbb{R} \times \mathbb{R} \rightarrow [0, \infty)`
+    is said to be **margin-based** if there exists a representing function
+    :math:`\psi : \mathbb{R} \rightarrow [0, \infty)` satisfying
+
+    ..math:: L(y, t) = \psi (yt), where y \in Y, t \in \mathbb{R}
+
+    :param Loss loss: The loss we want to check for being Margin-based.
+
+.. code-block:: julia
+
+    julia> ismarginbased(HuberLoss(2))
+    false
+
+    julia> ismarginbased(L2MarginLoss())
+    true
+
 .. function:: isclasscalibrated(loss) -> Bool
 
 .. function:: isdistancebased(loss) -> Bool
 
+    Returns true if given loss is a Distance-based Loss.
+
+    A Supervised Loss function :math:`f : \mathbb{R} \times \mathbb{R} \rightarrow [0, \infty)`
+    is said to be **distance-based** if there exists a representing function
+    :math:`\psi : \mathbb{R} \rightarrow [0, \infty)` satisfying :math:`\psi (0) = 0` and
+
+    ..math:: L(y, t) = \psi (y - t), where y \in Y, t \in \mathbb{R}
+
+    :param Loss loss: The loss we want to check for being Distance-based.
+
+.. code-block:: julia
+
+    julia> isdistancebased(HuberLoss(2))
+    true
+
+    julia> isdistancebased(L2MarginLoss())
+    false
+
 .. function:: issymmetric(loss) -> Bool
+
+    Returns true if given loss is a Symmetric Loss.
+
+    A function :math:`f : \mathbb{R} \rightarrow [0,\infty)` is said to be
+    symmetric about origin if we have
+
+    ..math:: f(x) = f(-x) \forall x \in \mathbb{R}
+
+    :param Loss loss: The loss we want to check for being symmetric.
+
+.. code-block:: julia
+
+    julia> issymmetric(QuantileLoss(0.2))
+    false
+
+    julia> issymetric(LPDistLoss(2))
+    true
 
 .. [BOYD2004] Stephen Boyd and Lieven Vandenberghe. `"Convex Optimization" <https://stanford.edu/~boyd/cvxbook/>`_. Cambridge University Press, 2004.
