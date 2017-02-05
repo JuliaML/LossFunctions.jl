@@ -7,7 +7,7 @@ the sum or mean of them; be it weighted or unweighted. For
 example, by computing the unweighted mean of the loss for our
 training set, we would effectively compute what is known as the
 empirical risk. This is usually the quantity (or an important
-part of it) that the are interesting in minimizing.
+part of it) that we are interesting in minimizing.
 
 When we say "weighted" or "unweighted", we are referring to
 whether we are explicitly specifying the influence of individual

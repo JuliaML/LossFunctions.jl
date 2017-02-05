@@ -18,7 +18,6 @@ Learning.
    solution provided by this package. As such, this section is
    **not** intended as a guide on how to apply this package.
 
-
 Terminology
 ----------------------
 
@@ -54,14 +53,14 @@ a prediction *function* as the same thing as a prediction
 of prediction functions. What that boils down to is that the
 prediction model represents the set of possible prediction
 functions, while the final prediction function is the chosen
-function that best solves the problem. So in a way a prediction
-model can be thought of as the manifestation of our assumptions
-about the problem, because it restricts the solution to a
-specific family of functions.  For example a linear prediction
-model for two features represents all possible linear functions
-that have two coefficients. A prediction function would in that
-scenario be a concrete linear function with a particular fixed
-set of coefficients.
+function that best solves the prediction problem. So in a way a
+prediction model can be thought of as the manifestation of our
+assumptions about the problem, because it restricts the solution
+to a specific family of functions. For example a linear
+prediction model for two features represents all possible linear
+functions that have two coefficients. A prediction function would
+in that scenario be a concrete linear function with a particular
+fixed set of coefficients.
 
 The purpose of a prediction function is to take some input and
 produce a corresponding output. That output should be as faithful
@@ -81,12 +80,15 @@ care about in this package.
 
 True Targets
     A true target (singular) represents the "desired" output for
-    the input features of the observation. The targets are often
-    referred to as "ground truth" and we will denote a single
-    target as :math:`y \in Y`. When we talk about an array (e.g.
-    a vector) of targets, we will print it in bold as
-    :math:`\mathbf{y}`. What the set :math:`Y` is will depend on
-    the subdomain of supervised learning that you are working in.
+    the input features of a single observation. The targets are
+    often referred to as "ground truth" and we will denote a
+    single target as :math:`y \in Y`. While :math:`y` can be a
+    scalar or some array, the key is that it represents the
+    target of a single observation. When we talk about an array
+    (e.g. a vector) of **multiple** targets, we will print it in
+    bold as :math:`\mathbf{y}`. What the set :math:`Y` is will
+    depend on the subdomain of supervised learning that you are
+    working in.
 
     - Real-valued Regression: :math:`Y \subseteq \mathbb{R}`.
 
@@ -96,7 +98,7 @@ True Targets
 
     - Probabilistic Classification: :math:`Y = \{1,0\}`.
 
-    - Multiclass Classification: :math:`Y = \{1,2,\dots,k\}`
+    - Multiclass Classification: :math:`Y = \{1,2,\dots,k\}`.
 
     See `MLLabelUtils
     <http://mllabelutilsjl.readthedocs.io/en/latest/api/targets.html>`_
@@ -107,8 +109,8 @@ Predicted Outputs
     function given the features of some observation. We will
     denote a single output as :math:`\hat{y} \in \mathbb{R}`
     (pronounced as "why hat"). When we talk about an array of
-    outputs, we will print it in bold as
-    :math:`\mathbf{\hat{y}}`. Note something unintuitive but
+    outputs for multiple observations, we will print it in bold
+    as :math:`\mathbf{\hat{y}}`. Note something unintuitive but
     important: The variables :math:`y` and :math:`\hat{y}` don't
     have to be of the same set. Even in a classification setting
     where :math:`y \in \{1,-1\}`, it is typical that
@@ -130,6 +132,11 @@ target properly, but in this case we would actually have a
 perfectly correct prediction. This is because in margin-based
 classification the main thing that matters about the predicted
 output is that the sign agrees with the true target.
+
+Even though we talked about prediction functions and features,
+we will see that for computing loss functions all we really care
+about are the true targets and the predicted outputs, regardless
+of how the outputs were produced.
 
 ..  More generally speaking, to be able to directly compare the
     predicted outputs to the targets in a classification setting, one
@@ -196,6 +203,66 @@ Note a few interesting things about supervised loss functions.
   "correct" prediction has a loss of zero. In fact some
   classification calibrated losses are never truly zero.
 
+There are two sub-families of supervised loss-functions that are
+of particular interest, namely **margin-based** losses and
+**distance-based** losses. These two categories of loss functions
+are especially useful for the two basic sub-domains of supervised
+learning: Classification and Regression.
+
+Margin-based Losses for Classification
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Margin-based losses are mainly utilized for binary classification
+problems where the goal is to predict a categorical value. They
+assume that the set of targets :math:`Y` is restricted to
+:math:`Y = \{1,-1\}`. These two possible values for the target
+denote the positive class in the case of :math:`y = 1`, and the
+negative class in the case of :math:`y = -1`. In contrast to
+other formalism, they do not natively provide probabilities as
+output.
+
+More formally, we call a supervised loss function
+:math:`L : Y \times \mathbb{R} \rightarrow [0, \infty)`
+**margin-based** if there exists a representing function
+:math:`\psi : \mathbb{R} \rightarrow [0, \infty)` such that
+
+.. math:: L(y, \hat{y}) = \psi (y \cdot \hat{y}),  \qquad  y \in Y, \hat{y} \in \mathbb{R}
+
+.. note::
+
+   Throughout the codebase we refer to the result of
+   :math:`y \cdot \hat{y}` as *agreement*.
+   The discussion that lead to this convention can be found
+   `issue #9 <https://github.com/JuliaML/LossFunctions.jl/issues/9#issuecomment-190321549>`_
+
+Distance-based Losses for Regression
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Distance-based losses are usually used in regression settings
+where the goal is to predict some real valued variable. The goal
+there is that the prediction is as close as possible to the true
+target. In such a scenario it is quite sensible to penalize the
+distance between the prediction and the target in some way.
+
+More formally, a supervised loss function :math:`L : Y \times
+\mathbb{R} \rightarrow [0, \infty)` is said to be
+**distance-based**, if there exists a representing function
+:math:`\psi : \mathbb{R} \rightarrow [0, \infty)` satisfying
+:math:`\psi (0) = 0` and
+
+.. math:: L(y, \hat{y}) = \psi (\hat{y} - y),  \qquad  y \in Y, \hat{y} \in \mathbb{R}
+
+.. note::
+
+   In the literature that this package is partially based on,
+   the convention for the distance-based losses is that :math:`r
+   = y - \hat{y}` (see [STEINWART2008]_ p. 38). We chose to
+   diverge from this definition because it would force a
+   difference of the sign between the results for the unary and
+   the binary version of the derivative. That difference would
+   be a introduced by the chain rule, since the inner derivative
+   would result in
+   :math:`\frac{\partial}{\partial \hat{y}} (y - \hat{y}) = -1`.
 
 Alternative Viewpoints
 ------------------------

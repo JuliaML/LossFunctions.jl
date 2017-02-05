@@ -116,6 +116,21 @@ they agree with the sign of the target.
 |    losses/margin                             |                                                                                        |
 +----------------------------------------------+----------------------------------------------------------------------------------------+
 
+Common Meta Losses
+----------------------
+
+In some situations it can be useful to slightly alter an existing
+loss function. We provide two general ways to accomplish that.
+The first way is to scale a loss by a constant factor. This can
+for example be useful to transform the :class:`L2DistLoss` into
+the least squares loss one knows from statistics. The second way
+is to reweight the two classes of a binary classification loss.
+This is useful for handling inbalanced class distributions.
+
+.. toctree::
+   :maxdepth: 2
+
+   losses/scaledandweighted
 
 Internals
 --------------------------------
