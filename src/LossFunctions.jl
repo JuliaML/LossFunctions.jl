@@ -50,7 +50,6 @@ export
     ZeroOneLoss,
 
     weightedloss,
-    scaledloss,
 
     AvgMode
 

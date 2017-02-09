@@ -61,7 +61,7 @@ type-stable manner.
 
 .. code-block:: jlcon
 
-   julia> lsloss = scaledloss(L2DistLoss(), Val{0.5})
+   julia> lsloss = scaled(L2DistLoss(), Val{0.5})
    LossFunctions.ScaledDistanceLoss{LossFunctions.LPDistLoss{2},0.5}(LossFunctions.LPDistLoss{2}())
 
 Storing the scale factor as a type-parameter instead of a member
