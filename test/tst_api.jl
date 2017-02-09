@@ -253,7 +253,7 @@ end
 @testset "Vectorized API" begin
     for T in (Float32, Float64)
         for O in (Float32, Float64)
-            @testset "Margin-based" begin
+            @testset "Margin-based $T -> $O" begin
                 for (targets,outputs) in (
                         (rand(T[-1,1],4),(rand(O,4)-O(.5)) .* O(20)),
                         (rand(T[-1,1],4,5),(rand(O,4,5)-O(.5)) .* O(20)),
@@ -268,7 +268,8 @@ end
                     end
                 end
             end
-            @testset "Distance-based" begin
+            println("<HEARTBEAT>")
+            @testset "Distance-based $T -> $O" begin
                 for (targets,outputs) in (
                         ((rand(T,4)-T(.5)) .* T(20),(rand(O,4)-O(.5)) .* O(20)),
                         ((rand(T,4,5)-T(.5)) .* T(20),(rand(O,4,5)-O(.5)) .* O(20)),

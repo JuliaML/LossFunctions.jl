@@ -1,19 +1,3 @@
-"""
-    scaledloss(loss::SupervisedLoss, K)
-
-Returns a version of `loss` that is uniformly scaled by `K`.
-This function dispatches on the type of `loss` in order to choose
-the appropriate type of scaled loss that will be used as the decorator.
-For example, if `typeof(loss) <: DistanceLoss` then the given `loss`
-will be boxed into a `ScaledDistanceLoss`.
-
-Note: If `typeof(K) <: Number`, then this method will poison the
-type-inference of the calling scope. This is because `K` will be
-promoted to a type parameter. For a typestable version use the
-following signature: `scaledloss(loss, Val{K})`
-"""
-function scaledloss end
-
 @inline _serror() = throw(ArgumentError("Scale factor K has to be strictly positive."))
 
 for KIND in (:MarginLoss, :DistanceLoss, :SupervisedLoss)
@@ -38,8 +22,8 @@ for KIND in (:MarginLoss, :DistanceLoss, :SupervisedLoss)
 
         In contrast, in order to only create a `K` times scaled
         instance of some specific loss you can use
-        `scaledloss(my$($(lowercase(string(KIND)))), Val{K})`.
-        See `?scaledloss` for more information.
+        `scaled(my$($(lowercase(string(KIND)))), Val{K})`.
+        See `?scaled` for more information.
         """ ->
         immutable ($SCALEDKIND){L<:$KIND,K} <: $KIND
             loss::L
@@ -53,7 +37,7 @@ for KIND in (:MarginLoss, :DistanceLoss, :SupervisedLoss)
         ($SCALEDKIND){T}(loss::T, k::Number) = ($SCALEDKIND)(loss, Val{k})
         (*){K}(::Type{Val{K}}, loss::$KIND) = ($SCALEDKIND)(loss, Val{K})
         (*)(k::Number, loss::$KIND) = ($SCALEDKIND)(loss, Val{k})
-        scaledloss{T<:$KIND,K}(loss::T, ::Type{Val{K}}) = ($SCALEDKIND)(loss, Val{K})
+        scaled{T<:$KIND,K}(loss::T, ::Type{Val{K}}) = ($SCALEDKIND)(loss, Val{K})
 
         @generated ($SCALEDKIND){T,K1,K2}(s::$SCALEDKIND{T,K1}, ::Type{Val{K2}}) = :(($($SCALEDKIND))(s.loss, Val{$(K1*K2)}))
     end
@@ -65,11 +49,25 @@ end
 Mainly intended for dispatch. Look at `?ScaledMarginLoss`,
 or `ScaledDistanceLoss` for more information.
 
-use `scaledloss` to create a scaled version of some loss.
+use `scaled` to create a scaled version of some loss.
 """
 typealias ScaledLoss{T,K} Union{ScaledSupervisedLoss{T,K}, ScaledMarginLoss{T,K}, ScaledDistanceLoss{T,K}}
 
-scaledloss(l::Loss, k::Number) = scaledloss(l, Val{k})
+"""
+    scaled(loss::SupervisedLoss, K)
+
+Returns a version of `loss` that is uniformly scaled by `K`.
+This function dispatches on the type of `loss` in order to choose
+the appropriate type of scaled loss that will be used as the decorator.
+For example, if `typeof(loss) <: DistanceLoss` then the given `loss`
+will be boxed into a `ScaledDistanceLoss`.
+
+Note: If `typeof(K) <: Number`, then this method will poison the
+type-inference of the calling scope. This is because `K` will be
+promoted to a type parameter. For a typestable version use the
+following signature: `scaled(loss, Val{K})`
+"""
+scaled(l::Loss, k::Number) = scaled(l, Val{k})
 
 for fun in (:value, :deriv, :deriv2)
     @eval @fastmath ($fun){T,K}(l::ScaledLoss{T,K}, num::Number) = K * ($fun)(l.loss, num)

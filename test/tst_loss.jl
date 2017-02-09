@@ -213,7 +213,7 @@ end
 function test_scaledloss(l::Loss, t_vec, y_vec)
     @testset "Scaling for $(l): " begin
         for λ = (2.0, 2)
-            sl = scaledloss(l,λ)
+            sl = scaled(l,λ)
             if typeof(l) <: MarginLoss
                 @test typeof(sl) <: LossFunctions.ScaledMarginLoss{typeof(l),λ}
             elseif typeof(l) <: DistanceLoss
@@ -221,9 +221,9 @@ function test_scaledloss(l::Loss, t_vec, y_vec)
             else
                 @test typeof(sl) <: LossFunctions.ScaledSupervisedLoss{typeof(l),λ}
             end
-            @test 3 * sl == @inferred(scaledloss(sl,Val{3}))
-            @test (λ*3) * l == @inferred(scaledloss(sl,Val{3}))
-            @test sl == @inferred(scaledloss(l,Val{λ}))
+            @test 3 * sl == @inferred(scaled(sl,Val{3}))
+            @test (λ*3) * l == @inferred(scaled(sl,Val{3}))
+            @test sl == @inferred(scaled(l,Val{λ}))
             @test sl == λ * l
             @test sl == @inferred(Val{λ} * l)
             for t in t_vec
@@ -243,7 +243,7 @@ end
 function test_scaledloss(l::Loss, n_vec)
     @testset "Scaling for $(l): " begin
         for λ = (2.0, 2)
-            sl = scaledloss(l,λ)
+            sl = scaled(l,λ)
             if typeof(l) <: MarginLoss
                 @test typeof(sl) <: LossFunctions.ScaledMarginLoss{typeof(l),λ}
             elseif typeof(l) <: DistanceLoss
@@ -251,7 +251,7 @@ function test_scaledloss(l::Loss, n_vec)
             else
                 @test typeof(sl) <: LossFunctions.ScaledSupervisedLoss{typeof(l),λ}
             end
-            @test sl == @inferred(scaledloss(l,Val{λ}))
+            @test sl == @inferred(scaled(l,Val{λ}))
             @test sl == λ * l
             @test sl == @inferred(Val{λ} * l)
             for n in n_vec
