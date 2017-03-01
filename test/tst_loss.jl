@@ -140,9 +140,9 @@ function test_deriv(l::DistanceLoss, t_vec)
     end
 end
 
-function test_deriv(l::SupervisedLoss, t_vec)
+function test_deriv(l::SupervisedLoss, y_vec, t_vec)
     @testset "$(l): " begin
-        for y in -10:.2:10, t in t_vec
+        for y in y_vec, t in t_vec
             if isdifferentiable(l, y, t)
                 d_dual = epsilon(LossFunctions.value(l, y, dual(t, 1)))
                 d_comp = @inferred deriv(l, y, t)
@@ -202,6 +202,24 @@ function test_deriv2(l::DistanceLoss, t_vec)
                 @test_approx_eq d2_comp @inferred deriv2(l, t-y)
                 @test_approx_eq d2_comp deriv2_fun(l)(y, t)
                 @test_approx_eq d2_comp deriv2_fun(l)(t-y)
+            else
+                # y-t == 0 ? print(".") : print("$(y-t) ")
+                #print(".")
+            end
+        end
+    end
+end
+
+function test_deriv2(l::SupervisedLoss, y_vec, t_vec)
+    @testset "$(l): " begin
+        for y in y_vec, t in t_vec
+            if istwicedifferentiable(l, y, t) && isdifferentiable(l, y, t)
+                d2_dual = epsilon(deriv(l, dual(y, 0), dual(t, 1)))
+                d2_comp = @inferred deriv2(l, y, t)
+                @test abs(d2_dual - d2_comp) < 1e-10
+                @test_approx_eq d2_comp @inferred(l''(y, t))
+                @test_approx_eq d2_comp @inferred deriv2(l, y, t)
+                @test_approx_eq d2_comp deriv2_fun(l)(y, t)
             else
                 # y-t == 0 ? print(".") : print("$(y-t) ")
                 #print(".")
@@ -509,8 +527,11 @@ end
     end
 end
 
-@testset "Test first derivatives of other losses" begin
-    test_deriv(PoissonLoss(), 0:30)
+@testset "Test first and second derivatives of other losses" begin
+    test_deriv(PoissonLoss(), -10:.2:10, 0:30)
+    test_deriv2(PoissonLoss(), -10:.2:10, 0:30)
+    test_deriv(CrossentropyLoss(), 0:0.01:1, 0.01:0.01:0.99)
+    test_deriv2(CrossentropyLoss(), 0:0.01:1, 0.01:0.01:0.99)
 end
 
 @testset "Test second derivatives of distance-based losses" begin
