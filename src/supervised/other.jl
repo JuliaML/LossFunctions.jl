@@ -1,10 +1,11 @@
 # ===============================================================
-# L(y, t) = exp(t) - t*y
 
-"""
+doc"""
     PoissonLoss <: SupervisedLoss
 
 Loss under a Poisson noise distribution (KL-divergence)
+
+``L(target, output) = exp(output) - target*output``
 """
 immutable PoissonLoss <: SupervisedLoss end
 
@@ -26,7 +27,14 @@ isconvex(::PoissonLoss) = true
 isstronglyconvex(::PoissonLoss) = false
 
 # ===============================================================
-# L(target, output) = - target*ln(output) - (1-target)*ln(1-output)
+
+doc"""
+    CrossentropyLoss <: SupervisedLoss
+
+Cross-entropy loss also known as log loss and logistic loss is defined as:
+
+``L(target, output) = - target*ln(output) - (1-target)*ln(1-output)``
+"""
 
 immutable CrossentropyLoss <: SupervisedLoss end
 typealias LogitProbLoss CrossentropyLoss
@@ -49,4 +57,3 @@ isconvex(::CrossentropyLoss) = true
 
 # ===============================================================
 # L(target, output) = sign(agreement) < 0 ? 1 : 0
-
