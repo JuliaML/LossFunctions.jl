@@ -40,6 +40,8 @@ immutable CrossentropyLoss <: SupervisedLoss end
 typealias LogitProbLoss CrossentropyLoss
 
 function value(loss::CrossentropyLoss, target::Number, output::Number)
+    target >= 0 && target <=1 || error("target must be in [0,1]")
+    output >= 0 && output <=1 || error("output must be in [0,1]")
     if target == 0
         -log(1 - output)
     elseif target == 1
@@ -53,6 +55,9 @@ deriv2(loss::CrossentropyLoss, target::Number, output::Number) = (1-target) / (1
 value_deriv(loss::CrossentropyLoss, target::Number, output::Number) = (value(loss,target,output), deriv(loss,target,output))
 
 isdifferentiable(::CrossentropyLoss) = true
+isdifferentiable(::CrossentropyLoss, y, t) = t != 0 && t != 1
+istwicedifferentiable(::CrossentropyLoss) = true
+istwicedifferentiable(::CrossentropyLoss, y, t) = t != 0 && t != 1
 isconvex(::CrossentropyLoss) = true
 
 # ===============================================================
