@@ -210,6 +210,24 @@ function test_deriv2(l::DistanceLoss, t_vec)
     end
 end
 
+function test_deriv2(l::SupervisedLoss, y_vec, t_vec)
+    @testset "$(l): " begin
+        for y in y_vec, t in t_vec
+            if istwicedifferentiable(l, y, t) && isdifferentiable(l, y, t)
+                d2_dual = epsilon(deriv(l, dual(y, 0), dual(t, 1)))
+                d2_comp = @inferred deriv2(l, y, t)
+                @test abs(d2_dual - d2_comp) < 1e-10
+                @test_approx_eq d2_comp @inferred(l''(y, t))
+                @test_approx_eq d2_comp @inferred deriv2(l, y, t)
+                @test_approx_eq d2_comp deriv2_fun(l)(y, t)
+            else
+                # y-t == 0 ? print(".") : print("$(y-t) ")
+                #print(".")
+            end
+        end
+    end
+end
+
 function test_scaledloss(l::Loss, t_vec, y_vec)
     @testset "Scaling for $(l): " begin
         for λ = (2.0, 2)
@@ -509,9 +527,11 @@ end
     end
 end
 
-@testset "Test first derivatives of other losses" begin
+@testset "Test first and second derivatives of other losses" begin
     test_deriv(PoissonLoss(), -10:.2:10, 0:30)
+    test_deriv2(PoissonLoss(), -10:.2:10, 0:30)
     test_deriv(CrossentropyLoss(), 0:0.01:1, 0.01:0.01:0.99)
+    test_deriv2(CrossentropyLoss(), 0:0.01:1, 0.01:0.01:0.99)
 end
 
 @testset "Test second derivatives of distance-based losses" begin
