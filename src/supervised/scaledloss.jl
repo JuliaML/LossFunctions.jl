@@ -25,14 +25,15 @@ for KIND in (:MarginLoss, :DistanceLoss, :SupervisedLoss)
         `scaled(my$($(lowercase(string(KIND)))), Val{K})`.
         See `?scaled` for more information.
         """ ->
-        immutable ($SCALEDKIND){L<:$KIND,K} <: $KIND
+        struct ($SCALEDKIND){L<:$KIND,K} <: $KIND
             loss::L
-
-            ($SCALEDKIND)() = typeof(K) <: Number ? new(L()) : _serror()
-            ($SCALEDKIND)(args...) = typeof(K) <: Number ? new(L(args...)) : _serror()
-            ($SCALEDKIND)(loss::L) = typeof(K) <: Number ? new(loss) : _serror()
+            (::Type{($SCALEDKIND){L,K}}){L<:$KIND, K}(loss::L) = new{L,K}(loss)
         end
 
+        @generated function (::Type{($SCALEDKIND){L,K}}){L<:$KIND, K}(args...)
+            typeof(K) <: Number || _serror()
+            :(($($SCALEDKIND)){L,K}(L(args...)))
+        end
         ($SCALEDKIND){T,K}(loss::T, ::Type{Val{K}}) = ($SCALEDKIND){T,K}(loss)
         ($SCALEDKIND){T}(loss::T, k::Number) = ($SCALEDKIND)(loss, Val{k})
         (*){K}(::Type{Val{K}}, loss::$KIND) = ($SCALEDKIND)(loss, Val{K})
@@ -51,7 +52,7 @@ or `ScaledDistanceLoss` for more information.
 
 use `scaled` to create a scaled version of some loss.
 """
-typealias ScaledLoss{T,K} Union{ScaledSupervisedLoss{T,K}, ScaledMarginLoss{T,K}, ScaledDistanceLoss{T,K}}
+const ScaledLoss{T,K} = Union{ScaledSupervisedLoss{T,K}, ScaledMarginLoss{T,K}, ScaledDistanceLoss{T,K}}
 
 """
     scaled(loss::SupervisedLoss, K)
@@ -88,4 +89,3 @@ end
 for prop_param in (:isdifferentiable, :istwicedifferentiable)
     @eval ($prop_param)(l::ScaledLoss, at) = ($prop_param)(l.loss, at)
 end
-

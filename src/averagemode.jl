@@ -1,4 +1,4 @@
-abstract AverageMode
+abstract type AverageMode end
 
 module AvgMode
 
@@ -14,20 +14,20 @@ module AvgMode
         WeightedMean,
         WeightedSum
 
-    immutable None <: AverageMode end
-    immutable Sum <: AverageMode end
-    immutable Macro <: AverageMode end
-    immutable Mean <: AverageMode end
-    typealias Micro Mean
+    struct None <: AverageMode end
+    struct Sum <: AverageMode end
+    struct Macro <: AverageMode end
+    struct Mean <: AverageMode end
+    const Micro = Mean
 
-    immutable WeightedMean{T<:WeightVec} <: AverageMode
+    struct WeightedMean{T<:WeightVec} <: AverageMode
         weights::T
         normalize::Bool
     end
     WeightedMean(A::AbstractVector, normalize::Bool) = WeightedMean(weights(A), normalize)
     WeightedMean(A::AbstractVector; normalize::Bool = true) = WeightedMean(weights(A), normalize)
 
-    immutable WeightedSum{T<:WeightVec} <: AverageMode
+    struct WeightedSum{T<:WeightVec} <: AverageMode
         weights::T
         normalize::Bool
     end
@@ -35,4 +35,3 @@ module AvgMode
     WeightedSum(A::AbstractVector; normalize::Bool = false) = WeightedSum(weights(A), normalize)
 
 end
-

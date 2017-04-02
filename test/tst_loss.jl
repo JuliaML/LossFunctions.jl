@@ -79,23 +79,23 @@ function test_deriv(l::MarginLoss, t_vec)
                 val2, d_comp2 = @inferred value_deriv(l, y, t)
                 val3, d_comp3 = value_deriv_fun(l)(y, t)
                 val4, d_comp4 = @inferred value_deriv(l, y * t)
-                @test_approx_eq val @inferred(l(y, t))
-                @test_approx_eq val @inferred(l(y*t))
-                @test_approx_eq val val2
-                @test_approx_eq val val3
-                @test_approx_eq val val4
-                @test_approx_eq val LossFunctions.value(l, y, t)
-                @test_approx_eq val LossFunctions.value(l, y*t)
-                @test_approx_eq val value_fun(l)(y, t)
-                @test_approx_eq val value_fun(l)(y*t)
-                @test_approx_eq d_comp @inferred(l'(y,t))
-                @test_approx_eq d_comp y*@inferred(l'(y*t))
-                @test_approx_eq d_comp d_comp2
-                @test_approx_eq d_comp d_comp3
-                @test_approx_eq d_comp y*d_comp4
-                @test_approx_eq d_comp y*deriv(l, y*t)
-                @test_approx_eq d_comp deriv_fun(l)(y, t)
-                @test_approx_eq d_comp y*deriv_fun(l)(y*t)
+                @test val ≈ @inferred(l(y, t))
+                @test val ≈ @inferred(l(y*t))
+                @test val ≈ val2
+                @test val ≈ val3
+                @test val ≈ val4
+                @test val ≈ LossFunctions.value(l, y, t)
+                @test val ≈ LossFunctions.value(l, y*t)
+                @test val ≈ value_fun(l)(y, t)
+                @test val ≈ value_fun(l)(y*t)
+                @test d_comp ≈ @inferred(l'(y,t))
+                @test d_comp ≈ y*@inferred(l'(y*t))
+                @test d_comp ≈ d_comp2
+                @test d_comp ≈ d_comp3
+                @test d_comp ≈ y*d_comp4
+                @test d_comp ≈ y*deriv(l, y*t)
+                @test d_comp ≈ deriv_fun(l)(y, t)
+                @test d_comp ≈ y*deriv_fun(l)(y*t)
             else
                 # y*t == 1 ? print(".") : print("(no $(y)*$(t)) ")
                 #print(".")
@@ -115,23 +115,23 @@ function test_deriv(l::DistanceLoss, t_vec)
                 val2, d_comp2 = @inferred value_deriv(l, y, t)
                 val3, d_comp3 = value_deriv_fun(l)(y, t)
                 val4, d_comp4 = @inferred value_deriv(l, t-y)
-                @test_approx_eq val @inferred(l(y, t))
-                @test_approx_eq val @inferred(l(t-y))
-                @test_approx_eq val val2
-                @test_approx_eq val val3
-                @test_approx_eq val val4
-                @test_approx_eq val LossFunctions.value(l, y, t)
-                @test_approx_eq val LossFunctions.value(l, t-y)
-                @test_approx_eq val value_fun(l)(y, t)
-                @test_approx_eq val value_fun(l)(t-y)
-                @test_approx_eq d_comp @inferred(l'(y,t))
-                @test_approx_eq d_comp @inferred(l'(t-y))
-                @test_approx_eq d_comp d_comp2
-                @test_approx_eq d_comp d_comp3
-                @test_approx_eq d_comp d_comp4
-                @test_approx_eq d_comp deriv(l, t-y)
-                @test_approx_eq d_comp deriv_fun(l)(y, t)
-                @test_approx_eq d_comp deriv_fun(l)(t-y)
+                @test val ≈ @inferred(l(y, t))
+                @test val ≈ @inferred(l(t-y))
+                @test val ≈ val2
+                @test val ≈ val3
+                @test val ≈ val4
+                @test val ≈ LossFunctions.value(l, y, t)
+                @test val ≈ LossFunctions.value(l, t-y)
+                @test val ≈ value_fun(l)(y, t)
+                @test val ≈ value_fun(l)(t-y)
+                @test d_comp ≈ @inferred(l'(y,t))
+                @test d_comp ≈ @inferred(l'(t-y))
+                @test d_comp ≈ d_comp2
+                @test d_comp ≈ d_comp3
+                @test d_comp ≈ d_comp4
+                @test d_comp ≈ deriv(l, t-y)
+                @test d_comp ≈ deriv_fun(l)(y, t)
+                @test d_comp ≈ deriv_fun(l)(t-y)
             else
                 # y-t == 0 ? print(".") : print("$(y-t) ")
                 #print(".")
@@ -150,16 +150,16 @@ function test_deriv(l::SupervisedLoss, y_vec, t_vec)
                 val = @inferred LossFunctions.value(l, y, t)
                 val2, d_comp2 = @inferred value_deriv(l, y, t)
                 val3, d_comp3 = value_deriv_fun(l)(y, t)
-                @test_approx_eq val @inferred(l(y, t))
-                @test_approx_eq val val2
-                @test_approx_eq val val3
-                @test_approx_eq val LossFunctions.value(l, y, t)
-                @test_approx_eq val value_fun(l)(y, t)
-                @test_approx_eq d_comp @inferred(l'(y, t))
-                @test_approx_eq d_comp d_comp2
-                @test_approx_eq d_comp d_comp3
-                @test_approx_eq d_comp deriv(l, y, t)
-                @test_approx_eq d_comp deriv_fun(l)(y, t)
+                @test val ≈ @inferred(l(y, t))
+                @test val ≈ val2
+                @test val ≈ val3
+                @test val ≈ LossFunctions.value(l, y, t)
+                @test val ≈ value_fun(l)(y, t)
+                @test d_comp ≈ @inferred(l'(y, t))
+                @test d_comp ≈ d_comp2
+                @test d_comp ≈ d_comp3
+                @test d_comp ≈ deriv(l, y, t)
+                @test d_comp ≈ deriv_fun(l)(y, t)
             else
                 # y-t == 0 ? print(".") : print("$(y-t) ")
                 #print(".")
@@ -175,12 +175,12 @@ function test_deriv2(l::MarginLoss, t_vec)
                 d2_dual = epsilon(deriv(l, dual(y, 0), dual(t, 1)))
                 d2_comp = @inferred deriv2(l, y, t)
                 @test abs(d2_dual - d2_comp) < 1e-10
-                @test_approx_eq d2_comp @inferred(l''(y, t))
-                @test_approx_eq d2_comp @inferred(l''(y*t))
-                @test_approx_eq d2_comp @inferred deriv2(l, y, t)
-                @test_approx_eq d2_comp @inferred deriv2(l, y*t)
-                @test_approx_eq d2_comp deriv2_fun(l)(y, t)
-                @test_approx_eq d2_comp deriv2_fun(l)(y*t)
+                @test d2_comp ≈ @inferred(l''(y, t))
+                @test d2_comp ≈ @inferred(l''(y*t))
+                @test d2_comp ≈ @inferred deriv2(l, y, t)
+                @test d2_comp ≈ @inferred deriv2(l, y*t)
+                @test d2_comp ≈ deriv2_fun(l)(y, t)
+                @test d2_comp ≈ deriv2_fun(l)(y*t)
             else
                 # y*t == 1 ? print(".") : print("(no $(y)*$(t)) ")
                 #print(".")
@@ -196,12 +196,12 @@ function test_deriv2(l::DistanceLoss, t_vec)
                 d2_dual = epsilon(deriv(l, dual(t-y, 1)))
                 d2_comp = @inferred deriv2(l, y, t)
                 @test abs(d2_dual - d2_comp) < 1e-10
-                @test_approx_eq d2_comp @inferred(l''(y, t))
-                @test_approx_eq d2_comp @inferred(l''(t-y))
-                @test_approx_eq d2_comp @inferred deriv2(l, y, t)
-                @test_approx_eq d2_comp @inferred deriv2(l, t-y)
-                @test_approx_eq d2_comp deriv2_fun(l)(y, t)
-                @test_approx_eq d2_comp deriv2_fun(l)(t-y)
+                @test d2_comp ≈ @inferred(l''(y, t))
+                @test d2_comp ≈ @inferred(l''(t-y))
+                @test d2_comp ≈ @inferred deriv2(l, y, t)
+                @test d2_comp ≈ @inferred deriv2(l, t-y)
+                @test d2_comp ≈ deriv2_fun(l)(y, t)
+                @test d2_comp ≈ deriv2_fun(l)(t-y)
             else
                 # y-t == 0 ? print(".") : print("$(y-t) ")
                 #print(".")
@@ -217,9 +217,9 @@ function test_deriv2(l::SupervisedLoss, y_vec, t_vec)
                 d2_dual = epsilon(deriv(l, dual(y, 0), dual(t, 1)))
                 d2_comp = @inferred deriv2(l, y, t)
                 @test abs(d2_dual - d2_comp) < 1e-10
-                @test_approx_eq d2_comp @inferred(l''(y, t))
-                @test_approx_eq d2_comp @inferred deriv2(l, y, t)
-                @test_approx_eq d2_comp deriv2_fun(l)(y, t)
+                @test d2_comp ≈ @inferred(l''(y, t))
+                @test d2_comp ≈ @inferred deriv2(l, y, t)
+                @test d2_comp ≈ deriv2_fun(l)(y, t)
             else
                 # y-t == 0 ? print(".") : print("$(y-t) ")
                 #print(".")
@@ -357,6 +357,8 @@ end
     end
 end
 
+println("<HEARTBEAT>")
+
 @testset "Test margin-based loss against reference function" begin
     _zerooneloss(y, t) = sign(y*t) < 0 ? 1 : 0
     test_value(ZeroOneLoss(), _zerooneloss, [-1.,1], -10:0.2:10)
@@ -483,6 +485,8 @@ end
     test_scaledloss(PoissonLoss(), 0:10, linspace(0,10,11))
 end
 
+println("<HEARTBEAT>")
+
 # --------------------------------------------------------------
 
 @testset "Test first derivatives of margin-based losses" begin
@@ -504,7 +508,7 @@ end
     end
 end
 
-typealias BarLoss LossFunctions.WeightedBinaryLoss{SmoothedL1HingeLoss,0.2}
+const BarLoss = LossFunctions.WeightedBinaryLoss{SmoothedL1HingeLoss,0.2}
 
 @testset "Test margin-based weighted loss" begin
     for loss in margin_losses
@@ -540,7 +544,7 @@ end
     end
 end
 
-typealias FooLoss LossFunctions.ScaledDistanceLoss{L2EpsilonInsLoss,2}
+const FooLoss = LossFunctions.ScaledDistanceLoss{L2EpsilonInsLoss,2}
 
 @testset "Test distance-based scaled loss" begin
     for loss in distance_losses

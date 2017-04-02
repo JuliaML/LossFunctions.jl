@@ -1,5 +1,4 @@
 __precompile__(true)
-
 module LossFunctions
 
 using RecipesBase
@@ -65,8 +64,6 @@ include("supervised/weightedbinary.jl")
 include("supervised/other.jl")
 include("supervised/io.jl")
 
-include("deprecate.jl")
-
 # allow using some special losses as function
 (loss::ScaledSupervisedLoss)(args...) = value(loss, args...)
 (loss::WeightedBinaryLoss)(args...)   = value(loss, args...)
@@ -82,4 +79,3 @@ for T in union(subtypes(DistanceLoss), subtypes(MarginLoss))
 end
 
 end # module
-
