@@ -5,7 +5,6 @@
 # TODO: find way to use normal broadcast for this.
 # probably with the new changes in MLMetric and compare modes
 
-
 @inline function value(loss::MarginLoss, target::AbstractSparseArray, output::AbstractArray)
     buffer = similar(output)
     value!(buffer, loss, target, output)
@@ -37,4 +36,3 @@ end
       buffer
     end
 end
-

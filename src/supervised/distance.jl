@@ -7,9 +7,7 @@ iff `P > 1`.
 
 ``L(r) = |r|^P``
 """
-immutable LPDistLoss{P} <: DistanceLoss
-    LPDistLoss() = typeof(P) <: Number ? new() : error()
-end
+struct LPDistLoss{P} <: DistanceLoss end
 
 LPDistLoss(p::Number) = LPDistLoss{p}()
 
@@ -68,7 +66,7 @@ It is Lipschitz continuous and convex, but not strictly convex.
                  ŷ - y                            ŷ - y
 ```
 """
-typealias L1DistLoss LPDistLoss{1}
+const L1DistLoss = LPDistLoss{1}
 
 sumvalue(loss::L1DistLoss, difference::AbstractArray) = sumabs(difference)
 value(loss::L1DistLoss, difference::Number) = abs(difference)
@@ -111,7 +109,7 @@ It is strictly convex.
                  ŷ - y                            ŷ - y
 ```
 """
-typealias L2DistLoss LPDistLoss{2}
+const L2DistLoss = LPDistLoss{2}
 
 value(loss::L2DistLoss, difference::Number) = abs2(difference)
 deriv{T<:Number}(loss::L2DistLoss, difference::T) = T(2) * difference
@@ -126,7 +124,6 @@ isconvex(::L2DistLoss) = true
 isstrictlyconvex(::L2DistLoss) = true
 isstronglyconvex(::L2DistLoss) = true
 
-
 # ===========================================================
 
 doc"""
@@ -136,11 +133,11 @@ Measures distance on a circle of specified circumference `c`.
 
 ``L(r) = 1 - \cos \left( \frac{2 r \pi}{c} \right)``
 """
-immutable PeriodicLoss{T<:AbstractFloat} <: DistanceLoss
+struct PeriodicLoss{T<:AbstractFloat} <: DistanceLoss
     k::T   # k = 2π/circumference
-    function PeriodicLoss(circ::T)
+    function (::Type{PeriodicLoss{T}}){T}(circ::T)
         circ > 0 || error("circumference should be strictly positive")
-        new(convert(T, 2π/circ))
+        new{T}(convert(T, 2π/circ))
     end
 end
 PeriodicLoss{T<:AbstractFloat}(circ::T=1.0) = PeriodicLoss{T}(circ)
@@ -193,11 +190,11 @@ It is Lipschitz continuous and convex, but not strictly convex.
                  ŷ - y                            ŷ - y
 ```
 """
-type HuberLoss{T<:AbstractFloat} <: DistanceLoss
+struct HuberLoss{T<:AbstractFloat} <: DistanceLoss
     d::T   # boundary between quadratic and linear loss
-    function HuberLoss(d::T)
+    function (::Type{HuberLoss{T}}){T}(d::T)
         d > 0 || error("Huber crossover parameter must be strictly positive.")
-        new(d)
+        new{T}(d)
     end
 end
 HuberLoss{T<:AbstractFloat}(d::T=1.0) = HuberLoss{T}(d)
@@ -276,15 +273,15 @@ It is Lipschitz continuous and convex, but not strictly convex.
                  ŷ - y                            ŷ - y
 ```
 """
-immutable L1EpsilonInsLoss{T<:AbstractFloat} <: DistanceLoss
+struct L1EpsilonInsLoss{T<:AbstractFloat} <: DistanceLoss
     ε::T
 
-    @inline function L1EpsilonInsLoss(ɛ::T)
+    function (::Type{L1EpsilonInsLoss{T}}){T}(ɛ::T)
         ɛ > 0 || error("ɛ must be strictly positive")
-        new(ɛ)
+        new{T}(ɛ)
     end
 end
-typealias EpsilonInsLoss L1EpsilonInsLoss
+const EpsilonInsLoss = L1EpsilonInsLoss
 @inline L1EpsilonInsLoss{T<:AbstractFloat}(ε::T) = L1EpsilonInsLoss{T}(ε)
 @inline L1EpsilonInsLoss(ε::Number) = L1EpsilonInsLoss{Float64}(Float64(ε))
 
@@ -341,12 +338,12 @@ larger deviances quadratically. It is convex, but not strictly convex.
                  ŷ - y                            ŷ - y
 ```
 """
-immutable L2EpsilonInsLoss{T<:AbstractFloat} <: DistanceLoss
+struct L2EpsilonInsLoss{T<:AbstractFloat} <: DistanceLoss
     ε::T
 
-    function L2EpsilonInsLoss(ɛ::Number)
+    function (::Type{L2EpsilonInsLoss{T}}){T}(ɛ::T)
         ɛ > 0 || error("ɛ must be strictly positive")
-        new(convert(T, ɛ))
+        new{T}(ɛ)
     end
 end
 L2EpsilonInsLoss{T<:AbstractFloat}(ε::T) = L2EpsilonInsLoss{T}(ε)
@@ -408,7 +405,7 @@ It is strictly convex and Lipschitz continuous.
                  ŷ - y                            ŷ - y
 ```
 """
-immutable LogitDistLoss <: DistanceLoss end
+struct LogitDistLoss <: DistanceLoss end
 
 function value(loss::LogitDistLoss, difference::Number)
     er = exp(difference)
@@ -469,11 +466,11 @@ Furthermore it is symmetric if and only if `τ = 1/2`.
                  ŷ - y                            ŷ - y
 ```
 """
-immutable QuantileLoss{T <: AbstractFloat} <: DistanceLoss
+struct QuantileLoss{T <: AbstractFloat} <: DistanceLoss
     τ::T
 end
 
-typealias PinballLoss QuantileLoss
+const PinballLoss = QuantileLoss
 
 function value{T1, T2 <: Number}(loss::QuantileLoss{T1}, diff::T2)
     T = promote_type(T1, T2)
@@ -495,4 +492,3 @@ islipschitzcont_deriv(::QuantileLoss) = true
 isconvex(::QuantileLoss) = true
 isstrictlyconvex(::QuantileLoss) = false
 isstronglyconvex(::QuantileLoss) = false
-

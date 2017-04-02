@@ -1,5 +1,3 @@
-# ===============================================================
-
 doc"""
     PoissonLoss <: SupervisedLoss
 
@@ -7,7 +5,7 @@ Loss under a Poisson noise distribution (KL-divergence)
 
 ``L(target, output) = exp(output) - target*output``
 """
-immutable PoissonLoss <: SupervisedLoss end
+struct PoissonLoss <: SupervisedLoss end
 
 value(loss::PoissonLoss, target::Number, output::Number) = exp(output) - target*output
 deriv(loss::PoissonLoss, target::Number, output::Number) = exp(output) - target
@@ -36,8 +34,8 @@ Cross-entropy loss also known as log loss and logistic loss is defined as:
 ``L(target, output) = - target*ln(output) - (1-target)*ln(1-output)``
 """
 
-immutable CrossentropyLoss <: SupervisedLoss end
-typealias LogitProbLoss CrossentropyLoss
+struct CrossentropyLoss <: SupervisedLoss end
+const LogitProbLoss = CrossentropyLoss
 
 function value(loss::CrossentropyLoss, target::Number, output::Number)
     target >= 0 && target <=1 || error("target must be in [0,1]")

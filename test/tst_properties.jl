@@ -1,4 +1,4 @@
-immutable TstVanillaLoss <: SupervisedLoss end
+struct TstVanillaLoss <: SupervisedLoss end
 
 @testset "Fallback implementations; not prior knowledge" begin
     @test isminimizable(TstVanillaLoss()) == false
@@ -21,7 +21,7 @@ immutable TstVanillaLoss <: SupervisedLoss end
 end
 
 
-immutable TstStronglyConvexLoss <: SupervisedLoss end
+struct TstStronglyConvexLoss <: SupervisedLoss end
 LossFunctions.isstronglyconvex(::TstStronglyConvexLoss) = true
 
 @testset "Fallback implementations; strongly convex" begin
@@ -46,7 +46,7 @@ LossFunctions.isstronglyconvex(::TstStronglyConvexLoss) = true
 end
 
 
-immutable TstTwiceDiffLoss <: SupervisedLoss end
+struct TstTwiceDiffLoss <: SupervisedLoss end
 LossFunctions.istwicedifferentiable(::TstTwiceDiffLoss) = true
 
 @testset "Fallback implementations; twice differentiable" begin
@@ -71,7 +71,7 @@ LossFunctions.istwicedifferentiable(::TstTwiceDiffLoss) = true
 end
 
 
-immutable TstMarginLoss <: MarginLoss end
+struct TstMarginLoss <: MarginLoss end
 
 @testset "Fallback implementations; margin-based" begin
     @test isminimizable(TstMarginLoss()) == false
@@ -99,7 +99,7 @@ immutable TstMarginLoss <: MarginLoss end
 end
 
 
-immutable TstDistanceLoss <: DistanceLoss end
+struct TstDistanceLoss <: DistanceLoss end
 
 @testset "Fallback implementations; distance-based" begin
     @test isminimizable(TstDistanceLoss()) == false

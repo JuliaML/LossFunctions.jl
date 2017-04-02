@@ -26,31 +26,19 @@ end
 # `myloss'(y,yhat)` and `myloss''(y,yhat)` without performance
 # penalty
 
-immutable Deriv{L<:SupervisedLoss}
+struct Deriv{L<:SupervisedLoss}
     loss::L
 end
 
 @inline Base.transpose(loss::SupervisedLoss) = Deriv(loss)
 @inline (d::Deriv)(args...) = deriv(d.loss, args...)
 
-immutable Deriv2{L<:SupervisedLoss}
+struct Deriv2{L<:SupervisedLoss}
     loss::L
 end
 
 @inline Base.transpose(d::Deriv) = Deriv2(d.loss)
 @inline (d::Deriv2)(args...) = deriv2(d.loss, args...)
-
-# --------------------------------------------------------------
-# Make broadcast work for losses
-
-Base.getindex(l::Loss, idx) = l
-Base.size(::Loss) = ()
-
-Base.getindex(l::Deriv, idx) = l
-Base.size(::Deriv) = ()
-
-Base.getindex(l::Deriv2, idx) = l
-Base.size(::Deriv2) = ()
 
 # --------------------------------------------------------------
 # Fallback implementations
@@ -524,4 +512,3 @@ value_deriv(loss::DistanceLoss, difference::Number) = (value(loss, difference), 
 isdistancebased(::DistanceLoss) = true
 issymmetric(::DistanceLoss) = false
 isclipable(::DistanceLoss) = true
-

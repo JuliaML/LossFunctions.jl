@@ -19,17 +19,21 @@ In contrast, in order to only create a re-weighted instance of some
 specific loss you can use `weightedloss(L2HingeLoss(), Val{0.2})`.
 See `?weightedloss` for more information.
 """
-immutable WeightedBinaryLoss{L<:MarginLoss,W} <: SupervisedLoss
+struct WeightedBinaryLoss{L<:MarginLoss,W} <: SupervisedLoss
     loss::L
+    (::Type{WeightedBinaryLoss{L,W}}){L<:MarginLoss, W}(loss::L) = new{L,W}(loss)
+end
 
-    WeightedBinaryLoss(args...) = typeof(W) <: Number && 0 <= W <= 1 ? new(L(args...)) : _werror()
-    WeightedBinaryLoss(loss::L) = typeof(W) <: Number && 0 <= W <= 1 ? new(loss) : _werror()
+@generated function (::Type{WeightedBinaryLoss{L,W}}){L<:MarginLoss, W}(args...)
+    typeof(W) <: Number && 0 <= W <= 1 || _werror()
+    :(WeightedBinaryLoss{L,W}(L(args...)))
 end
 
 _werror() = throw(ArgumentError("The given \"weight\" has to be a number in the interval [0, 1]"))
 
-function WeightedBinaryLoss{L<:MarginLoss,W}(loss::L, ::Type{Val{W}})
-    WeightedBinaryLoss{L,W}(loss)
+@generated function WeightedBinaryLoss{L<:MarginLoss,W}(loss::L, ::Type{Val{W}})
+    typeof(W) <: Number && 0 <= W <= 1 || _werror()
+    :(WeightedBinaryLoss{L,W}(loss))
 end
 
 function WeightedBinaryLoss(loss::SupervisedLoss, w::Number)
@@ -87,4 +91,3 @@ end
 for prop_param in (:isdifferentiable, :istwicedifferentiable)
     @eval ($prop_param)(l::WeightedBinaryLoss, at) = ($prop_param)(l.loss, at)
 end
-

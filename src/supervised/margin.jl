@@ -33,7 +33,7 @@ surrogate loss, such as one of those listed below.
                 y * h(x)                         y * h(x)
 ```
 """
-immutable ZeroOneLoss <: MarginLoss end
+struct ZeroOneLoss <: MarginLoss end
 
 deriv(loss::ZeroOneLoss, target::Number, output::Number) = zero(output)
 deriv2(loss::ZeroOneLoss, target::Number, output::Number) = zero(output)
@@ -82,7 +82,7 @@ It is Lipschitz continuous and convex, but not strictly convex.
                  y ⋅ ŷ                            y ⋅ ŷ
 ```
 """
-immutable PerceptronLoss <: MarginLoss end
+struct PerceptronLoss <: MarginLoss end
 
 value{T<:Number}(loss::PerceptronLoss, agreement::T) = max(zero(T), -agreement)
 deriv{T<:Number}(loss::PerceptronLoss, agreement::T) = agreement >= 0 ? zero(T) : -one(T)
@@ -126,7 +126,7 @@ times differentiable, strictly convex, and Lipschitz continuous.
                  y ⋅ ŷ                            y ⋅ ŷ
 ```
 """
-immutable LogitMarginLoss <: MarginLoss end
+struct LogitMarginLoss <: MarginLoss end
 value(loss::LogitMarginLoss, agreement::Number) = log1p(exp(-agreement))
 deriv(loss::LogitMarginLoss, agreement::Number) = -one(agreement) / (one(agreement) + exp(agreement))
 deriv2(loss::LogitMarginLoss, agreement::Number) = (eᵗ = exp(agreement); eᵗ / abs2(one(eᵗ) + eᵗ))
@@ -171,8 +171,8 @@ It is Lipschitz continuous and convex, but not strictly convex.
                  y ⋅ ŷ                            y ⋅ ŷ
 ```
 """
-immutable L1HingeLoss <: MarginLoss end
-typealias HingeLoss L1HingeLoss
+struct L1HingeLoss <: MarginLoss end
+const HingeLoss = L1HingeLoss
 
 value{T<:Number}(loss::L1HingeLoss, agreement::T) = max(zero(T), one(T) - agreement)
 deriv{T<:Number}(loss::L1HingeLoss, agreement::T) = agreement >= 1 ? zero(T) : -one(T)
@@ -218,7 +218,7 @@ It is locally Lipschitz continuous and convex, but not strictly convex.
                  y ⋅ ŷ                            y ⋅ ŷ
 ```
 """
-immutable L2HingeLoss <: MarginLoss end
+struct L2HingeLoss <: MarginLoss end
 
 value{T<:Number}(loss::L2HingeLoss, agreement::T) = agreement >= 1 ? zero(T) : abs2(one(T) - agreement)
 deriv{T<:Number}(loss::L2HingeLoss, agreement::T) = agreement >= 1 ? zero(T) : T(2) * (agreement - one(T))
@@ -264,12 +264,12 @@ It is Lipschitz continuous and convex, but not strictly convex.
                  y ⋅ ŷ                            y ⋅ ŷ
 ```
 """
-immutable SmoothedL1HingeLoss{T<:AbstractFloat} <: MarginLoss
+struct SmoothedL1HingeLoss{T<:AbstractFloat} <: MarginLoss
     gamma::T
 
-    function SmoothedL1HingeLoss(γ::T)
+    function (::Type{SmoothedL1HingeLoss{T}}){T}(γ::T)
         γ > 0 || error("γ must be strictly positive")
-        new(γ)
+        new{T}(γ)
     end
 end
 SmoothedL1HingeLoss{T<:AbstractFloat}(γ::T) = SmoothedL1HingeLoss{T}(γ)
@@ -331,7 +331,7 @@ It is Lipschitz continuous and convex, but not strictly convex.
                  y ⋅ ŷ                            y ⋅ ŷ
 ```
 """
-immutable ModifiedHuberLoss <: MarginLoss end
+struct ModifiedHuberLoss <: MarginLoss end
 
 function value{T<:Number}(loss::ModifiedHuberLoss, agreement::T)
     agreement >= -1 ? abs2(max(zero(T), one(agreement) - agreement)) : -T(4) * agreement
@@ -386,7 +386,7 @@ It is locally Lipschitz continuous and strongly convex.
                  y ⋅ ŷ                            y ⋅ ŷ
 ```
 """
-immutable L2MarginLoss <: MarginLoss end
+struct L2MarginLoss <: MarginLoss end
 
 value{T<:Number}(loss::L2MarginLoss, agreement::T) = abs2(one(T) - agreement)
 deriv{T<:Number}(loss::L2MarginLoss, agreement::T) = T(2) * (agreement - one(T))
@@ -433,7 +433,7 @@ convex, but not clipable.
                  y ⋅ ŷ                            y ⋅ ŷ
 ```
 """
-immutable ExpLoss <: MarginLoss end
+struct ExpLoss <: MarginLoss end
 
 value(loss::ExpLoss, agreement::Number) = exp(-agreement)
 deriv(loss::ExpLoss, agreement::Number) = -exp(-agreement)
@@ -480,7 +480,7 @@ differentiable, Lipschitz continuous but nonconvex.
                  y ⋅ ŷ                            y ⋅ ŷ
 ```
 """
-immutable SigmoidLoss <: MarginLoss end
+struct SigmoidLoss <: MarginLoss end
 
 value(loss::SigmoidLoss, agreement::Number) = one(agreement) - tanh(agreement)
 deriv(loss::SigmoidLoss, agreement::Number) = -abs2(sech(agreement))
@@ -527,11 +527,11 @@ It is Lipschitz continuous and convex, but not strictly convex.
                  y ⋅ ŷ                            y ⋅ ŷ
 ```
 """
-immutable DWDMarginLoss{T<:AbstractFloat} <: MarginLoss
+struct DWDMarginLoss{T<:AbstractFloat} <: MarginLoss
     q::T
-    function DWDMarginLoss(q::T)
+    function (::Type{DWDMarginLoss{T}}){T}(q::T)
         q > 0 || error("q must be strictly positive")
-        new(q)
+        new{T}(q)
     end
 end
 DWDMarginLoss{T<:AbstractFloat}(q::T) = DWDMarginLoss{T}(q)
@@ -568,4 +568,3 @@ isstronglyconvex(::DWDMarginLoss) = false
 isfishercons(::DWDMarginLoss) = true
 isunivfishercons(::DWDMarginLoss) = true
 isclipable(::DWDMarginLoss) = false
-
