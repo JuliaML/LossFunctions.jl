@@ -15,9 +15,7 @@ export
     value_fun,
     deriv_fun,
     deriv2_fun,
-    grad_fun,
     value_deriv_fun,
-    value_grad_fun,
 
     LogitMarginLoss,
     PerceptronLoss,
