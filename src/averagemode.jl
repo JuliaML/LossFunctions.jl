@@ -20,14 +20,14 @@ module AvgMode
     struct Mean <: AverageMode end
     const Micro = Mean
 
-    struct WeightedMean{T<:WeightVec} <: AverageMode
+    struct WeightedMean{T<:AbstractWeights} <: AverageMode
         weights::T
         normalize::Bool
     end
     WeightedMean(A::AbstractVector, normalize::Bool) = WeightedMean(weights(A), normalize)
     WeightedMean(A::AbstractVector; normalize::Bool = true) = WeightedMean(weights(A), normalize)
 
-    struct WeightedSum{T<:WeightVec} <: AverageMode
+    struct WeightedSum{T<:AbstractWeights} <: AverageMode
         weights::T
         normalize::Bool
     end
