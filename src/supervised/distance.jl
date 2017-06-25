@@ -408,11 +408,7 @@ It is strictly convex and Lipschitz continuous.
 struct LogitDistLoss <: DistanceLoss end
 
 function value(loss::LogitDistLoss, difference::Number)
-    #=
     er = exp(difference)
-    T = typeof(er)
-    -log(T(4) * er / abs2(one(T) + er))
-    =#
     T = typeof(er)
     -log(T(4)) - difference + 2log(one(T) + er)
 end
