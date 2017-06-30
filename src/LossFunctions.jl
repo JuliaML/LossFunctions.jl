@@ -46,6 +46,8 @@ export
     CrossentropyLoss,
     ZeroOneLoss,
 
+    OrdinalMarginLoss,
+
     weightedloss,
 
     AvgMode
