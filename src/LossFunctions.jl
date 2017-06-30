@@ -62,6 +62,7 @@ include("supervised/margin.jl")
 include("supervised/scaledloss.jl")
 include("supervised/weightedbinary.jl")
 include("supervised/other.jl")
+include("supervised/ordinal.jl")
 include("supervised/io.jl")
 
 # allow using some special losses as function
