@@ -488,7 +488,7 @@ end
         val
     end
     y = rand(1:5, 10); t = randn(10) .+ 3
-    test_value(OrdinalMarginLoss(HingeLoss(), 5), _ordinalhingeloss, y, t)
+    test_value(OrdinalMarginLoss(HingeLoss(), Val{5}), _ordinalhingeloss, y, t)
 end
 
 
