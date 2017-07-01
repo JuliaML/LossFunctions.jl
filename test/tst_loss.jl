@@ -476,6 +476,22 @@ end
     test_value(QuantileLoss(.7), _quantileloss, yr, tr)
 end
 
+@testset "Test ordinal losses against reference function" begin
+    function _ordinalhingeloss(y, t)
+        val = 0
+        for yp = 1:y - 1
+            val += max(0, 1 - t + yp)
+        end
+        for yp = y + 1:5
+            val += max(0, 1 + t - yp)
+        end
+        val
+    end
+    y = rand(1:5, 10); t = randn(10) .+ 3
+    test_value(OrdinalMarginLoss(HingeLoss(), 5), _ordinalhingeloss, y, t)
+end
+
+
 @testset "Test other loss against reference function" begin
     _crossentropyloss(y, t) = -y*log(t) - (1-y)*log(1-t)
     test_value(CrossentropyLoss(), _crossentropyloss, 0:0.01:1, 0.01:0.01:0.99)
@@ -598,4 +614,3 @@ end
         end
     end
 end
-
