@@ -37,8 +37,10 @@ end =#
 for fun in (:value, :deriv, :deriv2)
     @eval @fastmath function ($fun)(loss::OrdinalMarginLoss{T, N},
                     target::Number, output::Number) where {T <: MarginLoss, N}
-        retval = zero(output)
-        for t = 1:N
+        not_target = 1 != target
+        sgn = sign(target - 1)
+        retval = not_target * ($fun)(loss.loss, sgn, output - 1)
+        for t = 2:N
             not_target = (t != target)
             sgn = sign(target - t)
             retval += not_target * ($fun)(loss.loss, sgn, output - t)
