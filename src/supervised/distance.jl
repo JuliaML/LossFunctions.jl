@@ -410,7 +410,7 @@ struct LogitDistLoss <: DistanceLoss end
 function value(loss::LogitDistLoss, difference::Number)
     er = exp(difference)
     T = typeof(er)
-    -log(T(4) * er / abs2(one(T) + er))
+    -log(T(4)) - difference + 2log(one(T) + er)
 end
 function deriv{T<:Number}(loss::LogitDistLoss, difference::T)
     tanh(difference / T(2))
@@ -424,7 +424,7 @@ function value_deriv(loss::LogitDistLoss, difference::Number)
     er = exp(difference)
     T = typeof(er)
     er1 = one(T) + er
-    -log(T(4) * er / abs2(er1)), (er - one(T)) / (er1)
+    -log(T(4)) - difference + 2log(er1), (er - one(T)) / (er1)
 end
 
 issymmetric(::LogitDistLoss) = true
