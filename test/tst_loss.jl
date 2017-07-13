@@ -318,6 +318,7 @@ end
     @test L2DistLoss === LPDistLoss{2}
     @test HingeLoss === L1HingeLoss
     @test EpsilonInsLoss === L1EpsilonInsLoss
+    @test OrdinalHingeLoss === OrdinalMarginLoss{HingeLoss}
 end
 
 @testset "Test typestable supervised loss for type stability" begin
@@ -476,6 +477,9 @@ end
     test_value(QuantileLoss(.7), _quantileloss, yr, tr)
 end
 
+const OrdinalSmoothedHingeLoss = OrdinalMarginLoss{<:SmoothedL1HingeLoss}
+@test OrdinalSmoothedHingeLoss(4, 2.1) === OrdinalMarginLoss(SmoothedL1HingeLoss(2.1), 4)
+
 @testset "Test ordinal losses against reference function" begin
     function _ordinalhingeloss(y, t)
         val = 0
@@ -488,7 +492,8 @@ end
         val
     end
     y = rand(1:5, 10); t = randn(10) .+ 3
-    test_value(OrdinalMarginLoss(HingeLoss(), Val{5}), _ordinalhingeloss, y, t)
+    @test OrdinalHingeLoss(5) === OrdinalMarginLoss(HingeLoss(), 5)
+    test_value(OrdinalMarginLoss(HingeLoss(), 5), _ordinalhingeloss, y, t)
 end
 
 

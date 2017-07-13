@@ -9,41 +9,33 @@ level thresholds crossed relative to target
 Assumes target is encoded in an Index encoding scheme where levels are
 numbered between 1 and `N`
 """
-struct OrdinalMarginLoss{L<:MarginLoss, N} <: SupervisedLoss
+struct OrdinalMarginLoss{L<:MarginLoss} <: SupervisedLoss
     loss::L
+    N::Int
+    OrdinalMarginLoss{L}(loss::L, N::Int) where {L<:MarginLoss} = new{L}(loss, N)
 end
 
-function OrdinalMarginLoss(loss::T, ::Type{Val{N}}) where {T<:MarginLoss,N}
-  typeof(N) <: Number || _serror()
-  OrdinalMarginLoss{T,N}(loss)
+function OrdinalMarginLoss(loss::L, N::Int) where {L<:MarginLoss}
+    OrdinalMarginLoss{L}(loss, N)
 end
 
-#=
-for fun in (:value, :deriv, :deriv2)
-    @eval @fastmath @generated function ($fun)(loss::OrdinalMarginLoss{T, N},
-                    target::Number, output::Number) where {T <: MarginLoss, N}
-        quote
-            retval = zero(output)
-            @nexprs $N t -> begin
-                not_target = (t != target)
-                sgn = sign(target - t)
-                retval += not_target * ($($fun))(loss.loss, sgn, output - t)
-            end
-            retval
-        end
-    end
-end =#
+@generated function (::Type{T})(N::Int, args...) where {T<:OrdinalMarginLoss}
+    L = typeof(T) == UnionAll ? T.var.ub : T.parameters[1]
+    :(OrdinalMarginLoss($L(args...), N))
+end
 
 for fun in (:value, :deriv, :deriv2)
-    @eval @fastmath function ($fun)(loss::OrdinalMarginLoss{T, N},
-                    target::Number, output::Number) where {T <: MarginLoss, N}
-        not_target = 1 != target
+    @eval @fastmath function ($fun)(
+            l::OrdinalMarginLoss,
+            target::Number,
+            output::Number)
+        not_target = Int(1 != target)
         sgn = sign(target - 1)
-        retval = not_target * ($fun)(loss.loss, sgn, output - 1)
-        for t = 2:N
-            not_target = (t != target)
+        retval = not_target * ($fun)(l.loss, sgn, output - 1)
+        for t = 2:l.N
+            not_target = Int(t != target)
             sgn = sign(target - t)
-            retval += not_target * ($fun)(loss.loss, sgn, output - t)
+            retval += not_target * ($fun)(l.loss, sgn, output - t)
         end
         retval
     end
@@ -59,14 +51,19 @@ for prop in [:isminimizable, :isdifferentiable,
 end
 
 for fun in (:isdifferentiable, :istwicedifferentiable)
-    @eval function ($fun)(loss::OrdinalMarginLoss{T, N},
-                target::Number, output::Number) where {T, N}
+    @eval function ($fun)(
+            l::OrdinalMarginLoss,
+            target::Number,
+            output::Number)
         for t = 1:target - 1
-            ($fun)(loss.loss, output - t) || return false
+            ($fun)(l.loss, output - t) || return false
         end
-        for t = target + 1:N
-            ($fun)(loss.loss, t - output) || return false
+        for t = target + 1:l.N
+            ($fun)(l.loss, t - output) || return false
         end
         return true
     end
 end
+
+const OrdinalHingeLoss = OrdinalMarginLoss{HingeLoss}
+# const OrdinalSmoothedHingeLoss = OrdinalMarginLoss{<:SmoothedL1HingeLoss}

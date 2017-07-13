@@ -47,6 +47,7 @@ export
     ZeroOneLoss,
 
     OrdinalMarginLoss,
+    OrdinalHingeLoss,
 
     weightedloss,
 
