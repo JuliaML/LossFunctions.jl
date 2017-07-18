@@ -408,9 +408,9 @@ It is strictly convex and Lipschitz continuous.
 struct LogitDistLoss <: DistanceLoss end
 
 function value(loss::LogitDistLoss, difference::Number)
-    er = exp(difference)
-    T = typeof(er)
-    -log(T(4)) - difference + 2log(one(T) + er)
+    spd = softplus(difference)
+    T = typeof(spd)
+    -log(T(4)) - difference + 2spd
 end
 function deriv{T<:Number}(loss::LogitDistLoss, difference::T)
     tanh(difference / T(2))
@@ -423,8 +423,9 @@ end
 function value_deriv(loss::LogitDistLoss, difference::Number)
     er = exp(difference)
     T = typeof(er)
+    spd = softplus(difference)
     er1 = one(T) + er
-    -log(T(4)) - difference + 2log(er1), (er - one(T)) / (er1)
+    -log(T(4)) - difference + 2spd, (er - one(T)) / (er1)
 end
 
 issymmetric(::LogitDistLoss) = true

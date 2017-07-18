@@ -3,6 +3,8 @@ module LossFunctions
 
 using RecipesBase
 
+using StatsFuns
+
 import Base.*
 using Base.Cartesian
 
