@@ -127,8 +127,8 @@ times differentiable, strictly convex, and Lipschitz continuous.
 ```
 """
 struct LogitMarginLoss <: MarginLoss end
-value(loss::LogitMarginLoss, agreement::Number) = log1p(exp(-agreement))
-deriv(loss::LogitMarginLoss, agreement::Number) = -one(agreement) / (one(agreement) + exp(agreement))
+value(loss::LogitMarginLoss, agreement::Number) = softplus(-agreement)
+deriv(loss::LogitMarginLoss, agreement::Number) = -logistic(-agreement)
 deriv2(loss::LogitMarginLoss, agreement::Number) = (eᵗ = exp(agreement); eᵗ / abs2(one(eᵗ) + eᵗ))
 value_deriv(loss::LogitMarginLoss, agreement::Number) = (eᵗ = exp(-agreement); (log1p(eᵗ), -eᵗ / (one(eᵗ) + eᵗ)))
 
