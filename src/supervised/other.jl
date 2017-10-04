@@ -59,4 +59,58 @@ istwicedifferentiable(::CrossentropyLoss, y, t) = t != 0 && t != 1
 isconvex(::CrossentropyLoss) = true
 
 # ===============================================================
-# L(target, output) = sign(agreement) < 0 ? 1 : 0
+
+doc"""
+    SoftmaxWithLoss <: SupervisedLoss
+
+SoftmaxWithLoss is defined as:
+
+``L(target, output) = - target .* ln(output)``
+
+Here `target` is a one-hot vector and `output` is a vector
+"""
+
+struct SoftmaxWithLoss <: SupervisedLoss end
+
+function value{T<:Number}(loss::SoftmaxWithLoss, target::Int, output::AbstractVector{T})
+    n = length(output)
+    target <= n || throw(DimensionMismatch("Inconsistent vector lengths."))
+    m = maximum(output)
+    sumexp = zero(T)
+    for i in eachindex(output)
+        sumexp += exp(output[i]-m)
+    end
+    -log((output[target]-m) / sumexp)
+end
+
+function deriv{T<:Number}(loss::SoftmaxWithLoss, target::Int, output::AbstractVector{T})
+    n = length(output)
+    target <= n || throw(DimensionMismatch("Inconsistent vector lengths."))
+    m = maximum(output)
+    sumexp = zero(T)
+    for i in eachindex(output)
+        sumexp += exp(output[i]-m)
+    end
+    d = exp(output-m)
+    d[target] -= one(T)
+end
+
+function deriv2{T<:Number}(loss::SoftmaxWithLoss, target::Int, output::AbstractVector{T})
+    n = length(output)
+    target <= n || throw(DimensionMismatch("Inconsistent vector lengths."))
+    m = maximum(output)
+    sumexp = zero(T)
+    for i in eachindex(output)
+        sumexp += exp(output[i]-m)
+    end
+    d = exp(output-m)
+    d = d .* (one(T)-d)
+end
+
+isdifferentiable(::SoftmaxWithLoss) = true
+isdifferentiable(::SoftmaxWithLoss, y, t) = true
+istwicedifferentiable(::SoftmaxWithLoss) = true
+istwicedifferentiable(::SoftmaxWithLoss, y, t) = true
+isconvex(::SoftmaxWithLoss) = true
+
+# ===============================================================
