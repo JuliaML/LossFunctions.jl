@@ -44,6 +44,7 @@ export
     PoissonLoss,
     LogitProbLoss,
     CrossentropyLoss,
+    SoftmaxWithLoss,
     ZeroOneLoss,
 
     OrdinalMarginLoss,
@@ -51,9 +52,8 @@ export
 
     weightedloss,
 
-    AvgMode,
+    AvgMode
 
-    SoftmaxWithLoss
 
 include("common.jl")
 include("averagemode.jl")

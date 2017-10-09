@@ -72,7 +72,7 @@ Here `target` is a one-hot vector and `output` is a vector
 
 struct SoftmaxWithLoss <: SupervisedLoss end
 
-function value{T<:Number}(loss::SoftmaxWithLoss, target::Int, output::AbstractVector{T})
+function value{T<:Number}(loss::SoftmaxWithLoss, target::Int, output::AbstractArray{T})
     n = length(output)
     target <= n || throw(DimensionMismatch("Inconsistent vector lengths."))
     m = maximum(output)
@@ -80,30 +80,33 @@ function value{T<:Number}(loss::SoftmaxWithLoss, target::Int, output::AbstractVe
     for i in eachindex(output)
         sumexp += exp(output[i]-m)
     end
-    -log((output[target]-m) / sumexp)
+    -log(exp(output[target]-m) / sumexp)
 end
 
-function deriv{T<:Number}(loss::SoftmaxWithLoss, target::Int, output::AbstractVector{T})
+function deriv{T<:Number}(loss::SoftmaxWithLoss, target::Int, output::AbstractArray{T})
     n = length(output)
     target <= n || throw(DimensionMismatch("Inconsistent vector lengths."))
     m = maximum(output)
     sumexp = zero(T)
     for i in eachindex(output)
-        sumexp += exp(output[i]-m)
+        sumexp += exp.(output[i]-m)
     end
-    d = exp(output-m)
+    d = exp.(output-m)
+    d /= sumexp
     d[target] -= one(T)
+    d
 end
 
-function deriv2{T<:Number}(loss::SoftmaxWithLoss, target::Int, output::AbstractVector{T})
+function deriv2{T<:Number}(loss::SoftmaxWithLoss, target::Int, output::AbstractArray{T})
     n = length(output)
     target <= n || throw(DimensionMismatch("Inconsistent vector lengths."))
     m = maximum(output)
     sumexp = zero(T)
     for i in eachindex(output)
-        sumexp += exp(output[i]-m)
+        sumexp += exp.(output[i]-m)
     end
-    d = exp(output-m)
+    d = exp.(output-m)
+    d /= sumexp
     d = d .* (one(T)-d)
 end
 
