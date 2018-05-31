@@ -9,7 +9,7 @@ For example: To create a typealias for a 1:4 weighted version of
 `L2HingeLoss`, type:
 
 ```julia
-typealias WeightedL2HingeLoss LossFunctions.WeightedBinaryLoss{L2HingeLoss,0.2}
+const WeightedL2HingeLoss = LossFunctions.WeightedBinaryLoss{L2HingeLoss,0.2}
 ```
 
 This new loss-type can then be instantiated in the same manner and
