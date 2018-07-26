@@ -94,23 +94,23 @@ for FUN in (:value, :deriv, :deriv2)
         end
 
         # Translate ObsDim.Last to the correct ObsDim.Constant (for code reduction)
-        @inline function ($FUN){T,N}(
+        @inline function ($FUN)(
                 loss::SupervisedLoss,
                 target::AbstractArray,
                 output::AbstractArray{T,N},
                 avg::AverageMode,
-                ::ObsDim.Last = ObsDim.Last())
+                ::ObsDim.Last = ObsDim.Last()) where {T,N}
             ($FUN)(loss, target, output, avg, ObsDim.Constant{N}())
         end
 
         # (mutating) Translate ObsDim.Last to the correct ObsDim.Constant (for code reduction)
-        @inline function ($(Symbol(FUN,:!))){T,N}(
+        @inline function ($(Symbol(FUN,:!)))(
                 buffer::AbstractArray,
                 loss::SupervisedLoss,
                 target::AbstractArray,
                 output::AbstractArray{T,N},
                 avg::AverageMode,
-                ::ObsDim.Last = ObsDim.Last())
+                ::ObsDim.Last = ObsDim.Last()) where {T,N}
             ($(Symbol(FUN,:!)))(buffer, loss, target, output, avg, ObsDim.Constant{N}())
         end
 
@@ -118,11 +118,11 @@ for FUN in (:value, :deriv, :deriv2)
         # ELEMENT-WISE BROADCAST
 
         # Compute element-wise (returns an array)
-        @generated function ($FUN){Q,M,T,N}(
+        @generated function ($FUN)(
                 loss::SupervisedLoss,
                 target::AbstractArray{Q,M},
                 output::AbstractArray{T,N},
-                ::AvgMode.None)
+                ::AvgMode.None) where {Q,M,T,N}
             quote
                 $(Expr(:meta, :inline))
                 S = typeof(($($FUN))(loss, one(Q), one(T)))
@@ -131,12 +131,12 @@ for FUN in (:value, :deriv, :deriv2)
         end
 
         # (mutating) Compute element-wise (returns an array)
-        function ($(Symbol(FUN,:!))){Q,M,T,N}(
+        function ($(Symbol(FUN,:!)))(
                 buffer::AbstractArray,
                 loss::SupervisedLoss,
                 target::AbstractArray{Q,M},
                 output::AbstractArray{T,N},
-                ::AvgMode.None)
+                ::AvgMode.None) where {Q,M,T,N}
             buffer .= ($FUN).(loss, target, output)
             buffer
         end
@@ -145,11 +145,11 @@ for FUN in (:value, :deriv, :deriv2)
         # REDUCE TO NUMBER - BROADCAST
 
         # Compute the mean (returns a Number)
-        @generated function ($FUN){Q,M,T,N}(
+        @generated function ($FUN)(
                 loss::SupervisedLoss,
                 target::AbstractArray{Q,M},
                 output::AbstractArray{T,N},
-                ::AvgMode.Mean)
+                ::AvgMode.Mean) where {Q,M,T,N}
             bigger = M > N ? :target : :output
             S, B = min(M,N), max(M,N)
             P = promote_type(Q,T)
@@ -166,11 +166,11 @@ for FUN in (:value, :deriv, :deriv2)
         end
 
         # Compute the sum (returns a Number)
-        @generated function ($FUN){Q,M,T,N}(
+        @generated function ($FUN)(
                 loss::SupervisedLoss,
                 target::AbstractArray{Q,M},
                 output::AbstractArray{T,N},
-                ::AvgMode.Sum)
+                ::AvgMode.Sum) where {Q,M,T,N}
             bigger = M > N ? :target : :output
             S, B = min(M,N), max(M,N)
             quote
@@ -188,12 +188,12 @@ for FUN in (:value, :deriv, :deriv2)
         # REDUCE TO NUMBER - SAME SIZE
 
         # Compute the total weighted mean (returns a Number)
-        function ($FUN){Q,T,N,O}(
+        function ($FUN)(
                 loss::SupervisedLoss,
                 target::AbstractArray{Q,N},
                 output::AbstractArray{T,N},
                 avg::AvgMode.WeightedMean,
-                ::ObsDim.Constant{O})
+                ::ObsDim.Constant{O}) where {Q,T,N,O}
             O > N && throw(ArgumentError("The specified obsdim is larger as the available dimensions."))
             @_dimcheck size(target) == size(output)
             @_dimcheck size(output, O) == length(avg.weights)
@@ -207,12 +207,12 @@ for FUN in (:value, :deriv, :deriv2)
         end
 
         # Compute the total weighted sum (returns a Number)
-        function ($FUN){Q,T,N,O}(
+        function ($FUN)(
                 loss::SupervisedLoss,
                 target::AbstractArray{Q,N},
                 output::AbstractArray{T,N},
                 avg::AvgMode.WeightedSum,
-                ::ObsDim.Constant{O})
+                ::ObsDim.Constant{O}) where {Q,T,N,O}
             O > N && throw(ArgumentError("The specified obsdim is larger as the available dimensions."))
             @_dimcheck size(target) == size(output)
             @_dimcheck size(output, O) == length(avg.weights)
@@ -228,25 +228,25 @@ for FUN in (:value, :deriv, :deriv2)
         # PER OBSERVATION - SAME SIZE - TO VECTOR
 
         # Compute the mean per observation (returns a Vector)
-        function ($FUN){Q,T,N,O}(
+        function ($FUN)(
                 loss::SupervisedLoss,
                 target::AbstractArray{Q,N},
                 output::AbstractArray{T,N},
                 avg::AvgMode.Mean,
-                obsdim::ObsDim.Constant{O})
+                obsdim::ObsDim.Constant{O}) where {Q,T,N,O}
             S = typeof(($FUN)(loss, one(Q), one(T)) / one(Int))
             buffer = zeros(S, size(output, O))
             ($(Symbol(FUN,:!)))(buffer, loss, target, output, avg, obsdim)
         end
 
         # (mutating) Compute the mean per observation (returns a Vector)
-        function ($(Symbol(FUN,:!))){B,Q,T,N,O}(
+        function ($(Symbol(FUN,:!)))(
                 buffer::AbstractVector{B},
                 loss::SupervisedLoss,
                 target::AbstractArray{Q,N},
                 output::AbstractArray{T,N},
                 ::AvgMode.Mean,
-                ::ObsDim.Constant{O})
+                ::ObsDim.Constant{O}) where {B,Q,T,N,O}
             N == 1 && throw(ArgumentError("Mean per observation non sensible for two Vectors. Try omitting the obsdim"))
             O > N && throw(ArgumentError("The specified obsdim is larger as the available dimensions."))
             @_dimcheck size(target) == size(output)
@@ -262,25 +262,25 @@ for FUN in (:value, :deriv, :deriv2)
         end
 
         # Compute the sum per observation (returns a Vector)
-        function ($FUN){Q,T,N,O}(
+        function ($FUN)(
                 loss::SupervisedLoss,
                 target::AbstractArray{Q,N},
                 output::AbstractArray{T,N},
                 avg::AvgMode.Sum,
-                obsdim::ObsDim.Constant{O})
+                obsdim::ObsDim.Constant{O}) where {Q,T,N,O}
             S = typeof(($FUN)(loss, one(Q), one(T)))
             buffer = zeros(S, size(output, O))
             ($(Symbol(FUN,:!)))(buffer, loss, target, output, avg, obsdim)
         end
 
         # (mutating) Compute the sum per observation (returns a Vector)
-        function ($(Symbol(FUN,:!))){B,Q,T,N,O}(
+        function ($(Symbol(FUN,:!)))(
                 buffer::AbstractVector{B},
                 loss::SupervisedLoss,
                 target::AbstractArray{Q,N},
                 output::AbstractArray{T,N},
                 ::AvgMode.Sum,
-                ::ObsDim.Constant{O})
+                ::ObsDim.Constant{O}) where {B,Q,T,N,O}
             N == 1 && throw(ArgumentError("Sum per observation non sensible for two Vectors. Try omitting the obsdim"))
             O > N && throw(ArgumentError("The specified obsdim is larger as the available dimensions."))
             @_dimcheck size(target) == size(output)
@@ -313,21 +313,21 @@ for FUN in (:value, :deriv, :deriv2)
             end
 
             # Translate ObsDim.Last to the correct ObsDim.Constant (for code reduction)
-            @inline function ($FUN){T,N}(
+            @inline function ($FUN)(
                     loss::$KIND,
                     numbers::AbstractArray{T,N},
                     avg::AverageMode,
-                    ::ObsDim.Last = ObsDim.Last())
+                    ::ObsDim.Last = ObsDim.Last()) where {T,N}
                 ($FUN)(loss, numbers, avg, ObsDim.Constant{N}())
             end
 
             # (mutating) Translate ObsDim.Last to the correct ObsDim.Constant (for code reduction)
-            @inline function ($(Symbol(FUN,:!))){T,N}(
+            @inline function ($(Symbol(FUN,:!)))(
                     buffer::AbstractArray,
                     loss::$KIND,
                     numbers::AbstractArray{T,N},
                     avg::AverageMode,
-                    ::ObsDim.Last = ObsDim.Last())
+                    ::ObsDim.Last = ObsDim.Last()) where {T,N}
                 ($(Symbol(FUN,:!)))(buffer, loss, numbers, avg, ObsDim.Constant{N}())
             end
 
@@ -335,20 +335,20 @@ for FUN in (:value, :deriv, :deriv2)
             # ELEMENT-WISE BROADCAST
 
             # Compute element-wise (returns an array)
-            @inline function ($FUN){T,N}(
+            @inline function ($FUN)(
                     loss::$KIND,
                     numbers::AbstractArray{T,N},
-                    ::AvgMode.None)
+                    ::AvgMode.None) where {T,N}
                 S = typeof(($FUN)(loss, one(T)))
                 ($FUN).(loss, numbers)::Array{S,N}
             end
 
             # (mutating) Compute element-wise (returns an array)
-            function ($(Symbol(FUN,:!))){T,N}(
+            function ($(Symbol(FUN,:!)))(
                     buffer::AbstractArray,
                     loss::$KIND,
                     numbers::AbstractArray{T,N},
-                    ::AvgMode.None)
+                    ::AvgMode.None) where {T,N}
                 buffer .= ($FUN).(loss, numbers)
                 buffer
             end
@@ -357,29 +357,29 @@ for FUN in (:value, :deriv, :deriv2)
             # REDUCE TO NUMBER
 
             # Compute the mean (returns a Number)
-            function ($FUN){T,N}(
+            function ($FUN)(
                     loss::$KIND,
                     numbers::AbstractArray{T,N},
-                    ::AvgMode.Mean)
+                    ::AvgMode.Mean) where {T,N}
                 nrm = 1 / length(numbers)
                 S = typeof(($FUN)(loss, one(T)) * one(nrm))
                 mapreduce(x -> loss(x) * nrm, +, numbers)::S
             end
 
             # Compute the sum (returns a Number)
-            function ($FUN){T,N}(
+            function ($FUN)(
                     loss::$KIND,
                     numbers::AbstractArray{T,N},
-                    ::AvgMode.Sum)
+                    ::AvgMode.Sum) where {T,N}
                 mapreduce(loss, +, numbers)
             end
 
             # Compute the total weighted mean (returns a Number)
-            function ($FUN){T,N,O}(
+            function ($FUN)(
                     loss::$KIND,
                     numbers::AbstractArray{T,N},
                     avg::AvgMode.WeightedMean,
-                    ::ObsDim.Constant{O})
+                    ::ObsDim.Constant{O}) where {T,N,O}
                 @_dimcheck size(numbers, O) == length(avg.weights)
                 k = prod(n != O ? size(numbers,n) : 1 for n in 1:N)::Int
                 nrm = avg.normalize ? inv(k * sum(avg.weights)) : inv(k * one(sum(avg.weights)))
@@ -391,11 +391,11 @@ for FUN in (:value, :deriv, :deriv2)
             end
 
             # Compute the total weighted sum (returns a Number)
-            function ($FUN){T,N,O}(
+            function ($FUN)(
                     loss::$KIND,
                     numbers::AbstractArray{T,N},
                     avg::AvgMode.WeightedSum,
-                    ::ObsDim.Constant{O})
+                    ::ObsDim.Constant{O}) where {T,N,O}
                 @_dimcheck size(numbers, O) == length(avg.weights)
                 nrm = avg.normalize ? inv(sum(avg.weights)) : inv(one(sum(avg.weights)))
                 out = zero(($FUN)(loss, one(T)) * (avg.weights[1] * nrm))
@@ -409,23 +409,23 @@ for FUN in (:value, :deriv, :deriv2)
             # PER OBSERVATION - SAME SIZE - TO VECTOR
 
             # Compute the mean per observation (returns a Vector)
-            function ($FUN){T,N,O}(
+            function ($FUN)(
                     loss::$KIND,
                     numbers::AbstractArray{T,N},
                     avg::AvgMode.Mean,
-                    obsdim::ObsDim.Constant{O})
+                    obsdim::ObsDim.Constant{O}) where {T,N,O}
                 S = typeof(($FUN)(loss, one(T)) / one(Int))
                 buffer = zeros(S, size(numbers, O))
                 ($(Symbol(FUN,:!)))(buffer, loss, numbers, avg, obsdim)
             end
 
             # (mutating) Compute the mean per observation (returns a Vector)
-            function ($(Symbol(FUN,:!))){B,T,N,O}(
+            function ($(Symbol(FUN,:!)))(
                     buffer::AbstractVector{B},
                     loss::$KIND,
                     numbers::AbstractArray{T,N},
                     ::AvgMode.Mean,
-                    ::ObsDim.Constant{O})
+                    ::ObsDim.Constant{O}) where {B,T,N,O}
                 N == 1 && throw(ArgumentError("Mean per observation non sensible for two Vectors. Try omitting the obsdim"))
                 O > N && throw(ArgumentError("The specified obsdim is larger as the available dimensions."))
                 @_dimcheck length(buffer) == size(numbers, O)
@@ -439,23 +439,23 @@ for FUN in (:value, :deriv, :deriv2)
             end
 
             # Compute the sum per observation (returns a Vector)
-            function ($FUN){T,N,O}(
+            function ($FUN)(
                     loss::$KIND,
                     numbers::AbstractArray{T,N},
                     avg::AvgMode.Sum,
-                    obsdim::ObsDim.Constant{O})
+                    obsdim::ObsDim.Constant{O}) where {T,N,O}
                 S = typeof(($FUN)(loss, one(T)))
                 buffer = zeros(S, size(numbers, O))
                 ($(Symbol(FUN,:!)))(buffer, loss, numbers, avg, obsdim)
             end
 
             # (mutating) Compute the sum per observation (returns a Vector)
-            function ($(Symbol(FUN,:!))){B,T,N,O}(
+            function ($(Symbol(FUN,:!)))(
                     buffer::AbstractVector{B},
                     loss::$KIND,
                     numbers::AbstractArray{T,N},
                     ::AvgMode.Sum,
-                    ::ObsDim.Constant{O})
+                    ::ObsDim.Constant{O}) where {B,T,N,O}
                 N == 1 && throw(ArgumentError("Sum per observation non sensible for two Vectors. Try omitting the obsdim"))
                 O > N && throw(ArgumentError("The specified obsdim is larger as the available dimensions."))
                 @_dimcheck length(buffer) == size(numbers, O)

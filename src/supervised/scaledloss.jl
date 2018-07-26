@@ -27,20 +27,20 @@ for KIND in (:MarginLoss, :DistanceLoss, :SupervisedLoss)
         """ ->
         struct ($SCALEDKIND){L<:$KIND,K} <: $KIND
             loss::L
-            (::Type{($SCALEDKIND){L,K}}){L<:$KIND, K}(loss::L) = new{L,K}(loss)
+            (::Type{($SCALEDKIND){L,K}})(loss::L) where {L<:$KIND, K} = new{L,K}(loss)
         end
 
-        @generated function (::Type{($SCALEDKIND){L,K}}){L<:$KIND, K}(args...)
+        @generated function (::Type{($SCALEDKIND){L,K}})(args...) where {L<:$KIND, K}
             typeof(K) <: Number || _serror()
             :(($($SCALEDKIND)){L,K}(L(args...)))
         end
-        ($SCALEDKIND){T,K}(loss::T, ::Type{Val{K}}) = ($SCALEDKIND){T,K}(loss)
-        ($SCALEDKIND){T}(loss::T, k::Number) = ($SCALEDKIND)(loss, Val{k})
-        (*){K}(::Type{Val{K}}, loss::$KIND) = ($SCALEDKIND)(loss, Val{K})
+        ($SCALEDKIND)(loss::T, ::Type{Val{K}}) where {T,K} = ($SCALEDKIND){T,K}(loss)
+        ($SCALEDKIND)(loss::T, k::Number) where {T} = ($SCALEDKIND)(loss, Val{k})
+        (*)(::Type{Val{K}}, loss::$KIND) where {K} = ($SCALEDKIND)(loss, Val{K})
         (*)(k::Number, loss::$KIND) = ($SCALEDKIND)(loss, Val{k})
-        scaled{T<:$KIND,K}(loss::T, ::Type{Val{K}}) = ($SCALEDKIND)(loss, Val{K})
+        scaled(loss::T, ::Type{Val{K}}) where {T<:$KIND,K} = ($SCALEDKIND)(loss, Val{K})
 
-        @generated ($SCALEDKIND){T,K1,K2}(s::$SCALEDKIND{T,K1}, ::Type{Val{K2}}) = :(($($SCALEDKIND))(s.loss, Val{$(K1*K2)}))
+        @generated ($SCALEDKIND)(s::$SCALEDKIND{T,K1}, ::Type{Val{K2}}) where {T,K1,K2} = :(($($SCALEDKIND))(s.loss, Val{$(K1*K2)}))
     end
 end
 
@@ -71,8 +71,8 @@ following signature: `scaled(loss, Val{K})`
 scaled(l::Loss, k::Number) = scaled(l, Val{k})
 
 for fun in (:value, :deriv, :deriv2)
-    @eval @fastmath ($fun){T,K}(l::ScaledLoss{T,K}, num::Number) = K * ($fun)(l.loss, num)
-    @eval @fastmath ($fun){T,K}(l::ScaledLoss{T,K}, target::Number, output::Number) = K * ($fun)(l.loss, target, output)
+    @eval @fastmath ($fun)(l::ScaledLoss{T,K}, num::Number) where {T,K} = K * ($fun)(l.loss, num)
+    @eval @fastmath ($fun)(l::ScaledLoss{T,K}, target::Number, output::Number) where {T,K} = K * ($fun)(l.loss, target, output)
 end
 
 for prop in [:isminimizable, :isdifferentiable,

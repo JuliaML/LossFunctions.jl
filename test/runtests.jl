@@ -2,7 +2,7 @@ module LossFunctionsTests
 using LearnBase
 using LossFunctions
 using DualNumbers
-using Base.Test
+using Test
 
 tests = [
     "tst_loss.jl",

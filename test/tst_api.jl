@@ -1,5 +1,5 @@
 function test_vector_value(l::MarginLoss, t, y)
-    ref = [LossFunctions.value(l,t[i],y[i]) for i in CartesianRange(size(y))]
+    ref = [LossFunctions.value(l,t[i],y[i]) for i in CartesianIndices(size(y))]
     yt = t .* y
     buf = zeros(ref)
     @test @inferred(LossFunctions.value!(buf, l, t, y)) == ref
@@ -75,8 +75,8 @@ function test_vector_value(l::MarginLoss, t, y)
         # Weighted sum compare
         @test @inferred(LossFunctions.value(l, t, y, AvgMode.WeightedSum(1:k), ObsDim.Last())) ≈ sum(sv .* (1:k))
         @test @inferred(LossFunctions.value(l, yt, AvgMode.WeightedSum(1:k), ObsDim.Last())) ≈ sum(sv .* (1:k))
-        @test round(@inferred(LossFunctions.value(l, t, y, AvgMode.WeightedSum(1:k,normalize=true), ObsDim.Last())),3) ≈ round(sum(sv .* ((1:k)/(sum(1:k)))),3)
-        @test round(@inferred(LossFunctions.value(l, yt, AvgMode.WeightedSum(1:k,normalize=true), ObsDim.Last())),3) ≈ round(sum(sv .* ((1:k)/(sum(1:k)))),3)
+        @test round(@inferred(LossFunctions.value(l, t, y, AvgMode.WeightedSum(1:k,normalize=true), ObsDim.Last())), digits=3) ≈ round(sum(sv .* ((1:k)/(sum(1:k)))), digits=3)
+        @test round(@inferred(LossFunctions.value(l, yt, AvgMode.WeightedSum(1:k,normalize=true), ObsDim.Last())), digits=3) ≈ round(sum(sv .* ((1:k)/(sum(1:k)))), digits=3)
         # Mean per obs
         mv = vec(mean(ref, 1:(ndims(ref)-1)))
         @test @inferred(LossFunctions.value(l, t, y, AvgMode.Mean(), ObsDim.Last())) ≈ mv
@@ -94,7 +94,7 @@ function test_vector_value(l::MarginLoss, t, y)
 end
 
 function test_vector_value(l::DistanceLoss, t, y)
-    ref = [LossFunctions.value(l,t[i],y[i]) for i in CartesianRange(size(y))]
+    ref = [LossFunctions.value(l,t[i],y[i]) for i in CartesianIndices(size(y))]
     yt = y .- t
     buf = zeros(ref)
     @test @inferred(LossFunctions.value!(buf, l, t, y)) == ref
@@ -128,10 +128,10 @@ function test_vector_value(l::DistanceLoss, t, y)
     @test @inferred(l(yt, AvgMode.Sum())) ≈ s
     # Mean
     m = mean(ref)
-    @test round(@inferred(LossFunctions.value(l, t, y, AvgMode.Mean())),5) ≈ round(m,5)
-    @test round(@inferred(LossFunctions.value(l, yt, AvgMode.Mean())),5) ≈ round(m,5)
-    @test round(@inferred(l(t, y, AvgMode.Mean())),5) ≈ round(m,5)
-    @test round(@inferred(l(yt, AvgMode.Mean())),5) ≈ round(m,5)
+    @test round(@inferred(LossFunctions.value(l, t, y, AvgMode.Mean())), digits=5) ≈ round(m, digits=5)
+    @test round(@inferred(LossFunctions.value(l, yt, AvgMode.Mean())), digits=5) ≈ round(m, digits=5)
+    @test round(@inferred(l(t, y, AvgMode.Mean())), digits=5) ≈ round(m, digits=5)
+    @test round(@inferred(l(yt, AvgMode.Mean())), digits=5) ≈ round(m, digits=5)
     # Obs specific
     n = size(t, 1)
     k = size(t, ndims(t))
@@ -183,7 +183,7 @@ function test_vector_value(l::DistanceLoss, t, y)
 end
 
 function test_vector_deriv(l::MarginLoss, t, y)
-    ref = [LossFunctions.deriv(l,t[i],y[i]) for i in CartesianRange(size(y))]
+    ref = [LossFunctions.deriv(l,t[i],y[i]) for i in CartesianIndices(size(y))]
     yt = t .* y
     @test @inferred(LossFunctions.deriv(l, t, y, AvgMode.None())) == ref
     @test @inferred(LossFunctions.deriv(l, t, y)) == ref
@@ -200,7 +200,7 @@ function test_vector_deriv(l::MarginLoss, t, y)
 end
 
 function test_vector_deriv(l::DistanceLoss, t, y)
-    ref = [LossFunctions.deriv(l,t[i],y[i]) for i in CartesianRange(size(y))]
+    ref = [LossFunctions.deriv(l,t[i],y[i]) for i in CartesianIndices(size(y))]
     yt = y .- t
     @test @inferred(LossFunctions.deriv(l, t, y, AvgMode.None())) == ref
     @test @inferred(LossFunctions.deriv(l, t, y)) == ref
@@ -217,7 +217,7 @@ function test_vector_deriv(l::DistanceLoss, t, y)
 end
 
 function test_vector_deriv2(l::MarginLoss, t, y)
-    ref = [LossFunctions.deriv2(l,t[i],y[i]) for i in CartesianRange(size(y))]
+    ref = [LossFunctions.deriv2(l,t[i],y[i]) for i in CartesianIndices(size(y))]
     yt = t .* y
     @test @inferred(LossFunctions.deriv2(l, t, y, AvgMode.None())) == ref
     @test @inferred(LossFunctions.deriv2(l, t, y)) == ref
@@ -234,7 +234,7 @@ function test_vector_deriv2(l::MarginLoss, t, y)
 end
 
 function test_vector_deriv2(l::DistanceLoss, t, y)
-    ref = [LossFunctions.deriv2(l,t[i],y[i]) for i in CartesianRange(size(y))]
+    ref = [LossFunctions.deriv2(l,t[i],y[i]) for i in CartesianIndices(size(y))]
     yt = y .- t
     @test @inferred(LossFunctions.deriv2(l, t, y, AvgMode.None())) == ref
     @test @inferred(LossFunctions.deriv2(l, t, y)) == ref

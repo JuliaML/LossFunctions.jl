@@ -11,12 +11,12 @@
 end
 
 ##
-@generated function value!{T,N,Q,Ti,M}(
+@generated function value!(
         buffer::AbstractArray,
         loss::MarginLoss,
         target::AbstractSparseArray{Q,Ti,M},
         output::AbstractArray{T,N}
-    )
+    ) where {T,N,Q,Ti,M}
     M > N && throw(ArgumentError("target has more dimensions than output; broadcasting not supported in this direction."))
     quote
       @_dimcheck size(buffer) == size(output)

@@ -71,7 +71,7 @@ include("supervised/io.jl")
 (loss::WeightedBinaryLoss)(args...)   = value(loss, args...)
 
 # allow using SupervisedLoss as function
-for T in filter(isleaftype, subtypes(SupervisedLoss))
+for T in filter(isconcretetype, subtypes(SupervisedLoss))
     @eval (loss::$T)(args...) = value(loss, args...)
 end
 
