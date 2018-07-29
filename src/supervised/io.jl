@@ -2,18 +2,18 @@
 Base.print(io::IO, loss::SupervisedLoss, args...) = print(io, typeof(loss).name.name, args...)
 Base.print(io::IO, loss::L1DistLoss, args...) = print(io, "L1DistLoss", args...)
 Base.print(io::IO, loss::L2DistLoss, args...) = print(io, "L2DistLoss", args...)
-Base.print{P}(io::IO, loss::LPDistLoss{P}, args...) = print(io, typeof(loss).name.name, " with P = $(P)", args...)
+Base.print(io::IO, loss::LPDistLoss{P}, args...) where {P} = print(io, typeof(loss).name.name, " with P = $(P)", args...)
 Base.print(io::IO, loss::L1EpsilonInsLoss, args...) = print(io, typeof(loss).name.name, " with \$\\epsilon\$ = $(loss.ε)", args...)
 Base.print(io::IO, loss::L2EpsilonInsLoss, args...) = print(io, typeof(loss).name.name, " with \$\\epsilon\$ = $(loss.ε)", args...)
 Base.print(io::IO, loss::QuantileLoss, args...) = print(io, typeof(loss).name.name, " with \$\\tau\$ = $(loss.τ)", args...)
 Base.print(io::IO, loss::SmoothedL1HingeLoss, args...) = print(io, typeof(loss).name.name, " with \$\\gamma\$ = $(loss.gamma)", args...)
 Base.print(io::IO, loss::HuberLoss, args...) = print(io, typeof(loss).name.name, " with \$\\alpha\$ = $(loss.d)", args...)
 Base.print(io::IO, loss::DWDMarginLoss, args...) = print(io, typeof(loss).name.name, " with q = $(loss.q)", args...)
-Base.print(io::IO, loss::PeriodicLoss, args...) = print(io, typeof(loss).name.name, " with c = $(round(2π / loss.k,1))", args...)
-Base.print{T,K}(io::IO, loss::ScaledLoss{T,K}, args...) = print(io, "$(K) * ($(loss.loss))", args...)
+Base.print(io::IO, loss::PeriodicLoss, args...) = print(io, typeof(loss).name.name, " with c = $(round(2π / loss.k, digits=1))", args...)
+Base.print(io::IO, loss::ScaledLoss{T,K}, args...) where {T,K} = print(io, "$(K) * ($(loss.loss))", args...)
 
 # Pretty print weighted loss
-_round(num) = round(num) == round(num,1) ? round(Int, num) : round(num, 1)
+_round(num) = round(num) == round(num, digits=1) ? round(Int, num) : round(num, digits=1)
 function _relation(num)
     if num <= 0
         "negative only"
@@ -26,7 +26,7 @@ function _relation(num)
     end
 end
 
-Base.print{T,W}(io::IO, loss::WeightedBinaryLoss{T,W}, args...) = print(io, "$(_relation(W)) $(loss.loss)", args...)
+Base.print(io::IO, loss::WeightedBinaryLoss{T,W}, args...) where {T,W} = print(io, "$(_relation(W)) $(loss.loss)", args...)
 
 # -------------------------------------------------------------
 # Plot Recipes
@@ -48,7 +48,7 @@ end
     value_fun(loss), rng
 end
 
-@recipe function plot{T<:Deriv}(derivs::AbstractVector{T}, rng = -2:0.05:2)
+@recipe function plot(derivs::AbstractVector{T}, rng = -2:0.05:2) where T<:Deriv
     for drv in derivs
         @series begin
             drv, rng
@@ -56,7 +56,7 @@ end
     end
 end
 
-@recipe function plot{T<:SupervisedLoss}(losses::AbstractVector{T}, rng = -2:0.05:2)
+@recipe function plot(losses::AbstractVector{T}, rng = -2:0.05:2) where T<:SupervisedLoss
     for loss in losses
         @series begin
             loss, rng

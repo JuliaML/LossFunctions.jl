@@ -21,17 +21,17 @@ See `?weightedloss` for more information.
 """
 struct WeightedBinaryLoss{L<:MarginLoss,W} <: SupervisedLoss
     loss::L
-    (::Type{WeightedBinaryLoss{L,W}}){L<:MarginLoss, W}(loss::L) = new{L,W}(loss)
+    WeightedBinaryLoss{L,W}(loss::L) where {L<:MarginLoss, W} = new{L,W}(loss)
 end
 
-@generated function (::Type{WeightedBinaryLoss{L,W}}){L<:MarginLoss, W}(args...)
+@generated function (::Type{WeightedBinaryLoss{L,W}})(args...) where {L<:MarginLoss, W}
     typeof(W) <: Number && 0 <= W <= 1 || _werror()
     :(WeightedBinaryLoss{L,W}(L(args...)))
 end
 
 _werror() = throw(ArgumentError("The given \"weight\" has to be a number in the interval [0, 1]"))
 
-@generated function WeightedBinaryLoss{L<:MarginLoss,W}(loss::L, ::Type{Val{W}})
+@generated function WeightedBinaryLoss(loss::L, ::Type{Val{W}}) where {L<:MarginLoss,W}
     typeof(W) <: Number && 0 <= W <= 1 || _werror()
     :(WeightedBinaryLoss{L,W}(loss))
 end
@@ -40,12 +40,12 @@ function WeightedBinaryLoss(loss::SupervisedLoss, w::Number)
     WeightedBinaryLoss(loss, Val{w})
 end
 
-@generated function WeightedBinaryLoss{T,W1,W2}(s::WeightedBinaryLoss{T,W1}, ::Type{Val{W2}})
+@generated function WeightedBinaryLoss(s::WeightedBinaryLoss{T,W1}, ::Type{Val{W2}}) where {T,W1,W2}
     :(WeightedBinaryLoss(s.loss, Val{$(W1*W2)}))
 end
 
 for fun in (:value, :deriv, :deriv2)
-    @eval function ($fun){L,W}(l::WeightedBinaryLoss{L,W}, target::Number, output::Number)
+    @eval function ($fun)(l::WeightedBinaryLoss{L,W}, target::Number, output::Number) where {L,W}
         # We interpret the W to be the weight of the positive class
         if target > 0
             W * ($fun)(l.loss, target, output)
@@ -68,11 +68,11 @@ promoted to a type parameter. For a typestable version use the
 following signature: `weightedloss(loss, Val{weight})`
 """
 weightedloss(loss::Loss, weight::Number) = WeightedBinaryLoss(loss, weight)
-weightedloss{W}(loss::Loss, ::Type{Val{W}}) = WeightedBinaryLoss(loss, Val{W})
+weightedloss(loss::Loss, ::Type{Val{W}}) where {W} = WeightedBinaryLoss(loss, Val{W})
 
 # An α-weighted version of a classification callibrated margin loss is
 # itself classification callibrated if and only if α == 1/2
-isclasscalibrated{T,W}(l::WeightedBinaryLoss{T,W}) = W == 0.5 && isclasscalibrated(l.loss)
+isclasscalibrated(l::WeightedBinaryLoss{T,W}) where {T,W} = W == 0.5 && isclasscalibrated(l.loss)
 
 # TODO: Think about this semantic
 issymmetric(::WeightedBinaryLoss) = false

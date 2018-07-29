@@ -11,19 +11,19 @@
 end
 
 ##
-@generated function value!{T,N,Q,Ti,M}(
+@generated function value!(
         buffer::AbstractArray,
         loss::MarginLoss,
         target::AbstractSparseArray{Q,Ti,M},
         output::AbstractArray{T,N}
-    )
+    ) where {T,N,Q,Ti,M}
     M > N && throw(ArgumentError("target has more dimensions than output; broadcasting not supported in this direction."))
     quote
       @_dimcheck size(buffer) == size(output)
       @nexprs $M (n)->@_dimcheck(size(target,n) == size(output,n))
       zeroQ = zero(Q)
       negQ = Q(-1)
-      @simd for I in CartesianRange(size(output))
+      @simd for I in CartesianIndices(size(output))
           @nexprs $N n->(i_n = I[n])
           tgt = @nref($M,target,i)
           if tgt == zeroQ

@@ -1,4 +1,4 @@
-doc"""
+@doc doc"""
     LPDistLoss{P} <: DistanceLoss
 
 The P-th power absolute distance loss. It is Lipschitz continuous
@@ -11,15 +11,15 @@ struct LPDistLoss{P} <: DistanceLoss end
 
 LPDistLoss(p::Number) = LPDistLoss{p}()
 
-value{P}(loss::LPDistLoss{P}, difference::Number) = abs(difference)^P
-function deriv{P,T<:Number}(loss::LPDistLoss{P}, difference::T)::promote_type(typeof(P),T)
+value(loss::LPDistLoss{P}, difference::Number) where {P} = abs(difference)^P
+function deriv(loss::LPDistLoss{P}, difference::T)::promote_type(typeof(P),T) where {P,T<:Number}
     if difference == 0
         zero(difference)
     else
         P * difference * abs(difference)^(P-convert(typeof(P), 2))
     end
 end
-function deriv2{P,T<:Number}(loss::LPDistLoss{P}, difference::T)::promote_type(typeof(P),T)
+function deriv2(loss::LPDistLoss{P}, difference::T)::promote_type(typeof(P),T) where {P,T<:Number}
     if difference == 0
         zero(difference)
     else
@@ -27,21 +27,21 @@ function deriv2{P,T<:Number}(loss::LPDistLoss{P}, difference::T)::promote_type(t
     end
 end
 
-isminimizable{P}(::LPDistLoss{P}) = true
-issymmetric{P}(::LPDistLoss{P}) = true
-isdifferentiable{P}(::LPDistLoss{P}) = P > 1
-isdifferentiable{P}(::LPDistLoss{P}, at) = P > 1 || at != 0
-istwicedifferentiable{P}(::LPDistLoss{P}) = P > 1
-istwicedifferentiable{P}(::LPDistLoss{P}, at) = P > 1 || at != 0
-islipschitzcont{P}(::LPDistLoss{P}) = P == 1
-islocallylipschitzcont{P}(::LPDistLoss{P}) = P >= 1
-isconvex{P}(::LPDistLoss{P}) = P >= 1
-isstrictlyconvex{P}(::LPDistLoss{P}) = P > 1
-isstronglyconvex{P}(::LPDistLoss{P}) = P >= 2
+isminimizable(::LPDistLoss{P}) where {P} = true
+issymmetric(::LPDistLoss{P}) where {P} = true
+isdifferentiable(::LPDistLoss{P}) where {P} = P > 1
+isdifferentiable(::LPDistLoss{P}, at) where {P} = P > 1 || at != 0
+istwicedifferentiable(::LPDistLoss{P}) where {P} = P > 1
+istwicedifferentiable(::LPDistLoss{P}, at) where {P} = P > 1 || at != 0
+islipschitzcont(::LPDistLoss{P}) where {P} = P == 1
+islocallylipschitzcont(::LPDistLoss{P}) where {P} = P >= 1
+isconvex(::LPDistLoss{P}) where {P} = P >= 1
+isstrictlyconvex(::LPDistLoss{P}) where {P} = P > 1
+isstronglyconvex(::LPDistLoss{P}) where {P} = P >= 2
 
 # ===========================================================
 
-doc"""
+@doc doc"""
     L1DistLoss <: DistanceLoss
 
 The absolute distance loss. Special case of the `LPDistLoss` with `P=1`.
@@ -70,8 +70,8 @@ const L1DistLoss = LPDistLoss{1}
 
 sumvalue(loss::L1DistLoss, difference::AbstractArray) = sumabs(difference)
 value(loss::L1DistLoss, difference::Number) = abs(difference)
-deriv{T<:Number}(loss::L1DistLoss, difference::T) = convert(T, sign(difference))
-deriv2{T<:Number}(loss::L1DistLoss, difference::T) = zero(T)
+deriv(loss::L1DistLoss, difference::T) where {T<:Number} = convert(T, sign(difference))
+deriv2(loss::L1DistLoss, difference::T) where {T<:Number} = zero(T)
 
 isdifferentiable(::L1DistLoss) = false
 isdifferentiable(::L1DistLoss, at) = at != 0
@@ -84,7 +84,7 @@ isstronglyconvex(::L1DistLoss) = false
 
 # ===========================================================
 
-doc"""
+@doc doc"""
     L2DistLoss <: DistanceLoss
 
 The least squares loss. Special case of the `LPDistLoss` with `P=2`.
@@ -112,8 +112,8 @@ It is strictly convex.
 const L2DistLoss = LPDistLoss{2}
 
 value(loss::L2DistLoss, difference::Number) = abs2(difference)
-deriv{T<:Number}(loss::L2DistLoss, difference::T) = T(2) * difference
-deriv2{T<:Number}(loss::L2DistLoss, difference::T) = T(2)
+deriv(loss::L2DistLoss, difference::T) where {T<:Number} = T(2) * difference
+deriv2(loss::L2DistLoss, difference::T) where {T<:Number} = T(2)
 
 isdifferentiable(::L2DistLoss) = true
 isdifferentiable(::L2DistLoss, at) = true
@@ -126,7 +126,7 @@ isstronglyconvex(::L2DistLoss) = true
 
 # ===========================================================
 
-doc"""
+@doc doc"""
     PeriodicLoss <: DistanceLoss
 
 Measures distance on a circle of specified circumference `c`.
@@ -135,18 +135,18 @@ Measures distance on a circle of specified circumference `c`.
 """
 struct PeriodicLoss{T<:AbstractFloat} <: DistanceLoss
     k::T   # k = 2π/circumference
-    function (::Type{PeriodicLoss{T}}){T}(circ::T)
+    function PeriodicLoss{T}(circ::T) where T
         circ > 0 || error("circumference should be strictly positive")
         new{T}(convert(T, 2π/circ))
     end
 end
-PeriodicLoss{T<:AbstractFloat}(circ::T=1.0) = PeriodicLoss{T}(circ)
+PeriodicLoss(circ::T=1.0) where {T<:AbstractFloat} = PeriodicLoss{T}(circ)
 PeriodicLoss(circ) = PeriodicLoss{Float64}(Float64(circ))
 
-value{T<:Number}(loss::PeriodicLoss, difference::T) = 1 - cos(difference*loss.k)
-deriv{T<:Number}(loss::PeriodicLoss, difference::T) = loss.k * sin(difference*loss.k)
-deriv2{T<:Number}(loss::PeriodicLoss, difference::T) = abs2(loss.k) * cos(difference*loss.k)
-function value_deriv{T<:Number}(loss::PeriodicLoss, difference::T)
+value(loss::PeriodicLoss, difference::T) where {T<:Number} = 1 - cos(difference*loss.k)
+deriv(loss::PeriodicLoss, difference::T) where {T<:Number} = loss.k * sin(difference*loss.k)
+deriv2(loss::PeriodicLoss, difference::T) where {T<:Number} = abs2(loss.k) * cos(difference*loss.k)
+function value_deriv(loss::PeriodicLoss, difference::T) where T<:Number
     dk = difference*loss.k
     return 1-cos(dk), loss.k*sin(dk)
 end
@@ -163,7 +163,7 @@ isstronglyconvex(::PeriodicLoss) = false
 
 # ===========================================================
 
-doc"""
+@doc doc"""
     HuberLoss <: DistanceLoss
 
 Loss function commonly used for robustness to outliers.
@@ -192,15 +192,15 @@ It is Lipschitz continuous and convex, but not strictly convex.
 """
 struct HuberLoss{T<:AbstractFloat} <: DistanceLoss
     d::T   # boundary between quadratic and linear loss
-    function (::Type{HuberLoss{T}}){T}(d::T)
+    function HuberLoss{T}(d::T) where T
         d > 0 || error("Huber crossover parameter must be strictly positive.")
         new{T}(d)
     end
 end
-HuberLoss{T<:AbstractFloat}(d::T=1.0) = HuberLoss{T}(d)
+HuberLoss(d::T=1.0) where {T<:AbstractFloat} = HuberLoss{T}(d)
 HuberLoss(d) = HuberLoss{Float64}(Float64(d))
 
-function value{T1,T2<:Number}(loss::HuberLoss{T1}, difference::T2)
+function value(loss::HuberLoss{T1}, difference::T2) where {T1,T2<:Number}
     T = promote_type(T1,T2)
     abs_diff = abs(difference)
     if abs_diff <= loss.d
@@ -209,7 +209,7 @@ function value{T1,T2<:Number}(loss::HuberLoss{T1}, difference::T2)
         return (loss.d*abs_diff) - T(0.5)*abs2(loss.d)   # linear
     end
 end
-function deriv{T1,T2<:Number}(loss::HuberLoss{T1}, difference::T2)
+function deriv(loss::HuberLoss{T1}, difference::T2) where {T1,T2<:Number}
     T = promote_type(T1,T2)
     if abs(difference) <= loss.d
         return T(difference)   # quadratic
@@ -217,11 +217,11 @@ function deriv{T1,T2<:Number}(loss::HuberLoss{T1}, difference::T2)
         return loss.d*T(sign(difference))   # linear
     end
 end
-function deriv2{T1,T2<:Number}(loss::HuberLoss{T1}, difference::T2)
+function deriv2(loss::HuberLoss{T1}, difference::T2) where {T1,T2<:Number}
     T = promote_type(T1,T2)
     abs(difference) <= loss.d ? one(T) : zero(T)
 end
-function value_deriv{T1,T2<:Number}(loss::HuberLoss{T1}, difference::T2)
+function value_deriv(loss::HuberLoss{T1}, difference::T2) where {T1,T2<:Number}
     T = promote_type(T1,T2)
     abs_diff = abs(difference)
     if abs_diff <= loss.d
@@ -246,7 +246,7 @@ issymmetric(::HuberLoss) = true
 
 # ===========================================================
 
-doc"""
+@doc doc"""
     L1EpsilonInsLoss <: DistanceLoss
 
 The `ϵ`-insensitive loss. Typically used in linear support vector
@@ -276,25 +276,25 @@ It is Lipschitz continuous and convex, but not strictly convex.
 struct L1EpsilonInsLoss{T<:AbstractFloat} <: DistanceLoss
     ε::T
 
-    function (::Type{L1EpsilonInsLoss{T}}){T}(ɛ::T)
+    function L1EpsilonInsLoss{T}(ɛ::T) where T
         ɛ > 0 || error("ɛ must be strictly positive")
         new{T}(ɛ)
     end
 end
 const EpsilonInsLoss = L1EpsilonInsLoss
-@inline L1EpsilonInsLoss{T<:AbstractFloat}(ε::T) = L1EpsilonInsLoss{T}(ε)
+@inline L1EpsilonInsLoss(ε::T) where {T<:AbstractFloat} = L1EpsilonInsLoss{T}(ε)
 @inline L1EpsilonInsLoss(ε::Number) = L1EpsilonInsLoss{Float64}(Float64(ε))
 
-function value{T1,T2<:Number}(loss::L1EpsilonInsLoss{T1}, difference::T2)
+function value(loss::L1EpsilonInsLoss{T1}, difference::T2) where {T1,T2<:Number}
     T = promote_type(T1,T2)
     max(zero(T), abs(difference) - loss.ε)
 end
-function deriv{T1,T2<:Number}(loss::L1EpsilonInsLoss{T1}, difference::T2)
+function deriv(loss::L1EpsilonInsLoss{T1}, difference::T2) where {T1,T2<:Number}
     T = promote_type(T1,T2)
     abs(difference) <= loss.ε ? zero(T) : T(sign(difference))
 end
-deriv2{T1,T2<:Number}(loss::L1EpsilonInsLoss{T1}, difference::T2) = zero(promote_type(T1,T2))
-function value_deriv{T1,T2<:Number}(loss::L1EpsilonInsLoss{T1}, difference::T2)
+deriv2(loss::L1EpsilonInsLoss{T1}, difference::T2) where {T1,T2<:Number} = zero(promote_type(T1,T2))
+function value_deriv(loss::L1EpsilonInsLoss{T1}, difference::T2) where {T1,T2<:Number}
     T = promote_type(T1,T2)
     absr = abs(difference)
     absr <= loss.ε ? (zero(T), zero(T)) : (absr - loss.ε, T(sign(difference)))
@@ -312,7 +312,7 @@ isstronglyconvex(::L1EpsilonInsLoss) = false
 
 # ===========================================================
 
-doc"""
+@doc doc"""
     L2EpsilonInsLoss <: DistanceLoss
 
 The `ϵ`-insensitive loss. Typically used in linear support vector
@@ -341,28 +341,28 @@ larger deviances quadratically. It is convex, but not strictly convex.
 struct L2EpsilonInsLoss{T<:AbstractFloat} <: DistanceLoss
     ε::T
 
-    function (::Type{L2EpsilonInsLoss{T}}){T}(ɛ::T)
+    function L2EpsilonInsLoss{T}(ɛ::T) where T
         ɛ > 0 || error("ɛ must be strictly positive")
         new{T}(ɛ)
     end
 end
-L2EpsilonInsLoss{T<:AbstractFloat}(ε::T) = L2EpsilonInsLoss{T}(ε)
+L2EpsilonInsLoss(ε::T) where {T<:AbstractFloat} = L2EpsilonInsLoss{T}(ε)
 L2EpsilonInsLoss(ε) = L2EpsilonInsLoss{Float64}(Float64(ε))
 
-function value{T1,T2<:Number}(loss::L2EpsilonInsLoss{T1}, difference::T2)
+function value(loss::L2EpsilonInsLoss{T1}, difference::T2) where {T1,T2<:Number}
     T = promote_type(T1,T2)
     abs2(max(zero(T), abs(difference) - loss.ε))
 end
-function deriv{T1,T2<:Number}(loss::L2EpsilonInsLoss{T1}, difference::T2)
+function deriv(loss::L2EpsilonInsLoss{T1}, difference::T2) where {T1,T2<:Number}
     T = promote_type(T1,T2)
     absr = abs(difference)
     absr <= loss.ε ? zero(T) : T(2)*sign(difference)*(absr - loss.ε)
 end
-function deriv2{T1,T2<:Number}(loss::L2EpsilonInsLoss{T1}, difference::T2)
+function deriv2(loss::L2EpsilonInsLoss{T1}, difference::T2) where {T1,T2<:Number}
     T = promote_type(T1,T2)
     abs(difference) <= loss.ε ? zero(T) : T(2)
 end
-function value_deriv{T}(loss::L2EpsilonInsLoss{T}, difference::Number)
+function value_deriv(loss::L2EpsilonInsLoss{T}, difference::Number) where T
     absr = abs(difference)
     diff = absr - loss.ε
     absr <= loss.ε ? (zero(T), zero(T)) : (abs2(diff), T(2)*sign(difference)*diff)
@@ -380,7 +380,7 @@ isstronglyconvex(::L2EpsilonInsLoss) = true
 
 # ===========================================================
 
-doc"""
+@doc doc"""
     LogitDistLoss <: DistanceLoss
 
 The distance-based logistic loss for regression.
@@ -412,7 +412,7 @@ function value(loss::LogitDistLoss, difference::Number)
     T = typeof(er)
     -log(T(4)) - difference + 2log(one(T) + er)
 end
-function deriv{T<:Number}(loss::LogitDistLoss, difference::T)
+function deriv(loss::LogitDistLoss, difference::T) where T<:Number
     tanh(difference / T(2))
 end
 function deriv2(loss::LogitDistLoss, difference::Number)
@@ -439,7 +439,7 @@ isstronglyconvex(::LogitDistLoss) = false
 
 
 # ===========================================================
-doc"""
+@doc doc"""
     QuantileLoss <: DistanceLoss
 
 The distance-based quantile loss, also known as pinball loss,
@@ -472,15 +472,15 @@ end
 
 const PinballLoss = QuantileLoss
 
-function value{T1, T2 <: Number}(loss::QuantileLoss{T1}, diff::T2)
+function value(loss::QuantileLoss{T1}, diff::T2) where {T1, T2 <: Number}
     T = promote_type(T1, T2)
     diff * (T(diff > 0) - loss.τ)
 end
-function deriv{T1, T2 <: Number}(loss::QuantileLoss{T1}, diff::T2)
+function deriv(loss::QuantileLoss{T1}, diff::T2) where {T1, T2 <: Number}
     T = promote_type(T1, T2)
     T(diff > 0) - loss.τ
 end
-deriv2{T1, T2 <: Number}(::QuantileLoss{T1}, diff::T2) = zero(promote_type(T1, T2))
+deriv2(::QuantileLoss{T1}, diff::T2) where {T1, T2 <: Number} = zero(promote_type(T1, T2))
 
 issymmetric(loss::QuantileLoss) = loss.τ == 0.5
 isdifferentiable(::QuantileLoss) = false

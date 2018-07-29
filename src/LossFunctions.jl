@@ -5,9 +5,29 @@ using RecipesBase
 
 import Base.*
 using Base.Cartesian
+using SparseArrays, InteractiveUtils
 
-# to be replaced with Reexport as soon as it's importall issues are fixed
-importall LearnBase
+
+using LearnBase 
+import LearnBase: value, deriv, deriv2, scaled, value_deriv,
+    isminimizable,
+    isdifferentiable,
+    istwicedifferentiable,
+    isconvex,
+    isstrictlyconvex,
+    isstronglyconvex,
+    isnemitski,
+    isunivfishercons,
+    isfishercons,
+    islipschitzcont,
+    islocallylipschitzcont,
+    islipschitzcont_deriv, # maybe overkill
+    isclipable,
+    ismarginbased,
+    isclasscalibrated,
+    isdistancebased,
+    issymmetric
+# Reexport LearnBase
 eval(Expr(:toplevel, Expr(:export, setdiff(names(LearnBase), [:LearnBase])...)))
 
 export
@@ -71,7 +91,7 @@ include("supervised/io.jl")
 (loss::WeightedBinaryLoss)(args...)   = value(loss, args...)
 
 # allow using SupervisedLoss as function
-for T in filter(isleaftype, subtypes(SupervisedLoss))
+for T in filter(isconcretetype, subtypes(SupervisedLoss))
     @eval (loss::$T)(args...) = value(loss, args...)
 end
 
