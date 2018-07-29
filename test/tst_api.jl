@@ -1,16 +1,16 @@
 function test_vector_value(l::MarginLoss, t, y)
     ref = [LossFunctions.value(l,t[i],y[i]) for i in CartesianIndices(size(y))]
     yt = t .* y
-    buf = zeros(ref)
+    buf = fill!(similar(ref), 0)
     @test @inferred(LossFunctions.value!(buf, l, t, y)) == ref
     @test buf == ref
-    buf1 = zeros(ref)
+    buf1 = fill!(similar(ref), 0)
     @test @inferred(LossFunctions.value!(buf1, l, yt)) == ref
     @test buf1 == ref
-    buf2 = zeros(ref)
+    buf2 = fill!(similar(ref), 0)
     @test @inferred(LossFunctions.value!(buf2, l, t, y, AvgMode.None())) == ref
     @test buf2 == ref
-    buf3 = zeros(ref)
+    buf3 = fill!(similar(ref), 0)
     @test @inferred(LossFunctions.value!(buf3, l, yt, AvgMode.None())) == ref
     @test buf3 == ref
     @test @inferred(LossFunctions.value(l, t, y, AvgMode.None())) == ref
@@ -66,10 +66,10 @@ function test_vector_value(l::MarginLoss, t, y)
         sv = vec(sum(ref, 1:(ndims(ref)-1)))
         @test @inferred(LossFunctions.value(l, t, y, AvgMode.Sum(), ObsDim.Last())) ≈ sv
         @test @inferred(LossFunctions.value(l, yt, AvgMode.Sum(), ObsDim.Last())) ≈ sv
-        buffer1 = zeros(sv)
+        buffer1 = fill!(similar(sv), 0)
         @test @inferred(LossFunctions.value!(buffer1, l, t, y, AvgMode.Sum(), ObsDim.Last())) ≈ sv
         @test buffer1 ≈ sv
-        buffer2 = zeros(sv)
+        buffer2 = fill!(similar(sv), 0)
         @test @inferred(LossFunctions.value!(buffer2, l, yt, AvgMode.Sum(), ObsDim.Last())) ≈ sv
         @test buffer2 ≈ sv
         # Weighted sum compare
@@ -81,10 +81,10 @@ function test_vector_value(l::MarginLoss, t, y)
         mv = vec(mean(ref, 1:(ndims(ref)-1)))
         @test @inferred(LossFunctions.value(l, t, y, AvgMode.Mean(), ObsDim.Last())) ≈ mv
         @test @inferred(LossFunctions.value(l, yt, AvgMode.Mean(), ObsDim.Last())) ≈ mv
-        buffer3 = zeros(mv)
+        buffer3 = fill!(similar(mv), 0)
         @test @inferred(LossFunctions.value!(buffer3, l, t, y, AvgMode.Mean(), ObsDim.Last())) ≈ mv
         @test buffer3 ≈ mv
-        buffer4 = zeros(mv)
+        buffer4 = fill!(similar(mv), 0)
         @test @inferred(LossFunctions.value!(buffer4, l, yt, AvgMode.Mean(), ObsDim.Last())) ≈ mv
         @test buffer4 ≈ mv
         # Weighted mean compare
@@ -96,16 +96,16 @@ end
 function test_vector_value(l::DistanceLoss, t, y)
     ref = [LossFunctions.value(l,t[i],y[i]) for i in CartesianIndices(size(y))]
     yt = y .- t
-    buf = zeros(ref)
+    buf = fill!(similar(ref), 0)
     @test @inferred(LossFunctions.value!(buf, l, t, y)) == ref
     @test buf == ref
-    buf1 = zeros(ref)
+    buf1 = fill!(similar(ref), 0)
     @test @inferred(LossFunctions.value!(buf1, l, yt)) == ref
     @test buf1 == ref
-    buf2 = zeros(ref)
+    buf2 = fill!(similar(ref), 0)
     @test @inferred(LossFunctions.value!(buf2, l, t, y, AvgMode.None())) == ref
     @test buf2 == ref
-    buf3 = zeros(ref)
+    buf3 = fill!(similar(ref), 0)
     @test @inferred(LossFunctions.value!(buf3, l, yt, AvgMode.None())) == ref
     @test buf3 == ref
     @test @inferred(LossFunctions.value(l, t, y, AvgMode.None())) == ref
@@ -167,13 +167,13 @@ function test_vector_value(l::DistanceLoss, t, y)
         @test @inferred(LossFunctions.value(l, t, y, AvgMode.WeightedSum(1:k,normalize=false), ObsDim.Last())) ≈ sum(sv .* (1:k))
         @test @inferred(LossFunctions.value(l, yt, AvgMode.WeightedSum(1:k,normalize=false), ObsDim.Last())) ≈ sum(sv .* (1:k))
         # Mean per obs
-        mv = vec(mean(ref, 1:(ndims(ref)-1)))
+        mv = vec(mean(ref, dims=1:(ndims(ref)-1)))
         @test @inferred(LossFunctions.value(l, t, y, AvgMode.Mean(), ObsDim.Last())) ≈ mv
         @test @inferred(LossFunctions.value(l, yt, AvgMode.Mean(), ObsDim.Last())) ≈ mv
-        buffer3 = zeros(mv)
+        buffer3 = fill!(copy(mv), 0)
         @test @inferred(LossFunctions.value!(buffer3, l, t, y, AvgMode.Mean(), ObsDim.Last())) ≈ mv
         @test buffer3 ≈ mv
-        buffer4 = zeros(mv)
+        buffer4 = fill!(copy(mv), 0)
         @test @inferred(LossFunctions.value!(buffer4, l, yt, AvgMode.Mean(), ObsDim.Last())) ≈ mv
         @test buffer4 ≈ mv
         # Weighted mean compare
@@ -191,12 +191,6 @@ function test_vector_deriv(l::MarginLoss, t, y)
     @test t .* @inferred(LossFunctions.deriv(l, yt)) == ref
     @test LossFunctions.deriv.(l, t, y) == ref
     @test t .* LossFunctions.deriv.(l, yt) == ref
-    @test @inferred(l'(t, y, AvgMode.None())) == ref
-    @test @inferred(l'(t, y)) == ref
-    @test t .* @inferred(l'(yt, AvgMode.None())) == ref
-    @test t .* @inferred(l'(yt)) == ref
-    @test l'.(t, y) == ref
-    @test t .* l'.(yt) == ref
 end
 
 function test_vector_deriv(l::DistanceLoss, t, y)
@@ -208,12 +202,6 @@ function test_vector_deriv(l::DistanceLoss, t, y)
     @test @inferred(LossFunctions.deriv(l, yt)) == ref
     @test LossFunctions.deriv.(l, t, y) == ref
     @test LossFunctions.deriv.(l, yt) == ref
-    @test @inferred(l'(t, y, AvgMode.None())) == ref
-    @test @inferred(l'(t, y)) == ref
-    @test @inferred(l'(yt, AvgMode.None())) == ref
-    @test @inferred(l'(yt)) == ref
-    @test l'.(t, y) == ref
-    @test l'.(yt) == ref
 end
 
 function test_vector_deriv2(l::MarginLoss, t, y)
@@ -225,12 +213,6 @@ function test_vector_deriv2(l::MarginLoss, t, y)
     @test @inferred(LossFunctions.deriv2(l, yt)) == ref
     @test LossFunctions.deriv2.(l, t, y) == ref
     @test LossFunctions.deriv2.(l, yt) == ref
-    @test @inferred(l''(t, y, AvgMode.None())) == ref
-    @test @inferred(l''(t, y)) == ref
-    @test @inferred(l''(yt, AvgMode.None())) == ref
-    @test @inferred(l''(yt)) == ref
-    @test l''.(t, y) == ref
-    @test l''.(yt) == ref
 end
 
 function test_vector_deriv2(l::DistanceLoss, t, y)
@@ -242,12 +224,6 @@ function test_vector_deriv2(l::DistanceLoss, t, y)
     @test @inferred(LossFunctions.deriv2(l, yt)) == ref
     @test LossFunctions.deriv2.(l, t, y) == ref
     @test LossFunctions.deriv2.(l, yt) == ref
-    @test @inferred(l''(t, y, AvgMode.None())) == ref
-    @test @inferred(l''(t, y)) == ref
-    @test @inferred(l''(yt, AvgMode.None())) == ref
-    @test @inferred(l''(yt)) == ref
-    @test l''.(t, y) == ref
-    @test l''.(yt) == ref
 end
 
 @testset "Vectorized API" begin

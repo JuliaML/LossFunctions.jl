@@ -1,4 +1,4 @@
-doc"""
+@doc doc"""
     LPDistLoss{P} <: DistanceLoss
 
 The P-th power absolute distance loss. It is Lipschitz continuous
@@ -41,7 +41,7 @@ isstronglyconvex(::LPDistLoss{P}) where {P} = P >= 2
 
 # ===========================================================
 
-doc"""
+@doc doc"""
     L1DistLoss <: DistanceLoss
 
 The absolute distance loss. Special case of the `LPDistLoss` with `P=1`.
@@ -84,7 +84,7 @@ isstronglyconvex(::L1DistLoss) = false
 
 # ===========================================================
 
-doc"""
+@doc doc"""
     L2DistLoss <: DistanceLoss
 
 The least squares loss. Special case of the `LPDistLoss` with `P=2`.
@@ -126,7 +126,7 @@ isstronglyconvex(::L2DistLoss) = true
 
 # ===========================================================
 
-doc"""
+@doc doc"""
     PeriodicLoss <: DistanceLoss
 
 Measures distance on a circle of specified circumference `c`.
@@ -163,7 +163,7 @@ isstronglyconvex(::PeriodicLoss) = false
 
 # ===========================================================
 
-doc"""
+@doc doc"""
     HuberLoss <: DistanceLoss
 
 Loss function commonly used for robustness to outliers.
@@ -246,7 +246,7 @@ issymmetric(::HuberLoss) = true
 
 # ===========================================================
 
-doc"""
+@doc doc"""
     L1EpsilonInsLoss <: DistanceLoss
 
 The `ϵ`-insensitive loss. Typically used in linear support vector
@@ -312,7 +312,7 @@ isstronglyconvex(::L1EpsilonInsLoss) = false
 
 # ===========================================================
 
-doc"""
+@doc doc"""
     L2EpsilonInsLoss <: DistanceLoss
 
 The `ϵ`-insensitive loss. Typically used in linear support vector
@@ -380,7 +380,7 @@ isstronglyconvex(::L2EpsilonInsLoss) = true
 
 # ===========================================================
 
-doc"""
+@doc doc"""
     LogitDistLoss <: DistanceLoss
 
 The distance-based logistic loss for regression.
@@ -439,7 +439,7 @@ isstronglyconvex(::LogitDistLoss) = false
 
 
 # ===========================================================
-doc"""
+@doc doc"""
     QuantileLoss <: DistanceLoss
 
 The distance-based quantile loss, also known as pinball loss,

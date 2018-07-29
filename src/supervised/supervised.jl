@@ -22,22 +22,16 @@ end
 end
 
 # --------------------------------------------------------------
-# These non-exported types allow for the convenience syntax
-# `myloss'(y,yhat)` and `myloss''(y,yhat)` without performance
-# penalty
+# non-exported types
 
 struct Deriv{L<:SupervisedLoss}
     loss::L
 end
-
-@inline Base.transpose(loss::SupervisedLoss) = Deriv(loss)
 @inline (d::Deriv)(args...) = deriv(d.loss, args...)
 
 struct Deriv2{L<:SupervisedLoss}
     loss::L
 end
-
-@inline Base.transpose(d::Deriv) = Deriv2(d.loss)
 @inline (d::Deriv2)(args...) = deriv2(d.loss, args...)
 
 # --------------------------------------------------------------

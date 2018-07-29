@@ -88,8 +88,6 @@ function test_deriv(l::MarginLoss, t_vec)
                 @test val ≈ LossFunctions.value(l, y*t)
                 @test val ≈ value_fun(l)(y, t)
                 @test val ≈ value_fun(l)(y*t)
-                @test d_comp ≈ @inferred(l'(y,t))
-                @test d_comp ≈ y*@inferred(l'(y*t))
                 @test d_comp ≈ d_comp2
                 @test d_comp ≈ d_comp3
                 @test d_comp ≈ y*d_comp4
@@ -124,8 +122,6 @@ function test_deriv(l::DistanceLoss, t_vec)
                 @test val ≈ LossFunctions.value(l, t-y)
                 @test val ≈ value_fun(l)(y, t)
                 @test val ≈ value_fun(l)(t-y)
-                @test d_comp ≈ @inferred(l'(y,t))
-                @test d_comp ≈ @inferred(l'(t-y))
                 @test d_comp ≈ d_comp2
                 @test d_comp ≈ d_comp3
                 @test d_comp ≈ d_comp4
@@ -155,7 +151,6 @@ function test_deriv(l::SupervisedLoss, y_vec, t_vec)
                 @test val ≈ val3
                 @test val ≈ LossFunctions.value(l, y, t)
                 @test val ≈ value_fun(l)(y, t)
-                @test d_comp ≈ @inferred(l'(y, t))
                 @test d_comp ≈ d_comp2
                 @test d_comp ≈ d_comp3
                 @test d_comp ≈ deriv(l, y, t)
@@ -175,8 +170,6 @@ function test_deriv2(l::MarginLoss, t_vec)
                 d2_dual = epsilon(deriv(l, dual(y, 0), dual(t, 1)))
                 d2_comp = @inferred deriv2(l, y, t)
                 @test abs(d2_dual - d2_comp) < 1e-10
-                @test d2_comp ≈ @inferred(l''(y, t))
-                @test d2_comp ≈ @inferred(l''(y*t))
                 @test d2_comp ≈ @inferred deriv2(l, y, t)
                 @test d2_comp ≈ @inferred deriv2(l, y*t)
                 @test d2_comp ≈ deriv2_fun(l)(y, t)
@@ -196,8 +189,6 @@ function test_deriv2(l::DistanceLoss, t_vec)
                 d2_dual = epsilon(deriv(l, dual(t-y, 1)))
                 d2_comp = @inferred deriv2(l, y, t)
                 @test abs(d2_dual - d2_comp) < 1e-10
-                @test d2_comp ≈ @inferred(l''(y, t))
-                @test d2_comp ≈ @inferred(l''(t-y))
                 @test d2_comp ≈ @inferred deriv2(l, y, t)
                 @test d2_comp ≈ @inferred deriv2(l, t-y)
                 @test d2_comp ≈ deriv2_fun(l)(y, t)
@@ -217,7 +208,6 @@ function test_deriv2(l::SupervisedLoss, y_vec, t_vec)
                 d2_dual = epsilon(deriv(l, dual(y, 0), dual(t, 1)))
                 d2_comp = @inferred deriv2(l, y, t)
                 @test abs(d2_dual - d2_comp) < 1e-10
-                @test d2_comp ≈ @inferred(l''(y, t))
                 @test d2_comp ≈ @inferred deriv2(l, y, t)
                 @test d2_comp ≈ deriv2_fun(l)(y, t)
             else
@@ -248,9 +238,7 @@ function test_scaledloss(l::Loss, t_vec, y_vec)
                 for y in y_vec
                     @test LossFunctions.value(sl,t,y) == @inferred(sl(t,y))
                     @test @inferred(LossFunctions.value(sl,t,y)) == λ*LossFunctions.value(l,t,y)
-                    @test @inferred(deriv(sl,t,y)) == @inferred(sl'(t,y))
                     @test @inferred(deriv(sl,t,y)) == λ*deriv(l,t,y)
-                    @test @inferred(deriv2(sl,t,y)) == @inferred(sl''(t,y))
                     @test @inferred(deriv2(sl,t,y)) == λ*deriv2(l,t,y)
                 end
             end
@@ -275,9 +263,7 @@ function test_scaledloss(l::Loss, n_vec)
             for n in n_vec
                 @test LossFunctions.value(sl,n) == @inferred(sl(n))
                 @test @inferred(LossFunctions.value(sl,n)) == λ*LossFunctions.value(l,n)
-                @test @inferred(deriv(sl,n)) == @inferred(sl'(n))
                 @test @inferred(deriv(sl,n)) == λ*deriv(l,n)
-                @test @inferred(deriv2(sl,n)) == @inferred(sl''(n))
                 @test @inferred(deriv2(sl,n)) == λ*deriv2(l,n)
             end
         end
@@ -294,7 +280,6 @@ function test_weightedloss(l::MarginLoss, t_vec, y_vec)
             for t in t_vec
                 for y in y_vec
                     @test @inferred(LossFunctions.value(wl,t,y)) == @inferred(wl(t,y))
-                    @test @inferred(deriv(wl,t,y)) == @inferred(wl'(t,y))
                     if t == 1
                         @test LossFunctions.value(wl,t,y) == w*LossFunctions.value(l,t,y)
                         @test deriv(wl,t,y) == w*deriv(l,t,y)
@@ -391,10 +376,10 @@ println("<HEARTBEAT>")
     test_value(SmoothedL1HingeLoss(2), _smoothedl1hingeloss(2), [-1.,1], -10:0.2:10)
 
     function _modhuberloss(y, t)
-        if y.*t >= -1
-            max(0, 1 - y.*t)^2
+        if y .* t >= -1
+            max(0, 1 - y .* t)^2
         else
-            -4.*y.*t
+            -4 .* y .* t
         end
     end
     test_value(ModifiedHuberLoss(), _modhuberloss, [-1.,1], -10:0.2:10)
@@ -425,7 +410,7 @@ println("<HEARTBEAT>")
 end
 
 @testset "Test distance-based loss against reference function" begin
-    yr,tr = linspace(-20,20,10),linspace(-30,30,10)
+    yr, tr = range(-10, stop=20, length=10), range(-30, stop=30, length=10)
 
     _l1distloss(y, t) = abs(t - y)
     test_value(L1DistLoss(), _l1distloss, yr, tr)
@@ -502,8 +487,8 @@ end
     test_value(CrossentropyLoss(), _crossentropyloss, 0:0.01:1, 0.01:0.01:0.99)
 
     _poissonloss(y, t) = exp(t) - t*y
-    test_value(PoissonLoss(), _poissonloss, 0:10, linspace(0,10,11))
-    test_scaledloss(PoissonLoss(), 0:10, linspace(0,10,11))
+    test_value(PoissonLoss(), _poissonloss, 0:10, range(0,stop=10,length=11))
+    test_scaledloss(PoissonLoss(), 0:10, range(0,stop=10,length=11))
 end
 
 println("<HEARTBEAT>")

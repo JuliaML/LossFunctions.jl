@@ -1,4 +1,4 @@
-doc"""
+@doc doc"""
     PoissonLoss <: SupervisedLoss
 
 Loss under a Poisson noise distribution (KL-divergence)
@@ -26,7 +26,7 @@ isstronglyconvex(::PoissonLoss) = false
 
 # ===============================================================
 
-doc"""
+@doc doc"""
     CrossentropyLoss <: SupervisedLoss
 
 Cross-entropy loss also known as log loss and logistic loss is defined as:

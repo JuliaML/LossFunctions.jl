@@ -4,7 +4,7 @@
 
 # ============================================================
 
-doc"""
+@doc doc"""
     ZeroOneLoss <: MarginLoss
 
 The classical classification loss. It penalizes every misclassified
@@ -56,7 +56,7 @@ isclipable(::ZeroOneLoss) = true
 
 # ============================================================
 
-doc"""
+@doc doc"""
     PerceptronLoss <: MarginLoss
 
 The perceptron loss linearly penalizes every prediction where the
@@ -101,7 +101,7 @@ isclipable(::PerceptronLoss) = true
 
 # ============================================================
 
-doc"""
+@doc doc"""
     LogitMarginLoss <: MarginLoss
 
 The margin version of the logistic loss. It is infinitely many
@@ -145,7 +145,7 @@ isclipable(::LogitMarginLoss) = false
 
 # ============================================================
 
-doc"""
+@doc doc"""
     L1HingeLoss <: MarginLoss
 
 The hinge loss linearly penalizes every predicition where the
@@ -192,7 +192,7 @@ isclipable(::L1HingeLoss) = true
 
 # ============================================================
 
-doc"""
+@doc doc"""
     L2HingeLoss <: MarginLoss
 
 The truncated least squares loss quadratically penalizes every
@@ -239,7 +239,7 @@ isclipable(::L2HingeLoss) = true
 
 # ============================================================
 
-doc"""
+@doc doc"""
     SmoothedL1HingeLoss <: MarginLoss
 
 As the name suggests a smoothed version of the L1 hinge loss.
@@ -306,7 +306,7 @@ isclipable(::SmoothedL1HingeLoss) = true
 
 # ============================================================
 
-doc"""
+@doc doc"""
     ModifiedHuberLoss <: MarginLoss
 
 A special (4 times scaled) case of the `SmoothedL1HingeLoss` with `γ=2`.
@@ -360,7 +360,7 @@ isclipable(::ModifiedHuberLoss) = true
 
 # ============================================================
 
-doc"""
+@doc doc"""
     L2MarginLoss <: MarginLoss
 
 The margin-based least-squares loss for classification,
@@ -406,7 +406,7 @@ isclipable(::L2MarginLoss) = true
 
 # ============================================================
 
-doc"""
+@doc doc"""
     ExpLoss <: MarginLoss
 
 The margin-based exponential loss for classification, which
@@ -454,7 +454,7 @@ isclipable(::ExpLoss) = false
 
 # ============================================================
 
-doc"""
+@doc doc"""
     SigmoidLoss <: MarginLoss
 
 Continuous loss which penalizes every prediction with a loss
@@ -501,7 +501,7 @@ isclipable(::SigmoidLoss) = false
 
 # ============================================================
 
-doc"""
+@doc doc"""
     DWDMarginLoss <: MarginLoss
 
 DWDMarginLoss stands for Distance Weighted Discrimination Margin loss.

@@ -3,7 +3,7 @@
 for KIND in (:MarginLoss, :DistanceLoss, :SupervisedLoss)
     SCALEDKIND = Symbol(:Scaled, KIND)
     @eval begin
-        @doc """
+        @doc doc"""
             $($(string(SCALEDKIND))){L,K} <: $($(string(KIND)))
 
         Can an be used to represent a `K` times scaled version of a
@@ -24,7 +24,7 @@ for KIND in (:MarginLoss, :DistanceLoss, :SupervisedLoss)
         instance of some specific loss you can use
         `scaled(my$($(lowercase(string(KIND)))), Val{K})`.
         See `?scaled` for more information.
-        """ ->
+        """
         struct ($SCALEDKIND){L<:$KIND,K} <: $KIND
             loss::L
             (::Type{($SCALEDKIND){L,K}})(loss::L) where {L<:$KIND, K} = new{L,K}(loss)

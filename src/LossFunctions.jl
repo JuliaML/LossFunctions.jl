@@ -5,9 +5,14 @@ using RecipesBase
 
 import Base.*
 using Base.Cartesian
+using SparseArrays, InteractiveUtils
 
-# to be replaced with Reexport as soon as it's importall issues are fixed
-importall LearnBase
+
+using LearnBase 
+import LearnBase: value, deriv, deriv2, scaled, isdifferentiable, istwicedifferentiable,
+    value_deriv, islipschitzcont, isstrictlyconvex, islocallylipschitz, isdistancebased,
+    issymmetric, isclasscalibrated, isminimizable, isstronglyconvex, isnemitski
+# Reexport LearnBase
 eval(Expr(:toplevel, Expr(:export, setdiff(names(LearnBase), [:LearnBase])...)))
 
 export
