@@ -151,7 +151,7 @@ for FUN in (:value, :deriv, :deriv2)
                 @nexprs $S (n)->@_dimcheck(size(target, n) == size(output, n))
                 nrm = 1 / $P(length($bigger))
                 out = zero(($($FUN))(loss, one(Q), one(T)) * nrm)
-                @inbounds @simd for I in CartesianRange(size($bigger))
+                @inbounds @simd for I in CartesianIndices(size($bigger))
                     @nexprs $B n->(i_n = I[n])
                     out += ($($FUN))(loss, @nref($M,target,i), @nref($N,output,i)) * nrm
                 end
@@ -170,7 +170,7 @@ for FUN in (:value, :deriv, :deriv2)
             quote
                 @nexprs $S (n)->@_dimcheck(size(target, n) == size(output, n))
                 out = zero(($($FUN))(loss, one(Q), one(T)))
-                @inbounds @simd for I in CartesianRange(size($bigger))
+                @inbounds @simd for I in CartesianIndices(size($bigger))
                     @nexprs $B n->(i_n = I[n])
                     out += ($($FUN))(loss, @nref($M,target,i), @nref($N,output,i))
                 end
@@ -194,7 +194,7 @@ for FUN in (:value, :deriv, :deriv2)
             k = prod(n != O ? size(output,n) : 1 for n in 1:N)::Int
             nrm = avg.normalize ? inv(k * sum(avg.weights)) : inv(k * one(sum(avg.weights)))
             out = zero(($FUN)(loss, one(Q), one(T)) * (avg.weights[1] * nrm))
-            @inbounds @simd for I in CartesianRange(size(output))
+            @inbounds @simd for I in CartesianIndices(size(output))
                 out += ($FUN)(loss, target[I], output[I]) * (avg.weights[I[O]] * nrm)
             end
             out
@@ -212,7 +212,7 @@ for FUN in (:value, :deriv, :deriv2)
             @_dimcheck size(output, O) == length(avg.weights)
             nrm = avg.normalize ? inv(sum(avg.weights)) : inv(one(sum(avg.weights)))
             out = zero(($FUN)(loss, one(Q), one(T)) * (avg.weights[1] * nrm))
-            @inbounds @simd for I in CartesianRange(size(output))
+            @inbounds @simd for I in CartesianIndices(size(output))
                 out += ($FUN)(loss, target[I], output[I]) * (avg.weights[I[O]] * nrm)
             end
             out
@@ -249,7 +249,7 @@ for FUN in (:value, :deriv, :deriv2)
             P = promote_type(Q,T)
             k = P(prod(size(output,n) for n in 1:N if n != O))
             nrm = 1 / k
-            @inbounds @simd for I in CartesianRange(size(output))
+            @inbounds @simd for I in CartesianIndices(size(output))
                 buffer[I[O]] += ($FUN)(loss, target[I], output[I]) * nrm
             end
             buffer
@@ -280,7 +280,7 @@ for FUN in (:value, :deriv, :deriv2)
             @_dimcheck size(target) == size(output)
             @_dimcheck length(buffer) == size(output, O)
             fill!(buffer, zero(B))
-            @inbounds @simd for I in CartesianRange(size(output))
+            @inbounds @simd for I in CartesianIndices(size(output))
                 buffer[I[O]] += ($FUN)(loss, target[I], output[I])
             end
             buffer
@@ -378,7 +378,7 @@ for FUN in (:value, :deriv, :deriv2)
                 k = prod(n != O ? size(numbers,n) : 1 for n in 1:N)::Int
                 nrm = avg.normalize ? inv(k * sum(avg.weights)) : inv(k * one(sum(avg.weights)))
                 out = zero(($FUN)(loss, one(T)) * (avg.weights[1] * nrm))
-                @inbounds @simd for I in CartesianRange(size(numbers))
+                @inbounds @simd for I in CartesianIndices(size(numbers))
                     out += ($FUN)(loss, numbers[I]) * (avg.weights[I[O]] * nrm)
                 end
                 out
@@ -393,7 +393,7 @@ for FUN in (:value, :deriv, :deriv2)
                 @_dimcheck size(numbers, O) == length(avg.weights)
                 nrm = avg.normalize ? inv(sum(avg.weights)) : inv(one(sum(avg.weights)))
                 out = zero(($FUN)(loss, one(T)) * (avg.weights[1] * nrm))
-                @inbounds @simd for I in CartesianRange(size(numbers))
+                @inbounds @simd for I in CartesianIndices(size(numbers))
                     out += ($FUN)(loss, numbers[I]) * (avg.weights[I[O]] * nrm)
                 end
                 out
@@ -426,7 +426,7 @@ for FUN in (:value, :deriv, :deriv2)
                 fill!(buffer, zero(B))
                 k = prod(size(numbers,n) for n in 1:N if n != O)::Int
                 nrm = 1 / k
-                @inbounds @simd for I in CartesianRange(size(numbers))
+                @inbounds @simd for I in CartesianIndices(size(numbers))
                     buffer[I[O]] += ($FUN)(loss, numbers[I]) * nrm
                 end
                 buffer
@@ -454,7 +454,7 @@ for FUN in (:value, :deriv, :deriv2)
                 O > N && throw(ArgumentError("The specified obsdim is larger as the available dimensions."))
                 @_dimcheck length(buffer) == size(numbers, O)
                 fill!(buffer, zero(B))
-                @inbounds @simd for I in CartesianRange(size(numbers))
+                @inbounds @simd for I in CartesianIndices(size(numbers))
                     buffer[I[O]] += ($FUN)(loss, numbers[I])
                 end
                 buffer

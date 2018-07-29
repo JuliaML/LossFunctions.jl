@@ -9,9 +9,24 @@ using SparseArrays, InteractiveUtils
 
 
 using LearnBase 
-import LearnBase: value, deriv, deriv2, scaled, isdifferentiable, istwicedifferentiable,
-    value_deriv, islipschitzcont, isstrictlyconvex, islocallylipschitz, isdistancebased,
-    issymmetric, isclasscalibrated, isminimizable, isstronglyconvex, isnemitski
+import LearnBase: value, deriv, deriv2, scaled, value_deriv,
+    isminimizable,
+    isdifferentiable,
+    istwicedifferentiable,
+    isconvex,
+    isstrictlyconvex,
+    isstronglyconvex,
+    isnemitski,
+    isunivfishercons,
+    isfishercons,
+    islipschitzcont,
+    islocallylipschitzcont,
+    islipschitzcont_deriv, # maybe overkill
+    isclipable,
+    ismarginbased,
+    isclasscalibrated,
+    isdistancebased,
+    issymmetric
 # Reexport LearnBase
 eval(Expr(:toplevel, Expr(:export, setdiff(names(LearnBase), [:LearnBase])...)))
 

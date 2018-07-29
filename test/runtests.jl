@@ -1,8 +1,7 @@
 module LossFunctionsTests
-using LearnBase
+using LearnBase, LossFunctions, DualNumbers, Statistics, Random, Test
 using LossFunctions
-using DualNumbers
-using Test
+
 
 tests = [
     "tst_loss.jl",
@@ -15,6 +14,7 @@ perf = [
 ]
 
 # for deterministic testing
+
 srand(1234)
 
 distance_losses = [
