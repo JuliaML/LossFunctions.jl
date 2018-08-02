@@ -1,5 +1,5 @@
 module LossFunctionsTests
-using LearnBase, LossFunctions, DualNumbers, Statistics, Random, Test
+using LearnBase, LossFunctions, DualNumbers, Statistics, Random, SparseArrays, Test
 using LossFunctions
 
 

@@ -10,11 +10,11 @@ function test_value_typestable(l::SupervisedLoss)
                 T = promote_type(typeof(y), typeof(t))
 
                 # test basic loss
-                val = @inferred LossFunctions.value(l, y, t)
+                val = @inferred value(l, y, t)
                 @test typeof(val) <: T
 
                 # test scaled version of loss
-                @test typeof(LossFunctions.value(T(2)*l, y, t)) <: T
+                @test typeof(value(T(2)*l, y, t)) <: T
             end
         end
     end
@@ -28,7 +28,7 @@ function test_value_float32_preserving(l::SupervisedLoss)
                 @inferred deriv(l, y, t)
                 @inferred deriv2(l, y, t)
 
-                val = @inferred LossFunctions.value(l, y, t)
+                val = @inferred value(l, y, t)
                 T = promote_type(typeof(y),typeof(t))
                 if !(T <: AbstractFloat)
                     # cast Integers to a float
@@ -53,7 +53,7 @@ function test_value_float64_forcing(l::SupervisedLoss)
                 @inferred deriv(l, y, t)
                 @inferred deriv2(l, y, t)
 
-                val = @inferred LossFunctions.value(l, y, t)
+                val = @inferred value(l, y, t)
                 @test (typeof(val) <: Float64)
             end
         end
@@ -63,7 +63,7 @@ end
 function test_value(l::SupervisedLoss, f::Function, y_vec, t_vec)
     @testset "$(l): " begin
         for y in y_vec, t in t_vec
-            @test abs(LossFunctions.value(l, y, t) - f(y, t)) < 1e-10
+            @test abs(value(l, y, t) - f(y, t)) < 1e-10
         end
     end
 end
@@ -72,10 +72,10 @@ function test_deriv(l::MarginLoss, t_vec)
     @testset "$(l): " begin
         for y in [-1., 1], t in t_vec
             if isdifferentiable(l, y*t)
-                d_dual = epsilon(LossFunctions.value(l, dual(y, 0), dual(t, 1)))
+                d_dual = epsilon(value(l, dual(y, zero(y)), dual(t, one(t))))
                 d_comp = @inferred deriv(l, y, t)
                 @test abs(d_dual - d_comp) < 1e-10
-                val = @inferred LossFunctions.value(l, y, t)
+                val = @inferred value(l, y, t)
                 val2, d_comp2 = @inferred value_deriv(l, y, t)
                 val3, d_comp3 = value_deriv_fun(l)(y, t)
                 val4, d_comp4 = @inferred value_deriv(l, y * t)
@@ -84,8 +84,8 @@ function test_deriv(l::MarginLoss, t_vec)
                 @test val ≈ val2
                 @test val ≈ val3
                 @test val ≈ val4
-                @test val ≈ LossFunctions.value(l, y, t)
-                @test val ≈ LossFunctions.value(l, y*t)
+                @test val ≈ value(l, y, t)
+                @test val ≈ value(l, y*t)
                 @test val ≈ value_fun(l)(y, t)
                 @test val ≈ value_fun(l)(y*t)
                 @test d_comp ≈ d_comp2
@@ -106,10 +106,10 @@ function test_deriv(l::DistanceLoss, t_vec)
     @testset "$(l): " begin
         for y in -10:.2:10, t in t_vec
             if isdifferentiable(l, t-y)
-                d_dual = epsilon(LossFunctions.value(l, dual(t-y, 1)))
+                d_dual = epsilon(value(l, dual(t-y, one(t-y))))
                 d_comp = @inferred deriv(l, y, t)
                 @test abs(d_dual - d_comp) < 1e-10
-                val = @inferred LossFunctions.value(l, y, t)
+                val = @inferred value(l, y, t)
                 val2, d_comp2 = @inferred value_deriv(l, y, t)
                 val3, d_comp3 = value_deriv_fun(l)(y, t)
                 val4, d_comp4 = @inferred value_deriv(l, t-y)
@@ -118,8 +118,8 @@ function test_deriv(l::DistanceLoss, t_vec)
                 @test val ≈ val2
                 @test val ≈ val3
                 @test val ≈ val4
-                @test val ≈ LossFunctions.value(l, y, t)
-                @test val ≈ LossFunctions.value(l, t-y)
+                @test val ≈ value(l, y, t)
+                @test val ≈ value(l, t-y)
                 @test val ≈ value_fun(l)(y, t)
                 @test val ≈ value_fun(l)(t-y)
                 @test d_comp ≈ d_comp2
@@ -140,16 +140,16 @@ function test_deriv(l::SupervisedLoss, y_vec, t_vec)
     @testset "$(l): " begin
         for y in y_vec, t in t_vec
             if isdifferentiable(l, y, t)
-                d_dual = epsilon(LossFunctions.value(l, y, dual(t, 1)))
+                d_dual = epsilon(value(l, y, dual(t, one(t))))
                 d_comp = @inferred deriv(l, y, t)
                 @test abs(d_dual - d_comp) < 1e-10
-                val = @inferred LossFunctions.value(l, y, t)
+                val = @inferred value(l, y, t)
                 val2, d_comp2 = @inferred value_deriv(l, y, t)
                 val3, d_comp3 = value_deriv_fun(l)(y, t)
                 @test val ≈ @inferred(l(y, t))
                 @test val ≈ val2
                 @test val ≈ val3
-                @test val ≈ LossFunctions.value(l, y, t)
+                @test val ≈ value(l, y, t)
                 @test val ≈ value_fun(l)(y, t)
                 @test d_comp ≈ d_comp2
                 @test d_comp ≈ d_comp3
@@ -167,7 +167,7 @@ function test_deriv2(l::MarginLoss, t_vec)
     @testset "$(l): " begin
         for y in [-1., 1], t in t_vec
             if istwicedifferentiable(l, y*t) && isdifferentiable(l, y*t)
-                d2_dual = epsilon(deriv(l, dual(y, 0), dual(t, 1)))
+                d2_dual = epsilon(deriv(l, dual(y, zero(y)), dual(t, one(t))))
                 d2_comp = @inferred deriv2(l, y, t)
                 @test abs(d2_dual - d2_comp) < 1e-10
                 @test d2_comp ≈ @inferred deriv2(l, y, t)
@@ -186,7 +186,7 @@ function test_deriv2(l::DistanceLoss, t_vec)
     @testset "$(l): " begin
         for y in -10:.2:10, t in t_vec
             if istwicedifferentiable(l, t-y) && isdifferentiable(l, t-y)
-                d2_dual = epsilon(deriv(l, dual(t-y, 1)))
+                d2_dual = epsilon(deriv(l, dual(t-y, one(t-y))))
                 d2_comp = @inferred deriv2(l, y, t)
                 @test abs(d2_dual - d2_comp) < 1e-10
                 @test d2_comp ≈ @inferred deriv2(l, y, t)
@@ -205,7 +205,7 @@ function test_deriv2(l::SupervisedLoss, y_vec, t_vec)
     @testset "$(l): " begin
         for y in y_vec, t in t_vec
             if istwicedifferentiable(l, y, t) && isdifferentiable(l, y, t)
-                d2_dual = epsilon(deriv(l, dual(y, 0), dual(t, 1)))
+                d2_dual = epsilon(deriv(l, dual(y, zero(y)), dual(t, one(t))))
                 d2_comp = @inferred deriv2(l, y, t)
                 @test abs(d2_dual - d2_comp) < 1e-10
                 @test d2_comp ≈ @inferred deriv2(l, y, t)
@@ -236,8 +236,8 @@ function test_scaledloss(l::Loss, t_vec, y_vec)
             @test sl == @inferred(Val{λ} * l)
             for t in t_vec
                 for y in y_vec
-                    @test LossFunctions.value(sl,t,y) == @inferred(sl(t,y))
-                    @test @inferred(LossFunctions.value(sl,t,y)) == λ*LossFunctions.value(l,t,y)
+                    @test value(sl,t,y) == @inferred(sl(t,y))
+                    @test @inferred(value(sl,t,y)) == λ*value(l,t,y)
                     @test @inferred(deriv(sl,t,y)) == λ*deriv(l,t,y)
                     @test @inferred(deriv2(sl,t,y)) == λ*deriv2(l,t,y)
                 end
@@ -261,8 +261,8 @@ function test_scaledloss(l::Loss, n_vec)
             @test sl == λ * l
             @test sl == @inferred(Val{λ} * l)
             for n in n_vec
-                @test LossFunctions.value(sl,n) == @inferred(sl(n))
-                @test @inferred(LossFunctions.value(sl,n)) == λ*LossFunctions.value(l,n)
+                @test value(sl,n) == @inferred(sl(n))
+                @test @inferred(value(sl,n)) == λ*value(l,n)
                 @test @inferred(deriv(sl,n)) == λ*deriv(l,n)
                 @test @inferred(deriv2(sl,n)) == λ*deriv2(l,n)
             end
@@ -279,13 +279,13 @@ function test_weightedloss(l::MarginLoss, t_vec, y_vec)
             @test weightedloss(l, w * 0.1) == weightedloss(wl, 0.1)
             for t in t_vec
                 for y in y_vec
-                    @test @inferred(LossFunctions.value(wl,t,y)) == @inferred(wl(t,y))
+                    @test @inferred(value(wl,t,y)) == @inferred(wl(t,y))
                     if t == 1
-                        @test LossFunctions.value(wl,t,y) == w*LossFunctions.value(l,t,y)
+                        @test value(wl,t,y) == w*value(l,t,y)
                         @test deriv(wl,t,y) == w*deriv(l,t,y)
                         @test deriv2(wl,t,y) == w*deriv2(l,t,y)
                     else
-                        @test LossFunctions.value(wl,t,y) == (1-w)*LossFunctions.value(l,t,y)
+                        @test value(wl,t,y) == (1-w)*value(l,t,y)
                         @test deriv(wl,t,y) == (1-w)*deriv(l,t,y)
                         @test deriv2(wl,t,y) == (1-w)*deriv2(l,t,y)
                     end
@@ -572,7 +572,7 @@ end
         # sparse vector of {0,1}
         sparse_target = sprand(N,0.5)
         nz = sparse_target .> 0.0
-        sparse_target[nz] = 1.0
+        sparse_target[nz] .= 1.0
         @test typeof(sparse_target) <: AbstractSparseArray
 
         # dense vector of {-1,1}
@@ -581,7 +581,7 @@ end
         output = randn(N)
 
         for loss in margin_losses
-            @test isapprox(@inferred(LossFunctions.value(loss,sparse_target,output)), LossFunctions.value.(loss,target,output))
+            @test isapprox(@inferred(value(loss,sparse_target,output)), value.(Ref(loss),target,output))
         end
     end
 
@@ -591,7 +591,7 @@ end
         # sparse vector of {0,1}
         sparse_target = sprand(N,0.5)
         nz = sparse_target .> 0.0
-        sparse_target[nz] = 1.0
+        sparse_target[nz] .= 1.0
         @test typeof(sparse_target) <: AbstractSparseArray
 
         # dense vector of {-1,1}
@@ -600,7 +600,7 @@ end
         output = randn(N,N)
 
         for loss in margin_losses
-            @test isapprox(@inferred(LossFunctions.value(loss,sparse_target,output)), LossFunctions.value.(loss,target,output))
+            @test isapprox(@inferred(value(loss,sparse_target,output)), value.(Ref(loss),target,output))
         end
     end
 end

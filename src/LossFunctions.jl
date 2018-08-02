@@ -9,7 +9,7 @@ using SparseArrays, InteractiveUtils
 
 
 using LearnBase 
-import LearnBase: value, deriv, deriv2, scaled, value_deriv,
+import LearnBase: value, value!, deriv, deriv2, scaled, value_deriv,
     isminimizable,
     isdifferentiable,
     istwicedifferentiable,
