@@ -17,8 +17,8 @@ function test_vector_value(l::MarginLoss, t, y)
     @test @inferred(value(l, t, y)) == ref
     @test @inferred(value(l, yt, AvgMode.None())) == ref
     @test @inferred(value(l, yt)) == ref
-    @test value.(l, t, y) == ref
-    @test value.(l, yt) == ref
+    @test value.(Ref(l), t, y) == ref
+    @test value.(Ref(l), yt) == ref
     @test @inferred(l(t, y, AvgMode.None())) == ref
     @test @inferred(l(t, y)) == ref
     @test @inferred(l(yt, AvgMode.None())) == ref
@@ -114,8 +114,8 @@ function test_vector_value(l::DistanceLoss, t, y)
     @test @inferred(value(l, t, y)) == ref
     @test @inferred(value(l, yt, AvgMode.None())) == ref
     @test @inferred(value(l, yt)) == ref
-    @test value.(l, t, y) == ref
-    @test value.(l, yt) == ref
+    @test value.(Ref(l), t, y) == ref
+    @test value.(Ref(l), yt) == ref
     @test @inferred(l(t, y, AvgMode.None())) == ref
     @test @inferred(l(t, y)) == ref
     @test @inferred(l(yt, AvgMode.None())) == ref
@@ -191,8 +191,8 @@ function test_vector_deriv(l::MarginLoss, t, y)
     @test @inferred(LossFunctions.deriv(l, t, y)) == ref
     @test t .* @inferred(LossFunctions.deriv(l, yt, AvgMode.None())) == ref
     @test t .* @inferred(LossFunctions.deriv(l, yt)) == ref
-    @test LossFunctions.deriv.(l, t, y) == ref
-    @test t .* LossFunctions.deriv.(l, yt) == ref
+    @test LossFunctions.deriv.(Ref(l), t, y) == ref
+    @test t .* LossFunctions.deriv.(Ref(l), yt) == ref
 end
 
 function test_vector_deriv(l::DistanceLoss, t, y)
@@ -202,8 +202,8 @@ function test_vector_deriv(l::DistanceLoss, t, y)
     @test @inferred(LossFunctions.deriv(l, t, y)) == ref
     @test @inferred(LossFunctions.deriv(l, yt, AvgMode.None())) == ref
     @test @inferred(LossFunctions.deriv(l, yt)) == ref
-    @test LossFunctions.deriv.(l, t, y) == ref
-    @test LossFunctions.deriv.(l, yt) == ref
+    @test LossFunctions.deriv.(Ref(l), t, y) == ref
+    @test LossFunctions.deriv.(Ref(l), yt) == ref
 end
 
 function test_vector_deriv2(l::MarginLoss, t, y)
@@ -213,8 +213,8 @@ function test_vector_deriv2(l::MarginLoss, t, y)
     @test @inferred(LossFunctions.deriv2(l, t, y)) == ref
     @test @inferred(LossFunctions.deriv2(l, yt, AvgMode.None())) == ref
     @test @inferred(LossFunctions.deriv2(l, yt)) == ref
-    @test LossFunctions.deriv2.(l, t, y) == ref
-    @test LossFunctions.deriv2.(l, yt) == ref
+    @test LossFunctions.deriv2.(Ref(l), t, y) == ref
+    @test LossFunctions.deriv2.(Ref(l), yt) == ref
 end
 
 function test_vector_deriv2(l::DistanceLoss, t, y)
@@ -224,8 +224,8 @@ function test_vector_deriv2(l::DistanceLoss, t, y)
     @test @inferred(LossFunctions.deriv2(l, t, y)) == ref
     @test @inferred(LossFunctions.deriv2(l, yt, AvgMode.None())) == ref
     @test @inferred(LossFunctions.deriv2(l, yt)) == ref
-    @test LossFunctions.deriv2.(l, t, y) == ref
-    @test LossFunctions.deriv2.(l, yt) == ref
+    @test LossFunctions.deriv2.(Ref(l), t, y) == ref
+    @test LossFunctions.deriv2.(Ref(l), yt) == ref
 end
 
 @testset "Vectorized API" begin
@@ -233,8 +233,8 @@ end
         for O in (Float32, Float64)
             @testset "Margin-based $T -> $O" begin
                 for (targets,outputs) in (
-                        (rand(T[-1, 1], 4), (rand(O,4) .- O(.5)) .* O(20)),
-                        (rand(T[-1, 1], 4, 5), (rand(O,4,5) .- O(.5)) .* O(20)),
+                        (rand(T[-1, 1], 4), (rand(O, 4) .- O(.5)) .* O(20)),
+                        (rand(T[-1, 1], 4, 5), (rand(O, 4, 5) .- O(.5)) .* O(20)),
                     )
                     for loss in (LogitMarginLoss(),ModifiedHuberLoss(),
                                  L1HingeLoss(),SigmoidLoss())

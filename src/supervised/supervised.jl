@@ -120,7 +120,7 @@ for FUN in (:value, :deriv, :deriv2)
             quote
                 $(Expr(:meta, :inline))
                 S = typeof(($($FUN))(loss, one(Q), one(T)))
-                ($($FUN)).(loss, target, output)::Array{S,$(max(N,M))}
+                ($($FUN)).(Ref(loss), target, output)::Array{S,$(max(N,M))}
             end
         end
 
@@ -131,7 +131,7 @@ for FUN in (:value, :deriv, :deriv2)
                 target::AbstractArray{Q,M},
                 output::AbstractArray{T,N},
                 ::AvgMode.None) where {Q,M,T,N}
-            buffer .= ($FUN).(loss, target, output)
+            buffer .= ($FUN).(Ref(loss), target, output)
             buffer
         end
 
@@ -334,7 +334,7 @@ for FUN in (:value, :deriv, :deriv2)
                     numbers::AbstractArray{T,N},
                     ::AvgMode.None) where {T,N}
                 S = typeof(($FUN)(loss, one(T)))
-                ($FUN).(loss, numbers)::Array{S,N}
+                ($FUN).(Ref(loss), numbers)::Array{S,N}
             end
 
             # (mutating) Compute element-wise (returns an array)
@@ -343,7 +343,7 @@ for FUN in (:value, :deriv, :deriv2)
                     loss::$KIND,
                     numbers::AbstractArray{T,N},
                     ::AvgMode.None) where {T,N}
-                buffer .= ($FUN).(loss, numbers)
+                buffer .= ($FUN).(Ref(loss), numbers)
                 buffer
             end
 
