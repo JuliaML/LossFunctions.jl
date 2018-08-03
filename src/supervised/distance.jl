@@ -112,8 +112,8 @@ It is strictly convex.
 const L2DistLoss = LPDistLoss{2}
 
 value(loss::L2DistLoss, difference::Number) = abs2(difference)
-deriv(loss::L2DistLoss, difference::T) where {T<:Number} = T(2) * difference
-deriv2(loss::L2DistLoss, difference::T) where {T<:Number} = T(2)
+deriv(loss::L2DistLoss, difference::T) where {T<:Number} = convert(T,2) * difference
+deriv2(loss::L2DistLoss, difference::T) where {T<:Number} = convert(T,2)
 
 isdifferentiable(::L2DistLoss) = true
 isdifferentiable(::L2DistLoss, at) = true
@@ -204,17 +204,17 @@ function value(loss::HuberLoss{T1}, difference::T2) where {T1,T2<:Number}
     T = promote_type(T1,T2)
     abs_diff = abs(difference)
     if abs_diff <= loss.d
-        return T(0.5)*abs2(difference)   # quadratic
+        return convert(T,0.5)*abs2(difference)   # quadratic
     else
-        return (loss.d*abs_diff) - T(0.5)*abs2(loss.d)   # linear
+        return (loss.d*abs_diff) - convert(T,0.5)*abs2(loss.d)   # linear
     end
 end
 function deriv(loss::HuberLoss{T1}, difference::T2) where {T1,T2<:Number}
     T = promote_type(T1,T2)
     if abs(difference) <= loss.d
-        return T(difference)   # quadratic
+        return convert(T,difference)   # quadratic
     else
-        return loss.d*T(sign(difference))   # linear
+        return loss.d*convert(T,sign(difference))   # linear
     end
 end
 function deriv2(loss::HuberLoss{T1}, difference::T2) where {T1,T2<:Number}
@@ -225,11 +225,11 @@ function value_deriv(loss::HuberLoss{T1}, difference::T2) where {T1,T2<:Number}
     T = promote_type(T1,T2)
     abs_diff = abs(difference)
     if abs_diff <= loss.d
-        val = T(0.5)*abs2(difference)
-        der = T(difference)
+        val = convert(T,0.5)*abs2(difference)
+        der = convert(T,difference)
     else
-        val = (loss.d*abs_diff) - T(0.5)*abs2(loss.d)
-        der = loss.d*T(sign(difference))
+        val = (loss.d*abs_diff) - convert(T,0.5)*abs2(loss.d)
+        der = loss.d*convert(T,sign(difference))
     end
     return val,der
 end
@@ -291,13 +291,13 @@ function value(loss::L1EpsilonInsLoss{T1}, difference::T2) where {T1,T2<:Number}
 end
 function deriv(loss::L1EpsilonInsLoss{T1}, difference::T2) where {T1,T2<:Number}
     T = promote_type(T1,T2)
-    abs(difference) <= loss.ε ? zero(T) : T(sign(difference))
+    abs(difference) <= loss.ε ? zero(T) : convert(T,sign(difference))
 end
 deriv2(loss::L1EpsilonInsLoss{T1}, difference::T2) where {T1,T2<:Number} = zero(promote_type(T1,T2))
 function value_deriv(loss::L1EpsilonInsLoss{T1}, difference::T2) where {T1,T2<:Number}
     T = promote_type(T1,T2)
     absr = abs(difference)
-    absr <= loss.ε ? (zero(T), zero(T)) : (absr - loss.ε, T(sign(difference)))
+    absr <= loss.ε ? (zero(T), zero(T)) : (absr - loss.ε, convert(T,sign(difference)))
 end
 
 issymmetric(::L1EpsilonInsLoss) = true
@@ -356,16 +356,16 @@ end
 function deriv(loss::L2EpsilonInsLoss{T1}, difference::T2) where {T1,T2<:Number}
     T = promote_type(T1,T2)
     absr = abs(difference)
-    absr <= loss.ε ? zero(T) : T(2)*sign(difference)*(absr - loss.ε)
+    absr <= loss.ε ? zero(T) : convert(T,2)*sign(difference)*(absr - loss.ε)
 end
 function deriv2(loss::L2EpsilonInsLoss{T1}, difference::T2) where {T1,T2<:Number}
     T = promote_type(T1,T2)
-    abs(difference) <= loss.ε ? zero(T) : T(2)
+    abs(difference) <= loss.ε ? zero(T) : convert(T,2)
 end
 function value_deriv(loss::L2EpsilonInsLoss{T}, difference::Number) where T
     absr = abs(difference)
     diff = absr - loss.ε
-    absr <= loss.ε ? (zero(T), zero(T)) : (abs2(diff), T(2)*sign(difference)*diff)
+    absr <= loss.ε ? (zero(T), zero(T)) : (abs2(diff), convert(T,2)*sign(difference)*diff)
 end
 
 issymmetric(::L2EpsilonInsLoss) = true
@@ -410,21 +410,21 @@ struct LogitDistLoss <: DistanceLoss end
 function value(loss::LogitDistLoss, difference::Number)
     er = exp(difference)
     T = typeof(er)
-    -log(T(4)) - difference + 2log(one(T) + er)
+    -log(convert(T,4)) - difference + 2log(one(T) + er)
 end
 function deriv(loss::LogitDistLoss, difference::T) where T<:Number
-    tanh(difference / T(2))
+    tanh(difference / convert(T,2))
 end
 function deriv2(loss::LogitDistLoss, difference::Number)
     er = exp(difference)
     T = typeof(er)
-    T(2)*er / abs2(one(T) + er)
+    convert(T,2)*er / abs2(one(T) + er)
 end
 function value_deriv(loss::LogitDistLoss, difference::Number)
     er = exp(difference)
     T = typeof(er)
     er1 = one(T) + er
-    -log(T(4)) - difference + 2log(er1), (er - one(T)) / (er1)
+    -log(convert(T,4)) - difference + 2log(er1), (er - one(T)) / (er1)
 end
 
 issymmetric(::LogitDistLoss) = true
@@ -474,11 +474,11 @@ const PinballLoss = QuantileLoss
 
 function value(loss::QuantileLoss{T1}, diff::T2) where {T1, T2 <: Number}
     T = promote_type(T1, T2)
-    diff * (T(diff > 0) - loss.τ)
+    diff * (convert(T,diff > 0) - loss.τ)
 end
 function deriv(loss::QuantileLoss{T1}, diff::T2) where {T1, T2 <: Number}
     T = promote_type(T1, T2)
-    T(diff > 0) - loss.τ
+    convert(T,diff > 0) - loss.τ
 end
 deriv2(::QuantileLoss{T1}, diff::T2) where {T1, T2 <: Number} = zero(promote_type(T1, T2))
 

@@ -1,14 +1,13 @@
-__precompile__(true)
 module LossFunctions
 
 using RecipesBase
 
 import Base.*
 using Base.Cartesian
-using SparseArrays, InteractiveUtils
+using Markdown, SparseArrays, InteractiveUtils
 
 
-using LearnBase 
+using LearnBase
 import LearnBase: value, value!, deriv, deriv2, scaled, value_deriv,
     isminimizable,
     isdifferentiable,
