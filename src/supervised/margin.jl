@@ -221,9 +221,9 @@ It is locally Lipschitz continuous and convex, but not strictly convex.
 struct L2HingeLoss <: MarginLoss end
 
 value(loss::L2HingeLoss, agreement::T) where {T<:Number} = agreement >= 1 ? zero(T) : abs2(one(T) - agreement)
-deriv(loss::L2HingeLoss, agreement::T) where {T<:Number} = agreement >= 1 ? zero(T) : T(2) * (agreement - one(T))
-deriv2(loss::L2HingeLoss, agreement::T) where {T<:Number} = agreement >= 1 ? zero(T) : T(2)
-value_deriv(loss::L2HingeLoss, agreement::T) where {T<:Number} = agreement >= 1 ? (zero(T), zero(T)) : (abs2(one(T) - agreement), T(2) * (agreement - one(T)))
+deriv(loss::L2HingeLoss, agreement::T) where {T<:Number} = agreement >= 1 ? zero(T) : convert(T,2) * (agreement - one(T))
+deriv2(loss::L2HingeLoss, agreement::T) where {T<:Number} = agreement >= 1 ? zero(T) : convert(T,2)
+value_deriv(loss::L2HingeLoss, agreement::T) where {T<:Number} = agreement >= 1 ? (zero(T), zero(T)) : (abs2(one(T) - agreement), convert(T,2) * (agreement - one(T)))
 
 isunivfishercons(::L2HingeLoss) = true
 isdifferentiable(::L2HingeLoss) = true
@@ -334,17 +334,17 @@ It is Lipschitz continuous and convex, but not strictly convex.
 struct ModifiedHuberLoss <: MarginLoss end
 
 function value(loss::ModifiedHuberLoss, agreement::T) where T<:Number
-    agreement >= -1 ? abs2(max(zero(T), one(agreement) - agreement)) : -T(4) * agreement
+    agreement >= -1 ? abs2(max(zero(T), one(agreement) - agreement)) : -convert(T,4) * agreement
 end
 function deriv(loss::ModifiedHuberLoss, agreement::T) where T<:Number
     if agreement >= -1
-        agreement > 1 ? zero(T) : T(2)*agreement - T(2)
+        agreement > 1 ? zero(T) : convert(T,2)*agreement - convert(T,2)
     else
-        -T(4)
+        -convert(T,4)
     end
 end
 function deriv2(loss::ModifiedHuberLoss, agreement::T) where T<:Number
-    agreement < -1 || agreement > 1 ? zero(T) : T(2)
+    agreement < -1 || agreement > 1 ? zero(T) : convert(T,2)
 end
 
 isdifferentiable(::ModifiedHuberLoss) = true
@@ -389,8 +389,8 @@ It is locally Lipschitz continuous and strongly convex.
 struct L2MarginLoss <: MarginLoss end
 
 value(loss::L2MarginLoss, agreement::T) where {T<:Number} = abs2(one(T) - agreement)
-deriv(loss::L2MarginLoss, agreement::T) where {T<:Number} = T(2) * (agreement - one(T))
-deriv2(loss::L2MarginLoss, agreement::T) where {T<:Number} = T(2)
+deriv(loss::L2MarginLoss, agreement::T) where {T<:Number} = convert(T,2) * (agreement - one(T))
+deriv2(loss::L2MarginLoss, agreement::T) where {T<:Number} = convert(T,2)
 
 isunivfishercons(::L2MarginLoss) = true
 isdifferentiable(::L2MarginLoss) = true
@@ -484,7 +484,7 @@ struct SigmoidLoss <: MarginLoss end
 
 value(loss::SigmoidLoss, agreement::Number) = one(agreement) - tanh(agreement)
 deriv(loss::SigmoidLoss, agreement::Number) = -abs2(sech(agreement))
-deriv2(loss::SigmoidLoss, agreement::T) where {T<:Number} = T(2) * tanh(agreement) * abs2(sech(agreement))
+deriv2(loss::SigmoidLoss, agreement::T) where {T<:Number} = convert(T,2) * tanh(agreement) * abs2(sech(agreement))
 
 isunivfishercons(::SigmoidLoss) = true
 isdifferentiable(::SigmoidLoss) = true
