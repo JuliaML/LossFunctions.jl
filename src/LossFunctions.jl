@@ -6,7 +6,6 @@ import Base.*
 using Base.Cartesian
 using Markdown, SparseArrays, InteractiveUtils
 
-
 using LearnBase
 import LearnBase: value, value!, deriv, deriv2, deriv!, scaled, value_deriv,
     isminimizable,

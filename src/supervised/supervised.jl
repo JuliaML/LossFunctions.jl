@@ -37,10 +37,57 @@ end
 # --------------------------------------------------------------
 # Fallback implementations
 
+@doc doc"""
+    value(l::SupervisedLoss, target::Number, output::Number) -> Number
+
+Compute the (non-negative) numeric result for the loss-function
+denoted by the parameter `loss` and return it. Note that `target`
+and `output` can be of different numeric type, in which case
+promotion is performed in the manner appropriate for the given
+loss.
+
+Note: This function should always be type-stable. If it isn't,
+you likely found a bug.
+
+```math
+L : Y \times \mathbb{R} \rightarrow [0,\infty)
+```
+
+# Arguments
+
+- `loss::SupervisedLoss`: The loss-function ``L`` we want to
+  compute the value with.
+
+- `target::Number`: The ground truth ``y \in Y`` of the observation.
+
+- `output::Number`: The predicted output ``\hat{y} \in \mathbb{R}``
+  for the observation.
+
+# Examples
+
+```jldoctest
+#               loss        y    ŷ
+julia> value(L1DistLoss(), 1.0, 2.0)
+1.0
+
+julia> value(L1DistLoss(), 1, 2)
+1
+
+julia> value(L1HingeLoss(), -1, 2)
+3
+
+julia> value(L1HingeLoss(), -1f0, 2f0)
+3.0f0
+```
+"""
+value(l::SupervisedLoss, target::Number, output::Number) =
+    MethodError(value, (l,target,output))
+
 function value_deriv(l::SupervisedLoss, target::Number, output::Number)
     value(l, target, output), deriv(l, target, output)
 end
 
+Base.Broadcast.broadcastable(l::SupervisedLoss) = Ref(l)
 isstronglyconvex(::SupervisedLoss) = false
 isminimizable(l::SupervisedLoss) = isconvex(l)
 isdifferentiable(l::SupervisedLoss) = istwicedifferentiable(l)
@@ -64,13 +111,56 @@ issymmetric(::SupervisedLoss) = false
 
 # --------------------------------------------------------------
 
-for FUN in (:value, :deriv, :deriv2)
+for (FUN, DESC) in ((:value, "result"),
+                    (:deriv, "derivative"),
+                    (:deriv2, "second derivative"))
     @eval begin
 
         # ------------------------------------------------------
         # FALLBACK
 
         # By default compute the element-wise result
+        @doc """
+            $($(string(FUN)))(loss:SupervisedLoss, targets::AbstractArray, outputs::AbstractArray)
+
+        Compute the element-wise $($(DESC)) of the loss
+        function for each index-pair in `targets` and `outputs`
+        individually and return the result as an array of
+        the appropriate size.
+
+        In the case that the two parameters are arrays with a
+        different number of dimensions, broadcast will be
+        performed. Note that the given parameters are expected to
+        have the same size in the dimensions they share.
+
+        Note: This function should always be type-stable. If it
+        isn't, you likely found a bug.
+
+        # Arguments
+
+        - `loss::SupervisedLoss`: The loss-function ``L`` we want
+          to compute the value with.
+
+        - `targets::AbstractArray`: The array of ground truths ``\\mathbf{y}``.
+
+        - `outputs::AbstractArray`: The array of predicted outputs ``\\mathbf{\\hat{y}}``.
+
+        # Examples
+
+        ```jldoctest
+        julia> value(L1DistLoss(), [1,2,3], [2,5,-2])
+        3-element Array{Int64,1}:
+         1
+         3
+         5
+
+        julia> value(L1DistLoss(), [1.,2,3], [2,5,-2])
+        3-element Array{Float64,1}:
+         1.0
+         3.0
+         5.0
+        ```
+        """
         @inline function ($FUN)(
                 loss::SupervisedLoss,
                 target::AbstractArray,
