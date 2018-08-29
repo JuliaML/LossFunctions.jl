@@ -54,11 +54,20 @@ functions and their available methods. We will start by
 describing how to instantiate a loss, as well as the basic
 interface that all loss functions share.
 
+```@contents
+Pages = ["user/interface.md"]
+Depth = 2
+```
 
 Next we will consider how to average or sum the results of the
 loss functions more efficiently. The methods described here are
 implemented in such a way as to avoid allocating a temporary
 array.
+
+```@contents
+Pages = ["user/aggregate.md"]
+Depth = 2
+```
 
 ## Available Loss Functions
 
@@ -77,7 +86,25 @@ primarily used in regression problems. They utilize the numeric
 difference between the predicted output and the true target as a
 proxy variable to quantify the quality of individual predictions.
 
-![](https://rawgithub.com/JuliaML/FileStorage/master/LossFunctions/distance.svg)
+
+```@raw html
+<table><tbody><tr><td style="text-align: left;">
+```
+
+```@contents
+Pages = ["losses/distance.md"]
+Depth = 2
+```
+
+```@raw html
+</td><td>
+```
+
+![distance-based losses](https://rawgithub.com/JuliaML/FileStorage/master/LossFunctions/distance.svg)
+
+```@raw html
+</td></tr></tbody></table>
+```
 
 ### Loss Functions for Classification
 
@@ -87,7 +114,24 @@ do not care about the difference between true target and
 prediction. Instead they penalize predictions based on how well
 they agree with the sign of the target.
 
-![](https://rawgithub.com/JuliaML/FileStorage/master/LossFunctions/margin.svg)
+```@raw html
+<table><tbody><tr><td style="text-align: left;">
+```
+
+```@contents
+Pages = ["losses/margin.md"]
+Depth = 2
+```
+
+```@raw html
+</td><td>
+```
+
+![margin-based losses](https://rawgithub.com/JuliaML/FileStorage/master/LossFunctions/margin.svg)
+
+```@raw html
+</td></tr></tbody></table>
+```
 
 ## Common Meta Losses
 

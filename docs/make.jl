@@ -14,11 +14,16 @@ makedocs(
     pages = Any[
         "Home" => "index.md",
         "Introduction" => [
-            "Getting Started" => "introduction/gettingstarted.md",
-            "Background and Motivation" => "introduction/motivation.md",
+            "introduction/gettingstarted.md",
+            "introduction/motivation.md",
         ],
         "User's Guide" => [
-            "Working with Losses" => "user/interface.md",
+            "user/interface.md",
+            "user/aggregate.md",
+        ],
+        "Available Losses" => [
+            "losses/distance.md",
+            "losses/margin.md",
         ],
         hide("Indices" => "indices.md"),
         "LICENSE.md",

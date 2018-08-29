@@ -614,7 +614,7 @@ function is symmetric.
 julia> issymmetric(QuantileLoss(0.2))
 false
 
-julia> issymetric(LPDistLoss(2))
+julia> issymmetric(LPDistLoss(2))
 true
 ```
 """

@@ -25,3 +25,23 @@ article p {
 article > header .edit-page {
     margin-left: 1em;
 }
+
+/*
+ * Hide the ASCII plots and formulas of the docstrings
+ * on the margin-based and distance-based pages.
+ */
+.loss-docs .docstring pre:not(:nth-child(1)) {
+    display: none;
+}
+.loss-docs .docstring > div > div {
+    display: none;
+}
+.loss-docs .docstring hr {
+    display: none;
+}
+article .loss-docs table {
+    width: 100%;
+}
+article .loss-docs table td {
+    width: 50%;
+}
