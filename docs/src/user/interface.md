@@ -168,3 +168,172 @@ value(::SupervisedLoss, ::AbstractArray, ::AbstractArray)
 
 We also provide a mutating version for the same reasons. It
 even utilizes `broadcast!` underneath.
+
+```@docs
+value!(::AbstractArray, ::SupervisedLoss, ::AbstractArray, ::AbstractArray)
+```
+
+## Computing the 1st Derivatives
+
+Maybe the more interesting aspect of loss functions are their
+derivatives. In fact, most of the popular learning algorithm in
+Supervised Learning, such as gradient descent, utilize the
+derivatives of the loss in one way or the other during the
+training process.
+
+To compute the derivative of some loss we expose the function
+[`deriv`](@ref). It supports the same exact method signatures as
+[`value`](@ref). It may be interesting to note explicitly, that
+we always compute the derivative in respect to the predicted
+`output`, since we are interested in deducing in which direction
+the output should change.
+
+```@docs
+deriv(::SupervisedLoss, ::Number, ::Number)
+```
+
+Similar to [`value`](@ref), this function also supports
+broadcasting and all the syntax benefits that come with it. Thus,
+one can make use of preallocated memory for storing the
+element-wise derivatives.
+
+```jldoctest bcast2
+julia> deriv.(L2DistLoss(), [1,2,3], [2,5,-2])
+3-element Array{Int64,1}:
+   2
+   6
+ -10
+
+julia> buffer = zeros(3); # preallocate a buffer
+
+julia> buffer .= deriv.(L2DistLoss(), [1.,2,3], [2,5,-2])
+3-element Array{Float64,1}:
+   2.0
+   6.0
+ -10.0
+```
+
+Furthermore, with the loop fusion changes that were introduced in
+Julia 0.6, one can also easily weight the influence of each
+observation without allocating a temporary array.
+
+```jldoctest bcast2
+julia> buffer .= deriv.(L2DistLoss(), [1.,2,3], [2,5,-2]) .* [2,1,0.5]
+3-element Array{Float64,1}:
+  4.0
+  6.0
+ -5.0
+```
+
+While broadcast is supported, we do expose a vectorized method
+natively. This is done mainly for API consistency reasons.
+Internally it even uses broadcast itself, but it does provide the
+additional benefit of a more reliable type-inference.
+
+```@docs
+deriv(::SupervisedLoss, ::AbstractArray, ::AbstractArray)
+```
+
+We also provide a mutating version for the same reasons. It
+even utilizes ``broadcast!`` underneath.
+
+```@docs
+deriv!(::AbstractArray, ::SupervisedLoss, ::AbstractArray, ::AbstractArray)
+```
+
+It is also possible to compute the value and derivative at the
+same time. For some losses that means less computation overhead.
+
+```@docs
+value_deriv(::SupervisedLoss, ::Number, ::Number)
+```
+
+## Computing the 2nd Derivatives
+
+Additionally to the first derivative, we also provide the
+corresponding methods for the second derivative through the
+function [`deriv2`](@ref). Note again, that we always compute the
+derivative in respect to the predicted `output`.
+
+```@docs
+deriv2(::SupervisedLoss, ::Number, ::Number)
+```
+
+Just like [`deriv`](@ref) and [`value`](@ref), this function also
+supports broadcasting and all the syntax benefits that come with
+it. Thus, one can make use of preallocated memory for storing the
+element-wise derivatives.
+
+```jldoctest
+julia> deriv2.(LogitDistLoss(), [-0.5, 1.2, 3], [0.3, 2.3, -2])
+3-element Array{Float64,1}:
+ 0.42781939304058886
+ 0.3747397590950412
+ 0.013296113341580313
+
+julia> buffer = zeros(3); # preallocate a buffer
+
+julia> buffer .= deriv2.(LogitDistLoss(), [-0.5, 1.2, 3], [0.3, 2.3, -2])
+3-element Array{Float64,1}:
+ 0.42781939304058886
+ 0.3747397590950412
+ 0.013296113341580313
+```
+
+Furthermore [`deriv2`](@ref) supports all the same method
+signatures as [`deriv`](@ref) does. So to avoid repeating the
+same text over and over again, please look at the documentation
+of [`deriv`](@ref) for more information.
+
+## Function Closures
+
+In some circumstances it may be convenient to have the loss
+function or its derivative as a proper Julia function. Instead of
+exporting special function names for every implemented loss (like
+`l2distloss(...)`), we provide the ability to generate a true
+function on the fly for any given loss.
+
+```@docs
+value_fun(::SupervisedLoss)
+deriv_fun(::SupervisedLoss)
+deriv2_fun(::SupervisedLoss)
+value_deriv_fun(::SupervisedLoss)
+```
+
+## Properties of a Loss
+
+In some situations it can be quite useful to assert certain
+properties about a loss-function. One such scenario could be when
+implementing an algorithm that requires the loss to be strictly
+convex or Lipschitz continuous.
+Note that we will only skim over the defintions in most cases. A
+good treatment of all of the concepts involved can be found in
+either [^BOYD2004] or [^STEINWART2008].
+
+[^BOYD2004]:
+
+    Stephen Boyd and Lieven Vandenberghe. ["Convex Optimization"](https://stanford.edu/~boyd/cvxbook/). Cambridge University Press, 2004.
+
+[^STEINWART2008]:
+
+    Steinwart, Ingo, and Andreas Christmann. ["Support vector machines"](https://www.springer.com/us/book/9780387772417). Springer Science & Business Media, 2008.
+
+This package uses functions to represent individual properties of
+a loss. It follows a list of implemented property-functions
+defined in [LearnBase.jl](https://github.com/JuliaML/LearnBase.jl).
+
+```@docs
+isconvex
+isstrictlyconvex
+isstronglyconvex
+isdifferentiable
+istwicedifferentiable
+islocallylipschitzcont
+islipschitzcont
+isnemitski
+isclipable
+ismarginbased
+isclasscalibrated
+isdistancebased
+issymmetric
+```
