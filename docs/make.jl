@@ -1,7 +1,7 @@
 using Documenter, LearnBase, LossFunctions
 
 makedocs(
-    modules = [LossFunctions],
+    #modules = [LossFunctions],
     clean = false,
     format = :html,
     assets = [
@@ -27,6 +27,7 @@ makedocs(
         ],
         "Advances Topics" => [
             "advanced/extend.md",
+            "advanced/developer.md",
         ],
         hide("Indices" => "indices.md"),
         "LICENSE.md",

@@ -148,8 +148,13 @@ Depth = 2
 
 If you are interested in contributing to LossFunctions.jl, or
 simply want to understand how and why the package does then take
-a look at our developer documentation.
+a look at our developer documentation (although it is a bit
+sparse at the moment).
 
+```@contents
+Pages = ["advanced/developer.md"]
+Depth = 2
+```
 
 ## Index
 
