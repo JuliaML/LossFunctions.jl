@@ -27,7 +27,7 @@ for KIND in (:MarginLoss, :DistanceLoss, :SupervisedLoss)
         """
         struct ($SCALEDKIND){L<:$KIND,K} <: $KIND
             loss::L
-            (::Type{($SCALEDKIND){L,K}})(loss::L) where {L<:$KIND, K} = new{L,K}(loss)
+            ($SCALEDKIND){L,K}(loss::L) where {L<:$KIND, K} = new{L,K}(loss)
         end
 
         @generated function (::Type{($SCALEDKIND){L,K}})(args...) where {L<:$KIND, K}
