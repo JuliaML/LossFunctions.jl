@@ -131,7 +131,7 @@ Depth = 2
 </td></tr></tbody></table>
 ```
 
-## Common Meta Losses
+## Advanced Topics
 
 In some situations it can be useful to slightly alter an existing
 loss function. We provide two general ways to accomplish that.
@@ -141,8 +141,10 @@ the least squares loss one knows from statistics. The second way
 is to reweight the two classes of a binary classification loss.
 This is useful for handling inbalanced class distributions.
 
-
-## Internals
+```@contents
+Pages = ["advanced/extend.md"]
+Depth = 2
+```
 
 If you are interested in contributing to LossFunctions.jl, or
 simply want to understand how and why the package does then take

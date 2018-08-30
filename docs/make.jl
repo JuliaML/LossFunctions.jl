@@ -25,6 +25,9 @@ makedocs(
             "losses/distance.md",
             "losses/margin.md",
         ],
+        "Advances Topics" => [
+            "advanced/extend.md",
+        ],
         hide("Indices" => "indices.md"),
         "LICENSE.md",
     ],
