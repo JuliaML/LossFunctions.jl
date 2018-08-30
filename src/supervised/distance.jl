@@ -5,7 +5,9 @@ The P-th power absolute distance loss. It is Lipschitz continuous
 iff `P == 1`, convex if and only if `P >= 1`, and strictly convex
 iff `P > 1`.
 
-``L(r) = |r|^P``
+```math
+L(r) = |r|^P
+```
 """
 struct LPDistLoss{P} <: DistanceLoss end
 
@@ -44,10 +46,13 @@ isstronglyconvex(::LPDistLoss{P}) where {P} = P >= 2
 @doc doc"""
     L1DistLoss <: DistanceLoss
 
-The absolute distance loss. Special case of the `LPDistLoss` with `P=1`.
+The absolute distance loss.
+Special case of the [`LPDistLoss`](@ref) with `P=1`.
 It is Lipschitz continuous and convex, but not strictly convex.
 
-``L(r) = |r|``
+```math
+L(r) = |r|
+```
 
 ---
 ```
@@ -87,10 +92,13 @@ isstronglyconvex(::L1DistLoss) = false
 @doc doc"""
     L2DistLoss <: DistanceLoss
 
-The least squares loss. Special case of the `LPDistLoss` with `P=2`.
+The least squares loss.
+Special case of the [`LPDistLoss`](@ref) with `P=2`.
 It is strictly convex.
 
-``L(r) = |r|^2``
+```math
+L(r) = |r|^2
+```
 
 ---
 ```
@@ -131,7 +139,9 @@ isstronglyconvex(::L2DistLoss) = true
 
 Measures distance on a circle of specified circumference `c`.
 
-``L(r) = 1 - \cos \left( \frac{2 r \pi}{c} \right)``
+```math
+L(r) = 1 - \cos \left( \frac{2 r \pi}{c} \right)
+```
 """
 struct PeriodicLoss{T<:AbstractFloat} <: DistanceLoss
     k::T   # k = 2π/circumference
@@ -167,11 +177,13 @@ isstronglyconvex(::PeriodicLoss) = false
     HuberLoss <: DistanceLoss
 
 Loss function commonly used for robustness to outliers.
-For large values of `d` it becomes close to the `L1DistLoss`,
-while for small values of `d` it resembles the `L2DistLoss`.
+For large values of `d` it becomes close to the [`L1DistLoss`](@ref),
+while for small values of `d` it resembles the [`L2DistLoss`](@ref).
 It is Lipschitz continuous and convex, but not strictly convex.
 
-``L(r) = \begin{cases} \frac{r^2}{2} & \quad \text{if } | r | \le \alpha \\ \alpha | r | - \frac{\alpha^3}{2} & \quad \text{otherwise}\\ \end{cases}``
+```math
+L(r) = \begin{cases} \frac{r^2}{2} & \quad \text{if } | r | \le \alpha \\ \alpha | r | - \frac{\alpha^3}{2} & \quad \text{otherwise}\\ \end{cases}
+```
 
 ---
 ```
@@ -249,12 +261,14 @@ issymmetric(::HuberLoss) = true
 @doc doc"""
     L1EpsilonInsLoss <: DistanceLoss
 
-The `ϵ`-insensitive loss. Typically used in linear support vector
-regression. It ignores deviances smaller than `ϵ`, but penalizes
+The ``ϵ``-insensitive loss. Typically used in linear support vector
+regression. It ignores deviances smaller than ``ϵ``, but penalizes
 larger deviances linarily.
 It is Lipschitz continuous and convex, but not strictly convex.
 
-``L(r) = \max \{ 0, | r | - \epsilon \}``
+```math
+L(r) = \max \{ 0, | r | - \epsilon \}
+```
 
 ---
 ```
@@ -315,11 +329,14 @@ isstronglyconvex(::L1EpsilonInsLoss) = false
 @doc doc"""
     L2EpsilonInsLoss <: DistanceLoss
 
-The `ϵ`-insensitive loss. Typically used in linear support vector
-regression. It ignores deviances smaller than `ϵ`, but penalizes
+The quadratic ``ϵ``-insensitive loss.
+Typically used in linear support vector regression.
+It ignores deviances smaller than ``ϵ``, but penalizes
 larger deviances quadratically. It is convex, but not strictly convex.
 
-``L(r) = \max \{ 0, | r | - \epsilon \}^2``
+```math
+L(r) = \max \{ 0, | r | - \epsilon \}^2
+```
 
 ---
 ```
@@ -386,7 +403,9 @@ isstronglyconvex(::L2EpsilonInsLoss) = true
 The distance-based logistic loss for regression.
 It is strictly convex and Lipschitz continuous.
 
-``L(r) = - \ln \frac{4 e^r}{(1 + e^r)^2}``
+```math
+L(r) = - \ln \frac{4 e^r}{(1 + e^r)^2}
+```
 
 ---
 ```
@@ -447,7 +466,9 @@ can be used to estimate conditional τ-quantiles.
 It is Lipschitz continuous and convex, but not strictly convex.
 Furthermore it is symmetric if and only if `τ = 1/2`.
 
-``L(r) = \begin{cases} -\left( 1 - \tau  \right) r & \quad \text{if } r < 0 \\ \tau r & \quad \text{if } r \ge 0 \\ \end{cases}``
+```math
+L(r) = \begin{cases} -\left( 1 - \tau  \right) r & \quad \text{if } r < 0 \\ \tau r & \quad \text{if } r \ge 0 \\ \end{cases}
+```
 
 ---
 ```

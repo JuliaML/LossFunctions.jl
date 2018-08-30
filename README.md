@@ -6,7 +6,7 @@ that are commonly used in Machine Learning._
 
 | **Package Status** | **Package Evaluator** | **Build Status**  |
 |:------------------:|:---------------------:|:-----------------:|
-| [![License](http://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat)](LICENSE.md) [![Documentation Status](https://img.shields.io/badge/docs-latest-blue.svg?style=flat)](http://lossesjl.readthedocs.io/en/latest/?badge=latest) | [![Pkg Eval 0.6](http://pkg.julialang.org/badges/LossFunctions_0.6.svg)](http://pkg.julialang.org/?pkg=LossFunctions) [![Pkg Eval 0.7](http://pkg.julialang.org/badges/LossFunctions_0.7.svg)](http://pkg.julialang.org/?pkg=LossFunctions) | [![Build Status](https://travis-ci.org/JuliaML/LossFunctions.jl.svg?branch=master)](https://travis-ci.org/JuliaML/LossFunctions.jl) [![Build status](https://ci.appveyor.com/api/projects/status/xbwc2fiel40bajsp?svg=true)](https://ci.appveyor.com/project/Evizero/losses-jl) [![Coverage Status](https://coveralls.io/repos/github/JuliaML/LossFunctions.jl/badge.svg?branch=master)](https://coveralls.io/github/JuliaML/LossFunctions.jl?branch=master) |
+| [![License](http://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat)](LICENSE.md) [![Docs](https://img.shields.io/badge/docs-stable-blue.svg)](https://JuliaML.github.io/LossFunctions.jl/stable) | [![Pkg Eval 0.6](http://pkg.julialang.org/badges/LossFunctions_0.6.svg)](http://pkg.julialang.org/?pkg=LossFunctions) [![Pkg Eval 0.7](http://pkg.julialang.org/badges/LossFunctions_0.7.svg)](http://pkg.julialang.org/?pkg=LossFunctions) | [![Build Status](https://travis-ci.org/JuliaML/LossFunctions.jl.svg?branch=master)](https://travis-ci.org/JuliaML/LossFunctions.jl) [![Build status](https://ci.appveyor.com/api/projects/status/xbwc2fiel40bajsp?svg=true)](https://ci.appveyor.com/project/Evizero/losses-jl) [![Coverage Status](https://coveralls.io/repos/github/JuliaML/LossFunctions.jl/badge.svg?branch=master)](https://coveralls.io/github/JuliaML/LossFunctions.jl?branch=master) |
 
 ## Available Losses
 
@@ -213,7 +213,7 @@ the documentation.
 
 ## Documentation
 
-Check out the **[latest documentation](http://lossesjl.readthedocs.io/en/latest/index.html)**
+Check out the **[latest documentation](https://JuliaML.github.io/LossFunctions.jl/stable)**
 
 Additionally, you can make use of Julia's native docsystem.
 The following example shows how to get additional information
@@ -256,10 +256,10 @@ This package is registered in `METADATA.jl` and can be installed
 as usual
 
 ```julia
+import Pkg
 Pkg.add("LossFunctions")
 ```
 
 ## License
 
 This code is free to use under the terms of the MIT license.
-

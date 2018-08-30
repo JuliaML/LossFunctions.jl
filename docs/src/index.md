@@ -1,9 +1,8 @@
-LossFunctions.jl's documentation
-=================================
+# LossFunctions.jl's documentation
 
 This package represents a community effort to centralize the
 definition and implementation of **loss functions** in Julia.
-As such, it is a part of the `JuliaML <https://github.com/JuliaML>`_
+As such, it is a part of the [JuliaML](https://github.com/JuliaML)
 ecosystem.
 
 The sole purpose of this package is to provide an efficient and
@@ -24,20 +23,16 @@ import this package directly. That said, it should provide a
 decent starting point for any student that is interested in
 investigating the properties or behaviour of loss functions.
 
-Where to begin?
----------------------
+## Introduction and Motivation
 
 If this is the first time you consider using LossFunctions for
 your machine learning related experiments or packages, make sure
 to check out the "Getting Started" section.
 
-.. toctree::
-   :maxdepth: 2
-
-   introduction/gettingstarted
-
-Introduction and Motivation
-------------------------------
+```@contents
+Pages = ["introduction/gettingstarted.md"]
+Depth = 2
+```
 
 If you are new to Machine Learning in Julia, or are simply
 interested in how and why this package works the way it works,
@@ -45,37 +40,34 @@ feel free to take a look at the following sections. There we
 discuss the concepts involved and outline the most important
 terms and definitions.
 
-.. toctree::
-   :maxdepth: 2
+```@contents
+Pages = ["introduction/motivation.md"]
+Depth = 2
+```
 
-   introduction/motivation
-
-API Documentation
---------------------------------
+## User's Guide
 
 This section gives a more detailed treatment of the exposed
 functions and their available methods. We will start by
 describing how to instantiate a loss, as well as the basic
 interface that all loss functions share.
 
-.. toctree::
-   :maxdepth: 2
-
-   losses/interface
+```@contents
+Pages = ["user/interface.md"]
+Depth = 2
+```
 
 Next we will consider how to average or sum the results of the
 loss functions more efficiently. The methods described here are
 implemented in such a way as to avoid allocating a temporary
 array.
 
-.. toctree::
-   :maxdepth: 2
+```@contents
+Pages = ["user/aggregate.md"]
+Depth = 2
+```
 
-   losses/avgmode
-   losses/other
-
-Available Loss Functions
---------------------------------
+## Available Losses
 
 Aside from the interface, this package also provides a number of
 popular (and not so popular) loss functions out-of-the-box. Great
@@ -85,23 +77,34 @@ to the family of distance-based or margin-based losses. These two
 categories are also indicative for if a loss is intended for
 regression or classification problems
 
-Loss Functions for Regression
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Loss Functions for Regression
 
 Loss functions that belong to the category "distance-based" are
 primarily used in regression problems. They utilize the numeric
 difference between the predicted output and the true target as a
 proxy variable to quantify the quality of individual predictions.
 
-+----------------------------------------------+----------------------------------------------------------------------------------------+
-| .. toctree::                                 | .. image:: https://rawgithub.com/JuliaML/FileStorage/master/LossFunctions/distance.svg |
-|    :maxdepth: 2                              |                                                                                        |
-|                                              |                                                                                        |
-|    losses/distance                           |                                                                                        |
-+----------------------------------------------+----------------------------------------------------------------------------------------+
 
-Loss Functions for Classification
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```@raw html
+<table><tbody><tr><td style="text-align: left;">
+```
+
+```@contents
+Pages = ["losses/distance.md"]
+Depth = 2
+```
+
+```@raw html
+</td><td>
+```
+
+![distance-based losses](https://rawgithub.com/JuliaML/FileStorage/master/LossFunctions/distance.svg)
+
+```@raw html
+</td></tr></tbody></table>
+```
+
+### Loss Functions for Classification
 
 Margin-based loss functions are particularly useful for binary
 classification. In contrast to the distance-based losses, these
@@ -109,52 +112,52 @@ do not care about the difference between true target and
 prediction. Instead they penalize predictions based on how well
 they agree with the sign of the target.
 
-+----------------------------------------------+----------------------------------------------------------------------------------------+
-| .. toctree::                                 | .. image:: https://rawgithub.com/JuliaML/FileStorage/master/LossFunctions/margin.svg   |
-|    :maxdepth: 2                              |                                                                                        |
-|                                              |                                                                                        |
-|    losses/margin                             |                                                                                        |
-+----------------------------------------------+----------------------------------------------------------------------------------------+
+```@raw html
+<table><tbody><tr><td style="text-align: left;">
+```
 
-Common Meta Losses
-----------------------
+```@contents
+Pages = ["losses/margin.md"]
+Depth = 2
+```
+
+```@raw html
+</td><td>
+```
+
+![margin-based losses](https://rawgithub.com/JuliaML/FileStorage/master/LossFunctions/margin.svg)
+
+```@raw html
+</td></tr></tbody></table>
+```
+
+## Advanced Topics
 
 In some situations it can be useful to slightly alter an existing
 loss function. We provide two general ways to accomplish that.
 The first way is to scale a loss by a constant factor. This can
-for example be useful to transform the :class:`L2DistLoss` into
+for example be useful to transform the [`L2DistLoss`](@ref) into
 the least squares loss one knows from statistics. The second way
 is to reweight the two classes of a binary classification loss.
 This is useful for handling inbalanced class distributions.
 
-.. toctree::
-   :maxdepth: 2
-
-   losses/scaledandweighted
-
-Internals
---------------------------------
+```@contents
+Pages = ["advanced/extend.md"]
+Depth = 2
+```
 
 If you are interested in contributing to LossFunctions.jl, or
 simply want to understand how and why the package does then take
-a look at our developer documentation.
+a look at our developer documentation (although it is a bit
+sparse at the moment).
 
-.. toctree::
-   :maxdepth: 2
+```@contents
+Pages = ["advanced/developer.md"]
+Depth = 2
+```
 
-   developer/design
+## Index
 
-Indices and tables
-==================
-
-.. toctree::
-   :hidden:
-   :maxdepth: 2
-
-   about/acknowledgements
-   about/license
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
+```@contents
+Pages = ["indices.md"]
+```

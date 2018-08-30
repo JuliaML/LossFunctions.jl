@@ -6,7 +6,6 @@ import Base.*
 using Base.Cartesian
 using Markdown, SparseArrays, InteractiveUtils
 
-
 using LearnBase
 import LearnBase: value, value!, deriv, deriv2, deriv!, scaled, value_deriv,
     isminimizable,
@@ -31,6 +30,7 @@ eval(Expr(:toplevel, Expr(:export, setdiff(names(LearnBase), [:LearnBase])...)))
 
 export
 
+    deriv2!,
     value_fun,
     deriv_fun,
     deriv2_fun,
@@ -98,5 +98,14 @@ end
 for T in union(subtypes(DistanceLoss), subtypes(MarginLoss))
     @eval (loss::$T)(args...) = value(loss, args...)
 end
+
+# deprecations
+@deprecate ScaledMarginLoss(loss, ::Type{Val{K}}) where {K}  ScaledMarginLoss(loss, Val(K))
+@deprecate ScaledDistanceLoss(loss, ::Type{Val{K}}) where {K}  ScaledDistanceLoss(loss, Val(K))
+@deprecate ScaledSupervisedLoss(loss, ::Type{Val{K}}) where {K}  ScaledSupervisedLoss(loss, Val(K))
+@deprecate ((*)(::Type{Val{K}}, loss::Loss) where {K}) (*)(Val(K), loss)
+@deprecate scaled(loss, ::Type{Val{K}}) where {K}  scaled(loss, Val(K))
+@deprecate weightedloss(loss::Loss, ::Type{Val{W}}) where {W}  weightedloss(loss, Val(W))
+@deprecate WeightedBinaryLoss(loss, ::Type{Val{W}}) where {W}  WeightedBinaryLoss(loss, Val(W))
 
 end # module

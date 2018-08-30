@@ -1,1 +1,0 @@
--e git+https://github.com/Evizero/JuliaDoc.git#egg=JuliaDoc

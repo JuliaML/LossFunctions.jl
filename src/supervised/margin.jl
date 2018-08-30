@@ -12,9 +12,11 @@ observation with a loss of `1` while every correctly classified
 observation has a loss of `0`.
 It is not convex nor continuous and thus seldom used directly.
 Instead one usually works with some classification-calibrated
-surrogate loss, such as one of those listed below.
+surrogate loss, such as [L1HingeLoss](@ref).
 
-``L(a) = \begin{cases} 1 & \quad \text{if } a < 0 \\ 0 & \quad \text{if } a >= 0\\ \end{cases}``
+```math
+L(a) = \begin{cases} 1 & \quad \text{if } a < 0 \\ 0 & \quad \text{if } a >= 0\\ \end{cases}
+```
 
 ---
 ```
@@ -63,7 +65,9 @@ The perceptron loss linearly penalizes every prediction where the
 resulting `agreement <= 0`.
 It is Lipschitz continuous and convex, but not strictly convex.
 
-``L(a) = \max \{ 0, -a \}``
+```math
+L(a) = \max \{ 0, -a \}
+```
 
 ---
 ```
@@ -107,7 +111,9 @@ isclipable(::PerceptronLoss) = true
 The margin version of the logistic loss. It is infinitely many
 times differentiable, strictly convex, and Lipschitz continuous.
 
-``L(a) = \ln (1 + e^{-a})``
+```math
+L(a) = \ln (1 + e^{-a})
+```
 
 ---
 ```
@@ -152,7 +158,9 @@ The hinge loss linearly penalizes every predicition where the
 resulting `agreement < 1` .
 It is Lipschitz continuous and convex, but not strictly convex.
 
-``L(a) = \max \{ 0, 1 - a \}``
+```math
+L(a) = \max \{ 0, 1 - a \}
+```
 
 ---
 ```
@@ -197,9 +205,12 @@ isclipable(::L1HingeLoss) = true
 
 The truncated least squares loss quadratically penalizes every
 predicition where the resulting `agreement < 1`.
-It is locally Lipschitz continuous and convex, but not strictly convex.
+It is locally Lipschitz continuous and convex,
+but not strictly convex.
 
-``L(a) = \max \{ 0, 1 - a \}^2``
+```math
+L(a) = \max \{ 0, 1 - a \}^2
+```
 
 ---
 ```
@@ -245,7 +256,9 @@ isclipable(::L2HingeLoss) = true
 As the name suggests a smoothed version of the L1 hinge loss.
 It is Lipschitz continuous and convex, but not strictly convex.
 
-``L(a) = \begin{cases} \frac{0.5}{\gamma} \cdot \max \{ 0, 1 - a \} ^2 & \quad \text{if } a \ge 1 - \gamma \\ 1 - \frac{\gamma}{2} - a & \quad \text{otherwise}\\ \end{cases}``
+```math
+L(a) = \begin{cases} \frac{0.5}{\gamma} \cdot \max \{ 0, 1 - a \} ^2 & \quad \text{if } a \ge 1 - \gamma \\ 1 - \frac{\gamma}{2} - a & \quad \text{otherwise}\\ \end{cases}
+```
 
 ---
 ```
@@ -309,10 +322,13 @@ isclipable(::SmoothedL1HingeLoss) = true
 @doc doc"""
     ModifiedHuberLoss <: MarginLoss
 
-A special (4 times scaled) case of the `SmoothedL1HingeLoss` with `γ=2`.
-It is Lipschitz continuous and convex, but not strictly convex.
+A special (4 times scaled) case of the [`SmoothedL1HingeLoss`](@ref)
+with `γ=2`. It is Lipschitz continuous and convex,
+but not strictly convex.
 
-``L(a) = \begin{cases} \max \{ 0, 1 - a \} ^2 & \quad \text{if } a \ge -1 \\ - 4 a & \quad \text{otherwise}\\ \end{cases}``
+```math
+L(a) = \begin{cases} \max \{ 0, 1 - a \} ^2 & \quad \text{if } a \ge -1 \\ - 4 a & \quad \text{otherwise}\\ \end{cases}
+```
 
 ---
 ```
@@ -367,7 +383,9 @@ The margin-based least-squares loss for classification,
 which penalizes every prediction where `agreement != 1` quadratically.
 It is locally Lipschitz continuous and strongly convex.
 
-``L(a) = {\left( 1 - a \right)}^2``
+```math
+L(a) = {\left( 1 - a \right)}^2
+```
 
 ---
 ```
@@ -414,7 +432,9 @@ penalizes every prediction exponentially. It is infinitely many
 times differentiable, locally Lipschitz continuous and strictly
 convex, but not clipable.
 
-``L(a) = e^{-a}``
+```math
+L(a) = e^{-a}
+```
 
 ---
 ```
@@ -461,7 +481,9 @@ Continuous loss which penalizes every prediction with a loss
 within in the range (0,2). It is infinitely many times
 differentiable, Lipschitz continuous but nonconvex.
 
-``L(a) = 1 - \tanh(a)``
+```math
+L(a) = 1 - \tanh(a)
+```
 
 ---
 ```
@@ -504,11 +526,14 @@ isclipable(::SigmoidLoss) = false
 @doc doc"""
     DWDMarginLoss <: MarginLoss
 
-DWDMarginLoss stands for Distance Weighted Discrimination Margin loss.
-Serves as an alternative to SVM loss function, with similar performance.
-It is Lipschitz continuous and convex, but not strictly convex.
+The distance weighted discrimination margin loss. It is a
+differentiable generalization of the [L1HingeLoss](@ref) that is
+different than the [SmoothedL1HingeLoss](@ref). It is Lipschitz
+continuous and convex, but not strictly convex.
 
-``L(a) = \begin{cases} 1 - a & \quad \text{if } a \ge \frac{q}{q+1} \\ \frac{1}{a^q} \frac{q^q}{(q+1)^{q+1}} & \quad \text{otherwise}\\ \end{cases}``
+```math
+L(a) = \begin{cases} 1 - a & \quad \text{if } a \ge \frac{q}{q+1} \\ \frac{1}{a^q} \frac{q^q}{(q+1)^{q+1}} & \quad \text{otherwise}\\ \end{cases}
+```
 
 ---
 ```
