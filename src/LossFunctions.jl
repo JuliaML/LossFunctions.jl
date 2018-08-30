@@ -30,6 +30,7 @@ eval(Expr(:toplevel, Expr(:export, setdiff(names(LearnBase), [:LearnBase])...)))
 
 export
 
+    deriv2!,
     value_fun,
     deriv_fun,
     deriv2_fun,

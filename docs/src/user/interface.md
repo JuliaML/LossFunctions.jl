@@ -281,9 +281,12 @@ julia> buffer .= deriv2.(LogitDistLoss(), [-0.5, 1.2, 3], [0.3, 2.3, -2])
 ```
 
 Furthermore [`deriv2`](@ref) supports all the same method
-signatures as [`deriv`](@ref) does. So to avoid repeating the
-same text over and over again, please look at the documentation
-of [`deriv`](@ref) for more information.
+signatures as [`deriv`](@ref) does.
+
+```@docs
+deriv2(::SupervisedLoss, ::AbstractArray, ::AbstractArray)
+deriv2!(::AbstractArray, ::SupervisedLoss, ::AbstractArray, ::AbstractArray)
+```
 
 ## Function Closures
 

@@ -1,4 +1,4 @@
-using Documenter, LossFunctions
+using Documenter, LearnBase, LossFunctions
 
 makedocs(
     modules = [LossFunctions],
@@ -12,7 +12,7 @@ makedocs(
     authors = "Christof Stocker, Tom Breloff, Alex Williams",
     linkcheck = !("skiplinks" in ARGS),
     pages = Any[
-        "Home" => "index.md",
+        hide("Home" => "index.md"),
         "Introduction" => [
             "introduction/gettingstarted.md",
             "introduction/motivation.md",

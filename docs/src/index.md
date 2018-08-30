@@ -23,7 +23,7 @@ import this package directly. That said, it should provide a
 decent starting point for any student that is interested in
 investigating the properties or behaviour of loss functions.
 
-## Where to begin?
+## Introduction and Motivation
 
 If this is the first time you consider using LossFunctions for
 your machine learning related experiments or packages, make sure
@@ -33,8 +33,6 @@ to check out the "Getting Started" section.
 Pages = ["introduction/gettingstarted.md"]
 Depth = 2
 ```
-
-## Introduction and Motivation
 
 If you are new to Machine Learning in Julia, or are simply
 interested in how and why this package works the way it works,
@@ -47,7 +45,7 @@ Pages = ["introduction/motivation.md"]
 Depth = 2
 ```
 
-## API Documentation
+## User's Guide
 
 This section gives a more detailed treatment of the exposed
 functions and their available methods. We will start by
@@ -69,7 +67,7 @@ Pages = ["user/aggregate.md"]
 Depth = 2
 ```
 
-## Available Loss Functions
+## Available Losses
 
 Aside from the interface, this package also provides a number of
 popular (and not so popular) loss functions out-of-the-box. Great
