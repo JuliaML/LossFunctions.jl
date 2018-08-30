@@ -30,6 +30,7 @@ makedocs(
             "advanced/developer.md",
         ],
         hide("Indices" => "indices.md"),
+        "acknowledgements.md",
         "LICENSE.md",
     ],
     html_prettyurls = !("local" in ARGS),
