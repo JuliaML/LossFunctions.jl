@@ -39,7 +39,7 @@ makedocs(
 deploydocs(
     repo = "github.com/JuliaML/LossFunctions.jl.git",
     target = "build",
-    julia = "1.0",
+    julia = "0.7",
     deps = nothing,
     make = nothing,
 )
