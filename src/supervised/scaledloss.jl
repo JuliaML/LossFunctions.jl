@@ -3,7 +3,7 @@
 for KIND in (:MarginLoss, :DistanceLoss, :SupervisedLoss)
     SCALEDKIND = Symbol(:Scaled, KIND)
     @eval begin
-        @doc doc"""
+        @doc """
             $($(string(SCALEDKIND))){L,K} <: $($(string(KIND)))
 
         Can an be used to represent a `K` times scaled version of a
@@ -13,7 +13,7 @@ for KIND in (:MarginLoss, :DistanceLoss, :SupervisedLoss)
         version of some loss `My$($(string(KIND)))`, type:
 
         ```julia
-        typealias MyScaled$($(string(KIND))) LossFunctions.$($(string(SCALEDKIND))){My$($(string(KIND))),1.5}
+        const MyScaled$($(string(KIND))) = LossFunctions.$($(string(SCALEDKIND))){My$($(string(KIND))),1.5}
         ```
 
         This new loss-type can then be instantiated in the same
@@ -22,7 +22,7 @@ for KIND in (:MarginLoss, :DistanceLoss, :SupervisedLoss)
 
         In contrast, in order to only create a `K` times scaled
         instance of some specific loss you can use
-        `scaled(my$($(lowercase(string(KIND)))), Val{K})`.
+        `scaled(my$($(lowercase(string(KIND)))), Val(K))`.
         See `?scaled` for more information.
         """
         struct ($SCALEDKIND){L<:$KIND,K} <: $KIND
@@ -34,13 +34,14 @@ for KIND in (:MarginLoss, :DistanceLoss, :SupervisedLoss)
             typeof(K) <: Number || _serror()
             :(($($SCALEDKIND)){L,K}(L(args...)))
         end
-        ($SCALEDKIND)(loss::T, ::Type{Val{K}}) where {T,K} = ($SCALEDKIND){T,K}(loss)
-        ($SCALEDKIND)(loss::T, k::Number) where {T} = ($SCALEDKIND)(loss, Val{k})
-        (*)(::Type{Val{K}}, loss::$KIND) where {K} = ($SCALEDKIND)(loss, Val{K})
-        (*)(k::Number, loss::$KIND) = ($SCALEDKIND)(loss, Val{k})
-        scaled(loss::T, ::Type{Val{K}}) where {T<:$KIND,K} = ($SCALEDKIND)(loss, Val{K})
+        ($SCALEDKIND)(loss::T, ::Val{K}) where {T,K} = ($SCALEDKIND){T,K}(loss)
+        ($SCALEDKIND)(loss::T, k::Number) where {T} = ($SCALEDKIND)(loss, Val(k))
+        (*)(::Val{K}, loss::$KIND) where {K} = ($SCALEDKIND)(loss, Val(K))
+        (*)(k::Number, loss::$KIND) = ($SCALEDKIND)(loss, Val(k))
+        scaled(loss::T, ::Val{K}) where {T<:$KIND,K} = ($SCALEDKIND)(loss, Val(K))
 
-        @generated ($SCALEDKIND)(s::$SCALEDKIND{T,K1}, ::Type{Val{K2}}) where {T,K1,K2} = :(($($SCALEDKIND))(s.loss, Val{$(K1*K2)}))
+        @generated ($SCALEDKIND)(s::$SCALEDKIND{T,K1}, ::Val{K2}) where {T,K1,K2} = :(($($SCALEDKIND))(s.loss, Val($(K1*K2))))
+
     end
 end
 
@@ -66,9 +67,9 @@ will be boxed into a `ScaledDistanceLoss`.
 Note: If `typeof(K) <: Number`, then this method will poison the
 type-inference of the calling scope. This is because `K` will be
 promoted to a type parameter. For a typestable version use the
-following signature: `scaled(loss, Val{K})`
+following signature: `scaled(loss, Val(K))`
 """
-scaled(l::Loss, k::Number) = scaled(l, Val{k})
+scaled(l::Loss, k::Number) = scaled(l, Val(k))
 
 for fun in (:value, :deriv, :deriv2)
     @eval @fastmath ($fun)(l::ScaledLoss{T,K}, num::Number) where {T,K} = K * ($fun)(l.loss, num)

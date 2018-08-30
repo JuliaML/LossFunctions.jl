@@ -16,7 +16,7 @@ This new loss-type can then be instantiated in the same manner and
 with the same parameters as the original unscaled loss-type.
 
 In contrast, in order to only create a re-weighted instance of some
-specific loss you can use `weightedloss(L2HingeLoss(), Val{0.2})`.
+specific loss you can use `weightedloss(L2HingeLoss(), Val(0.2))`.
 See `?weightedloss` for more information.
 """
 struct WeightedBinaryLoss{L<:MarginLoss,W} <: SupervisedLoss
@@ -31,17 +31,17 @@ end
 
 _werror() = throw(ArgumentError("The given \"weight\" has to be a number in the interval [0, 1]"))
 
-@generated function WeightedBinaryLoss(loss::L, ::Type{Val{W}}) where {L<:MarginLoss,W}
+@generated function WeightedBinaryLoss(loss::L, ::Val{W}) where {L<:MarginLoss,W}
     typeof(W) <: Number && 0 <= W <= 1 || _werror()
     :(WeightedBinaryLoss{L,W}(loss))
 end
 
 function WeightedBinaryLoss(loss::SupervisedLoss, w::Number)
-    WeightedBinaryLoss(loss, Val{w})
+    WeightedBinaryLoss(loss, Val(w))
 end
 
-@generated function WeightedBinaryLoss(s::WeightedBinaryLoss{T,W1}, ::Type{Val{W2}}) where {T,W1,W2}
-    :(WeightedBinaryLoss(s.loss, Val{$(W1*W2)}))
+@generated function WeightedBinaryLoss(s::WeightedBinaryLoss{T,W1}, ::Val{W2}) where {T,W1,W2}
+    :(WeightedBinaryLoss(s.loss, Val($(W1*W2))))
 end
 
 for fun in (:value, :deriv, :deriv2)
@@ -65,10 +65,10 @@ negative class `1 - weight` times its original respectively.
 Note: If `typeof(weight) <: Number`, then this method will poison the
 type-inference of the calling scope. This is because `weight` will be
 promoted to a type parameter. For a typestable version use the
-following signature: `weightedloss(loss, Val{weight})`
+following signature: `weightedloss(loss, Val(weight))`
 """
 weightedloss(loss::Loss, weight::Number) = WeightedBinaryLoss(loss, weight)
-weightedloss(loss::Loss, ::Type{Val{W}}) where {W} = WeightedBinaryLoss(loss, Val{W})
+weightedloss(loss::Loss, ::Val{W}) where {W} = WeightedBinaryLoss(loss, Val(W))
 
 # An α-weighted version of a classification callibrated margin loss is
 # itself classification callibrated if and only if α == 1/2

@@ -229,11 +229,11 @@ function test_scaledloss(l::Loss, t_vec, y_vec)
             else
                 @test typeof(sl) <: LossFunctions.ScaledSupervisedLoss{typeof(l),λ}
             end
-            @test 3 * sl == @inferred(scaled(sl,Val{3}))
-            @test (λ*3) * l == @inferred(scaled(sl,Val{3}))
-            @test sl == @inferred(scaled(l,Val{λ}))
+            @test 3 * sl == @inferred(scaled(sl,Val(3)))
+            @test (λ*3) * l == @inferred(scaled(sl,Val(3)))
+            @test sl == @inferred(scaled(l,Val(λ)))
             @test sl == λ * l
-            @test sl == @inferred(Val{λ} * l)
+            @test sl == @inferred(Val(λ) * l)
             for t in t_vec
                 for y in y_vec
                     @test value(sl,t,y) == @inferred(sl(t,y))
@@ -257,9 +257,9 @@ function test_scaledloss(l::Loss, n_vec)
             else
                 @test typeof(sl) <: LossFunctions.ScaledSupervisedLoss{typeof(l),λ}
             end
-            @test sl == @inferred(scaled(l,Val{λ}))
+            @test sl == @inferred(scaled(l,Val(λ)))
             @test sl == λ * l
-            @test sl == @inferred(Val{λ} * l)
+            @test sl == @inferred(Val(λ) * l)
             for n in n_vec
                 @test value(sl,n) == @inferred(sl(n))
                 @test @inferred(value(sl,n)) == λ*value(l,n)
@@ -275,7 +275,7 @@ function test_weightedloss(l::MarginLoss, t_vec, y_vec)
         for w in (0., 0.2, 0.7, 1.)
             wl = weightedloss(l, w)
             @test typeof(wl) <: LossFunctions.WeightedBinaryLoss{typeof(l),w}
-            @test wl == @inferred(weightedloss(l, Val{w}))
+            @test wl == @inferred(weightedloss(l, Val(w)))
             @test weightedloss(l, w * 0.1) == weightedloss(wl, 0.1)
             for t in t_vec
                 for y in y_vec
