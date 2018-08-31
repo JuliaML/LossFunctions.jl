@@ -1,7 +1,7 @@
 using Documenter, LearnBase, LossFunctions
 
 makedocs(
-    #modules = [LossFunctions],
+    modules = [LossFunctions, LearnBase],
     clean = false,
     format = :html,
     assets = [
