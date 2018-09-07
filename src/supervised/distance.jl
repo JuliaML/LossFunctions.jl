@@ -73,7 +73,6 @@ L(r) = |r|
 """
 const L1DistLoss = LPDistLoss{1}
 
-sumvalue(loss::L1DistLoss, difference::AbstractArray) = sumabs(difference)
 value(loss::L1DistLoss, difference::Number) = abs(difference)
 deriv(loss::L1DistLoss, difference::T) where {T<:Number} = convert(T, sign(difference))
 deriv2(loss::L1DistLoss, difference::T) where {T<:Number} = zero(T)
