@@ -178,7 +178,7 @@ for (FUN, DESC, EXAMPLE) in (
                 loss::SupervisedLoss,
                 target::AbstractArray,
                 output::AbstractArray)
-            ($FUN)(loss, target, output, AvgMode.None())
+            ($FUN)(loss, target, output, AggMode.None())
         end
 
         # (mutating) By default compute the element-wise result
@@ -224,7 +224,7 @@ for (FUN, DESC, EXAMPLE) in (
                 loss::SupervisedLoss,
                 target::AbstractArray,
                 output::AbstractArray)
-            ($(Symbol(FUN,:!)))(buffer, loss, target, output, AvgMode.None())
+            ($(Symbol(FUN,:!)))(buffer, loss, target, output, AggMode.None())
         end
 
         # Translate ObsDim.Last to the correct ObsDim.Constant (for code reduction)
@@ -232,7 +232,7 @@ for (FUN, DESC, EXAMPLE) in (
                 loss::SupervisedLoss,
                 target::AbstractArray,
                 output::AbstractArray{T,N},
-                avg::AverageMode,
+                avg::AggregateMode,
                 ::ObsDim.Last = ObsDim.Last()) where {T,N}
             ($FUN)(loss, target, output, avg, ObsDim.Constant{N}())
         end
@@ -243,7 +243,7 @@ for (FUN, DESC, EXAMPLE) in (
                 loss::SupervisedLoss,
                 target::AbstractArray,
                 output::AbstractArray{T,N},
-                avg::AverageMode,
+                avg::AggregateMode,
                 ::ObsDim.Last = ObsDim.Last()) where {T,N}
             ($(Symbol(FUN,:!)))(buffer, loss, target, output, avg, ObsDim.Constant{N}())
         end
@@ -256,7 +256,7 @@ for (FUN, DESC, EXAMPLE) in (
                 loss::SupervisedLoss,
                 target::AbstractArray{Q,M},
                 output::AbstractArray{T,N},
-                ::AvgMode.None) where {Q,M,T,N}
+                ::AggMode.None) where {Q,M,T,N}
             quote
                 $(Expr(:meta, :inline))
                 S = typeof(($($FUN))(loss, one(Q), one(T)))
@@ -270,7 +270,7 @@ for (FUN, DESC, EXAMPLE) in (
                 loss::SupervisedLoss,
                 target::AbstractArray{Q,M},
                 output::AbstractArray{T,N},
-                ::AvgMode.None) where {Q,M,T,N}
+                ::AggMode.None) where {Q,M,T,N}
             buffer .= ($FUN).(Ref(loss), target, output)
             buffer
         end
@@ -283,7 +283,7 @@ for (FUN, DESC, EXAMPLE) in (
                 loss::SupervisedLoss,
                 target::AbstractArray{Q,M},
                 output::AbstractArray{T,N},
-                ::AvgMode.Mean) where {Q,M,T,N}
+                ::AggMode.Mean) where {Q,M,T,N}
             bigger = M > N ? :target : :output
             S, B = min(M,N), max(M,N)
             P = promote_type(Q,T)
@@ -304,7 +304,7 @@ for (FUN, DESC, EXAMPLE) in (
                 loss::SupervisedLoss,
                 target::AbstractArray{Q,M},
                 output::AbstractArray{T,N},
-                ::AvgMode.Sum) where {Q,M,T,N}
+                ::AggMode.Sum) where {Q,M,T,N}
             bigger = M > N ? :target : :output
             S, B = min(M,N), max(M,N)
             quote
@@ -326,7 +326,7 @@ for (FUN, DESC, EXAMPLE) in (
                 loss::SupervisedLoss,
                 target::AbstractArray{Q,N},
                 output::AbstractArray{T,N},
-                avg::AvgMode.WeightedMean,
+                avg::AggMode.WeightedMean,
                 ::ObsDim.Constant{O}) where {Q,T,N,O}
             O > N && throw(ArgumentError("The specified obsdim is larger as the available dimensions."))
             @_dimcheck size(target) == size(output)
@@ -345,7 +345,7 @@ for (FUN, DESC, EXAMPLE) in (
                 loss::SupervisedLoss,
                 target::AbstractArray{Q,N},
                 output::AbstractArray{T,N},
-                avg::AvgMode.WeightedSum,
+                avg::AggMode.WeightedSum,
                 ::ObsDim.Constant{O}) where {Q,T,N,O}
             O > N && throw(ArgumentError("The specified obsdim is larger as the available dimensions."))
             @_dimcheck size(target) == size(output)
@@ -366,7 +366,7 @@ for (FUN, DESC, EXAMPLE) in (
                 loss::SupervisedLoss,
                 target::AbstractArray{Q,N},
                 output::AbstractArray{T,N},
-                avg::AvgMode.Mean,
+                avg::AggMode.Mean,
                 obsdim::ObsDim.Constant{O}) where {Q,T,N,O}
             S = typeof(($FUN)(loss, one(Q), one(T)) / one(Int))
             buffer = zeros(S, size(output, O))
@@ -379,7 +379,7 @@ for (FUN, DESC, EXAMPLE) in (
                 loss::SupervisedLoss,
                 target::AbstractArray{Q,N},
                 output::AbstractArray{T,N},
-                ::AvgMode.Mean,
+                ::AggMode.Mean,
                 ::ObsDim.Constant{O}) where {B,Q,T,N,O}
             N == 1 && throw(ArgumentError("Mean per observation non sensible for two Vectors. Try omitting the obsdim"))
             O > N && throw(ArgumentError("The specified obsdim is larger as the available dimensions."))
@@ -400,7 +400,7 @@ for (FUN, DESC, EXAMPLE) in (
                 loss::SupervisedLoss,
                 target::AbstractArray{Q,N},
                 output::AbstractArray{T,N},
-                avg::AvgMode.Sum,
+                avg::AggMode.Sum,
                 obsdim::ObsDim.Constant{O}) where {Q,T,N,O}
             S = typeof(($FUN)(loss, one(Q), one(T)))
             buffer = zeros(S, size(output, O))
@@ -413,7 +413,7 @@ for (FUN, DESC, EXAMPLE) in (
                 loss::SupervisedLoss,
                 target::AbstractArray{Q,N},
                 output::AbstractArray{T,N},
-                ::AvgMode.Sum,
+                ::AggMode.Sum,
                 ::ObsDim.Constant{O}) where {B,Q,T,N,O}
             N == 1 && throw(ArgumentError("Sum per observation non sensible for two Vectors. Try omitting the obsdim"))
             O > N && throw(ArgumentError("The specified obsdim is larger as the available dimensions."))
@@ -435,7 +435,7 @@ for (FUN, DESC, EXAMPLE) in (
 
             # By default compute the element-wise result
             @inline function ($FUN)(loss::$KIND, numbers::AbstractArray)
-                ($FUN)(loss, numbers, AvgMode.None())
+                ($FUN)(loss, numbers, AggMode.None())
             end
 
             # (mutating) By default compute the element-wise result
@@ -443,14 +443,14 @@ for (FUN, DESC, EXAMPLE) in (
                     buffer::AbstractArray,
                     loss::$KIND,
                     numbers::AbstractArray)
-                ($(Symbol(FUN,:!)))(buffer, loss, numbers, AvgMode.None())
+                ($(Symbol(FUN,:!)))(buffer, loss, numbers, AggMode.None())
             end
 
             # Translate ObsDim.Last to the correct ObsDim.Constant (for code reduction)
             @inline function ($FUN)(
                     loss::$KIND,
                     numbers::AbstractArray{T,N},
-                    avg::AverageMode,
+                    avg::AggregateMode,
                     ::ObsDim.Last = ObsDim.Last()) where {T,N}
                 ($FUN)(loss, numbers, avg, ObsDim.Constant{N}())
             end
@@ -460,7 +460,7 @@ for (FUN, DESC, EXAMPLE) in (
                     buffer::AbstractArray,
                     loss::$KIND,
                     numbers::AbstractArray{T,N},
-                    avg::AverageMode,
+                    avg::AggregateMode,
                     ::ObsDim.Last = ObsDim.Last()) where {T,N}
                 ($(Symbol(FUN,:!)))(buffer, loss, numbers, avg, ObsDim.Constant{N}())
             end
@@ -472,7 +472,7 @@ for (FUN, DESC, EXAMPLE) in (
             @inline function ($FUN)(
                     loss::$KIND,
                     numbers::AbstractArray{T,N},
-                    ::AvgMode.None) where {T,N}
+                    ::AggMode.None) where {T,N}
                 S = typeof(($FUN)(loss, one(T)))
                 ($FUN).(Ref(loss), numbers)::Array{S,N}
             end
@@ -482,7 +482,7 @@ for (FUN, DESC, EXAMPLE) in (
                     buffer::AbstractArray,
                     loss::$KIND,
                     numbers::AbstractArray{T,N},
-                    ::AvgMode.None) where {T,N}
+                    ::AggMode.None) where {T,N}
                 buffer .= ($FUN).(Ref(loss), numbers)
                 buffer
             end
@@ -494,7 +494,7 @@ for (FUN, DESC, EXAMPLE) in (
             function ($FUN)(
                     loss::$KIND,
                     numbers::AbstractArray{T,N},
-                    ::AvgMode.Mean) where {T,N}
+                    ::AggMode.Mean) where {T,N}
                 nrm = 1 / length(numbers)
                 S = typeof(($FUN)(loss, one(T)) * one(nrm))
                 mapreduce(x -> loss(x) * nrm, +, numbers)::S
@@ -504,7 +504,7 @@ for (FUN, DESC, EXAMPLE) in (
             function ($FUN)(
                     loss::$KIND,
                     numbers::AbstractArray{T,N},
-                    ::AvgMode.Sum) where {T,N}
+                    ::AggMode.Sum) where {T,N}
                 mapreduce(loss, +, numbers)
             end
 
@@ -512,7 +512,7 @@ for (FUN, DESC, EXAMPLE) in (
             function ($FUN)(
                     loss::$KIND,
                     numbers::AbstractArray{T,N},
-                    avg::AvgMode.WeightedMean,
+                    avg::AggMode.WeightedMean,
                     ::ObsDim.Constant{O}) where {T,N,O}
                 @_dimcheck size(numbers, O) == length(avg.weights)
                 k = prod(n != O ? size(numbers,n) : 1 for n in 1:N)::Int
@@ -528,7 +528,7 @@ for (FUN, DESC, EXAMPLE) in (
             function ($FUN)(
                     loss::$KIND,
                     numbers::AbstractArray{T,N},
-                    avg::AvgMode.WeightedSum,
+                    avg::AggMode.WeightedSum,
                     ::ObsDim.Constant{O}) where {T,N,O}
                 @_dimcheck size(numbers, O) == length(avg.weights)
                 nrm = avg.normalize ? inv(sum(avg.weights)) : inv(one(sum(avg.weights)))
@@ -546,7 +546,7 @@ for (FUN, DESC, EXAMPLE) in (
             function ($FUN)(
                     loss::$KIND,
                     numbers::AbstractArray{T,N},
-                    avg::AvgMode.Mean,
+                    avg::AggMode.Mean,
                     obsdim::ObsDim.Constant{O}) where {T,N,O}
                 S = typeof(($FUN)(loss, one(T)) / one(Int))
                 buffer = zeros(S, size(numbers, O))
@@ -558,7 +558,7 @@ for (FUN, DESC, EXAMPLE) in (
                     buffer::AbstractVector{B},
                     loss::$KIND,
                     numbers::AbstractArray{T,N},
-                    ::AvgMode.Mean,
+                    ::AggMode.Mean,
                     ::ObsDim.Constant{O}) where {B,T,N,O}
                 N == 1 && throw(ArgumentError("Mean per observation non sensible for two Vectors. Try omitting the obsdim"))
                 O > N && throw(ArgumentError("The specified obsdim is larger as the available dimensions."))
@@ -576,7 +576,7 @@ for (FUN, DESC, EXAMPLE) in (
             function ($FUN)(
                     loss::$KIND,
                     numbers::AbstractArray{T,N},
-                    avg::AvgMode.Sum,
+                    avg::AggMode.Sum,
                     obsdim::ObsDim.Constant{O}) where {T,N,O}
                 S = typeof(($FUN)(loss, one(T)))
                 buffer = zeros(S, size(numbers, O))
@@ -588,7 +588,7 @@ for (FUN, DESC, EXAMPLE) in (
                     buffer::AbstractVector{B},
                     loss::$KIND,
                     numbers::AbstractArray{T,N},
-                    ::AvgMode.Sum,
+                    ::AggMode.Sum,
                     ::ObsDim.Constant{O}) where {B,T,N,O}
                 N == 1 && throw(ArgumentError("Sum per observation non sensible for two Vectors. Try omitting the obsdim"))
                 O > N && throw(ArgumentError("The specified obsdim is larger as the available dimensions."))
@@ -697,7 +697,7 @@ value(l::SupervisedLoss, target::Number, output::Number) =
     MethodError(value, (l, target, output))
 
 """
-    value(loss, target::AbstractArray, output::AbstractArray, avgmode::AverageMode) -> Number
+    value(loss, target::AbstractArray, output::AbstractArray, avgmode::AggregateMode) -> Number
 
 Compute the weighted or unweighted sum or mean (depending on
 `avgmode`) of the individual values of the loss function for each
@@ -720,31 +720,31 @@ you likely found a bug.
 
 - `outputs::AbstractArray`: The array of predicted outputs ``\\mathbf{\\hat{y}}``.
 
-- `avgmode::AverageMode`: Must be one of the following: [`AvgMode.Sum()`](@ref),
-  [`AvgMode.Mean()`](@ref), [`AvgMode.WeightedSum`](@ref), or
-  [`AvgMode.WeightedMean`](@ref).
+- `avgmode::AggregateMode`: Must be one of the following: [`AggMode.Sum()`](@ref),
+  [`AggMode.Mean()`](@ref), [`AggMode.WeightedSum`](@ref), or
+  [`AggMode.WeightedMean`](@ref).
 
 # Examples
 
 ```jldoctest
-julia> value(L1DistLoss(), [1,2,3], [2,5,-2], AvgMode.Sum())
+julia> value(L1DistLoss(), [1,2,3], [2,5,-2], AggMode.Sum())
 9
 
-julia> value(L1DistLoss(), [1.,2,3], [2,5,-2], AvgMode.Sum())
+julia> value(L1DistLoss(), [1.,2,3], [2,5,-2], AggMode.Sum())
 9.0
 
-julia> value(L1DistLoss(), [1,2,3], [2,5,-2], AvgMode.Mean())
+julia> value(L1DistLoss(), [1,2,3], [2,5,-2], AggMode.Mean())
 3.0
 
-julia> value(L1DistLoss(), Float32[1,2,3], Float32[2,5,-2], AvgMode.Mean())
+julia> value(L1DistLoss(), Float32[1,2,3], Float32[2,5,-2], AggMode.Mean())
 3.0f0
 ```
 """
-value(l::Loss, target::AbstractArray, output::AbstractArray, avgmode::AverageMode) =
+value(l::Loss, target::AbstractArray, output::AbstractArray, avgmode::AggregateMode) =
     MethodError(value, (l, target, output, avgmode))
 
 """
-    value(loss, target::AbstractArray, output::AbstractArray, avgmode::AverageMode, obsdim::ObsDimension) -> AbstractVector
+    value(loss, target::AbstractArray, output::AbstractArray, avgmode::AggregateMode, obsdim::ObsDimension) -> AbstractVector
 
 Compute the values of the loss function for each pair in
 `targets` and `outputs` individually, and return either the
@@ -767,18 +767,18 @@ you likely found a bug.
 
 - `outputs::AbstractArray`: The array of predicted outputs ``\\mathbf{\\hat{y}}``.
 
-- `avgmode::AverageMode`: Must be one of the following: [`AvgMode.Sum()`](@ref),
-  [`AvgMode.Mean()`](@ref), [`AvgMode.WeightedSum`](@ref), or
-  [`AvgMode.WeightedMean`](@ref).
+- `avgmode::AggregateMode`: Must be one of the following: [`AggMode.Sum()`](@ref),
+  [`AggMode.Mean()`](@ref), [`AggMode.WeightedSum`](@ref), or
+  [`AggMode.WeightedMean`](@ref).
 
 - `obsdim::ObsDimension`: Specifies which of the array dimensions
   denotes the observations. see `?ObsDim` for more information.
 """
-value(l::Loss, target::AbstractArray, output::AbstractArray, avgmode::AverageMode, obsdim::LearnBase.ObsDimension) =
+value(l::Loss, target::AbstractArray, output::AbstractArray, avgmode::AggregateMode, obsdim::LearnBase.ObsDimension) =
     MethodError(value, (l, target, output, avgmode, obsdim))
 
 """
-    value!(buffer::AbstractArray, loss, target::AbstractArray, output::AbstractArray, avgmode::AverageMode, obsdim::ObsDimension) -> buffer
+    value!(buffer::AbstractArray, loss, target::AbstractArray, output::AbstractArray, avgmode::AggregateMode, obsdim::ObsDimension) -> buffer
 
 Compute the values of the loss function for each pair in
 `targets` and `outputs` individually, and return either the
@@ -804,9 +804,9 @@ you likely found a bug.
 
 - `outputs::AbstractArray`: The array of predicted outputs ``\\mathbf{\\hat{y}}``.
 
-- `avgmode::AverageMode`: Must be one of the following: [`AvgMode.Sum()`](@ref),
-  [`AvgMode.Mean()`](@ref), [`AvgMode.WeightedSum`](@ref), or
-  [`AvgMode.WeightedMean`](@ref).
+- `avgmode::AggregateMode`: Must be one of the following: [`AggMode.Sum()`](@ref),
+  [`AggMode.Mean()`](@ref), [`AggMode.WeightedSum`](@ref), or
+  [`AggMode.WeightedMean`](@ref).
 
 - `obsdim::ObsDimension`: Specifies which of the array dimensions
   denotes the observations. see `?ObsDim` for more information.
@@ -820,14 +820,14 @@ julia> outputs = reshape(1:2:16, (2, 4)) ./ 8;
 
 julia> buffer = zeros(2);
 
-julia> value!(buffer, L1DistLoss(), targets, outputs, AvgMode.Sum(), ObsDim.First())
+julia> value!(buffer, L1DistLoss(), targets, outputs, AggMode.Sum(), ObsDim.First())
 2-element Array{Float64,1}:
  1.5
  2.0
 
 julia> buffer = zeros(4);
 
-julia> value!(buffer, L1DistLoss(), targets, outputs, AvgMode.Sum(), ObsDim.Last())
+julia> value!(buffer, L1DistLoss(), targets, outputs, AggMode.Sum(), ObsDim.Last())
 4-element Array{Float64,1}:
  0.125
  0.625
@@ -835,7 +835,7 @@ julia> value!(buffer, L1DistLoss(), targets, outputs, AvgMode.Sum(), ObsDim.Last
  1.625
 ```
 """
-value!(buffer::AbstractArray, l::Loss, target::AbstractArray, output::AbstractArray, avgmode::AverageMode, obsdim::LearnBase.ObsDimension) =
+value!(buffer::AbstractArray, l::Loss, target::AbstractArray, output::AbstractArray, avgmode::AggregateMode, obsdim::LearnBase.ObsDimension) =
     MethodError(value!, (buffer, l, target, output, avgmode, obsdim))
 
 @doc doc"""
@@ -881,7 +881,7 @@ deriv(l::SupervisedLoss, target::Number, output::Number) =
     MethodError(deriv, (l, target, output))
 
 """
-    deriv(loss, target::AbstractArray, output::AbstractArray, avgmode::AverageMode) -> Number
+    deriv(loss, target::AbstractArray, output::AbstractArray, avgmode::AggregateMode) -> Number
 
 Compute the weighted or unweighted sum or mean (depending on `avgmode`)
 of the individual derivatives of the loss function for each pair
@@ -904,25 +904,25 @@ you likely found a bug.
 
 - `outputs::AbstractArray`: The array of predicted outputs ``\\mathbf{\\hat{y}}``.
 
-- `avgmode::AverageMode`: Must be one of the following: [`AvgMode.Sum()`](@ref),
-  [`AvgMode.Mean()`](@ref), [`AvgMode.WeightedSum`](@ref), or
-  [`AvgMode.WeightedMean`](@ref).
+- `avgmode::AggregateMode`: Must be one of the following: [`AggMode.Sum()`](@ref),
+  [`AggMode.Mean()`](@ref), [`AggMode.WeightedSum`](@ref), or
+  [`AggMode.WeightedMean`](@ref).
 
 # Examples
 
 ```jldoctest
-julia> deriv(L2DistLoss(), [1,2,3], [2,5,-2], AvgMode.Sum())
+julia> deriv(L2DistLoss(), [1,2,3], [2,5,-2], AggMode.Sum())
 -2
 
-julia> deriv(L2DistLoss(), [1,2,3], [2,5,-2], AvgMode.Mean())
+julia> deriv(L2DistLoss(), [1,2,3], [2,5,-2], AggMode.Mean())
 -0.6666666666666666
 ```
 """
-deriv(l::Loss, target::AbstractArray, output::AbstractArray, avgmode::AverageMode) =
+deriv(l::Loss, target::AbstractArray, output::AbstractArray, avgmode::AggregateMode) =
     MethodError(deriv, (l, target, output, avgmode))
 
 """
-    deriv(loss, target::AbstractArray, output::AbstractArray, avgmode::AverageMode, obsdim::ObsDimension) -> AbstractVector
+    deriv(loss, target::AbstractArray, output::AbstractArray, avgmode::AggregateMode, obsdim::ObsDimension) -> AbstractVector
 
 Compute the derivative of the loss function for each pair in
 `targets` and `outputs` individually, and return either the
@@ -945,18 +945,18 @@ you likely found a bug.
 
 - `outputs::AbstractArray`: The array of predicted outputs ``\\mathbf{\\hat{y}}``.
 
-- `avgmode::AverageMode`: Must be one of the following: [`AvgMode.Sum()`](@ref),
-  [`AvgMode.Mean()`](@ref), [`AvgMode.WeightedSum`](@ref), or
-  [`AvgMode.WeightedMean`](@ref).
+- `avgmode::AggregateMode`: Must be one of the following: [`AggMode.Sum()`](@ref),
+  [`AggMode.Mean()`](@ref), [`AggMode.WeightedSum`](@ref), or
+  [`AggMode.WeightedMean`](@ref).
 
 - `obsdim::ObsDimension`: Specifies which of the array dimensions
   denotes the observations. see `?ObsDim` for more information.
 """
-deriv(l::Loss, target::AbstractArray, output::AbstractArray, avgmode::AverageMode, obsdim::LearnBase.ObsDimension) =
+deriv(l::Loss, target::AbstractArray, output::AbstractArray, avgmode::AggregateMode, obsdim::LearnBase.ObsDimension) =
     MethodError(deriv, (l, target, output, avgmode, obsdim))
 
 """
-    deriv!(buffer::AbstractArray, loss, target::AbstractArray, output::AbstractArray, avgmode::AverageMode, obsdim::ObsDimension) -> buffer
+    deriv!(buffer::AbstractArray, loss, target::AbstractArray, output::AbstractArray, avgmode::AggregateMode, obsdim::ObsDimension) -> buffer
 
 Compute the derivative of the loss function for each pair in
 `targets` and `outputs` individually, and return either the
@@ -982,9 +982,9 @@ you likely found a bug.
 
 - `outputs::AbstractArray`: The array of predicted outputs ``\\mathbf{\\hat{y}}``.
 
-- `avgmode::AverageMode`: Must be one of the following: [`AvgMode.Sum()`](@ref),
-  [`AvgMode.Mean()`](@ref), [`AvgMode.WeightedSum`](@ref), or
-  [`AvgMode.WeightedMean`](@ref).
+- `avgmode::AggregateMode`: Must be one of the following: [`AggMode.Sum()`](@ref),
+  [`AggMode.Mean()`](@ref), [`AggMode.WeightedSum`](@ref), or
+  [`AggMode.WeightedMean`](@ref).
 
 - `obsdim::ObsDimension`: Specifies which of the array dimensions
   denotes the observations. see `?ObsDim` for more information.
@@ -998,14 +998,14 @@ julia> outputs = reshape(1:2:16, (2, 4)) ./ 8;
 
 julia> buffer = zeros(2);
 
-julia> deriv!(buffer, L1DistLoss(), targets, outputs, AvgMode.Sum(), ObsDim.First())
+julia> deriv!(buffer, L1DistLoss(), targets, outputs, AggMode.Sum(), ObsDim.First())
 2-element Array{Float64,1}:
  3.0
  4.0
 
 julia> buffer = zeros(4);
 
-julia> deriv!(buffer, L1DistLoss(), targets, outputs, AvgMode.Sum(), ObsDim.Last())
+julia> deriv!(buffer, L1DistLoss(), targets, outputs, AggMode.Sum(), ObsDim.Last())
 4-element Array{Float64,1}:
  1.0
  2.0
@@ -1013,7 +1013,7 @@ julia> deriv!(buffer, L1DistLoss(), targets, outputs, AvgMode.Sum(), ObsDim.Last
  2.0
 ```
 """
-deriv!(buffer::AbstractArray, l::Loss, target::AbstractArray, output::AbstractArray, avgmode::AverageMode, obsdim::LearnBase.ObsDimension) =
+deriv!(buffer::AbstractArray, l::Loss, target::AbstractArray, output::AbstractArray, avgmode::AggregateMode, obsdim::LearnBase.ObsDimension) =
     MethodError(deriv!, (buffer, l, target, output, avgmode, obsdim))
 
 @doc doc"""
@@ -1053,7 +1053,7 @@ deriv2(l::SupervisedLoss, target::Number, output::Number) =
     MethodError(deriv2, (l, target, output))
 
 """
-    deriv2(loss, target::AbstractArray, output::AbstractArray, avgmode::AverageMode) -> Number
+    deriv2(loss, target::AbstractArray, output::AbstractArray, avgmode::AggregateMode) -> Number
 
 Compute the weighted or unweighted sum or mean (depending on `avgmode`)
 of the individual second derivatives of the loss function for
@@ -1076,25 +1076,25 @@ you likely found a bug.
 
 - `outputs::AbstractArray`: The array of predicted outputs ``\\mathbf{\\hat{y}}``.
 
-- `avgmode::AverageMode`: Must be one of the following: [`AvgMode.Sum()`](@ref),
-  [`AvgMode.Mean()`](@ref), [`AvgMode.WeightedSum`](@ref), or
-  [`AvgMode.WeightedMean`](@ref).
+- `avgmode::AggregateMode`: Must be one of the following: [`AggMode.Sum()`](@ref),
+  [`AggMode.Mean()`](@ref), [`AggMode.WeightedSum`](@ref), or
+  [`AggMode.WeightedMean`](@ref).
 
 # Examples
 
 ```jldoctest
-julia> deriv2(LogitDistLoss(), [1.,2,3], [2,5,-2], AvgMode.Sum())
+julia> deriv2(LogitDistLoss(), [1.,2,3], [2,5,-2], AggMode.Sum())
 0.49687329928636825
 
-julia> deriv2(LogitDistLoss(), [1.,2,3], [2,5,-2], AvgMode.Mean())
+julia> deriv2(LogitDistLoss(), [1.,2,3], [2,5,-2], AggMode.Mean())
 0.1656244330954561
 ```
 """
-deriv2(l::Loss, target::AbstractArray, output::AbstractArray, avgmode::AverageMode) =
+deriv2(l::Loss, target::AbstractArray, output::AbstractArray, avgmode::AggregateMode) =
     MethodError(deriv2, (l, target, output, avgmode))
 
 """
-    deriv2(loss, target::AbstractArray, output::AbstractArray, avgmode::AverageMode, obsdim::ObsDimension) -> AbstractVector
+    deriv2(loss, target::AbstractArray, output::AbstractArray, avgmode::AggregateMode, obsdim::ObsDimension) -> AbstractVector
 
 Compute the second derivative of the loss function for each pair in
 `targets` and `outputs` individually, and return either the
@@ -1117,18 +1117,18 @@ you likely found a bug.
 
 - `outputs::AbstractArray`: The array of predicted outputs ``\\mathbf{\\hat{y}}``.
 
-- `avgmode::AverageMode`: Must be one of the following: [`AvgMode.Sum()`](@ref),
-  [`AvgMode.Mean()`](@ref), [`AvgMode.WeightedSum`](@ref), or
-  [`AvgMode.WeightedMean`](@ref).
+- `avgmode::AggregateMode`: Must be one of the following: [`AggMode.Sum()`](@ref),
+  [`AggMode.Mean()`](@ref), [`AggMode.WeightedSum`](@ref), or
+  [`AggMode.WeightedMean`](@ref).
 
 - `obsdim::ObsDimension`: Specifies which of the array dimensions
   denotes the observations. see `?ObsDim` for more information.
 """
-deriv2(l::Loss, target::AbstractArray, output::AbstractArray, avgmode::AverageMode, obsdim::LearnBase.ObsDimension) =
+deriv2(l::Loss, target::AbstractArray, output::AbstractArray, avgmode::AggregateMode, obsdim::LearnBase.ObsDimension) =
     MethodError(deriv2, (l, target, output, avgmode, obsdim))
 
 """
-    deriv2!(buffer::AbstractArray, loss, target::AbstractArray, output::AbstractArray, avgmode::AverageMode, obsdim::ObsDimension) -> buffer
+    deriv2!(buffer::AbstractArray, loss, target::AbstractArray, output::AbstractArray, avgmode::AggregateMode, obsdim::ObsDimension) -> buffer
 
 Compute the second derivative of the loss function for each pair in
 `targets` and `outputs` individually, and return either the
@@ -1154,9 +1154,9 @@ you likely found a bug.
 
 - `outputs::AbstractArray`: The array of predicted outputs ``\\mathbf{\\hat{y}}``.
 
-- `avgmode::AverageMode`: Must be one of the following: [`AvgMode.Sum()`](@ref),
-  [`AvgMode.Mean()`](@ref), [`AvgMode.WeightedSum`](@ref), or
-  [`AvgMode.WeightedMean`](@ref).
+- `avgmode::AggregateMode`: Must be one of the following: [`AggMode.Sum()`](@ref),
+  [`AggMode.Mean()`](@ref), [`AggMode.WeightedSum`](@ref), or
+  [`AggMode.WeightedMean`](@ref).
 
 - `obsdim::ObsDimension`: Specifies which of the array dimensions
   denotes the observations. see `?ObsDim` for more information.
@@ -1170,14 +1170,14 @@ julia> outputs = reshape(1:2:16, (2, 4)) ./ 8;
 
 julia> buffer = zeros(2);
 
-julia> deriv2!(buffer, L2DistLoss(), targets, outputs, AvgMode.Sum(), ObsDim.First())
+julia> deriv2!(buffer, L2DistLoss(), targets, outputs, AggMode.Sum(), ObsDim.First())
 2-element Array{Float64,1}:
  8.0
  8.0
 
 julia> buffer = zeros(4);
 
-julia> deriv2!(buffer, L2DistLoss(), targets, outputs, AvgMode.Sum(), ObsDim.Last())
+julia> deriv2!(buffer, L2DistLoss(), targets, outputs, AggMode.Sum(), ObsDim.Last())
 4-element Array{Float64,1}:
  4.0
  4.0
@@ -1185,7 +1185,7 @@ julia> deriv2!(buffer, L2DistLoss(), targets, outputs, AvgMode.Sum(), ObsDim.Las
  4.0
 ```
 """
-deriv2!(buffer::AbstractArray, l::Loss, target::AbstractArray, output::AbstractArray, avgmode::AverageMode, obsdim::LearnBase.ObsDimension) =
+deriv2!(buffer::AbstractArray, l::Loss, target::AbstractArray, output::AbstractArray, avgmode::AggregateMode, obsdim::LearnBase.ObsDimension) =
     MethodError(deriv2!, (buffer, l, target, output, avgmode, obsdim))
 
 @doc doc"""

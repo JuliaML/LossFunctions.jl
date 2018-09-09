@@ -1,13 +1,16 @@
 module LossFunctions
 
-using RecipesBase
-
 import Base.*
 using Base.Cartesian
 using Markdown, SparseArrays, InteractiveUtils
 
+using RecipesBase
 using LearnBase
-import LearnBase: value, value!, deriv, deriv2, deriv!, scaled, value_deriv,
+import LearnBase:
+    value, value!,
+    deriv, deriv2, deriv!,
+    value_deriv,
+    scaled,
     isminimizable,
     isdifferentiable,
     istwicedifferentiable,
@@ -25,6 +28,7 @@ import LearnBase: value, value!, deriv, deriv2, deriv!, scaled, value_deriv,
     isclasscalibrated,
     isdistancebased,
     issymmetric
+
 # Reexport LearnBase
 eval(Expr(:toplevel, Expr(:export, setdiff(names(LearnBase), [:LearnBase])...)))
 
@@ -70,10 +74,10 @@ export
 
     weightedloss,
 
-    AvgMode
+    AggMode
 
 include("common.jl")
-include("averagemode.jl")
+include("aggregatemode.jl")
 
 include("supervised/supervised.jl")
 include("supervised/sparse.jl")
@@ -84,6 +88,8 @@ include("supervised/weightedbinary.jl")
 include("supervised/other.jl")
 include("supervised/ordinal.jl")
 include("supervised/io.jl")
+
+include("deprecated.jl")
 
 # allow using some special losses as function
 (loss::ScaledSupervisedLoss)(args...) = value(loss, args...)
@@ -98,14 +104,5 @@ end
 for T in union(subtypes(DistanceLoss), subtypes(MarginLoss))
     @eval (loss::$T)(args...) = value(loss, args...)
 end
-
-# deprecations
-@deprecate ScaledMarginLoss(loss, ::Type{Val{K}}) where {K}  ScaledMarginLoss(loss, Val(K))
-@deprecate ScaledDistanceLoss(loss, ::Type{Val{K}}) where {K}  ScaledDistanceLoss(loss, Val(K))
-@deprecate ScaledSupervisedLoss(loss, ::Type{Val{K}}) where {K}  ScaledSupervisedLoss(loss, Val(K))
-@deprecate ((*)(::Type{Val{K}}, loss::Loss) where {K}) (*)(Val(K), loss)
-@deprecate scaled(loss, ::Type{Val{K}}) where {K}  scaled(loss, Val(K))
-@deprecate weightedloss(loss::Loss, ::Type{Val{W}}) where {W}  weightedloss(loss, Val(W))
-@deprecate WeightedBinaryLoss(loss, ::Type{Val{W}}) where {W}  WeightedBinaryLoss(loss, Val(W))
 
 end # module

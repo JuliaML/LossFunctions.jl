@@ -1,29 +1,27 @@
-abstract type AverageMode end
+abstract type AggregateMode end
 
-module AvgMode
+module AggMode
 
     using StatsBase
-    import ..LossFunctions.AverageMode
+    import ..LossFunctions.AggregateMode
 
     export
         None,
         Sum,
         Mean,
-        Macro,
-        Micro,
         WeightedMean,
         WeightedSum
 
     """
-        AvgMode.None()
+        AggMode.None()
 
     Opt-out of aggregation. This is usually the default value.
     Using `None` will cause the element-wise results to be returned.
     """
-    struct None <: AverageMode end
+    struct None <: AggregateMode end
 
     """
-        AvgMode.Sum()
+        AggMode.Sum()
 
     Causes the method to return the unweighted sum of the
     elements instead of the individual elements. Can be used in
@@ -31,10 +29,10 @@ module AvgMode
     returned containing the sum for each observation (useful
     mainly for multivariable regression).
     """
-    struct Sum <: AverageMode end
+    struct Sum <: AggregateMode end
 
     """
-        AvgMode.Mean()
+        AggMode.Mean()
 
     Causes the method to return the unweighted mean of the
     elements instead of the individual elements. Can be used in
@@ -42,13 +40,10 @@ module AvgMode
     returned containing the mean for each observation (useful
     mainly for multivariable regression).
     """
-    struct Mean <: AverageMode end
-
-    struct Macro <: AverageMode end
-    const Micro = Mean
+    struct Mean <: AggregateMode end
 
     """
-        AvgMode.WeightedSum(weights; [normalize = false])
+        AggMode.WeightedSum(weights; [normalize = false])
 
     Causes the method to return the weighted sum of all
     observations. The variable `weights` has to be a vector of
@@ -61,7 +56,6 @@ module AvgMode
     - `weights::AbstractVector`: Vector of weight values that
       can be used to give certain observations a stronger
       influence on the sum.
-
 
     - `normalize::Bool`: Boolean that specifies if the weight
       vector should be transformed in such a way that it sums to
@@ -76,12 +70,12 @@ module AvgMode
     # Examples
 
     ```julia-repl
-    julia> AvgMode.WeightedSum([1,1,2]); # 3 observations
+    julia> AggMode.WeightedSum([1,1,2]); # 3 observations
 
-    julia> AvgMode.WeightedSum([1,1,2], normalize = true);
+    julia> AggMode.WeightedSum([1,1,2], normalize = true);
     ```
     """
-    struct WeightedSum{T<:AbstractWeights} <: AverageMode
+    struct WeightedSum{T<:AbstractWeights} <: AggregateMode
         weights::T
         normalize::Bool
     end
@@ -89,7 +83,7 @@ module AvgMode
     WeightedSum(A::AbstractVector; normalize::Bool = false) = WeightedSum(weights(A), normalize)
 
     """
-        AvgMode.WeightedMean(weights; [normalize = true])
+        AggMode.WeightedMean(weights; [normalize = true])
 
     Causes the method to return the weighted mean of all
     observations. The variable `weights` has to be a vector of
@@ -102,7 +96,6 @@ module AvgMode
     - `weights::AbstractVector`: Vector of weight values that can
       be used to give certain observations a stronger influence
       on the mean.
-
 
     - `normalize::Bool`: Boolean that specifies if the weight
       vector should be transformed in such a way that it sums to
@@ -117,12 +110,12 @@ module AvgMode
     # Examples
 
     ```julia-repl
-    julia> AvgMode.WeightedMean([1,1,2]); # 3 observations
+    julia> AggMode.WeightedMean([1,1,2]); # 3 observations
 
-    julia> AvgMode.WeightedMean([1,1,2], normalize = false);
+    julia> AggMode.WeightedMean([1,1,2], normalize = false);
     ```
     """
-    struct WeightedMean{T<:AbstractWeights} <: AverageMode
+    struct WeightedMean{T<:AbstractWeights} <: AggregateMode
         weights::T
         normalize::Bool
     end
