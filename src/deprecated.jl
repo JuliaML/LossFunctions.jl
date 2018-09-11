@@ -7,6 +7,7 @@
 @deprecate WeightedBinaryLoss(loss, ::Type{Val{W}}) where {W}  WeightedBinaryLoss(loss, Val(W))
 
 Base.@deprecate_binding AverageMode AggregateMode
+export AvgMode
 module AvgMode
     import ..LossFunctions.AggMode
     Base.@deprecate_binding None AggMode.None
