@@ -33,7 +33,6 @@ Cross-entropy loss also known as log loss and logistic loss is defined as:
 
 ``L(target, output) = - target*ln(output) - (1-target)*ln(1-output)``
 """
-
 struct CrossentropyLoss <: SupervisedLoss end
 const LogitProbLoss = CrossentropyLoss
 
