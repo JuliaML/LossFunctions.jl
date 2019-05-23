@@ -260,7 +260,7 @@ for (FUN, DESC, EXAMPLE) in (
             quote
                 $(Expr(:meta, :inline))
                 S = typeof(($($FUN))(loss, one(Q), one(T)))
-                ($($FUN)).(Ref(loss), target, output)::Array{S,$(max(N,M))}
+                ($($FUN)).(Ref(loss), target, output)
             end
         end
 
