@@ -29,9 +29,6 @@ import LearnBase:
     isdistancebased,
     issymmetric
 
-# Reexport LearnBase
-eval(Expr(:toplevel, Expr(:export, setdiff(names(LearnBase), [:LearnBase])...)))
-
 export
 
     deriv2!,
