@@ -366,7 +366,7 @@ end
     @test islipschitzcont(loss) == true
     @test islocallylipschitzcont(loss) == true
     @test isclipable(loss) == true
-    @test ismarginbased(loss) == true
+    @test ismarginbased(loss) == false
     @test isdistancebased(loss) == false
     @test issymmetric(loss) == false
     @test isclasscalibrated(loss) == true
@@ -707,4 +707,3 @@ end
         end
     end
 end
-

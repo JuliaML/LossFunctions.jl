@@ -346,9 +346,6 @@ end
 println("<HEARTBEAT>")
 
 @testset "Test margin-based loss against reference function" begin
-    _zerooneloss(y, t) = sign(y*t) < 0 ? 1 : 0
-    test_value(ZeroOneLoss(), _zerooneloss, [-1.,1], -10:0.2:10)
-
     _hingeloss(y, t) = max(0, 1 - y.*t)
     test_value(HingeLoss(), _hingeloss, [-1.,1], -10:0.2:10)
 
@@ -482,7 +479,10 @@ const OrdinalSmoothedHingeLoss = OrdinalMarginLoss{<:SmoothedL1HingeLoss}
 end
 
 
-@testset "Test other loss against reference function" begin
+@testset "Test other losses against reference function" begin
+    _zerooneloss(y, t) = y == t ? 0 : 1
+    test_value(ZeroOneLoss(), _zerooneloss, [-1.,1], -10:0.2:10)
+
     _crossentropyloss(y, t) = -y*log(t) - (1-y)*log(1-t)
     test_value(CrossentropyLoss(), _crossentropyloss, 0:0.01:1, 0.01:0.01:0.99)
 

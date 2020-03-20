@@ -1,4 +1,40 @@
 @doc doc"""
+    ZeroOneLoss <: SupervisedLoss
+
+The classical classification loss. It penalizes every misclassified
+observation with a loss of `1` while every correctly classified
+observation has a loss of `0`.
+It is not convex nor continuous and thus seldom used directly.
+Instead one usually works with some classification-calibrated
+surrogate loss, such as [L1HingeLoss](@ref).
+"""
+struct ZeroOneLoss <: SupervisedLoss end
+
+agreement(target, output) = target == output
+
+value(loss::ZeroOneLoss, agreement::Bool) = agreement ? 0 : 1
+deriv(loss::ZeroOneLoss, agreement::Bool) = 0
+deriv2(loss::ZeroOneLoss, agreement::Bool) = 0
+value_deriv(loss::ZeroOneLoss, agreement::Bool) = agreement ? (0, 0) : (1, 0)
+
+value(loss::ZeroOneLoss, target::Number, output::Number) = value(loss, agreement(target, output))
+deriv(loss::ZeroOneLoss, target::Number, output::Number) = deriv(loss, agreement(target, output))
+deriv2(loss::ZeroOneLoss, target::Number, output::Number) = deriv2(loss, agreement(target, output))
+
+isminimizable(::ZeroOneLoss) = true
+isdifferentiable(::ZeroOneLoss) = false
+isdifferentiable(::ZeroOneLoss, at) = at != 0
+istwicedifferentiable(::ZeroOneLoss) = false
+istwicedifferentiable(::ZeroOneLoss, at) = at != 0
+isnemitski(::ZeroOneLoss) = true
+islipschitzcont(::ZeroOneLoss) = true
+isconvex(::ZeroOneLoss) = false
+isclasscalibrated(::ZeroOneLoss) = true
+isclipable(::ZeroOneLoss) = true
+
+# ============================================================
+
+@doc doc"""
     PoissonLoss <: SupervisedLoss
 
 Loss under a Poisson noise distribution (KL-divergence)

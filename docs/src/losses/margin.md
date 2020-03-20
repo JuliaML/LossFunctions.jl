@@ -18,18 +18,6 @@ they agree with the sign of the target.
 This section lists all the subtypes of [`MarginLoss`](@ref)
 that are implemented in this package.
 
-## ZeroOneLoss
-
-```@docs
-ZeroOneLoss
-```
-
-Lossfunction | Derivative
--------------|------------------
-![loss](https://rawgit.com/JuliaML/FileStorage/master/LossFunctions/ZeroOneLoss1.svg) | ![deriv](https://rawgit.com/JuliaML/FileStorage/master/LossFunctions/ZeroOneLoss2.svg)
-``L(a) = \begin{cases} 1 & \quad \text{if } a < 0 \\ 0 & \quad \text{otherwise}\\ \end{cases}`` | ``L'(a) = 0``
-
-
 ## PerceptronLoss
 
 ```@docs

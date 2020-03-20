@@ -30,9 +30,13 @@ margin_losses = [
     LogitMarginLoss(), L1HingeLoss(), L2HingeLoss(),
     PerceptronLoss(), SmoothedL1HingeLoss(.5),
     SmoothedL1HingeLoss(1), SmoothedL1HingeLoss(2),
-    ModifiedHuberLoss(), ZeroOneLoss(), L2MarginLoss(),
+    ModifiedHuberLoss(), L2MarginLoss(),
     ExpLoss(), SigmoidLoss(), DWDMarginLoss(.5),
     DWDMarginLoss(1), DWDMarginLoss(2)
+]
+
+other_losses = [
+    ZeroOneLoss(), CrossentropyLoss(), PoissonLoss()
 ]
 
 for t in tests

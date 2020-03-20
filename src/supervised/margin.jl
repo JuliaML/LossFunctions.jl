@@ -5,60 +5,6 @@
 # ============================================================
 
 @doc doc"""
-    ZeroOneLoss <: MarginLoss
-
-The classical classification loss. It penalizes every misclassified
-observation with a loss of `1` while every correctly classified
-observation has a loss of `0`.
-It is not convex nor continuous and thus seldom used directly.
-Instead one usually works with some classification-calibrated
-surrogate loss, such as [L1HingeLoss](@ref).
-
-```math
-L(a) = \begin{cases} 1 & \quad \text{if } a < 0 \\ 0 & \quad \text{if } a >= 0\\ \end{cases}
-```
-
----
-```
-              Lossfunction                     Derivative
-      ┌────────────┬────────────┐      ┌────────────┬────────────┐
-    1 │------------┐            │    1 │                         │
-      │            |            │      │                         │
-      │            |            │      │                         │
-      │            |            │      │_________________________│
-      │            |            │      │                         │
-      │            |            │      │                         │
-      │            |            │      │                         │
-    0 │            └------------│   -1 │                         │
-      └────────────┴────────────┘      └────────────┴────────────┘
-      -2                        2      -2                        2
-                y * h(x)                         y * h(x)
-```
-"""
-struct ZeroOneLoss <: MarginLoss end
-
-deriv(loss::ZeroOneLoss, target::Number, output::Number) = zero(output)
-deriv2(loss::ZeroOneLoss, target::Number, output::Number) = zero(output)
-
-value(loss::ZeroOneLoss, agreement::T) where {T<:Number} = sign(agreement) < 0 ? one(T) : zero(T)
-deriv(loss::ZeroOneLoss, agreement::T) where {T<:Number} = zero(T)
-deriv2(loss::ZeroOneLoss, agreement::T) where {T<:Number} = zero(T)
-value_deriv(loss::ZeroOneLoss, agreement::T) where {T<:Number} = sign(agreement) < 0 ? (one(T), zero(T)) : (zero(T), zero(T))
-
-isminimizable(::ZeroOneLoss) = true
-isdifferentiable(::ZeroOneLoss) = false
-isdifferentiable(::ZeroOneLoss, at) = at != 0
-istwicedifferentiable(::ZeroOneLoss) = false
-istwicedifferentiable(::ZeroOneLoss, at) = at != 0
-isnemitski(::ZeroOneLoss) = true
-islipschitzcont(::ZeroOneLoss) = true
-isconvex(::ZeroOneLoss) = false
-isclasscalibrated(loss::ZeroOneLoss) = true
-isclipable(::ZeroOneLoss) = true
-
-# ============================================================
-
-@doc doc"""
     PerceptronLoss <: MarginLoss
 
 The perceptron loss linearly penalizes every prediction where the
