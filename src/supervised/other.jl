@@ -1,4 +1,37 @@
 @doc doc"""
+    MissclassLoss
+
+Misclassification loss that assigns `1` for misclassified
+examples and `0` otherwise. It is a generalization of
+`ZeroOneLoss` for more than two classes.
+"""
+struct MisclassLoss <: SupervisedLoss end
+
+agreement(target, output) = target == output
+
+value(::MisclassLoss, agreement::Bool) = agreement ? 0 : 1
+deriv(::MisclassLoss, agreement::Bool) = 0
+deriv2(::MisclassLoss, agreement::Bool) = 0
+value_deriv(::MisclassLoss, agreement::Bool) = agreement ? (0, 0) : (1, 0)
+
+value(loss::MisclassLoss, target::Number, output::Number) = value(loss, agreement(target, output))
+deriv(loss::MisclassLoss, target::Number, output::Number) = deriv(loss, agreement(target, output))
+deriv2(loss::MisclassLoss, target::Number, output::Number) = deriv2(loss, agreement(target, output))
+
+isminimizable(::MisclassLoss) = false
+isdifferentiable(::MisclassLoss) = false
+isdifferentiable(::MisclassLoss, at) = at != 0
+istwicedifferentiable(::MisclassLoss) = false
+istwicedifferentiable(::MisclassLoss, at) = at != 0
+isnemitski(::MisclassLoss) = false
+islipschitzcont(::MisclassLoss) = false
+isconvex(::MisclassLoss) = false
+isclasscalibrated(::MisclassLoss) = false
+isclipable(::MisclassLoss) = false
+
+# ===============================================================
+
+@doc doc"""
     PoissonLoss <: SupervisedLoss
 
 Loss under a Poisson noise distribution (KL-divergence)

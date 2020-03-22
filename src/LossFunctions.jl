@@ -31,12 +31,15 @@ import LearnBase:
 
 export
 
+    value,
+    value!,
     deriv2!,
     value_fun,
     deriv_fun,
     deriv2_fun,
     value_deriv_fun,
 
+    ZeroOneLoss,
     LogitMarginLoss,
     PerceptronLoss,
     HingeLoss,
@@ -61,10 +64,10 @@ export
     QuantileLoss,
     PinballLoss,
 
+    MisclassLoss,
     PoissonLoss,
     LogitProbLoss,
     CrossentropyLoss,
-    ZeroOneLoss,
 
     OrdinalMarginLoss,
     OrdinalHingeLoss,
