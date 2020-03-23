@@ -36,7 +36,7 @@ margin_losses = [
 ]
 
 other_losses = [
-    MisclassLoss(), PoissonLoss(), CrossentropyLoss()
+    MisclassLoss(), PoissonLoss(), CrossEntropyLoss()
 ]
 
 for t in tests
