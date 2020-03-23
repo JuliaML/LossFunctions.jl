@@ -5,6 +5,7 @@
 @deprecate scaled(loss, ::Type{Val{K}}) where {K}  scaled(loss, Val(K))
 @deprecate weightedloss(loss::Loss, ::Type{Val{W}}) where {W}  weightedloss(loss, Val(W))
 @deprecate WeightedBinaryLoss(loss, ::Type{Val{W}}) where {W}  WeightedBinaryLoss(loss, Val(W))
+@deprecate CrossentropyLoss CrossEntropyLoss
 
 Base.@deprecate_binding AverageMode AggregateMode
 export AvgMode
