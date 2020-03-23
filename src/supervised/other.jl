@@ -1,5 +1,5 @@
 @doc doc"""
-    MissclassLoss
+    MisclassLoss <: SupervisedLoss
 
 Misclassification loss that assigns `1` for misclassified
 examples and `0` otherwise. It is a generalization of
