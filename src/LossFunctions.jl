@@ -67,7 +67,8 @@ export
     MisclassLoss,
     PoissonLoss,
     LogitProbLoss,
-    CrossentropyLoss,
+    CrossEntropyLoss,
+    ZeroOneLoss,
 
     OrdinalMarginLoss,
     OrdinalHingeLoss,

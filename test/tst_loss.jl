@@ -487,7 +487,7 @@ end
     test_value(MisclassLoss(), _misclassloss, 1:10, vcat(1:5,7:11))
 
     _crossentropyloss(y, t) = -y*log(t) - (1-y)*log(1-t)
-    test_value(CrossentropyLoss(), _crossentropyloss, 0:0.01:1, 0.01:0.01:0.99)
+    test_value(CrossEntropyLoss(), _crossentropyloss, 0:0.01:1, 0.01:0.01:0.99)
 
     _poissonloss(y, t) = exp(t) - t*y
     test_value(PoissonLoss(), _poissonloss, 0:10, range(0,stop=10,length=11))
@@ -543,8 +543,8 @@ end
 @testset "Test first and second derivatives of other losses" begin
     test_deriv(PoissonLoss(), -10:.2:10, 0:30)
     test_deriv2(PoissonLoss(), -10:.2:10, 0:30)
-    test_deriv(CrossentropyLoss(), 0:0.01:1, 0.01:0.01:0.99)
-    test_deriv2(CrossentropyLoss(), 0:0.01:1, 0.01:0.01:0.99)
+    test_deriv(CrossEntropyLoss(), 0:0.01:1, 0.01:0.01:0.99)
+    test_deriv2(CrossEntropyLoss(), 0:0.01:1, 0.01:0.01:0.99)
 end
 
 @testset "Test second derivatives of distance-based losses" begin
