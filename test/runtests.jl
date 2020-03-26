@@ -35,6 +35,10 @@ margin_losses = [
     DWDMarginLoss(1), DWDMarginLoss(2)
 ]
 
+other_losses = [
+    MisclassLoss(), PoissonLoss(), CrossEntropyLoss()
+]
+
 for t in tests
     @testset "$t" begin
         include(t)

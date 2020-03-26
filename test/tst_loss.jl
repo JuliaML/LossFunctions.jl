@@ -483,6 +483,9 @@ end
 
 
 @testset "Test other loss against reference function" begin
+    _misclassloss(y, t) = y == t ? 0 : 1
+    test_value(MisclassLoss(), _misclassloss, 1:10, vcat(1:5,7:11))
+
     _crossentropyloss(y, t) = -y*log(t) - (1-y)*log(1-t)
     test_value(CrossEntropyLoss(), _crossentropyloss, 0:0.01:1, 0.01:0.01:0.99)
 
