@@ -1,9 +1,3 @@
-```@meta
-DocTestSetup = quote
-    using LossFunctions
-end
-```
-
 # Efficient Sum and Mean
 
 In many situations we are not really that interested in the

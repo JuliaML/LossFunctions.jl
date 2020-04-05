@@ -1,12 +1,3 @@
-```@meta
-DocTestSetup = quote
-    using LossFunctions
-end
-```
-```@raw html
-<div class="loss-docs">
-```
-
 # Margin-based Losses
 
 Margin-based loss functions are particularly useful for binary
