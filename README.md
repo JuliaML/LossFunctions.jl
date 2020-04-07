@@ -14,8 +14,7 @@ that are commonly used in Machine Learning._
 :-------------------------------:|:----------------------------------:
 ![distance_losses](https://rawgithub.com/JuliaML/FileStorage/master/LossFunctions/distance.svg) | ![margin_losses](https://rawgithub.com/JuliaML/FileStorage/master/LossFunctions/margin.svg)
 
-Others: `PeriodicLoss`, `PoissonLoss`, `ScaledLoss`,
-`WeightedBinaryLoss`
+Please consult the documentation for other losses available.
 
 ## Introduction
 

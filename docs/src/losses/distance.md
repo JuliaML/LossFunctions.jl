@@ -1,12 +1,3 @@
-```@meta
-DocTestSetup = quote
-    using LossFunctions
-end
-```
-```@raw html
-<div class="loss-docs">
-```
-
 # Distance-based Losses
 
 Loss functions that belong to the category "distance-based" are
