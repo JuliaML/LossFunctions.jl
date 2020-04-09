@@ -19,24 +19,14 @@ function test_vector_value(l::MarginLoss, t, y)
     @test @inferred(value(l, yt)) == ref
     @test value.(Ref(l), t, y) == ref
     @test value.(Ref(l), yt) == ref
-    @test @inferred(l(t, y, AggMode.None())) == ref
-    @test @inferred(l(t, y)) == ref
-    @test @inferred(l(yt, AggMode.None())) == ref
-    @test @inferred(l(yt)) == ref
-    @test l.(t, y) == ref
-    @test l.(yt) == ref
     # Sum
     s = sum(ref)
     @test @inferred(value(l, t, y, AggMode.Sum())) ≈ s
     @test @inferred(value(l, yt, AggMode.Sum())) ≈ s
-    @test @inferred(l(t, y, AggMode.Sum())) ≈ s
-    @test @inferred(l(yt, AggMode.Sum())) ≈ s
     # Mean
     m = mean(ref)
     @test @inferred(value(l, t, y, AggMode.Mean())) ≈ m
     @test @inferred(value(l, yt, AggMode.Mean())) ≈ m
-    @test @inferred(l(t, y, AggMode.Mean())) ≈ m
-    @test @inferred(l(yt, AggMode.Mean())) ≈ m
     # Obs specific
     n = size(t, 1)
     k = size(t, ndims(t))
@@ -116,24 +106,14 @@ function test_vector_value(l::DistanceLoss, t, y)
     @test @inferred(value(l, yt)) == ref
     @test value.(Ref(l), t, y) == ref
     @test value.(Ref(l), yt) == ref
-    @test @inferred(l(t, y, AggMode.None())) == ref
-    @test @inferred(l(t, y)) == ref
-    @test @inferred(l(yt, AggMode.None())) == ref
-    @test @inferred(l(yt)) == ref
-    @test l.(t, y) == ref
-    @test l.(yt) == ref
     # Sum
     s = sum(ref)
     @test @inferred(value(l, t, y, AggMode.Sum())) ≈ s
     @test @inferred(value(l, yt, AggMode.Sum())) ≈ s
-    @test @inferred(l(t, y, AggMode.Sum())) ≈ s
-    @test @inferred(l(yt, AggMode.Sum())) ≈ s
     # Mean
     m = mean(ref)
     @test round(@inferred(value(l, t, y, AggMode.Mean())), digits=5) ≈ round(m, digits=5)
     @test round(@inferred(value(l, yt, AggMode.Mean())), digits=5) ≈ round(m, digits=5)
-    @test round(@inferred(l(t, y, AggMode.Mean())), digits=5) ≈ round(m, digits=5)
-    @test round(@inferred(l(yt, AggMode.Mean())), digits=5) ≈ round(m, digits=5)
     # Obs specific
     n = size(t, 1)
     k = size(t, ndims(t))

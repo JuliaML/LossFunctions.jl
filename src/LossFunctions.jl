@@ -92,18 +92,4 @@ include("supervised/io.jl")
 
 include("deprecated.jl")
 
-# allow using some special losses as function
-(loss::ScaledSupervisedLoss)(args...) = value(loss, args...)
-(loss::WeightedBinaryLoss)(args...)   = value(loss, args...)
-
-# allow using SupervisedLoss as function
-for T in filter(isconcretetype, subtypes(SupervisedLoss))
-    @eval (loss::$T)(args...) = value(loss, args...)
-end
-
-# allow using MarginLoss and DistanceLoss as function
-for T in union(subtypes(DistanceLoss), subtypes(MarginLoss))
-    @eval (loss::$T)(args...) = value(loss, args...)
-end
-
 end # module
