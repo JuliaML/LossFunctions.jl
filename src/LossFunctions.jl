@@ -33,11 +33,10 @@ export
 
     value,
     value!,
+    deriv,
+    deriv!,
+    deriv2,
     deriv2!,
-    value_fun,
-    deriv_fun,
-    deriv2_fun,
-    value_deriv_fun,
 
     ZeroOneLoss,
     LogitMarginLoss,
