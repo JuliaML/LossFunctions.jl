@@ -282,21 +282,6 @@ deriv2(::SupervisedLoss, ::AbstractArray, ::AbstractArray)
 deriv2!(::AbstractArray, ::SupervisedLoss, ::AbstractArray, ::AbstractArray)
 ```
 
-## Function Closures
-
-In some circumstances it may be convenient to have the loss
-function or its derivative as a proper Julia function. Instead of
-exporting special function names for every implemented loss (like
-`l2distloss(...)`), we provide the ability to generate a true
-function on the fly for any given loss.
-
-```@docs
-value_fun(::SupervisedLoss)
-deriv_fun(::SupervisedLoss)
-deriv2_fun(::SupervisedLoss)
-value_deriv_fun(::SupervisedLoss)
-```
-
 ## Properties of a Loss
 
 In some situations it can be quite useful to assert certain
