@@ -1,100 +1,6 @@
 Base.Broadcast.broadcastable(l::SupervisedLoss) = Ref(l)
 
 # --------------------------------------------------------------
-# convenience closures
-
-"""
-    value_fun(loss::SupervisedLoss) -> Function
-
-Returns a new function that computes the [`value`](@ref) for the
-given `loss`. This new function will support all the signatures
-that [`value`](@ref) does.
-
-```jldoctest
-julia> f = value_fun(L2DistLoss());
-
-julia> f(-1.0, 3.0) # computes the value of L2DistLoss
-16.0
-
-julia> f.([1.,2], [4,7])
-2-element Array{Float64,1}:
-  9.0
- 25.0
-```
-"""
-@inline function value_fun(l::SupervisedLoss)
-    _value(args...) = value(l, args...)
-    _value
-end
-
-"""
-    deriv_fun(loss::SupervisedLoss) -> Function
-
-Returns a new function that computes the [`deriv`](@ref) for the
-given `loss`. This new function will support all the signatures
-that [`deriv`](@ref) does.
-
-```jldoctest
-julia> g = deriv_fun(L2DistLoss());
-
-julia> g(-1.0, 3.0) # computes the deriv of L2DistLoss
-8.0
-
-julia> g.([1.,2], [4,7])
-2-element Array{Float64,1}:
-  6.0
- 10.0
-```
-"""
-@inline function deriv_fun(l::SupervisedLoss)
-    _deriv(args...) = deriv(l, args...)
-    _deriv
-end
-
-"""
-    deriv2_fun(loss::SupervisedLoss) -> Function
-
-Returns a new function that computes the [`deriv2`](@ref) (i.e.
-second derivative) for the given `loss`. This new function will
-support all the signatures that [`deriv2`](@ref) does.
-
-```jldoctest
-julia> g2 = deriv2_fun(L2DistLoss());
-
-julia> g2(-1.0, 3.0) # computes the second derivative of L2DistLoss
-2.0
-
-julia> g2.([1.,2], [4,7])
-2-element Array{Float64,1}:
- 2.0
- 2.0
-```
-"""
-@inline function deriv2_fun(l::SupervisedLoss)
-    _deriv2(args...) = deriv2(l, args...)
-    _deriv2
-end
-
-"""
-    value_deriv_fun(loss::SupervisedLoss) -> Function
-
-Returns a new function that computes the [`value_deriv`](@ref)
-for the given `loss`. This new function will support all the
-signatures that [`value_deriv`](@ref) does.
-
-```jldoctest
-julia> fg = value_deriv_fun(L2DistLoss());
-
-julia> fg(-1.0, 3.0) # computes the second derivative of L2DistLoss
-(16.0, 8.0)
-```
-"""
-@inline function value_deriv_fun(l::SupervisedLoss)
-    _value_deriv(args...) = value_deriv(l, args...)
-    _value_deriv
-end
-
-# --------------------------------------------------------------
 # non-exported types
 
 struct Deriv{L<:SupervisedLoss}
@@ -496,8 +402,7 @@ for (FUN, DESC, EXAMPLE) in (
                     numbers::AbstractArray{T,N},
                     ::AggMode.Mean) where {T,N}
                 nrm = 1 / length(numbers)
-                S = typeof(($FUN)(loss, one(T)) * one(nrm))
-                mapreduce(x -> loss(x) * nrm, +, numbers)::S
+                mapreduce(x -> ($FUN)(loss, x) * nrm, +, numbers)
             end
 
             # Compute the sum (returns a Number)
@@ -505,7 +410,7 @@ for (FUN, DESC, EXAMPLE) in (
                     loss::$KIND,
                     numbers::AbstractArray{T,N},
                     ::AggMode.Sum) where {T,N}
-                mapreduce(loss, +, numbers)
+                sum(x -> ($FUN)(loss, x), numbers)
             end
 
             # Compute the total weighted mean (returns a Number)
