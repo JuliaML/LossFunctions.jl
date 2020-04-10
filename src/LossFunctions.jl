@@ -2,10 +2,12 @@ module LossFunctions
 
 import Base.*
 using Base.Cartesian
-using Markdown, SparseArrays, InteractiveUtils
-
+using Markdown
+using SparseArrays
+using InteractiveUtils
 using RecipesBase
 using LearnBase
+
 import LearnBase:
     value, value!,
     deriv, deriv2, deriv!,
@@ -31,6 +33,10 @@ import LearnBase:
 
 export
 
+    Loss,
+    SupervisedLoss,
+    MarginLoss,
+    DistanceLoss,
     value,
     value!,
     deriv,
