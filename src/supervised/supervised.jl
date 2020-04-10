@@ -410,7 +410,7 @@ for (FUN, DESC, EXAMPLE) in (
                     loss::$KIND,
                     numbers::AbstractArray{T,N},
                     ::AggMode.Sum) where {T,N}
-                mapreduce(x -> ($FUN)(loss, x), +, numbers)
+                sum(x -> ($FUN)(loss, x), numbers)
             end
 
             # Compute the total weighted mean (returns a Number)
