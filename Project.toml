@@ -1,6 +1,6 @@
 name = "LossFunctions"
 uuid = "6e9bb92d-87bd-4e8a-b639-80472d1675c6"
-version = "0.5.2"
+version = "0.6.0"
 
 [deps]
 InteractiveUtils = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
