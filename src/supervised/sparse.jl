@@ -19,8 +19,8 @@ end
     ) where {T,N,Q,Ti,M}
     M > N && throw(ArgumentError("target has more dimensions than output; broadcasting not supported in this direction."))
     quote
-      @_dimcheck size(buffer) == size(output)
-      @nexprs $M (n)->@_dimcheck(size(target,n) == size(output,n))
+      @dimcheck size(buffer) == size(output)
+      @nexprs $M (n)->@dimcheck(size(target,n) == size(output,n))
       zeroQ = zero(Q)
       negQ = Q(-1)
       @simd for I in CartesianIndices(size(output))
