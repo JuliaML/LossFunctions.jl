@@ -95,6 +95,4 @@ include("supervised/other.jl")
 include("supervised/ordinal.jl")
 include("supervised/io.jl")
 
-include("deprecated.jl")
-
 end # module
