@@ -1,3 +1,9 @@
+```@meta
+DocTestSetup = quote
+    using LossFunctions
+end
+```
+
 # Working with Losses
 
 Even though they are called loss "functions", this package

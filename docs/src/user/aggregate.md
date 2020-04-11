@@ -1,3 +1,9 @@
+```@meta
+DocTestSetup = quote
+    using LossFunctions
+end
+```
+
 # Efficient Sum and Mean
 
 In many situations we are not really that interested in the
@@ -50,14 +56,14 @@ common accumulations efficiently without allocating temporary
 arrays. These methods can be invoked using an additional
 parameter which specifies how the values should be accumulated /
 averaged. The type of this parameter has to be a subtype of
-`AverageMode`.
+`AggregateMode`.
 
 ## Average Modes
 
 Before we discuss these memory-efficient methods, let us briefly
 introduce the available average mode types. We provide a number
 of different averages modes, all of which are contained within
-the namespace `AvgMode`. An instance of such type can then be
+the namespace `AggMode`. An instance of such type can then be
 used as additional parameter to [`value`](@ref), [`deriv`](@ref),
 and [`deriv2`](@ref), as we will see further down.
 
@@ -66,11 +72,11 @@ a short description of what their effect would be when used as an
 additional parameter to the functions mentioned above.
 
 ```@docs
-AvgMode.None
-AvgMode.Sum
-AvgMode.Mean
-AvgMode.WeightedSum
-AvgMode.WeightedMean
+AggMode.None
+AggMode.Sum
+AggMode.Mean
+AggMode.WeightedSum
+AggMode.WeightedMean
 ```
 
 ## Unweighted Sum and Mean
@@ -82,15 +88,15 @@ broadcasted) results of [`value`](@ref), [`deriv`](@ref), and
 temporary array and instead compute the result directly.
 
 ```@docs
-value(::Loss, ::AbstractArray, ::AbstractArray, ::LossFunctions.AverageMode)
+value(::Loss, ::AbstractArray, ::AbstractArray, ::LossFunctions.AggregateMode)
 ```
 
 The exact same method signature is also implemented for
 [`deriv`](@ref) and [`deriv2`](@ref) respectively.
 
 ```@docs
-deriv(::Loss, ::AbstractArray, ::AbstractArray, ::LossFunctions.AverageMode)
-deriv2(::Loss, ::AbstractArray, ::AbstractArray, ::LossFunctions.AverageMode)
+deriv(::Loss, ::AbstractArray, ::AbstractArray, ::LossFunctions.AggregateMode)
+deriv2(::Loss, ::AbstractArray, ::AbstractArray, ::LossFunctions.AggregateMode)
 ```
 
 ## Sum and Mean per Observation
@@ -110,7 +116,7 @@ that denotes the observations. For that purpose we provide the
 types contained in the namespace `ObsDim`.
 
 ```@docs
-value(::Loss, ::AbstractArray, ::AbstractArray, ::LossFunctions.AverageMode, ::LearnBase.ObsDimension)
+value(::Loss, ::AbstractArray, ::AbstractArray, ::LossFunctions.AggregateMode, ::LearnBase.ObsDimension)
 ```
 
 Consider the following two matrices, `targets` and `outputs`.
@@ -136,12 +142,12 @@ the observations. Thus this data would consist of two
 observations with four variables each.
 
 ```jldoctest obsdim
-julia> value(L1DistLoss(), targets, outputs, AvgMode.Sum(), ObsDim.First())
+julia> value(L1DistLoss(), targets, outputs, AggMode.Sum(), ObsDim.First())
 2-element Array{Float64,1}:
  1.5
  2.0
 
-julia> value(L1DistLoss(), targets, outputs, AvgMode.Mean(), ObsDim.First())
+julia> value(L1DistLoss(), targets, outputs, AggMode.Mean(), ObsDim.First())
 2-element Array{Float64,1}:
  0.375
  0.5
@@ -152,14 +158,14 @@ second/last dimension denotes the observations. In that case our
 data consists of four observations with two variables each.
 
 ```jldoctest obsdim
-julia> value(L1DistLoss(), targets, outputs, AvgMode.Sum(), ObsDim.Last())
+julia> value(L1DistLoss(), targets, outputs, AggMode.Sum(), ObsDim.Last())
 4-element Array{Float64,1}:
  0.125
  0.625
  1.125
  1.625
 
-julia> value(L1DistLoss(), targets, outputs, AvgMode.Mean(), ObsDim.Last())
+julia> value(L1DistLoss(), targets, outputs, AggMode.Mean(), ObsDim.Last())
 4-element Array{Float64,1}:
  0.0625
  0.3125
@@ -172,17 +178,17 @@ mutating version that can make use a preallocated vector to write
 the results into.
 
 ```@docs
-value!(::AbstractArray, ::Loss, ::AbstractArray, ::AbstractArray, ::LossFunctions.AverageMode, ::LearnBase.ObsDimension)
+value!(::AbstractArray, ::Loss, ::AbstractArray, ::AbstractArray, ::LossFunctions.AggregateMode, ::LearnBase.ObsDimension)
 ```
 
 Naturally we also provide both of these methods for
 [`deriv`](@ref) and [`deriv2`](@ref) respectively.
 
 ```@docs
-deriv(::Loss, ::AbstractArray, ::AbstractArray, ::LossFunctions.AverageMode, ::LearnBase.ObsDimension)
-deriv!(::AbstractArray, ::Loss, ::AbstractArray, ::AbstractArray, ::LossFunctions.AverageMode, ::LearnBase.ObsDimension)
-deriv2(::Loss, ::AbstractArray, ::AbstractArray, ::LossFunctions.AverageMode, ::LearnBase.ObsDimension)
-deriv2!(::AbstractArray, ::Loss, ::AbstractArray, ::AbstractArray, ::LossFunctions.AverageMode, ::LearnBase.ObsDimension)
+deriv(::Loss, ::AbstractArray, ::AbstractArray, ::LossFunctions.AggregateMode, ::LearnBase.ObsDimension)
+deriv!(::AbstractArray, ::Loss, ::AbstractArray, ::AbstractArray, ::LossFunctions.AggregateMode, ::LearnBase.ObsDimension)
+deriv2(::Loss, ::AbstractArray, ::AbstractArray, ::LossFunctions.AggregateMode, ::LearnBase.ObsDimension)
+deriv2!(::AbstractArray, ::Loss, ::AbstractArray, ::AbstractArray, ::LossFunctions.AggregateMode, ::LearnBase.ObsDimension)
 ```
 
 ## Weighted Sum and Mean
@@ -233,7 +239,7 @@ each observation (which results in a vector), and then we compute
 the weighted sum of all observations.
 
 The following code snipped demonstrates how to compute the
-`AvgMode.WeightedSum([2,1])` manually. This is **not** meant as
+`AggMode.WeightedSum([2,1])` manually. This is **not** meant as
 an example of how to do it, but simply to show what is happening
 qualitatively. In this example we assume that we are working in a
 multi-variable regression setting, in which our data set has four
@@ -261,7 +267,7 @@ julia> sum(tmp .* [2, 1]) # weigh 1st observation twice as high
 5.0
 ```
 
-To manually compute the result for `AvgMode.WeightedMean([2,1])`
+To manually compute the result for `AggMode.WeightedMean([2,1])`
 we follow a similar approach, but use the normalized weight
 vector in the last step.
 
@@ -282,8 +288,8 @@ julia> sum(tmp .* [0.6666, 0.3333]) # weigh 1st observation twice as high
 Note that you can specify explicitly if you want to normalize the
 weight vector. That option is supported for computing the
 weighted sum, as well as for computing the weighted mean. See the
-documentation for [`AvgMode.WeightedSum`](@ref) and
-[`AvgMode.WeightedMean`](@ref) for more information.
+documentation for [`AggMode.WeightedSum`](@ref) and
+[`AggMode.WeightedMean`](@ref) for more information.
 
 The code-snippets above are of course very inefficient, because
 they allocate (multiple) temporary arrays. We only included them
@@ -293,16 +299,16 @@ special methods for [`value`](@ref), [`deriv`](@ref),
 [`deriv2`](@ref) and their mutating counterparts.
 
 ```jldoctest weight
-julia> value(L1DistLoss(), [1.,2,3], [2,5,-2], AvgMode.WeightedSum([1,2,1]))
+julia> value(L1DistLoss(), [1.,2,3], [2,5,-2], AggMode.WeightedSum([1,2,1]))
 12.0
 
-julia> value(L1DistLoss(), [1.,2,3], [2,5,-2], AvgMode.WeightedMean([1,2,1]))
+julia> value(L1DistLoss(), [1.,2,3], [2,5,-2], AggMode.WeightedMean([1,2,1]))
 3.0
 
-julia> value(L1DistLoss(), targets, outputs, AvgMode.WeightedSum([2,1]), ObsDim.First())
+julia> value(L1DistLoss(), targets, outputs, AggMode.WeightedSum([2,1]), ObsDim.First())
 5.0
 
-julia> value(L1DistLoss(), targets, outputs, AvgMode.WeightedMean([2,1]), ObsDim.First())
+julia> value(L1DistLoss(), targets, outputs, AggMode.WeightedMean([2,1]), ObsDim.First())
 0.4166666666666667
 ```
 
@@ -310,15 +316,15 @@ We also provide this functionality for [`deriv`](@ref) and
 [`deriv2`](@ref) respectively.
 
 ```jldoctest weight
-julia> deriv(L2DistLoss(), [1.,2,3], [2,5,-2], AvgMode.WeightedSum([1,2,1]))
+julia> deriv(L2DistLoss(), [1.,2,3], [2,5,-2], AggMode.WeightedSum([1,2,1]))
 4.0
 
-julia> deriv(L2DistLoss(), [1.,2,3], [2,5,-2], AvgMode.WeightedMean([1,2,1]))
+julia> deriv(L2DistLoss(), [1.,2,3], [2,5,-2], AggMode.WeightedMean([1,2,1]))
 1.0
 
-julia> deriv(L2DistLoss(), targets, outputs, AvgMode.WeightedSum([2,1]), ObsDim.First())
+julia> deriv(L2DistLoss(), targets, outputs, AggMode.WeightedSum([2,1]), ObsDim.First())
 10.0
 
-julia> deriv(L2DistLoss(), targets, outputs, AvgMode.WeightedMean([2,1]), ObsDim.First())
+julia> deriv(L2DistLoss(), targets, outputs, AggMode.WeightedMean([2,1]), ObsDim.First())
 0.8333333333333334
 ```
