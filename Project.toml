@@ -1,5 +1,5 @@
 name = "LossFunctions"
-uuid = "6e9bb92d-87bd-4e8a-b639-80472d1675c6"
+uuid = "30fc2ffe-d236-52d8-8643-a9d8f7c094a7"
 version = "0.6.0"
 
 [deps]
