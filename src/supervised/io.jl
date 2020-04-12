@@ -33,33 +33,12 @@ Base.print(io::IO, loss::WeightedBinaryLoss{T,W}, args...) where {T,W} = print(i
 
 _loss_xguide(loss::MarginLoss) = "y * h(x)"
 _loss_xguide(loss::DistanceLoss) = "h(x) - y"
+_loss_yguide(loss::SupervisedLoss) = "L("*_loss_xguide(loss)*")"
 
-@recipe function plot(drv::Deriv, rng = -2:0.05:2)
-    xguide --> _loss_xguide(drv.loss)
-    yguide --> "L'(y, h(x))"
-    label  --> string(drv.loss)
-    deriv_fun(drv.loss), rng
-end
-
-@recipe function plot(loss::SupervisedLoss, rng = -2:0.05:2)
+@recipe function plot(loss::SupervisedLoss, range=-2:0.05:2; fun=value)
     xguide --> _loss_xguide(loss)
-    yguide --> "L(y, h(x))"
+    yguide --> _loss_yguide(loss)
     label  --> string(loss)
-    value_fun(loss), rng
-end
-
-@recipe function plot(derivs::AbstractVector{T}, rng = -2:0.05:2) where T<:Deriv
-    for drv in derivs
-        @series begin
-            drv, rng
-        end
-    end
-end
-
-@recipe function plot(losses::AbstractVector{T}, rng = -2:0.05:2) where T<:SupervisedLoss
-    for loss in losses
-        @series begin
-            loss, rng
-        end
-    end
+    l(a) = fun(loss, a)
+    l, range
 end

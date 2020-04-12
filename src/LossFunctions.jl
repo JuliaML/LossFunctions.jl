@@ -82,7 +82,7 @@ export
 
     AggMode
 
-include("common.jl")
+include("devutils.jl")
 include("aggregatemode.jl")
 
 include("supervised/supervised.jl")

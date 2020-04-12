@@ -113,10 +113,10 @@ avoid allocating a temporary array and directly compute the
 result.
 
 ```julia-repl
-julia> value(L2DistLoss(), true_targets, pred_outputs, AvgMode.Sum())
+julia> value(L2DistLoss(), true_targets, pred_outputs, AggMode.Sum())
 5.25
 
-julia> value(L2DistLoss(), true_targets, pred_outputs, AvgMode.Mean())
+julia> value(L2DistLoss(), true_targets, pred_outputs, AggMode.Mean())
 1.75
 ```
 
@@ -126,10 +126,10 @@ each observation in the predicted outputs and so allow to give
 certain observations a stronger influence over the result.
 
 ```julia-repl
-julia> value(L2DistLoss(), true_targets, pred_outputs, AvgMode.WeightedSum([2,1,1]))
+julia> value(L2DistLoss(), true_targets, pred_outputs, AggMode.WeightedSum([2,1,1]))
 5.5
 
-julia> value(L2DistLoss(), true_targets, pred_outputs, AvgMode.WeightedMean([2,1,1]))
+julia> value(L2DistLoss(), true_targets, pred_outputs, AggMode.WeightedMean([2,1,1]))
 1.375
 ```
 
@@ -157,7 +157,7 @@ julia> value(L2DistLoss(), A, B)
  0.00161395  0.0423701  0.183882
  0.172286    0.0180639  0.00252607
 
-julia> value(L2DistLoss(), A, B, AvgMode.Sum())
+julia> value(L2DistLoss(), A, B, AggMode.Sum())
 0.420741920634
 ```
 
@@ -172,7 +172,7 @@ julia> value(L2DistLoss(), rand(2), rand(2,2))
  0.228077  0.597212
  0.789808  0.311914
 
-julia> value(L2DistLoss(), rand(2), rand(2,2), AvgMode.Sum())
+julia> value(L2DistLoss(), rand(2), rand(2,2), AggMode.Sum())
 0.0860658081865589
 ```
 
@@ -182,18 +182,18 @@ multivariate regression where one could want to accumulate the
 loss per individual observation.
 
 ```julia-repl
-julia> value(L2DistLoss(), A, B, AvgMode.Sum(), ObsDim.First())
+julia> value(L2DistLoss(), A, B, AggMode.Sum(), ObsDim.First())
 2-element Array{Float64,1}:
  0.227866
  0.192876
 
-julia> value(L2DistLoss(), A, B, AvgMode.Sum(), ObsDim.Last())
+julia> value(L2DistLoss(), A, B, AggMode.Sum(), ObsDim.Last())
 3-element Array{Float64,1}:
  0.1739
  0.060434
  0.186408
 
-julia> value(L2DistLoss(), A, B, AvgMode.WeightedSum([2,1]), ObsDim.First())
+julia> value(L2DistLoss(), A, B, AggMode.WeightedSum([2,1]), ObsDim.First())
 0.648608280735
 ```
 
@@ -287,4 +287,3 @@ If you encounter a bug or would like to participate in the
 further development of this package come find us on Github.
 
 - [JuliaML/LossFunctions.jl](https://github.com/JuliaML/LossFunctions.jl)
-

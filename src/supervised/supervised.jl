@@ -1,20 +1,7 @@
 Base.Broadcast.broadcastable(l::SupervisedLoss) = Ref(l)
 
 # --------------------------------------------------------------
-# non-exported types
-
-struct Deriv{L<:SupervisedLoss}
-    loss::L
-end
-@inline (d::Deriv)(args...) = deriv(d.loss, args...)
-
-struct Deriv2{L<:SupervisedLoss}
-    loss::L
-end
-@inline (d::Deriv2)(args...) = deriv2(d.loss, args...)
-
-# --------------------------------------------------------------
-# avgmode support
+# aggmode support
 
 for (FUN, DESC, EXAMPLE) in (
         (:value,
@@ -194,7 +181,7 @@ for (FUN, DESC, EXAMPLE) in (
             S, B = min(M,N), max(M,N)
             P = promote_type(Q,T)
             quote
-                @nexprs $S (n)->@_dimcheck(size(target, n) == size(output, n))
+                @nexprs $S (n)->@dimcheck(size(target, n) == size(output, n))
                 nrm = 1 / $P(length($bigger))
                 out = zero(($($FUN))(loss, one(Q), one(T)) * nrm)
                 @inbounds @simd for I in CartesianIndices(size($bigger))
@@ -214,7 +201,7 @@ for (FUN, DESC, EXAMPLE) in (
             bigger = M > N ? :target : :output
             S, B = min(M,N), max(M,N)
             quote
-                @nexprs $S (n)->@_dimcheck(size(target, n) == size(output, n))
+                @nexprs $S (n)->@dimcheck(size(target, n) == size(output, n))
                 out = zero(($($FUN))(loss, one(Q), one(T)))
                 @inbounds @simd for I in CartesianIndices(size($bigger))
                     @nexprs $B n->(i_n = I[n])
@@ -235,8 +222,8 @@ for (FUN, DESC, EXAMPLE) in (
                 avg::AggMode.WeightedMean,
                 ::ObsDim.Constant{O}) where {Q,T,N,O}
             O > N && throw(ArgumentError("The specified obsdim is larger as the available dimensions."))
-            @_dimcheck size(target) == size(output)
-            @_dimcheck size(output, O) == length(avg.weights)
+            @dimcheck size(target) == size(output)
+            @dimcheck size(output, O) == length(avg.weights)
             k = prod(n != O ? size(output,n) : 1 for n in 1:N)::Int
             nrm = avg.normalize ? inv(k * sum(avg.weights)) : inv(k * one(sum(avg.weights)))
             out = zero(($FUN)(loss, one(Q), one(T)) * (avg.weights[1] * nrm))
@@ -254,8 +241,8 @@ for (FUN, DESC, EXAMPLE) in (
                 avg::AggMode.WeightedSum,
                 ::ObsDim.Constant{O}) where {Q,T,N,O}
             O > N && throw(ArgumentError("The specified obsdim is larger as the available dimensions."))
-            @_dimcheck size(target) == size(output)
-            @_dimcheck size(output, O) == length(avg.weights)
+            @dimcheck size(target) == size(output)
+            @dimcheck size(output, O) == length(avg.weights)
             nrm = avg.normalize ? inv(sum(avg.weights)) : inv(one(sum(avg.weights)))
             out = zero(($FUN)(loss, one(Q), one(T)) * (avg.weights[1] * nrm))
             @inbounds @simd for I in CartesianIndices(size(output))
@@ -289,8 +276,8 @@ for (FUN, DESC, EXAMPLE) in (
                 ::ObsDim.Constant{O}) where {B,Q,T,N,O}
             N == 1 && throw(ArgumentError("Mean per observation non sensible for two Vectors. Try omitting the obsdim"))
             O > N && throw(ArgumentError("The specified obsdim is larger as the available dimensions."))
-            @_dimcheck size(target) == size(output)
-            @_dimcheck length(buffer) == size(output, O)
+            @dimcheck size(target) == size(output)
+            @dimcheck length(buffer) == size(output, O)
             fill!(buffer, zero(B))
             P = promote_type(Q,T)
             k = P(prod(size(output,n) for n in 1:N if n != O))
@@ -323,8 +310,8 @@ for (FUN, DESC, EXAMPLE) in (
                 ::ObsDim.Constant{O}) where {B,Q,T,N,O}
             N == 1 && throw(ArgumentError("Sum per observation non sensible for two Vectors. Try omitting the obsdim"))
             O > N && throw(ArgumentError("The specified obsdim is larger as the available dimensions."))
-            @_dimcheck size(target) == size(output)
-            @_dimcheck length(buffer) == size(output, O)
+            @dimcheck size(target) == size(output)
+            @dimcheck length(buffer) == size(output, O)
             fill!(buffer, zero(B))
             @inbounds @simd for I in CartesianIndices(size(output))
                 buffer[I[O]] += ($FUN)(loss, target[I], output[I])
@@ -419,7 +406,7 @@ for (FUN, DESC, EXAMPLE) in (
                     numbers::AbstractArray{T,N},
                     avg::AggMode.WeightedMean,
                     ::ObsDim.Constant{O}) where {T,N,O}
-                @_dimcheck size(numbers, O) == length(avg.weights)
+                @dimcheck size(numbers, O) == length(avg.weights)
                 k = prod(n != O ? size(numbers,n) : 1 for n in 1:N)::Int
                 nrm = avg.normalize ? inv(k * sum(avg.weights)) : inv(k * one(sum(avg.weights)))
                 out = zero(($FUN)(loss, one(T)) * (avg.weights[1] * nrm))
@@ -435,7 +422,7 @@ for (FUN, DESC, EXAMPLE) in (
                     numbers::AbstractArray{T,N},
                     avg::AggMode.WeightedSum,
                     ::ObsDim.Constant{O}) where {T,N,O}
-                @_dimcheck size(numbers, O) == length(avg.weights)
+                @dimcheck size(numbers, O) == length(avg.weights)
                 nrm = avg.normalize ? inv(sum(avg.weights)) : inv(one(sum(avg.weights)))
                 out = zero(($FUN)(loss, one(T)) * (avg.weights[1] * nrm))
                 @inbounds @simd for I in CartesianIndices(size(numbers))
@@ -467,7 +454,7 @@ for (FUN, DESC, EXAMPLE) in (
                     ::ObsDim.Constant{O}) where {B,T,N,O}
                 N == 1 && throw(ArgumentError("Mean per observation non sensible for two Vectors. Try omitting the obsdim"))
                 O > N && throw(ArgumentError("The specified obsdim is larger as the available dimensions."))
-                @_dimcheck length(buffer) == size(numbers, O)
+                @dimcheck length(buffer) == size(numbers, O)
                 fill!(buffer, zero(B))
                 k = prod(size(numbers,n) for n in 1:N if n != O)::Int
                 nrm = 1 / k
@@ -497,7 +484,7 @@ for (FUN, DESC, EXAMPLE) in (
                     ::ObsDim.Constant{O}) where {B,T,N,O}
                 N == 1 && throw(ArgumentError("Sum per observation non sensible for two Vectors. Try omitting the obsdim"))
                 O > N && throw(ArgumentError("The specified obsdim is larger as the available dimensions."))
-                @_dimcheck length(buffer) == size(numbers, O)
+                @dimcheck length(buffer) == size(numbers, O)
                 fill!(buffer, zero(B))
                 @inbounds @simd for I in CartesianIndices(size(numbers))
                     buffer[I[O]] += ($FUN)(loss, numbers[I])
