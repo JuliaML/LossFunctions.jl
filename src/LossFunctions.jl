@@ -10,7 +10,8 @@ using LearnBase
 
 import LearnBase:
     value, value!,
-    deriv, deriv2, deriv!,
+    deriv, deriv!,
+    deriv2, deriv2!,
     value_deriv,
     scaled,
     isminimizable,
@@ -24,7 +25,6 @@ import LearnBase:
     isfishercons,
     islipschitzcont,
     islocallylipschitzcont,
-    islipschitzcont_deriv, # maybe overkill
     isclipable,
     ismarginbased,
     isclasscalibrated,
@@ -37,12 +37,9 @@ export
     SupervisedLoss,
     MarginLoss,
     DistanceLoss,
-    value,
-    value!,
-    deriv,
-    deriv!,
-    deriv2,
-    deriv2!,
+    value, value!,
+    deriv, deriv!,
+    deriv2, deriv2!,
 
     ZeroOneLoss,
     LogitMarginLoss,
