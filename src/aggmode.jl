@@ -128,3 +128,4 @@ end
 # -----------------
 include("aggmode/none.jl")
 include("aggmode/sum.jl")
+include("aggmode/mean.jl")
