@@ -127,3 +127,4 @@ end
 # IMPLEMENTATIONS
 # -----------------
 include("aggmode/none.jl")
+include("aggmode/sum.jl")
