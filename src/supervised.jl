@@ -125,9 +125,9 @@ for (FUN, DESC, EXAMPLE) in (
                 loss::SupervisedLoss,
                 target::AbstractArray,
                 output::AbstractArray{T,N},
-                avg::AggregateMode,
+                agg::AggregateMode,
                 ::ObsDim.Last = ObsDim.Last()) where {T,N}
-            ($FUN)(loss, target, output, avg, ObsDim.Constant{N}())
+            ($FUN)(loss, target, output, agg, ObsDim.Constant{N}())
         end
 
         # (mutating) Translate ObsDim.Last to the correct ObsDim.Constant (for code reduction)
@@ -136,31 +136,9 @@ for (FUN, DESC, EXAMPLE) in (
                 loss::SupervisedLoss,
                 target::AbstractArray,
                 output::AbstractArray{T,N},
-                avg::AggregateMode,
+                agg::AggregateMode,
                 ::ObsDim.Last = ObsDim.Last()) where {T,N}
-            ($(Symbol(FUN,:!)))(buffer, loss, target, output, avg, ObsDim.Constant{N}())
-        end
-
-        # ------------------------------------------------------
-        # REDUCE TO NUMBER - SAME SIZE
-
-        # Compute the total weighted mean (returns a Number)
-        function ($FUN)(
-                loss::SupervisedLoss,
-                target::AbstractArray{Q,N},
-                output::AbstractArray{T,N},
-                avg::AggMode.WeightedMean,
-                ::ObsDim.Constant{O}) where {Q,T,N,O}
-            O > N && throw(ArgumentError("The specified obsdim is larger as the available dimensions."))
-            @dimcheck size(target) == size(output)
-            @dimcheck size(output, O) == length(avg.weights)
-            k = prod(n != O ? size(output,n) : 1 for n in 1:N)::Int
-            nrm = avg.normalize ? inv(k * sum(avg.weights)) : inv(k * one(sum(avg.weights)))
-            out = zero(($FUN)(loss, one(Q), one(T)) * (avg.weights[1] * nrm))
-            @inbounds @simd for I in CartesianIndices(size(output))
-                out += ($FUN)(loss, target[I], output[I]) * (avg.weights[I[O]] * nrm)
-            end
-            out
+            ($(Symbol(FUN,:!)))(buffer, loss, target, output, agg, ObsDim.Constant{N}())
         end
     end
 
@@ -187,9 +165,9 @@ for (FUN, DESC, EXAMPLE) in (
             @inline function ($FUN)(
                     loss::$KIND,
                     numbers::AbstractArray{T,N},
-                    avg::AggregateMode,
+                    agg::AggregateMode,
                     ::ObsDim.Last = ObsDim.Last()) where {T,N}
-                ($FUN)(loss, numbers, avg, ObsDim.Constant{N}())
+                ($FUN)(loss, numbers, agg, ObsDim.Constant{N}())
             end
 
             # (mutating) Translate ObsDim.Last to the correct ObsDim.Constant (for code reduction)
@@ -197,28 +175,9 @@ for (FUN, DESC, EXAMPLE) in (
                     buffer::AbstractArray,
                     loss::$KIND,
                     numbers::AbstractArray{T,N},
-                    avg::AggregateMode,
+                    agg::AggregateMode,
                     ::ObsDim.Last = ObsDim.Last()) where {T,N}
-                ($(Symbol(FUN,:!)))(buffer, loss, numbers, avg, ObsDim.Constant{N}())
-            end
-
-            # --------------------------------------------------
-            # REDUCE TO NUMBER
-
-            # Compute the total weighted mean (returns a Number)
-            function ($FUN)(
-                    loss::$KIND,
-                    numbers::AbstractArray{T,N},
-                    avg::AggMode.WeightedMean,
-                    ::ObsDim.Constant{O}) where {T,N,O}
-                @dimcheck size(numbers, O) == length(avg.weights)
-                k = prod(n != O ? size(numbers,n) : 1 for n in 1:N)::Int
-                nrm = avg.normalize ? inv(k * sum(avg.weights)) : inv(k * one(sum(avg.weights)))
-                out = zero(($FUN)(loss, one(T)) * (avg.weights[1] * nrm))
-                @inbounds @simd for I in CartesianIndices(size(numbers))
-                    out += ($FUN)(loss, numbers[I]) * (avg.weights[I[O]] * nrm)
-                end
-                out
+                ($(Symbol(FUN,:!)))(buffer, loss, numbers, agg, ObsDim.Constant{N}())
             end
         end
     end
