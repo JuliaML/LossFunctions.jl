@@ -162,24 +162,6 @@ for (FUN, DESC, EXAMPLE) in (
             end
             out
         end
-
-        # Compute the total weighted sum (returns a Number)
-        function ($FUN)(
-                loss::SupervisedLoss,
-                target::AbstractArray{Q,N},
-                output::AbstractArray{T,N},
-                avg::AggMode.WeightedSum,
-                ::ObsDim.Constant{O}) where {Q,T,N,O}
-            O > N && throw(ArgumentError("The specified obsdim is larger as the available dimensions."))
-            @dimcheck size(target) == size(output)
-            @dimcheck size(output, O) == length(avg.weights)
-            nrm = avg.normalize ? inv(sum(avg.weights)) : inv(one(sum(avg.weights)))
-            out = zero(($FUN)(loss, one(Q), one(T)) * (avg.weights[1] * nrm))
-            @inbounds @simd for I in CartesianIndices(size(output))
-                out += ($FUN)(loss, target[I], output[I]) * (avg.weights[I[O]] * nrm)
-            end
-            out
-        end
     end
 
     for KIND in (:MarginLoss, :DistanceLoss)
@@ -232,21 +214,6 @@ for (FUN, DESC, EXAMPLE) in (
                 @dimcheck size(numbers, O) == length(avg.weights)
                 k = prod(n != O ? size(numbers,n) : 1 for n in 1:N)::Int
                 nrm = avg.normalize ? inv(k * sum(avg.weights)) : inv(k * one(sum(avg.weights)))
-                out = zero(($FUN)(loss, one(T)) * (avg.weights[1] * nrm))
-                @inbounds @simd for I in CartesianIndices(size(numbers))
-                    out += ($FUN)(loss, numbers[I]) * (avg.weights[I[O]] * nrm)
-                end
-                out
-            end
-
-            # Compute the total weighted sum (returns a Number)
-            function ($FUN)(
-                    loss::$KIND,
-                    numbers::AbstractArray{T,N},
-                    avg::AggMode.WeightedSum,
-                    ::ObsDim.Constant{O}) where {T,N,O}
-                @dimcheck size(numbers, O) == length(avg.weights)
-                nrm = avg.normalize ? inv(sum(avg.weights)) : inv(one(sum(avg.weights)))
                 out = zero(($FUN)(loss, one(T)) * (avg.weights[1] * nrm))
                 @inbounds @simd for I in CartesianIndices(size(numbers))
                     out += ($FUN)(loss, numbers[I]) * (avg.weights[I[O]] * nrm)
