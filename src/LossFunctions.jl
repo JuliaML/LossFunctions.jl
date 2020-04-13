@@ -92,4 +92,7 @@ include("supervised.jl")
 include("printing.jl")
 include("plotrecipes.jl")
 
+# deprecations
+@deprecate OrdinalHingeLoss OrdinalMarginLoss{HingeLoss}
+
 end # module
