@@ -184,8 +184,7 @@ for (FUN, DESC, EXAMPLE) in (
 end
 
 # --------------------------------------------------------------
-
-# abstract MarginLoss <: SupervisedLoss
+# MarginLoss fallbacks
 
 value(loss::MarginLoss, target::Number, output::Number) = value(loss, target * output)
 deriv(loss::MarginLoss, target::Number, output::Number) = target * deriv(loss, target * output)
@@ -194,8 +193,6 @@ function value_deriv(loss::MarginLoss, target::Number, output::Number)
     v, d = value_deriv(loss, target * output)
     (v, target*d)
 end
-
-# Fallback for losses that don't want to take advantage of this
 value_deriv(loss::MarginLoss, agreement::Number) = (value(loss, agreement), deriv(loss, agreement))
 
 isunivfishercons(::MarginLoss) = false
@@ -212,15 +209,12 @@ ismarginbased(::MarginLoss) = true
 isclasscalibrated(loss::MarginLoss) = isconvex(loss) && isdifferentiable(loss, 0) && deriv(loss, 0) < 0
 
 # --------------------------------------------------------------
-
-# abstract DistanceLoss <: SupervisedLoss
+# DistanceLoss fallbacks
 
 value(loss::DistanceLoss, target::Number, output::Number) = value(loss, output - target)
 deriv(loss::DistanceLoss, target::Number, output::Number) = deriv(loss, output - target)
 deriv2(loss::DistanceLoss, target::Number, output::Number) = deriv2(loss, output - target)
 value_deriv(loss::DistanceLoss, target::Number, output::Number) = value_deriv(loss, output - target)
-
-# Fallback for losses that don't want to take advantage of this
 value_deriv(loss::DistanceLoss, difference::Number) = (value(loss, difference), deriv(loss, difference))
 
 isdistancebased(::DistanceLoss) = true
@@ -277,10 +271,10 @@ value(l::SupervisedLoss, target::Number, output::Number) =
     MethodError(value, (l, target, output))
 
 """
-    value(loss, target::AbstractArray, output::AbstractArray, avgmode::AggregateMode) -> Number
+    value(loss, target::AbstractArray, output::AbstractArray, agg::AggregateMode) -> Number
 
 Compute the weighted or unweighted sum or mean (depending on
-`avgmode`) of the individual values of the loss function for each
+`agg`) of the individual values of the loss function for each
 pair in `targets` and `outputs`. This method will not allocate a
 temporary array.
 
@@ -300,7 +294,7 @@ you likely found a bug.
 
 - `outputs::AbstractArray`: The array of predicted outputs ``\\mathbf{\\hat{y}}``.
 
-- `avgmode::AggregateMode`: Must be one of the following: [`AggMode.Sum()`](@ref),
+- `agg::AggregateMode`: Must be one of the following: [`AggMode.Sum()`](@ref),
   [`AggMode.Mean()`](@ref), [`AggMode.WeightedSum`](@ref), or
   [`AggMode.WeightedMean`](@ref).
 
@@ -320,16 +314,16 @@ julia> value(L1DistLoss(), Float32[1,2,3], Float32[2,5,-2], AggMode.Mean())
 3.0f0
 ```
 """
-value(l::Loss, target::AbstractArray, output::AbstractArray, avgmode::AggregateMode) =
-    MethodError(value, (l, target, output, avgmode))
+value(l::Loss, target::AbstractArray, output::AbstractArray, agg::AggregateMode) =
+    MethodError(value, (l, target, output, agg))
 
 """
-    value(loss, target::AbstractArray, output::AbstractArray, avgmode::AggregateMode, obsdim::ObsDimension) -> AbstractVector
+    value(loss, target::AbstractArray, output::AbstractArray, agg::AggregateMode, obsdim::ObsDimension) -> AbstractVector
 
 Compute the values of the loss function for each pair in
 `targets` and `outputs` individually, and return either the
 weighted or unweighted sum or mean for each observation (depending on
-`avgmode`). This method will not allocate a temporary array, but
+`agg`). This method will not allocate a temporary array, but
 it will allocate the resulting vector.
 
 Both arrays have to be of the same shape and size. Furthermore
@@ -347,23 +341,23 @@ you likely found a bug.
 
 - `outputs::AbstractArray`: The array of predicted outputs ``\\mathbf{\\hat{y}}``.
 
-- `avgmode::AggregateMode`: Must be one of the following: [`AggMode.Sum()`](@ref),
+- `agg::AggregateMode`: Must be one of the following: [`AggMode.Sum()`](@ref),
   [`AggMode.Mean()`](@ref), [`AggMode.WeightedSum`](@ref), or
   [`AggMode.WeightedMean`](@ref).
 
 - `obsdim::ObsDimension`: Specifies which of the array dimensions
   denotes the observations. see `?ObsDim` for more information.
 """
-value(l::Loss, target::AbstractArray, output::AbstractArray, avgmode::AggregateMode, obsdim::LearnBase.ObsDimension) =
-    MethodError(value, (l, target, output, avgmode, obsdim))
+value(l::Loss, target::AbstractArray, output::AbstractArray, agg::AggregateMode, obsdim::LearnBase.ObsDimension) =
+    MethodError(value, (l, target, output, agg, obsdim))
 
 """
-    value!(buffer::AbstractArray, loss, target::AbstractArray, output::AbstractArray, avgmode::AggregateMode, obsdim::ObsDimension) -> buffer
+    value!(buffer::AbstractArray, loss, target::AbstractArray, output::AbstractArray, agg::AggregateMode, obsdim::ObsDimension) -> buffer
 
 Compute the values of the loss function for each pair in
 `targets` and `outputs` individually, and return either the
 weighted or unweighted sum or mean for each observation, depending on
-`avgmode`. The results are stored into the given vector `buffer`.
+`agg`. The results are stored into the given vector `buffer`.
 This method will not allocate a temporary array.
 
 Both arrays have to be of the same shape and size. Furthermore
@@ -384,7 +378,7 @@ you likely found a bug.
 
 - `outputs::AbstractArray`: The array of predicted outputs ``\\mathbf{\\hat{y}}``.
 
-- `avgmode::AggregateMode`: Must be one of the following: [`AggMode.Sum()`](@ref),
+- `agg::AggregateMode`: Must be one of the following: [`AggMode.Sum()`](@ref),
   [`AggMode.Mean()`](@ref), [`AggMode.WeightedSum`](@ref), or
   [`AggMode.WeightedMean`](@ref).
 
@@ -415,8 +409,8 @@ julia> value!(buffer, L1DistLoss(), targets, outputs, AggMode.Sum(), ObsDim.Last
  1.625
 ```
 """
-value!(buffer::AbstractArray, l::Loss, target::AbstractArray, output::AbstractArray, avgmode::AggregateMode, obsdim::LearnBase.ObsDimension) =
-    MethodError(value!, (buffer, l, target, output, avgmode, obsdim))
+value!(buffer::AbstractArray, l::Loss, target::AbstractArray, output::AbstractArray, agg::AggregateMode, obsdim::LearnBase.ObsDimension) =
+    MethodError(value!, (buffer, l, target, output, agg, obsdim))
 
 @doc doc"""
     deriv(loss, target::Number, output::Number) -> Number
@@ -461,9 +455,9 @@ deriv(l::SupervisedLoss, target::Number, output::Number) =
     MethodError(deriv, (l, target, output))
 
 """
-    deriv(loss, target::AbstractArray, output::AbstractArray, avgmode::AggregateMode) -> Number
+    deriv(loss, target::AbstractArray, output::AbstractArray, agg::AggregateMode) -> Number
 
-Compute the weighted or unweighted sum or mean (depending on `avgmode`)
+Compute the weighted or unweighted sum or mean (depending on `agg`)
 of the individual derivatives of the loss function for each pair
 in `targets` and `outputs`. This method will not allocate a
 temporary array.
@@ -484,7 +478,7 @@ you likely found a bug.
 
 - `outputs::AbstractArray`: The array of predicted outputs ``\\mathbf{\\hat{y}}``.
 
-- `avgmode::AggregateMode`: Must be one of the following: [`AggMode.Sum()`](@ref),
+- `agg::AggregateMode`: Must be one of the following: [`AggMode.Sum()`](@ref),
   [`AggMode.Mean()`](@ref), [`AggMode.WeightedSum`](@ref), or
   [`AggMode.WeightedMean`](@ref).
 
@@ -498,16 +492,16 @@ julia> deriv(L2DistLoss(), [1,2,3], [2,5,-2], AggMode.Mean())
 -0.6666666666666666
 ```
 """
-deriv(l::Loss, target::AbstractArray, output::AbstractArray, avgmode::AggregateMode) =
-    MethodError(deriv, (l, target, output, avgmode))
+deriv(l::Loss, target::AbstractArray, output::AbstractArray, agg::AggregateMode) =
+    MethodError(deriv, (l, target, output, agg))
 
 """
-    deriv(loss, target::AbstractArray, output::AbstractArray, avgmode::AggregateMode, obsdim::ObsDimension) -> AbstractVector
+    deriv(loss, target::AbstractArray, output::AbstractArray, agg::AggregateMode, obsdim::ObsDimension) -> AbstractVector
 
 Compute the derivative of the loss function for each pair in
 `targets` and `outputs` individually, and return either the
 weighted or unweighted sum or mean for each observation (depending on
-`avgmode`). This method will not allocate a temporary array, but
+`agg`). This method will not allocate a temporary array, but
 it will allocate the resulting vector.
 
 Both arrays have to be of the same shape and size. Furthermore
@@ -525,23 +519,23 @@ you likely found a bug.
 
 - `outputs::AbstractArray`: The array of predicted outputs ``\\mathbf{\\hat{y}}``.
 
-- `avgmode::AggregateMode`: Must be one of the following: [`AggMode.Sum()`](@ref),
+- `agg::AggregateMode`: Must be one of the following: [`AggMode.Sum()`](@ref),
   [`AggMode.Mean()`](@ref), [`AggMode.WeightedSum`](@ref), or
   [`AggMode.WeightedMean`](@ref).
 
 - `obsdim::ObsDimension`: Specifies which of the array dimensions
   denotes the observations. see `?ObsDim` for more information.
 """
-deriv(l::Loss, target::AbstractArray, output::AbstractArray, avgmode::AggregateMode, obsdim::LearnBase.ObsDimension) =
-    MethodError(deriv, (l, target, output, avgmode, obsdim))
+deriv(l::Loss, target::AbstractArray, output::AbstractArray, agg::AggregateMode, obsdim::LearnBase.ObsDimension) =
+    MethodError(deriv, (l, target, output, agg, obsdim))
 
 """
-    deriv!(buffer::AbstractArray, loss, target::AbstractArray, output::AbstractArray, avgmode::AggregateMode, obsdim::ObsDimension) -> buffer
+    deriv!(buffer::AbstractArray, loss, target::AbstractArray, output::AbstractArray, agg::AggregateMode, obsdim::ObsDimension) -> buffer
 
 Compute the derivative of the loss function for each pair in
 `targets` and `outputs` individually, and return either the
 weighted or unweighted sum or mean for each observation, depending on
-`avgmode`. The results are stored into the given vector `buffer`.
+`agg`. The results are stored into the given vector `buffer`.
 This method will not allocate a temporary array.
 
 Both arrays have to be of the same shape and size. Furthermore
@@ -562,7 +556,7 @@ you likely found a bug.
 
 - `outputs::AbstractArray`: The array of predicted outputs ``\\mathbf{\\hat{y}}``.
 
-- `avgmode::AggregateMode`: Must be one of the following: [`AggMode.Sum()`](@ref),
+- `agg::AggregateMode`: Must be one of the following: [`AggMode.Sum()`](@ref),
   [`AggMode.Mean()`](@ref), [`AggMode.WeightedSum`](@ref), or
   [`AggMode.WeightedMean`](@ref).
 
@@ -593,8 +587,8 @@ julia> deriv!(buffer, L1DistLoss(), targets, outputs, AggMode.Sum(), ObsDim.Last
  2.0
 ```
 """
-deriv!(buffer::AbstractArray, l::Loss, target::AbstractArray, output::AbstractArray, avgmode::AggregateMode, obsdim::LearnBase.ObsDimension) =
-    MethodError(deriv!, (buffer, l, target, output, avgmode, obsdim))
+deriv!(buffer::AbstractArray, l::Loss, target::AbstractArray, output::AbstractArray, agg::AggregateMode, obsdim::LearnBase.ObsDimension) =
+    MethodError(deriv!, (buffer, l, target, output, agg, obsdim))
 
 @doc doc"""
     deriv2(loss, target::Number, output::Number) -> Number
@@ -633,9 +627,9 @@ deriv2(l::SupervisedLoss, target::Number, output::Number) =
     MethodError(deriv2, (l, target, output))
 
 """
-    deriv2(loss, target::AbstractArray, output::AbstractArray, avgmode::AggregateMode) -> Number
+    deriv2(loss, target::AbstractArray, output::AbstractArray, agg::AggregateMode) -> Number
 
-Compute the weighted or unweighted sum or mean (depending on `avgmode`)
+Compute the weighted or unweighted sum or mean (depending on `agg`)
 of the individual second derivatives of the loss function for
 each pair in `targets` and `outputs`. This method will not
 allocate a temporary array.
@@ -656,7 +650,7 @@ you likely found a bug.
 
 - `outputs::AbstractArray`: The array of predicted outputs ``\\mathbf{\\hat{y}}``.
 
-- `avgmode::AggregateMode`: Must be one of the following: [`AggMode.Sum()`](@ref),
+- `agg::AggregateMode`: Must be one of the following: [`AggMode.Sum()`](@ref),
   [`AggMode.Mean()`](@ref), [`AggMode.WeightedSum`](@ref), or
   [`AggMode.WeightedMean`](@ref).
 
@@ -670,16 +664,16 @@ julia> deriv2(LogitDistLoss(), [1.,2,3], [2,5,-2], AggMode.Mean())
 0.1656244330954561
 ```
 """
-deriv2(l::Loss, target::AbstractArray, output::AbstractArray, avgmode::AggregateMode) =
-    MethodError(deriv2, (l, target, output, avgmode))
+deriv2(l::Loss, target::AbstractArray, output::AbstractArray, agg::AggregateMode) =
+    MethodError(deriv2, (l, target, output, agg))
 
 """
-    deriv2(loss, target::AbstractArray, output::AbstractArray, avgmode::AggregateMode, obsdim::ObsDimension) -> AbstractVector
+    deriv2(loss, target::AbstractArray, output::AbstractArray, agg::AggregateMode, obsdim::ObsDimension) -> AbstractVector
 
 Compute the second derivative of the loss function for each pair in
 `targets` and `outputs` individually, and return either the
 weighted or unweighted sum or mean for each observation (depending on
-`avgmode`). This method will not allocate a temporary array, but
+`agg`). This method will not allocate a temporary array, but
 it will allocate the resulting vector.
 
 Both arrays have to be of the same shape and size. Furthermore
@@ -697,23 +691,23 @@ you likely found a bug.
 
 - `outputs::AbstractArray`: The array of predicted outputs ``\\mathbf{\\hat{y}}``.
 
-- `avgmode::AggregateMode`: Must be one of the following: [`AggMode.Sum()`](@ref),
+- `agg::AggregateMode`: Must be one of the following: [`AggMode.Sum()`](@ref),
   [`AggMode.Mean()`](@ref), [`AggMode.WeightedSum`](@ref), or
   [`AggMode.WeightedMean`](@ref).
 
 - `obsdim::ObsDimension`: Specifies which of the array dimensions
   denotes the observations. see `?ObsDim` for more information.
 """
-deriv2(l::Loss, target::AbstractArray, output::AbstractArray, avgmode::AggregateMode, obsdim::LearnBase.ObsDimension) =
-    MethodError(deriv2, (l, target, output, avgmode, obsdim))
+deriv2(l::Loss, target::AbstractArray, output::AbstractArray, agg::AggregateMode, obsdim::LearnBase.ObsDimension) =
+    MethodError(deriv2, (l, target, output, agg, obsdim))
 
 """
-    deriv2!(buffer::AbstractArray, loss, target::AbstractArray, output::AbstractArray, avgmode::AggregateMode, obsdim::ObsDimension) -> buffer
+    deriv2!(buffer::AbstractArray, loss, target::AbstractArray, output::AbstractArray, agg::AggregateMode, obsdim::ObsDimension) -> buffer
 
 Compute the second derivative of the loss function for each pair in
 `targets` and `outputs` individually, and return either the
 weighted or unweighted sum or mean for each observation, depending on
-`avgmode`. The results are stored into the given vector `buffer`.
+`agg`. The results are stored into the given vector `buffer`.
 This method will not allocate a temporary array.
 
 Both arrays have to be of the same shape and size. Furthermore
@@ -734,7 +728,7 @@ you likely found a bug.
 
 - `outputs::AbstractArray`: The array of predicted outputs ``\\mathbf{\\hat{y}}``.
 
-- `avgmode::AggregateMode`: Must be one of the following: [`AggMode.Sum()`](@ref),
+- `agg::AggregateMode`: Must be one of the following: [`AggMode.Sum()`](@ref),
   [`AggMode.Mean()`](@ref), [`AggMode.WeightedSum`](@ref), or
   [`AggMode.WeightedMean`](@ref).
 
@@ -765,8 +759,8 @@ julia> deriv2!(buffer, L2DistLoss(), targets, outputs, AggMode.Sum(), ObsDim.Las
  4.0
 ```
 """
-deriv2!(buffer::AbstractArray, l::Loss, target::AbstractArray, output::AbstractArray, avgmode::AggregateMode, obsdim::LearnBase.ObsDimension) =
-    MethodError(deriv2!, (buffer, l, target, output, avgmode, obsdim))
+deriv2!(buffer::AbstractArray, l::Loss, target::AbstractArray, output::AbstractArray, agg::AggregateMode, obsdim::LearnBase.ObsDimension) =
+    MethodError(deriv2!, (buffer, l, target, output, agg, obsdim))
 
 @doc doc"""
     value_deriv(loss, target::Number, output::Number) -> Tuple
