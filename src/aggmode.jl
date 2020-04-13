@@ -122,3 +122,8 @@ module AggMode
     WeightedMean(A::AbstractVector, normalize::Bool) = WeightedMean(weights(A), normalize)
     WeightedMean(A::AbstractVector; normalize::Bool = true) = WeightedMean(weights(A), normalize)
 end
+
+# -----------------
+# IMPLEMENTATIONS
+# -----------------
+include("aggmode/none.jl")
