@@ -1467,3 +1467,14 @@ true
 issymmetric(::SupervisedLoss) = false
 
 isminimizable(l::SupervisedLoss) = isconvex(l)
+
+# -----------------
+# IMPLEMENTATIONS
+# -----------------
+include("supervised/sparse.jl")
+include("supervised/distance.jl")
+include("supervised/margin.jl")
+include("supervised/scaled.jl")
+include("supervised/weightedbinary.jl")
+include("supervised/other.jl")
+include("supervised/ordinal.jl")

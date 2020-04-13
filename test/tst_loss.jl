@@ -256,7 +256,6 @@ end
     @test L2DistLoss === LPDistLoss{2}
     @test HingeLoss === L1HingeLoss
     @test EpsilonInsLoss === L1EpsilonInsLoss
-    @test OrdinalHingeLoss === OrdinalMarginLoss{HingeLoss}
 end
 
 @testset "Test typestable supervised loss for type stability" begin
@@ -430,7 +429,6 @@ const OrdinalSmoothedHingeLoss = OrdinalMarginLoss{<:SmoothedL1HingeLoss}
         val
     end
     y = rand(1:5, 10); t = randn(10) .+ 3
-    @test OrdinalHingeLoss(5) === OrdinalMarginLoss(HingeLoss(), 5)
     test_value(OrdinalMarginLoss(HingeLoss(), 5), _ordinalhingeloss, y, t)
 end
 

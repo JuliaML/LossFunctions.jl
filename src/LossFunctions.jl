@@ -76,23 +76,20 @@ export
     ZeroOneLoss,
 
     OrdinalMarginLoss,
-    OrdinalHingeLoss,
 
     weightedloss,
 
     AggMode
 
+# for maintainers
 include("devutils.jl")
-include("aggregatemode.jl")
 
-include("supervised/supervised.jl")
-include("supervised/sparse.jl")
-include("supervised/distance.jl")
-include("supervised/margin.jl")
-include("supervised/scaledloss.jl")
-include("supervised/weightedbinary.jl")
-include("supervised/other.jl")
-include("supervised/ordinal.jl")
-include("supervised/io.jl")
+# loss and aggregation
+include("aggmode.jl")
+include("supervised.jl")
+
+# IO functionality
+include("printing.jl")
+include("plotrecipes.jl")
 
 end # module

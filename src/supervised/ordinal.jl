@@ -64,6 +64,3 @@ for fun in (:isdifferentiable, :istwicedifferentiable)
         return true
     end
 end
-
-const OrdinalHingeLoss = OrdinalMarginLoss{HingeLoss}
-# const OrdinalSmoothedHingeLoss = OrdinalMarginLoss{<:SmoothedL1HingeLoss}

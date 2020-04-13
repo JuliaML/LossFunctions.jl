@@ -1,9 +1,3 @@
-# Note: agreement = output * target
-#       Agreement is high when output and target are the same sign and |output| is large.
-#       It is an indication that the output represents the correct class in a margin-based model.
-
-# ============================================================
-
 @doc doc"""
     ZeroOneLoss <: MarginLoss
 
