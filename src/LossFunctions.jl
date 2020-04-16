@@ -6,33 +6,40 @@ using Markdown
 using SparseArrays
 using InteractiveUtils
 using RecipesBase
-using LearnBase
 
+import LearnBase.AggMode
+import LearnBase.ObsDim
 import LearnBase:
+    AggregateMode,
+    Loss, SupervisedLoss,
+    DistanceLoss, MarginLoss,
     value, value!,
     deriv, deriv!,
     deriv2, deriv2!,
-    value_deriv,
-    scaled,
-    isminimizable,
-    isdifferentiable,
+    isdistancebased, ismarginbased,
+    isminimizable, isdifferentiable,
     istwicedifferentiable,
-    isconvex,
-    isstrictlyconvex,
-    isstronglyconvex,
-    isnemitski,
-    isunivfishercons,
-    isfishercons,
-    islipschitzcont,
-    islocallylipschitzcont,
-    isclipable,
-    ismarginbased,
-    isclasscalibrated,
-    isdistancebased,
-    issymmetric
+    isconvex, isstrictlyconvex,
+    isstronglyconvex, isnemitski,
+    isunivfishercons, isfishercons,
+    islipschitzcont, islocallylipschitzcont,
+    isclipable, isclasscalibrated
+
+# for maintainers
+include("devutils.jl")
+
+# supervised losses
+include("supervised.jl")
+
+# IO and plot recipes
+include("printing.jl")
+include("plotrecipes.jl")
+
+# deprecations
+@deprecate OrdinalHingeLoss OrdinalMarginLoss{HingeLoss}
 
 export
-
+    # loss API
     Loss,
     SupervisedLoss,
     MarginLoss,
@@ -40,7 +47,19 @@ export
     value, value!,
     deriv, deriv!,
     deriv2, deriv2!,
+    isdistancebased, ismarginbased,
+    isminimizable, isdifferentiable,
+    istwicedifferentiable,
+    isconvex, isstrictlyconvex,
+    isstronglyconvex, isnemitski,
+    isunivfishercons, isfishercons,
+    islipschitzcont, islocallylipschitzcont,
+    isclipable, isclasscalibrated,
 
+    # relevant submodules
+    AggMode, ObsDim,
+
+    # margin-based losses
     ZeroOneLoss,
     LogitMarginLoss,
     PerceptronLoss,
@@ -53,7 +72,10 @@ export
     ExpLoss,
     SigmoidLoss,
     DWDMarginLoss,
+    OrdinalMarginLoss,
+    WeightedBinaryLoss,
 
+    # distance-based losses
     LPDistLoss,
     L1DistLoss,
     L2DistLoss,
@@ -66,30 +88,10 @@ export
     QuantileLoss,
     PinballLoss,
 
+    # other losses
     MisclassLoss,
     PoissonLoss,
     LogitProbLoss,
-    CrossEntropyLoss,
-    ZeroOneLoss,
-
-    OrdinalMarginLoss,
-
-    weightedloss,
-
-    AggMode
-
-# for maintainers
-include("devutils.jl")
-
-# loss and aggregation
-include("aggmode.jl")
-include("supervised.jl")
-
-# IO functionality
-include("printing.jl")
-include("plotrecipes.jl")
-
-# deprecations
-@deprecate OrdinalHingeLoss OrdinalMarginLoss{HingeLoss}
+    CrossEntropyLoss
 
 end # module
