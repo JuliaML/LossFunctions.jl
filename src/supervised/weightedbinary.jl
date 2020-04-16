@@ -55,21 +55,6 @@ for fun in (:value, :deriv, :deriv2)
     end
 end
 
-"""
-    weightedloss(loss, weight)
-
-Returns a weighted version of `loss` for which the value of the
-positive class is changed to be `weight` times its original, and the
-negative class `1 - weight` times its original respectively.
-
-Note: If `typeof(weight) <: Number`, then this method will poison the
-type-inference of the calling scope. This is because `weight` will be
-promoted to a type parameter. For a typestable version use the
-following signature: `weightedloss(loss, Val(weight))`
-"""
-weightedloss(loss::MarginLoss, weight::Number) = WeightedBinaryLoss(loss, weight)
-weightedloss(loss::MarginLoss, ::Val{W}) where {W} = WeightedBinaryLoss(loss, Val(W))
-
 # An α-weighted version of a classification callibrated margin loss is
 # itself classification callibrated if and only if α == 1/2
 isclasscalibrated(l::WeightedBinaryLoss{T,W}) where {T,W} = W == 0.5 && isclasscalibrated(l.loss)
