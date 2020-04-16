@@ -1,5 +1,5 @@
 """
-    WeightedBinaryLoss{L,W} <: SupervisedLoss
+    WeightedBinaryLoss{L,W} <: MarginLoss
 
 Can an be used to represent a re-weighted version of some type of
 binary loss `L`. The weight-factor `W`, which must be in `[0, 1]`,
@@ -19,7 +19,7 @@ In contrast, in order to only create a re-weighted instance of some
 specific loss you can use `weightedloss(L2HingeLoss(), Val(0.2))`.
 See `?weightedloss` for more information.
 """
-struct WeightedBinaryLoss{L<:MarginLoss,W} <: SupervisedLoss
+struct WeightedBinaryLoss{L<:MarginLoss,W} <: MarginLoss
     loss::L
     WeightedBinaryLoss{L,W}(loss::L) where {L<:MarginLoss, W} = new{L,W}(loss)
 end
@@ -36,7 +36,7 @@ _werror() = throw(ArgumentError("The given \"weight\" has to be a number in the 
     :(WeightedBinaryLoss{L,W}(loss))
 end
 
-function WeightedBinaryLoss(loss::SupervisedLoss, w::Number)
+function WeightedBinaryLoss(loss::MarginLoss, w::Number)
     WeightedBinaryLoss(loss, Val(w))
 end
 
@@ -67,8 +67,8 @@ type-inference of the calling scope. This is because `weight` will be
 promoted to a type parameter. For a typestable version use the
 following signature: `weightedloss(loss, Val(weight))`
 """
-weightedloss(loss::Loss, weight::Number) = WeightedBinaryLoss(loss, weight)
-weightedloss(loss::Loss, ::Val{W}) where {W} = WeightedBinaryLoss(loss, Val(W))
+weightedloss(loss::MarginLoss, weight::Number) = WeightedBinaryLoss(loss, weight)
+weightedloss(loss::MarginLoss, ::Val{W}) where {W} = WeightedBinaryLoss(loss, Val(W))
 
 # An α-weighted version of a classification callibrated margin loss is
 # itself classification callibrated if and only if α == 1/2
