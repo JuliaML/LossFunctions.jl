@@ -73,7 +73,7 @@ export
     SigmoidLoss,
     DWDMarginLoss,
     OrdinalMarginLoss,
-    WeightedBinaryLoss,
+    WeightedMarginLoss,
 
     # distance-based losses
     LPDistLoss,

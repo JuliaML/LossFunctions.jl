@@ -212,9 +212,9 @@ end
 function test_weightedloss(l::MarginLoss, t_vec, y_vec)
     @testset "Weighted version for $(l): " begin
         for w in (0., 0.2, 0.7, 1.)
-            wl = WeightedBinaryLoss(l, w)
-            @test typeof(wl) <: WeightedBinaryLoss{typeof(l),w}
-            @test WeightedBinaryLoss(l, w * 0.1) == WeightedBinaryLoss(wl, 0.1)
+            wl = WeightedMarginLoss(l, w)
+            @test typeof(wl) <: WeightedMarginLoss{typeof(l),w}
+            @test WeightedMarginLoss(l, w * 0.1) == WeightedMarginLoss(wl, 0.1)
             for t in t_vec
                 for y in y_vec
                     if t == 1
@@ -452,7 +452,7 @@ end
     end
 end
 
-const BarLoss = WeightedBinaryLoss{SmoothedL1HingeLoss,0.2}
+const BarLoss = WeightedMarginLoss{SmoothedL1HingeLoss,0.2}
 
 @testset "Test margin-based weighted loss" begin
     for loss in margin_losses

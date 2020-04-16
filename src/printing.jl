@@ -23,4 +23,4 @@ function _relation(num)
         "$(_round(num/(1-num))):1 weighted"
     end
 end
-Base.print(io::IO, loss::WeightedBinaryLoss{T,W}, args...) where {T,W} = print(io, "$(_relation(W)) $(loss.loss)", args...)
+Base.print(io::IO, loss::WeightedMarginLoss{T,W}, args...) where {T,W} = print(io, "$(_relation(W)) $(loss.loss)", args...)

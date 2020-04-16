@@ -16,10 +16,12 @@ deriv2(loss::MarginLoss, target::Number, output::Number) = deriv2(loss, target *
 include("supervised/sparse.jl")
 include("supervised/distance.jl")
 include("supervised/margin.jl")
-include("supervised/scaled.jl")
-include("supervised/weightedbinary.jl")
 include("supervised/other.jl")
+
+# meta-losses
 include("supervised/ordinal.jl")
+include("supervised/scaled.jl")
+include("supervised/weighted.jl")
 
 # ------------------------------
 # DEFAULT AGGREGATION BEHAVIOR
