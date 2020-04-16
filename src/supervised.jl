@@ -13,7 +13,6 @@ deriv2(loss::MarginLoss, target::Number, output::Number) = deriv2(loss, target *
 # ------------------
 # AVAILABLE LOSSES
 # ------------------
-include("supervised/sparse.jl")
 include("supervised/distance.jl")
 include("supervised/margin.jl")
 include("supervised/other.jl")
@@ -238,3 +237,7 @@ for FUN in (:value, :deriv, :deriv2)
         end
     end
 end
+
+# TODO: find way to use normal broadcast for this
+# probably with the new changes in MLMetric and compare modes
+include("sparse.jl")
