@@ -162,17 +162,11 @@ end
 function test_scaledloss(l::SupervisedLoss, t_vec, y_vec)
     @testset "Scaling for $(l): " begin
         for λ = (2.0, 2)
-            sl = scaled(l,λ)
-            if typeof(l) <: MarginLoss
-                @test typeof(sl) <: LossFunctions.ScaledMarginLoss{typeof(l),λ}
-            elseif typeof(l) <: DistanceLoss
-                @test typeof(sl) <: LossFunctions.ScaledDistanceLoss{typeof(l),λ}
-            else
-                @test typeof(sl) <: LossFunctions.ScaledSupervisedLoss{typeof(l),λ}
-            end
-            @test 3 * sl == @inferred(scaled(sl,Val(3)))
-            @test (λ*3) * l == @inferred(scaled(sl,Val(3)))
-            @test sl == @inferred(scaled(l,Val(λ)))
+            sl = ScaledLoss(l,λ)
+            @test typeof(sl) <: ScaledLoss{typeof(l),λ}
+            @test 3 * sl == @inferred(ScaledLoss(sl,Val(3)))
+            @test (λ*3) * l == @inferred(ScaledLoss(sl,Val(3)))
+            @test sl == @inferred(ScaledLoss(l,Val(λ)))
             @test sl == λ * l
             @test sl == @inferred(Val(λ) * l)
             for t in t_vec
@@ -189,22 +183,11 @@ end
 function test_scaledloss(l::SupervisedLoss, n_vec)
     @testset "Scaling for $(l): " begin
         for λ = (2.0, 2)
-            sl = scaled(l,λ)
-            if typeof(l) <: MarginLoss
-                @test typeof(sl) <: LossFunctions.ScaledMarginLoss{typeof(l),λ}
-            elseif typeof(l) <: DistanceLoss
-                @test typeof(sl) <: LossFunctions.ScaledDistanceLoss{typeof(l),λ}
-            else
-                @test typeof(sl) <: LossFunctions.ScaledSupervisedLoss{typeof(l),λ}
-            end
-            @test sl == @inferred(scaled(l,Val(λ)))
+            sl = ScaledLoss(l,λ)
+            @test typeof(sl) <: ScaledLoss{typeof(l),λ}
+            @test sl == @inferred(ScaledLoss(l,Val(λ)))
             @test sl == λ * l
             @test sl == @inferred(Val(λ) * l)
-            for n in n_vec
-                @test @inferred(value(sl,n)) == λ*value(l,n)
-                @test @inferred(deriv(sl,n)) == λ*deriv(l,n)
-                @test @inferred(deriv2(sl,n)) == λ*deriv2(l,n)
-            end
         end
     end
 end
@@ -483,16 +466,11 @@ end
     end
 end
 
-const FooLoss = LossFunctions.ScaledDistanceLoss{L2EpsilonInsLoss,2}
-
 @testset "Test distance-based scaled loss" begin
     for loss in distance_losses
         test_scaledloss(loss, -10:.2:10, -10:0.5:10)
         test_scaledloss(loss, -10:0.5:10)
     end
-
-    l = @inferred FooLoss(1.2)
-    @test l.loss == L2EpsilonInsLoss(1.2)
 end
 
 # --------------------------------------------------------------

@@ -23,7 +23,7 @@ import LearnBase:
     isstronglyconvex, isnemitski,
     isunivfishercons, isfishercons,
     islipschitzcont, islocallylipschitzcont,
-    isclipable, isclasscalibrated
+    isclipable, isclasscalibrated, issymmetric
 
 # for maintainers
 include("devutils.jl")
@@ -54,7 +54,7 @@ export
     isstronglyconvex, isnemitski,
     isunivfishercons, isfishercons,
     islipschitzcont, islocallylipschitzcont,
-    isclipable, isclasscalibrated,
+    isclipable, isclasscalibrated, issymmetric,
 
     # relevant submodules
     AggMode, ObsDim,
@@ -72,8 +72,6 @@ export
     ExpLoss,
     SigmoidLoss,
     DWDMarginLoss,
-    OrdinalMarginLoss,
-    WeightedMarginLoss,
 
     # distance-based losses
     LPDistLoss,
@@ -92,6 +90,11 @@ export
     MisclassLoss,
     PoissonLoss,
     LogitProbLoss,
-    CrossEntropyLoss
+    CrossEntropyLoss,
+
+    # meta losses
+    ScaledLoss,
+    OrdinalMarginLoss,
+    WeightedMarginLoss
 
 end # module
