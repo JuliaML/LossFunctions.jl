@@ -76,14 +76,8 @@ function test_deriv(l::MarginLoss, t_vec)
                 d_comp = @inferred deriv(l, y, t)
                 @test abs(d_dual - d_comp) < 1e-10
                 val = @inferred value(l, y, t)
-                val2, d_comp2 = @inferred value_deriv(l, y, t)
-                val4, d_comp4 = @inferred value_deriv(l, y * t)
-                @test val ≈ val2
-                @test val ≈ val4
                 @test val ≈ value(l, y, t)
                 @test val ≈ value(l, y*t)
-                @test d_comp ≈ d_comp2
-                @test d_comp ≈ y*d_comp4
                 @test d_comp ≈ y*deriv(l, y*t)
             else
                 # y*t == 1 ? print(".") : print("(no $(y)*$(t)) ")
@@ -101,14 +95,8 @@ function test_deriv(l::DistanceLoss, t_vec)
                 d_comp = @inferred deriv(l, y, t)
                 @test abs(d_dual - d_comp) < 1e-10
                 val = @inferred value(l, y, t)
-                val2, d_comp2 = @inferred value_deriv(l, y, t)
-                val4, d_comp4 = @inferred value_deriv(l, t-y)
-                @test val ≈ val2
-                @test val ≈ val4
                 @test val ≈ value(l, y, t)
                 @test val ≈ value(l, t-y)
-                @test d_comp ≈ d_comp2
-                @test d_comp ≈ d_comp4
                 @test d_comp ≈ deriv(l, t-y)
             end
         end
@@ -123,10 +111,7 @@ function test_deriv(l::SupervisedLoss, y_vec, t_vec)
                 d_comp = @inferred deriv(l, y, t)
                 @test abs(d_dual - d_comp) < 1e-10
                 val = @inferred value(l, y, t)
-                val2, d_comp2 = @inferred value_deriv(l, y, t)
-                @test val ≈ val2
                 @test val ≈ value(l, y, t)
-                @test d_comp ≈ d_comp2
                 @test d_comp ≈ deriv(l, y, t)
             end
         end
@@ -174,7 +159,7 @@ function test_deriv2(l::SupervisedLoss, y_vec, t_vec)
     end
 end
 
-function test_scaledloss(l::Loss, t_vec, y_vec)
+function test_scaledloss(l::SupervisedLoss, t_vec, y_vec)
     @testset "Scaling for $(l): " begin
         for λ = (2.0, 2)
             sl = scaled(l,λ)
@@ -201,7 +186,7 @@ function test_scaledloss(l::Loss, t_vec, y_vec)
     end
 end
 
-function test_scaledloss(l::Loss, n_vec)
+function test_scaledloss(l::SupervisedLoss, n_vec)
     @testset "Scaling for $(l): " begin
         for λ = (2.0, 2)
             sl = scaled(l,λ)
@@ -227,10 +212,9 @@ end
 function test_weightedloss(l::MarginLoss, t_vec, y_vec)
     @testset "Weighted version for $(l): " begin
         for w in (0., 0.2, 0.7, 1.)
-            wl = weightedloss(l, w)
-            @test typeof(wl) <: LossFunctions.WeightedBinaryLoss{typeof(l),w}
-            @test wl == @inferred(weightedloss(l, Val(w)))
-            @test weightedloss(l, w * 0.1) == weightedloss(wl, 0.1)
+            wl = WeightedBinaryLoss(l, w)
+            @test typeof(wl) <: WeightedBinaryLoss{typeof(l),w}
+            @test WeightedBinaryLoss(l, w * 0.1) == WeightedBinaryLoss(wl, 0.1)
             for t in t_vec
                 for y in y_vec
                     if t == 1
@@ -468,7 +452,7 @@ end
     end
 end
 
-const BarLoss = LossFunctions.WeightedBinaryLoss{SmoothedL1HingeLoss,0.2}
+const BarLoss = WeightedBinaryLoss{SmoothedL1HingeLoss,0.2}
 
 @testset "Test margin-based weighted loss" begin
     for loss in margin_losses

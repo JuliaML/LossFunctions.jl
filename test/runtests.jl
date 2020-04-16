@@ -1,6 +1,11 @@
 module LossFunctionsTests
-using LearnBase, LossFunctions, DualNumbers
-using Statistics, Random, SparseArrays, Test
+
+using LossFunctions
+using SparseArrays
+using DualNumbers
+using Statistics
+using Random
+using Test
 
 tests = [
     "tst_loss.jl",
@@ -13,7 +18,6 @@ perf = [
 ]
 
 # for deterministic testing
-
 Random.seed!(1234)
 
 distance_losses = [
@@ -50,4 +54,5 @@ for p in perf
         include(p)
     end
 end
-end #Test Module
+
+end # module
