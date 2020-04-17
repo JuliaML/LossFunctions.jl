@@ -12,8 +12,8 @@ Learning.
 
 !!! warning
 
-    This section and its sub-sections serve soley as to explain
-    the underyling theory and concepts and further to motivate
+    This section and its sub-sections serve solely as to explain
+    the underlying theory and concepts and further to motivate
     the solution provided by this package. As such, this section
     is **not** intended as a guide on how to apply this package.
 
@@ -193,7 +193,7 @@ of particular interest, namely **margin-based** losses and
 are especially useful for the two basic sub-domains of supervised
 learning: Classification and Regression.
 
-### Margin-based Losses for Classification
+### Margin-based Losses for (Binary) Classification
 
 Margin-based losses are mainly utilized for binary classification
 problems where the goal is to predict a categorical value. They

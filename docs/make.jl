@@ -3,7 +3,6 @@ using Documenter, LearnBase, LossFunctions
 istravis = "TRAVIS" ∈ keys(ENV)
 
 makedocs(
-    modules = [LossFunctions, LearnBase],
     format = Documenter.HTML(assets=["assets/style.css","assets/favicon.ico"], prettyurls=istravis),
     sitename = "LossFunctions.jl",
     authors = "Christof Stocker, Tom Breloff, Alex Williams",

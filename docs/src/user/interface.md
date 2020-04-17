@@ -9,7 +9,7 @@ end
 Even though they are called loss "functions", this package
 implements them as immutable types instead of true Julia
 functions. There are good reasons for that. For example it allows
-us to specify the properties of losse functions explicitly (e.g.
+us to specify the properties of loss functions explicitly (e.g.
 `isconvex(myloss)`). It also makes for a more consistent API when
 it comes to computing the value or the derivative. Some loss
 functions even have additional parameters that need to be
@@ -121,7 +121,7 @@ documentation that this function allows for a lot of different
 method signatures to accomplish a variety of tasks.
 
 ```@docs
-value(::SupervisedLoss, ::Number, ::Number)
+value
 ```
 
 It may be interesting to note, that this function also supports
@@ -162,15 +162,11 @@ method natively. This is done mainly for API consistency reasons.
 Internally it even uses broadcast itself, but it does provide the
 additional benefit of a more reliable type-inference.
 
-```@docs
-value(::SupervisedLoss, ::AbstractArray, ::AbstractArray)
-```
-
 We also provide a mutating version for the same reasons. It
 even utilizes `broadcast!` underneath.
 
 ```@docs
-value!(::AbstractArray, ::SupervisedLoss, ::AbstractArray, ::AbstractArray)
+value!
 ```
 
 ## Computing the 1st Derivatives
@@ -189,7 +185,7 @@ we always compute the derivative in respect to the predicted
 the output should change.
 
 ```@docs
-deriv(::SupervisedLoss, ::Number, ::Number)
+deriv
 ```
 
 Similar to [`value`](@ref), this function also supports
@@ -230,22 +226,11 @@ natively. This is done mainly for API consistency reasons.
 Internally it even uses broadcast itself, but it does provide the
 additional benefit of a more reliable type-inference.
 
-```@docs
-deriv(::SupervisedLoss, ::AbstractArray, ::AbstractArray)
-```
-
 We also provide a mutating version for the same reasons. It
 even utilizes ``broadcast!`` underneath.
 
 ```@docs
-deriv!(::AbstractArray, ::SupervisedLoss, ::AbstractArray, ::AbstractArray)
-```
-
-It is also possible to compute the value and derivative at the
-same time. For some losses that means less computation overhead.
-
-```@docs
-value_deriv(::SupervisedLoss, ::Number, ::Number)
+deriv!
 ```
 
 ## Computing the 2nd Derivatives
@@ -256,7 +241,7 @@ function [`deriv2`](@ref). Note again, that we always compute the
 derivative in respect to the predicted `output`.
 
 ```@docs
-deriv2(::SupervisedLoss, ::Number, ::Number)
+deriv2
 ```
 
 Just like [`deriv`](@ref) and [`value`](@ref), this function also
@@ -282,11 +267,6 @@ julia> buffer .= deriv2.(LogitDistLoss(), [-0.5, 1.2, 3], [0.3, 2.3, -2])
 
 Furthermore [`deriv2`](@ref) supports all the same method
 signatures as [`deriv`](@ref) does.
-
-```@docs
-deriv2(::SupervisedLoss, ::AbstractArray, ::AbstractArray)
-deriv2!(::AbstractArray, ::SupervisedLoss, ::AbstractArray, ::AbstractArray)
-```
 
 ## Properties of a Loss
 
