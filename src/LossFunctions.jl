@@ -37,6 +37,9 @@ include("plotrecipes.jl")
 
 # deprecations
 @deprecate OrdinalHingeLoss OrdinalMarginLoss{HingeLoss}
+@deprecate weightedloss(l, w) WeightedMarginLoss(l, w)
+@deprecate scaled(l, λ) ScaledLoss(l, λ)
+@deprecate value_deriv(l,y,ŷ) (value(l,y,ŷ), deriv(l,y,ŷ))
 
 export
     # loss API
