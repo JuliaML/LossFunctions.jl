@@ -435,14 +435,10 @@ end
     end
 end
 
-const BarLoss = WeightedMarginLoss{SmoothedL1HingeLoss,0.2}
-
 @testset "Test margin-based weighted loss" begin
     for loss in margin_losses
         test_weightedloss(loss, [-1.,1], -10:0.2:10)
     end
-    l = @inferred BarLoss(1.2)
-    @test l.loss == SmoothedL1HingeLoss(1.2)
 end
 
 # --------------------------------------------------------------

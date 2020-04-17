@@ -6,14 +6,8 @@ binary loss `L`. The weight-factor `W`, which must be in `[0, 1]`,
 denotes the relative weight of the positive class, while the
 relative weight of the negative class will be `1 - W`.
 """
-struct WeightedMarginLoss{L<:MarginLoss,W} <: MarginLoss
+struct WeightedMarginLoss{L<:MarginLoss,W} <: SupervisedLoss
     loss::L
-    WeightedMarginLoss{L,W}(loss::L) where {L<:MarginLoss, W} = new{L,W}(loss)
-end
-
-@generated function (::Type{WeightedMarginLoss{L,W}})(args...) where {L<:MarginLoss, W}
-    typeof(W) <: Number && 0 <= W <= 1 || _werror()
-    :(WeightedMarginLoss{L,W}(L(args...)))
 end
 
 _werror() = throw(ArgumentError("The given \"weight\" has to be a number in the interval [0, 1]"))
@@ -29,6 +23,10 @@ end
 
 @generated function WeightedMarginLoss(s::WeightedMarginLoss{T,W1}, ::Val{W2}) where {T,W1,W2}
     :(WeightedMarginLoss(s.loss, Val($(W1*W2))))
+end
+
+function WeightedMarginLoss(s::WeightedMarginLoss{L,W}, w::Number) where {L<:MarginLoss,W}
+    WeightedMarginLoss(s.loss, Val(W*w))
 end
 
 for fun in (:value, :deriv, :deriv2)
