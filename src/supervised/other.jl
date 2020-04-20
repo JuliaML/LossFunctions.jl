@@ -12,7 +12,6 @@ agreement(target, output) = target == output
 value(::MisclassLoss, agreement::Bool) = agreement ? 0 : 1
 deriv(::MisclassLoss, agreement::Bool) = 0
 deriv2(::MisclassLoss, agreement::Bool) = 0
-value_deriv(::MisclassLoss, agreement::Bool) = agreement ? (0, 0) : (1, 0)
 
 value(loss::MisclassLoss, target::Number, output::Number) = value(loss, agreement(target, output))
 deriv(loss::MisclassLoss, target::Number, output::Number) = deriv(loss, agreement(target, output))
@@ -43,10 +42,6 @@ struct PoissonLoss <: SupervisedLoss end
 value(loss::PoissonLoss, target::Number, output::Number) = exp(output) - target*output
 deriv(loss::PoissonLoss, target::Number, output::Number) = exp(output) - target
 deriv2(loss::PoissonLoss, target::Number, output::Number) = exp(output)
-function value_deriv(loss::PoissonLoss, target::Number, output::Number)
-    exp_o = exp(output)
-    return (exp_o-(target*output), exp_o-target)
-end
 
 isdifferentiable(::PoissonLoss) = true
 isdifferentiable(::PoissonLoss, y, t) = true
@@ -82,7 +77,6 @@ function value(loss::CrossEntropyLoss, target::Number, output::Number)
 end
 deriv(loss::CrossEntropyLoss, target::Number, output::Number) = (1-target) / (1-output) - target / output
 deriv2(loss::CrossEntropyLoss, target::Number, output::Number) = (1-target) / (1-output)^2 + target / output^2
-value_deriv(loss::CrossEntropyLoss, target::Number, output::Number) = (value(loss,target,output), deriv(loss,target,output))
 
 isdifferentiable(::CrossEntropyLoss) = true
 isdifferentiable(::CrossEntropyLoss, y, t) = t != 0 && t != 1

@@ -6,44 +6,63 @@ using Markdown
 using SparseArrays
 using InteractiveUtils
 using RecipesBase
-using LearnBase
 
+import LearnBase.AggMode
+import LearnBase.ObsDim
 import LearnBase:
+    AggregateMode,
+    Loss, SupervisedLoss,
+    DistanceLoss, MarginLoss,
     value, value!,
-    deriv, deriv2, deriv!,
-    value_deriv,
-    scaled,
-    isminimizable,
-    isdifferentiable,
+    deriv, deriv!,
+    deriv2, deriv2!,
+    isdistancebased, ismarginbased,
+    isminimizable, isdifferentiable,
     istwicedifferentiable,
-    isconvex,
-    isstrictlyconvex,
-    isstronglyconvex,
-    isnemitski,
-    isunivfishercons,
-    isfishercons,
-    islipschitzcont,
-    islocallylipschitzcont,
-    islipschitzcont_deriv, # maybe overkill
-    isclipable,
-    ismarginbased,
-    isclasscalibrated,
-    isdistancebased,
-    issymmetric
+    isconvex, isstrictlyconvex,
+    isstronglyconvex, isnemitski,
+    isunivfishercons, isfishercons,
+    islipschitzcont, islocallylipschitzcont,
+    isclipable, isclasscalibrated, issymmetric
+
+# for maintainers
+include("devutils.jl")
+
+# supervised losses
+include("supervised.jl")
+
+# IO and plot recipes
+include("printing.jl")
+include("plotrecipes.jl")
+
+# deprecations
+@deprecate OrdinalHingeLoss OrdinalMarginLoss{HingeLoss}
+@deprecate weightedloss(l, w) WeightedMarginLoss(l, w)
+@deprecate scaled(l, λ) ScaledLoss(l, λ)
+@deprecate value_deriv(l,y,ŷ) (value(l,y,ŷ), deriv(l,y,ŷ))
 
 export
-
+    # loss API
     Loss,
     SupervisedLoss,
     MarginLoss,
     DistanceLoss,
-    value,
-    value!,
-    deriv,
-    deriv!,
-    deriv2,
-    deriv2!,
+    value, value!,
+    deriv, deriv!,
+    deriv2, deriv2!,
+    isdistancebased, ismarginbased,
+    isminimizable, isdifferentiable,
+    istwicedifferentiable,
+    isconvex, isstrictlyconvex,
+    isstronglyconvex, isnemitski,
+    isunivfishercons, isfishercons,
+    islipschitzcont, islocallylipschitzcont,
+    isclipable, isclasscalibrated, issymmetric,
 
+    # relevant submodules
+    AggMode, ObsDim,
+
+    # margin-based losses
     ZeroOneLoss,
     LogitMarginLoss,
     PerceptronLoss,
@@ -57,6 +76,7 @@ export
     SigmoidLoss,
     DWDMarginLoss,
 
+    # distance-based losses
     LPDistLoss,
     L1DistLoss,
     L2DistLoss,
@@ -69,30 +89,15 @@ export
     QuantileLoss,
     PinballLoss,
 
+    # other losses
     MisclassLoss,
     PoissonLoss,
     LogitProbLoss,
     CrossEntropyLoss,
-    ZeroOneLoss,
 
+    # meta losses
+    ScaledLoss,
     OrdinalMarginLoss,
-    OrdinalHingeLoss,
-
-    weightedloss,
-
-    AggMode
-
-include("devutils.jl")
-include("aggregatemode.jl")
-
-include("supervised/supervised.jl")
-include("supervised/sparse.jl")
-include("supervised/distance.jl")
-include("supervised/margin.jl")
-include("supervised/scaledloss.jl")
-include("supervised/weightedbinary.jl")
-include("supervised/other.jl")
-include("supervised/ordinal.jl")
-include("supervised/io.jl")
+    WeightedMarginLoss
 
 end # module

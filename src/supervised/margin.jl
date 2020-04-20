@@ -1,9 +1,3 @@
-# Note: agreement = output * target
-#       Agreement is high when output and target are the same sign and |output| is large.
-#       It is an indication that the output represents the correct class in a margin-based model.
-
-# ============================================================
-
 @doc doc"""
     ZeroOneLoss <: MarginLoss
 
@@ -43,7 +37,6 @@ deriv2(loss::ZeroOneLoss, target::Number, output::Number) = zero(output)
 value(loss::ZeroOneLoss, agreement::T) where {T<:Number} = sign(agreement) < 0 ? one(T) : zero(T)
 deriv(loss::ZeroOneLoss, agreement::T) where {T<:Number} = zero(T)
 deriv2(loss::ZeroOneLoss, agreement::T) where {T<:Number} = zero(T)
-value_deriv(loss::ZeroOneLoss, agreement::T) where {T<:Number} = sign(agreement) < 0 ? (one(T), zero(T)) : (zero(T), zero(T))
 
 isminimizable(::ZeroOneLoss) = true
 isdifferentiable(::ZeroOneLoss) = false
@@ -91,7 +84,6 @@ struct PerceptronLoss <: MarginLoss end
 value(loss::PerceptronLoss, agreement::T) where {T<:Number} = max(zero(T), -agreement)
 deriv(loss::PerceptronLoss, agreement::T) where {T<:Number} = agreement >= 0 ? zero(T) : -one(T)
 deriv2(loss::PerceptronLoss, agreement::T) where {T<:Number} = zero(T)
-value_deriv(loss::PerceptronLoss, agreement::T) where {T<:Number} = agreement >= 0 ? (zero(T), zero(T)) : (-agreement, -one(T))
 
 isdifferentiable(::PerceptronLoss) = false
 isdifferentiable(::PerceptronLoss, at) = at != 0
@@ -136,7 +128,6 @@ struct LogitMarginLoss <: MarginLoss end
 value(loss::LogitMarginLoss, agreement::Number) = log1p(exp(-agreement))
 deriv(loss::LogitMarginLoss, agreement::Number) = -one(agreement) / (one(agreement) + exp(agreement))
 deriv2(loss::LogitMarginLoss, agreement::Number) = (eᵗ = exp(agreement); eᵗ / abs2(one(eᵗ) + eᵗ))
-value_deriv(loss::LogitMarginLoss, agreement::Number) = (eᵗ = exp(-agreement); (log1p(eᵗ), -eᵗ / (one(eᵗ) + eᵗ)))
 
 isunivfishercons(::LogitMarginLoss) = true
 isdifferentiable(::LogitMarginLoss) = true
@@ -185,7 +176,6 @@ const HingeLoss = L1HingeLoss
 value(loss::L1HingeLoss, agreement::T) where {T<:Number} = max(zero(T), one(T) - agreement)
 deriv(loss::L1HingeLoss, agreement::T) where {T<:Number} = agreement >= 1 ? zero(T) : -one(T)
 deriv2(loss::L1HingeLoss, agreement::T) where {T<:Number} = zero(T)
-value_deriv(loss::L1HingeLoss, agreement::T) where {T<:Number} = agreement >= 1 ? (zero(T), zero(T)) : (one(T) - agreement, -one(T))
 
 isfishercons(::L1HingeLoss) = true
 isdifferentiable(::L1HingeLoss) = false
@@ -234,7 +224,6 @@ struct L2HingeLoss <: MarginLoss end
 value(loss::L2HingeLoss, agreement::T) where {T<:Number} = agreement >= 1 ? zero(T) : abs2(one(T) - agreement)
 deriv(loss::L2HingeLoss, agreement::T) where {T<:Number} = agreement >= 1 ? zero(T) : convert(T,2) * (agreement - one(T))
 deriv2(loss::L2HingeLoss, agreement::T) where {T<:Number} = agreement >= 1 ? zero(T) : convert(T,2)
-value_deriv(loss::L2HingeLoss, agreement::T) where {T<:Number} = agreement >= 1 ? (zero(T), zero(T)) : (abs2(one(T) - agreement), convert(T,2) * (agreement - one(T)))
 
 isunivfishercons(::L2HingeLoss) = true
 isdifferentiable(::L2HingeLoss) = true
@@ -458,7 +447,6 @@ struct ExpLoss <: MarginLoss end
 value(loss::ExpLoss, agreement::Number) = exp(-agreement)
 deriv(loss::ExpLoss, agreement::Number) = -exp(-agreement)
 deriv2(loss::ExpLoss, agreement::Number) = exp(-agreement)
-value_deriv(loss::ExpLoss, agreement::Number) = (eᵗ = exp(-agreement); (eᵗ, -eᵗ))
 
 isunivfishercons(::ExpLoss) = true
 isdifferentiable(::ExpLoss) = true

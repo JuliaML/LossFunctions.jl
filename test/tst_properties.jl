@@ -683,9 +683,9 @@ compare_losses(PoissonLoss(), 0.5*PoissonLoss())
 @testset "Weighted Margin-based" begin
     for loss in margin_losses
         @testset "$loss" begin
-            compare_losses(loss, weightedloss(loss,0.2), false)
-            compare_losses(loss, weightedloss(loss,0.5), true)
-            compare_losses(loss, weightedloss(loss,0.7), false)
+            compare_losses(loss, WeightedMarginLoss(loss,0.2), false)
+            compare_losses(loss, WeightedMarginLoss(loss,0.5), true)
+            compare_losses(loss, WeightedMarginLoss(loss,0.7), false)
         end
     end
 end
@@ -707,4 +707,3 @@ end
         end
     end
 end
-

@@ -35,30 +35,18 @@ multiplied to the existing implementation of the loss function
 (and derivatives).
 
 ```@docs
-scaled
+ScaledLoss
 ```
 
-```jldoctest scaled
+```jldoctest
 julia> lsloss = 1/2 * L2DistLoss()
-ScaledDistanceLoss{LPDistLoss{2},0.5}(LPDistLoss{2}())
+ScaledLoss{LPDistLoss{2},0.5}(LPDistLoss{2}())
 
 julia> value(L2DistLoss(), 0.0, 4.0)
 16.0
 
 julia> value(lsloss, 0.0, 4.0)
 8.0
-```
-
-While the resulting loss is of the same basic family as the
-original loss (i.e. margin-based or distance-based), it is not a
-sub-type of it.
-
-```jldoctest scaled
-julia> typeof(lsloss) <: DistanceLoss
-true
-
-julia> typeof(lsloss) <: L2DistLoss
-false
 ```
 
 As you have probably noticed, the constant scale factor gets
@@ -68,44 +56,15 @@ this one can make use of `Val` to specify the scale factor in a
 type-stable manner.
 
 ```jldoctest
-julia> lsloss = scaled(L2DistLoss(), Val(0.5))
-ScaledDistanceLoss{LPDistLoss{2},0.5}(LPDistLoss{2}())
+julia> sl = ScaledLoss(L2DistLoss(), Val(0.5))
+ScaledLoss{LPDistLoss{2},0.5}(LPDistLoss{2}())
 ```
 
 Storing the scale factor as a type-parameter instead of a member
-variable has some nice advantages. For one it makes it possible
-to define new types of losses using simple type-aliases.
-
-```jldoctest
-julia> const LeastSquaresLoss = LossFunctions.ScaledDistanceLoss{L2DistLoss,0.5}
-ScaledDistanceLoss{LPDistLoss{2},0.5}
-
-julia> value(LeastSquaresLoss(), 0.0, 4.0)
-8.0
-```
-
-Furthermore, it allows the compiler to do some quite convenient
-optimizations if possible. For example the compiler is able to
-figure out that the derivative simplifies for our newly defined
-`LeastSquaresLoss`, because `1/2 * 2` cancels each other.
-This is accomplished using the power of `@fastmath`.
-
-```julia-repl
-julia> @code_llvm deriv(L2DistLoss(), 0.0, 4.0)
-define double @julia_deriv_71652(double, double) #0 {
-top:
-  %2 = fsub double %1, %0
-  %3 = fmul double %2, 2.000000e+00
-  ret double %3
-}
-
-julia> @code_llvm deriv(LeastSquaresLoss(), 0.0, 4.0)
-define double @julia_deriv_71659(double, double) #0 {
-top:
-  %2 = fsub double %1, %0
-  ret double %2
-}
-```
+variable has some nice advantages. It allows the compiler to do
+some quite convenient optimizations if possible. For example the
+compiler is able to figure out that the derivative simplifies for
+a scaled loss. This is accomplished using the power of `@fastmath`.
 
 ## Reweighting a Margin Loss
 
@@ -128,21 +87,20 @@ end
 ```
 
 
-Instead of providing special functions to compute a
-class-weighted loss, we instead expose a generic way to create
-new weighted versions of already existing unweighted losses. This
-way, every existing subtype of [`MarginLoss`](@ref) can be
-re-weighted arbitrarily. Furthermore, it allows every algorithm
-that expects a binary loss to work with weighted binary losses as
-well.
+Instead of providing special functions to compute a class-weighted loss,
+we instead expose a generic way to create new weighted versions of already
+existing unweighted margin losses. This way, every existing subtype of
+[`MarginLoss`](@ref) can be re-weighted arbitrarily. Furthermore, it
+allows every algorithm that expects a binary loss to work with weighted
+binary losses as well.
 
 ```@docs
-weightedloss
+WeightedMarginLoss
 ```
 
 ```jldoctest weighted
-julia> myloss = weightedloss(HingeLoss(), 0.8)
-WeightedBinaryLoss{L1HingeLoss,0.8}(L1HingeLoss())
+julia> myloss = WeightedMarginLoss(HingeLoss(), 0.8)
+WeightedMarginLoss{L1HingeLoss,0.8}(L1HingeLoss())
 
 julia> value(myloss, 1.0, -4.0) # positive class
 4.0
@@ -177,18 +135,6 @@ this one can make use of `Val` to specify the scale factor in a
 type-stable manner.
 
 ```jldoctest weighted
-julia> myloss = weightedloss(HingeLoss(), Val(0.8))
-WeightedBinaryLoss{L1HingeLoss,0.8}(L1HingeLoss())
-```
-
-Storing the scale factor as a type-parameter instead of a member
-variable has a nice advantage. It makes it possible to define new
-types of losses using simple type-aliases.
-
-```jldoctest weighted
-julia> const MyWeightedHingeLoss = LossFunctions.WeightedBinaryLoss{HingeLoss,0.8}
-WeightedBinaryLoss{L1HingeLoss,0.8}
-
-julia> value(MyWeightedHingeLoss(), 1.0, -4.0)
-4.0
+julia> WeightedMarginLoss(HingeLoss(), Val(0.8))
+WeightedMarginLoss{L1HingeLoss,0.8}(L1HingeLoss())
 ```

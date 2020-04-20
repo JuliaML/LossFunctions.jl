@@ -87,18 +87,6 @@ broadcasted) results of [`value`](@ref), [`deriv`](@ref), and
 [`deriv2`](@ref). These methods avoid the allocation of a
 temporary array and instead compute the result directly.
 
-```@docs
-value(::Loss, ::AbstractArray, ::AbstractArray, ::LossFunctions.AggregateMode)
-```
-
-The exact same method signature is also implemented for
-[`deriv`](@ref) and [`deriv2`](@ref) respectively.
-
-```@docs
-deriv(::Loss, ::AbstractArray, ::AbstractArray, ::LossFunctions.AggregateMode)
-deriv2(::Loss, ::AbstractArray, ::AbstractArray, ::LossFunctions.AggregateMode)
-```
-
 ## Sum and Mean per Observation
 
 When the targets and predicted outputs are multi-dimensional
@@ -114,10 +102,6 @@ To be able to accumulate the values for each observation
 separately, we have to know and explicitly specify the dimension
 that denotes the observations. For that purpose we provide the
 types contained in the namespace `ObsDim`.
-
-```@docs
-value(::Loss, ::AbstractArray, ::AbstractArray, ::LossFunctions.AggregateMode, ::LearnBase.ObsDimension)
-```
 
 Consider the following two matrices, `targets` and `outputs`.
 We will fill them with some generated example values in order to
@@ -176,20 +160,6 @@ julia> value(L1DistLoss(), targets, outputs, AggMode.Mean(), ObsDim.Last())
 Because this method returns a vector of values, we also provide a
 mutating version that can make use a preallocated vector to write
 the results into.
-
-```@docs
-value!(::AbstractArray, ::Loss, ::AbstractArray, ::AbstractArray, ::LossFunctions.AggregateMode, ::LearnBase.ObsDimension)
-```
-
-Naturally we also provide both of these methods for
-[`deriv`](@ref) and [`deriv2`](@ref) respectively.
-
-```@docs
-deriv(::Loss, ::AbstractArray, ::AbstractArray, ::LossFunctions.AggregateMode, ::LearnBase.ObsDimension)
-deriv!(::AbstractArray, ::Loss, ::AbstractArray, ::AbstractArray, ::LossFunctions.AggregateMode, ::LearnBase.ObsDimension)
-deriv2(::Loss, ::AbstractArray, ::AbstractArray, ::LossFunctions.AggregateMode, ::LearnBase.ObsDimension)
-deriv2!(::AbstractArray, ::Loss, ::AbstractArray, ::AbstractArray, ::LossFunctions.AggregateMode, ::LearnBase.ObsDimension)
-```
 
 ## Weighted Sum and Mean
 

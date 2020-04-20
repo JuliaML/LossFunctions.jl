@@ -155,10 +155,6 @@ PeriodicLoss(circ) = PeriodicLoss{Float64}(Float64(circ))
 value(loss::PeriodicLoss, difference::T) where {T<:Number} = 1 - cos(difference*loss.k)
 deriv(loss::PeriodicLoss, difference::T) where {T<:Number} = loss.k * sin(difference*loss.k)
 deriv2(loss::PeriodicLoss, difference::T) where {T<:Number} = abs2(loss.k) * cos(difference*loss.k)
-function value_deriv(loss::PeriodicLoss, difference::T) where T<:Number
-    dk = difference*loss.k
-    return 1-cos(dk), loss.k*sin(dk)
-end
 
 isdifferentiable(::PeriodicLoss) = true
 isdifferentiable(::PeriodicLoss, at) = true
@@ -232,18 +228,6 @@ function deriv2(loss::HuberLoss{T1}, difference::T2) where {T1,T2<:Number}
     T = promote_type(T1,T2)
     abs(difference) <= loss.d ? one(T) : zero(T)
 end
-function value_deriv(loss::HuberLoss{T1}, difference::T2) where {T1,T2<:Number}
-    T = promote_type(T1,T2)
-    abs_diff = abs(difference)
-    if abs_diff <= loss.d
-        val = convert(T,0.5)*abs2(difference)
-        der = convert(T,difference)
-    else
-        val = (loss.d*abs_diff) - convert(T,0.5)*abs2(loss.d)
-        der = loss.d*convert(T,sign(difference))
-    end
-    return val,der
-end
 
 isdifferentiable(::HuberLoss) = true
 isdifferentiable(l::HuberLoss, at) = true
@@ -307,11 +291,6 @@ function deriv(loss::L1EpsilonInsLoss{T1}, difference::T2) where {T1,T2<:Number}
     abs(difference) <= loss.ε ? zero(T) : convert(T,sign(difference))
 end
 deriv2(loss::L1EpsilonInsLoss{T1}, difference::T2) where {T1,T2<:Number} = zero(promote_type(T1,T2))
-function value_deriv(loss::L1EpsilonInsLoss{T1}, difference::T2) where {T1,T2<:Number}
-    T = promote_type(T1,T2)
-    absr = abs(difference)
-    absr <= loss.ε ? (zero(T), zero(T)) : (absr - loss.ε, convert(T,sign(difference)))
-end
 
 issymmetric(::L1EpsilonInsLoss) = true
 isdifferentiable(::L1EpsilonInsLoss) = false
@@ -378,11 +357,6 @@ function deriv2(loss::L2EpsilonInsLoss{T1}, difference::T2) where {T1,T2<:Number
     T = promote_type(T1,T2)
     abs(difference) <= loss.ε ? zero(T) : convert(T,2)
 end
-function value_deriv(loss::L2EpsilonInsLoss{T}, difference::Number) where T
-    absr = abs(difference)
-    diff = absr - loss.ε
-    absr <= loss.ε ? (zero(T), zero(T)) : (abs2(diff), convert(T,2)*sign(difference)*diff)
-end
 
 issymmetric(::L2EpsilonInsLoss) = true
 isdifferentiable(::L2EpsilonInsLoss) = true
@@ -437,12 +411,6 @@ function deriv2(loss::LogitDistLoss, difference::Number)
     er = exp(difference)
     T = typeof(er)
     convert(T,2)*er / abs2(one(T) + er)
-end
-function value_deriv(loss::LogitDistLoss, difference::Number)
-    er = exp(difference)
-    T = typeof(er)
-    er1 = one(T) + er
-    -log(convert(T,4)) - difference + 2log(er1), (er - one(T)) / (er1)
 end
 
 issymmetric(::LogitDistLoss) = true

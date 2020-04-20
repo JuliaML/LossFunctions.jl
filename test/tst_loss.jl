@@ -76,14 +76,8 @@ function test_deriv(l::MarginLoss, t_vec)
                 d_comp = @inferred deriv(l, y, t)
                 @test abs(d_dual - d_comp) < 1e-10
                 val = @inferred value(l, y, t)
-                val2, d_comp2 = @inferred value_deriv(l, y, t)
-                val4, d_comp4 = @inferred value_deriv(l, y * t)
-                @test val ≈ val2
-                @test val ≈ val4
                 @test val ≈ value(l, y, t)
                 @test val ≈ value(l, y*t)
-                @test d_comp ≈ d_comp2
-                @test d_comp ≈ y*d_comp4
                 @test d_comp ≈ y*deriv(l, y*t)
             else
                 # y*t == 1 ? print(".") : print("(no $(y)*$(t)) ")
@@ -101,14 +95,8 @@ function test_deriv(l::DistanceLoss, t_vec)
                 d_comp = @inferred deriv(l, y, t)
                 @test abs(d_dual - d_comp) < 1e-10
                 val = @inferred value(l, y, t)
-                val2, d_comp2 = @inferred value_deriv(l, y, t)
-                val4, d_comp4 = @inferred value_deriv(l, t-y)
-                @test val ≈ val2
-                @test val ≈ val4
                 @test val ≈ value(l, y, t)
                 @test val ≈ value(l, t-y)
-                @test d_comp ≈ d_comp2
-                @test d_comp ≈ d_comp4
                 @test d_comp ≈ deriv(l, t-y)
             end
         end
@@ -123,10 +111,7 @@ function test_deriv(l::SupervisedLoss, y_vec, t_vec)
                 d_comp = @inferred deriv(l, y, t)
                 @test abs(d_dual - d_comp) < 1e-10
                 val = @inferred value(l, y, t)
-                val2, d_comp2 = @inferred value_deriv(l, y, t)
-                @test val ≈ val2
                 @test val ≈ value(l, y, t)
-                @test d_comp ≈ d_comp2
                 @test d_comp ≈ deriv(l, y, t)
             end
         end
@@ -174,20 +159,14 @@ function test_deriv2(l::SupervisedLoss, y_vec, t_vec)
     end
 end
 
-function test_scaledloss(l::Loss, t_vec, y_vec)
+function test_scaledloss(l::SupervisedLoss, t_vec, y_vec)
     @testset "Scaling for $(l): " begin
         for λ = (2.0, 2)
-            sl = scaled(l,λ)
-            if typeof(l) <: MarginLoss
-                @test typeof(sl) <: LossFunctions.ScaledMarginLoss{typeof(l),λ}
-            elseif typeof(l) <: DistanceLoss
-                @test typeof(sl) <: LossFunctions.ScaledDistanceLoss{typeof(l),λ}
-            else
-                @test typeof(sl) <: LossFunctions.ScaledSupervisedLoss{typeof(l),λ}
-            end
-            @test 3 * sl == @inferred(scaled(sl,Val(3)))
-            @test (λ*3) * l == @inferred(scaled(sl,Val(3)))
-            @test sl == @inferred(scaled(l,Val(λ)))
+            sl = ScaledLoss(l,λ)
+            @test typeof(sl) <: ScaledLoss{typeof(l),λ}
+            @test 3 * sl == @inferred(ScaledLoss(sl,Val(3)))
+            @test (λ*3) * l == @inferred(ScaledLoss(sl,Val(3)))
+            @test sl == @inferred(ScaledLoss(l,Val(λ)))
             @test sl == λ * l
             @test sl == @inferred(Val(λ) * l)
             for t in t_vec
@@ -201,25 +180,14 @@ function test_scaledloss(l::Loss, t_vec, y_vec)
     end
 end
 
-function test_scaledloss(l::Loss, n_vec)
+function test_scaledloss(l::SupervisedLoss, n_vec)
     @testset "Scaling for $(l): " begin
         for λ = (2.0, 2)
-            sl = scaled(l,λ)
-            if typeof(l) <: MarginLoss
-                @test typeof(sl) <: LossFunctions.ScaledMarginLoss{typeof(l),λ}
-            elseif typeof(l) <: DistanceLoss
-                @test typeof(sl) <: LossFunctions.ScaledDistanceLoss{typeof(l),λ}
-            else
-                @test typeof(sl) <: LossFunctions.ScaledSupervisedLoss{typeof(l),λ}
-            end
-            @test sl == @inferred(scaled(l,Val(λ)))
+            sl = ScaledLoss(l,λ)
+            @test typeof(sl) <: ScaledLoss{typeof(l),λ}
+            @test sl == @inferred(ScaledLoss(l,Val(λ)))
             @test sl == λ * l
             @test sl == @inferred(Val(λ) * l)
-            for n in n_vec
-                @test @inferred(value(sl,n)) == λ*value(l,n)
-                @test @inferred(deriv(sl,n)) == λ*deriv(l,n)
-                @test @inferred(deriv2(sl,n)) == λ*deriv2(l,n)
-            end
         end
     end
 end
@@ -227,10 +195,9 @@ end
 function test_weightedloss(l::MarginLoss, t_vec, y_vec)
     @testset "Weighted version for $(l): " begin
         for w in (0., 0.2, 0.7, 1.)
-            wl = weightedloss(l, w)
-            @test typeof(wl) <: LossFunctions.WeightedBinaryLoss{typeof(l),w}
-            @test wl == @inferred(weightedloss(l, Val(w)))
-            @test weightedloss(l, w * 0.1) == weightedloss(wl, 0.1)
+            wl = WeightedMarginLoss(l, w)
+            @test typeof(wl) <: WeightedMarginLoss{typeof(l),w}
+            @test WeightedMarginLoss(l, w * 0.1) == WeightedMarginLoss(wl, 0.1)
             for t in t_vec
                 for y in y_vec
                     if t == 1
@@ -256,7 +223,6 @@ end
     @test L2DistLoss === LPDistLoss{2}
     @test HingeLoss === L1HingeLoss
     @test EpsilonInsLoss === L1EpsilonInsLoss
-    @test OrdinalHingeLoss === OrdinalMarginLoss{HingeLoss}
 end
 
 @testset "Test typestable supervised loss for type stability" begin
@@ -430,7 +396,6 @@ const OrdinalSmoothedHingeLoss = OrdinalMarginLoss{<:SmoothedL1HingeLoss}
         val
     end
     y = rand(1:5, 10); t = randn(10) .+ 3
-    @test OrdinalHingeLoss(5) === OrdinalMarginLoss(HingeLoss(), 5)
     test_value(OrdinalMarginLoss(HingeLoss(), 5), _ordinalhingeloss, y, t)
 end
 
@@ -470,14 +435,10 @@ end
     end
 end
 
-const BarLoss = LossFunctions.WeightedBinaryLoss{SmoothedL1HingeLoss,0.2}
-
 @testset "Test margin-based weighted loss" begin
     for loss in margin_losses
         test_weightedloss(loss, [-1.,1], -10:0.2:10)
     end
-    l = @inferred BarLoss(1.2)
-    @test l.loss == SmoothedL1HingeLoss(1.2)
 end
 
 # --------------------------------------------------------------
@@ -501,16 +462,11 @@ end
     end
 end
 
-const FooLoss = LossFunctions.ScaledDistanceLoss{L2EpsilonInsLoss,2}
-
 @testset "Test distance-based scaled loss" begin
     for loss in distance_losses
         test_scaledloss(loss, -10:.2:10, -10:0.5:10)
         test_scaledloss(loss, -10:0.5:10)
     end
-
-    l = @inferred FooLoss(1.2)
-    @test l.loss == L2EpsilonInsLoss(1.2)
 end
 
 # --------------------------------------------------------------

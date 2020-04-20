@@ -19,11 +19,10 @@ in detail.
 To install
 [LossFunctions.jl](https://github.com/JuliaML/LossFunctions.jl),
 start up Julia and type the following code-snipped into the REPL.
-It makes use of the native Julia package manger.
+It makes use of the native Julia package manager.
 
 ```julia
-using Pkg
-Pkg.add("LossFunctions")
+] add LossFunctions
 ```
 
 ## Overview
@@ -86,31 +85,11 @@ julia> value(L2DistLoss(), true_targets, pred_outputs)
  1.0
 ```
 
-Alternatively, one can also use an instance of a loss just like
-one would use any other Julia function. This can make the code
-significantly more readable while not impacting performance, as
-it is a zero-cost abstraction (i.e. it compiles down to the same
-code).
-
-```julia-repl
-julia> loss = L2DistLoss()
-LossFunctions.LPDistLoss{2}()
-
-julia> loss(true_targets, pred_outputs) # same result as above
-3-element Array{Float64,1}:
- 0.25
- 4.0
- 1.0
-
-julia> loss(1, 0.5f0) # single observation
-0.25f0
-```
-
 If you are not actually interested in the element-wise results
 individually, but some accumulation of those (such as mean or
-sum), you can additionally specify an **average mode**. This will
-avoid allocating a temporary array and directly compute the
-result.
+sum), you can additionally specify an **aggregation mode**.
+This will avoid allocating a temporary array and directly
+compute the result.
 
 ```julia-repl
 julia> value(L2DistLoss(), true_targets, pred_outputs, AggMode.Sum())
@@ -250,38 +229,12 @@ on [`L1HingeLoss`](@ref) within Julia's REPL:
 ```julia
 ?L1HingeLoss
 ```
-```
-search: L1HingeLoss SmoothedL1HingeLoss
-
-  L1HingeLoss <: MarginLoss
-
-  The hinge loss linearly penalizes every predicition where the resulting
-  agreement < 1 . It is Lipschitz continuous and convex, but not strictly
-  convex.
-
-  L(y, ŷ) = max(0, 1 - y⋅ŷ)
-
-             Lossfunction                     Derivative
-     ┌────────────┬────────────┐      ┌────────────┬────────────┐
-   3 │'\.                      │    0 │                  ┌------│
-     │  ''_                    │      │                  |      │
-     │     \.                  │      │                  |      │
-     │       '.                │      │                  |      │
-   L │         ''_             │   L' │                  |      │
-     │            \.           │      │                  |      │
-     │              '.         │      │                  |      │
-   0 │                ''_______│   -1 │------------------┘      │
-     └────────────┴────────────┘      └────────────┴────────────┘
-     -2                        2      -2                        2
-                y ⋅ ŷ                            y ⋅ ŷ
-```
-
 
 If you find yourself stuck or have other questions concerning the
-package you can find us on the julialang slack or the *Machine
-Learning* domain on discourse.julialang.org
+package you can find us on the Julia's Zulip chat or the *Machine
+Learning* domain on Discourse:
 
-- [Machine Learning on Julialang](https://discourse.julialang.org/c/domain/ML)
+- [Machine Learning in Julia](https://discourse.julialang.org/c/domain/ML)
 
 If you encounter a bug or would like to participate in the
 further development of this package come find us on Github.

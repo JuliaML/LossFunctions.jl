@@ -1,16 +1,8 @@
-# Function for sparse arrays
-# value!, deriv!
-# `output` can have more dimensions than `target`, in which case do broadcasting
-
-# TODO: find way to use normal broadcast for this.
-# probably with the new changes in MLMetric and compare modes
-
 @inline function value(loss::MarginLoss, target::AbstractSparseArray, output::AbstractArray)
     buffer = similar(output)
     value!(buffer, loss, target, output)
 end
 
-##
 @generated function value!(
         buffer::AbstractArray,
         loss::MarginLoss,
