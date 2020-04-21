@@ -58,16 +58,16 @@ parameter which specifies how the values should be accumulated /
 averaged. The type of this parameter has to be a subtype of
 `AggregateMode`.
 
-## Average Modes
+## Aggregation Modes
 
 Before we discuss these memory-efficient methods, let us briefly
-introduce the available average mode types. We provide a number
-of different averages modes, all of which are contained within
+introduce the available aggregation mode types. We provide a number
+of different aggregation modes, all of which are contained within
 the namespace `AggMode`. An instance of such type can then be
 used as additional parameter to [`value`](@ref), [`deriv`](@ref),
 and [`deriv2`](@ref), as we will see further down.
 
-It follows a list of available average modes. Each of which with
+It follows a list of available aggregation modes. Each of which with
 a short description of what their effect would be when used as an
 additional parameter to the functions mentioned above.
 
