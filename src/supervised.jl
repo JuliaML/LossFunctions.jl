@@ -22,6 +22,11 @@ include("supervised/ordinal.jl")
 include("supervised/scaled.jl")
 include("supervised/weighted.jl")
 
+# helper macro (for devs)
+macro dimcheck(condition)
+    :(($(esc(condition))) || throw(DimensionMismatch("Dimensions of the parameters don't match: $($(string(condition)))")))
+end
+
 # ------------------------------
 # DEFAULT AGGREGATION BEHAVIOR
 # ------------------------------

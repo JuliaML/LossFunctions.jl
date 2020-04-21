@@ -3,7 +3,7 @@ uuid = "30fc2ffe-d236-52d8-8643-a9d8f7c094a7"
 version = "0.6.0"
 
 [deps]
-InteractiveUtils = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
+CategoricalArrays = "324d7699-5711-5eae-9e2f-1d82baa6b597"
 LearnBase = "7f8f8fb0-2700-5f03-b4bd-41f8cfc144b6"
 Markdown = "d6f4376e-aef5-505a-96c1-9c027394607a"
 RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
@@ -11,7 +11,8 @@ SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 
 [compat]
-LearnBase = "0.3"
+CategoricalArrays = "0.8"
+LearnBase = "0.4"
 RecipesBase = "0.8, 1.0"
 StatsBase = "0.33"
 julia = "1"

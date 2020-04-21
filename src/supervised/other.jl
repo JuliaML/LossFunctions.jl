@@ -7,15 +7,15 @@ examples and `0` otherwise. It is a generalization of
 """
 struct MisclassLoss <: SupervisedLoss end
 
-agreement(target, output) = target == output
-
-value(::MisclassLoss, agreement::Bool) = agreement ? 0 : 1
+value(::MisclassLoss, agreement::Bool) = ifelse(agreement, 0, 1)
 deriv(::MisclassLoss, agreement::Bool) = 0
 deriv2(::MisclassLoss, agreement::Bool) = 0
 
-value(loss::MisclassLoss, target::Number, output::Number) = value(loss, agreement(target, output))
-deriv(loss::MisclassLoss, target::Number, output::Number) = deriv(loss, agreement(target, output))
-deriv2(loss::MisclassLoss, target::Number, output::Number) = deriv2(loss, agreement(target, output))
+const CV = Union{CategoricalValue,Number}
+
+value(loss::MisclassLoss, target::CV, output::CV) = value(loss, target == output)
+deriv(loss::MisclassLoss, target::CV, output::CV) = deriv(loss, target == output)
+deriv2(loss::MisclassLoss, target::CV, output::CV) = deriv2(loss, target == output)
 
 isminimizable(::MisclassLoss) = false
 isdifferentiable(::MisclassLoss) = false
@@ -62,7 +62,6 @@ Cross-entropy loss also known as log loss and logistic loss is defined as:
 ``L(target, output) = - target*ln(output) - (1-target)*ln(1-output)``
 """
 struct CrossEntropyLoss <: SupervisedLoss end
-const LogitProbLoss = CrossEntropyLoss
 
 function value(loss::CrossEntropyLoss, target::Number, output::Number)
     target >= 0 && target <=1 || error("target must be in [0,1]")
