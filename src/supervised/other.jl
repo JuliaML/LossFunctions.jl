@@ -7,9 +7,10 @@ examples and `0` otherwise. It is a generalization of
 """
 struct MisclassLoss <: SupervisedLoss end
 
-value(::MisclassLoss, agreement::Bool) = ifelse(agreement, 0, 1)
-deriv(::MisclassLoss, agreement::Bool) = 0
-deriv2(::MisclassLoss, agreement::Bool) = 0
+# return floating point to avoid big integers in aggregations
+value(::MisclassLoss, agreement::Bool) = ifelse(agreement, 0.0, 1.0)
+deriv(::MisclassLoss, agreement::Bool) = 0.0
+deriv2(::MisclassLoss, agreement::Bool) = 0.0
 
 const CV = Union{CategoricalValue,Number}
 

@@ -10,6 +10,10 @@ value(loss::MarginLoss, target::Number, output::Number)  = value(loss, target * 
 deriv(loss::MarginLoss, target::Number, output::Number)  = target * deriv(loss, target * output)
 deriv2(loss::MarginLoss, target::Number, output::Number) = deriv2(loss, target * output)
 
+# result type when applying the loss to a single pair of objects
+result_type(loss::SupervisedLoss, t::Type{T}, o::Type{O}) where {T,O} = typeof(value(loss, zero(t), zero(o)))
+result_type(loss::SupervisedLoss, t::Type{<:CategoricalValue}, o::Type{<:CategoricalValue}) = Float64
+
 # ------------------
 # AVAILABLE LOSSES
 # ------------------
@@ -80,8 +84,7 @@ for FUN in (:value, :deriv, :deriv2)
                 ::AggMode.None) where {Q,M,T,N}
             quote
                 $(Expr(:meta, :inline))
-                S = typeof(($($FUN))(loss, one(Q), one(T)))
-                ($($FUN)).(Ref(loss), target, output)
+                ($($FUN)).(loss, target, output)
             end
         end
 
@@ -91,7 +94,7 @@ for FUN in (:value, :deriv, :deriv2)
                 target::AbstractArray{Q,M},
                 output::AbstractArray{T,N},
                 ::AggMode.None) where {Q,M,T,N}
-            buffer .= ($FUN).(Ref(loss), target, output)
+            buffer .= ($FUN).(loss, target, output)
             buffer
         end
 
@@ -107,7 +110,7 @@ for FUN in (:value, :deriv, :deriv2)
             S, B = min(M,N), max(M,N)
             quote
                 @nexprs $S (n)->@dimcheck(size(target, n) == size(output, n))
-                out = zero(($($FUN))(loss, one(Q), one(T)))
+                out = zero(result_type(loss, Q, T))
                 @inbounds @simd for I in CartesianIndices(size($bigger))
                     @nexprs $B n->(i_n = I[n])
                     out += ($($FUN))(loss, @nref($M,target,i), @nref($N,output,i))
@@ -122,7 +125,7 @@ for FUN in (:value, :deriv, :deriv2)
                 output::AbstractArray{T,N},
                 avg::AggMode.Sum,
                 obsdim::ObsDim.Constant{O}) where {Q,T,N,O}
-            S = typeof(($FUN)(loss, one(Q), one(T)))
+            S = result_type(loss, Q, T)
             buffer = zeros(S, size(output, O))
             ($(Symbol(FUN,:!)))(buffer, loss, target, output, avg, obsdim)
         end
@@ -155,11 +158,10 @@ for FUN in (:value, :deriv, :deriv2)
                 ::AggMode.Mean) where {Q,M,T,N}
             bigger = M > N ? :target : :output
             S, B = min(M,N), max(M,N)
-            P = promote_type(Q,T)
             quote
                 @nexprs $S (n)->@dimcheck(size(target, n) == size(output, n))
-                nrm = 1 / $P(length($bigger))
-                out = zero(($($FUN))(loss, one(Q), one(T)) * nrm)
+                nrm = 1 / length($bigger)
+                out = zero(result_type(loss, Q, T)) * nrm
                 @inbounds @simd for I in CartesianIndices(size($bigger))
                     @nexprs $B n->(i_n = I[n])
                     out += ($($FUN))(loss, @nref($M,target,i), @nref($N,output,i)) * nrm
@@ -174,7 +176,7 @@ for FUN in (:value, :deriv, :deriv2)
                 output::AbstractArray{T,N},
                 avg::AggMode.Mean,
                 obsdim::ObsDim.Constant{O}) where {Q,T,N,O}
-            S = typeof(($FUN)(loss, one(Q), one(T)) / one(Int))
+            S = result_type(loss, Q, T)
             buffer = zeros(S, size(output, O))
             ($(Symbol(FUN,:!)))(buffer, loss, target, output, avg, obsdim)
         end
@@ -191,9 +193,7 @@ for FUN in (:value, :deriv, :deriv2)
             @dimcheck size(target) == size(output)
             @dimcheck length(buffer) == size(output, O)
             fill!(buffer, zero(B))
-            P = promote_type(Q,T)
-            k = P(prod(size(output,n) for n in 1:N if n != O))
-            nrm = 1 / k
+            nrm = 1 / B(prod(size(output,n) for n in 1:N if n != O))
             @inbounds @simd for I in CartesianIndices(size(output))
                 buffer[I[O]] += ($FUN)(loss, target[I], output[I]) * nrm
             end
@@ -213,7 +213,7 @@ for FUN in (:value, :deriv, :deriv2)
             @dimcheck size(target) == size(output)
             @dimcheck size(output, O) == length(agg.weights)
             nrm = agg.normalize ? inv(sum(agg.weights)) : inv(one(sum(agg.weights)))
-            out = zero(($FUN)(loss, one(Q), one(T)) * (agg.weights[1] * nrm))
+            out = zero(result_type(loss, Q, T)) * (agg.weights[1] * nrm)
             @inbounds @simd for I in CartesianIndices(size(output))
                 out += ($FUN)(loss, target[I], output[I]) * (agg.weights[I[O]] * nrm)
             end
@@ -234,7 +234,7 @@ for FUN in (:value, :deriv, :deriv2)
             @dimcheck size(output, O) == length(agg.weights)
             k = prod(n != O ? size(output,n) : 1 for n in 1:N)::Int
             nrm = agg.normalize ? inv(k * sum(agg.weights)) : inv(k * one(sum(agg.weights)))
-            out = zero(($FUN)(loss, one(Q), one(T)) * (agg.weights[1] * nrm))
+            out = zero(result_type(loss, Q, T)) * (agg.weights[1] * nrm)
             @inbounds @simd for I in CartesianIndices(size(output))
                 out += ($FUN)(loss, target[I], output[I]) * (agg.weights[I[O]] * nrm)
             end
