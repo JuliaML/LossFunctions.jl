@@ -1,18 +1,27 @@
 @doc doc"""
-    MisclassLoss <: SupervisedLoss
+    MisclassLoss{R<:AbstractFloat} <: SupervisedLoss
 
 Misclassification loss that assigns `1` for misclassified
 examples and `0` otherwise. It is a generalization of
 `ZeroOneLoss` for more than two classes.
+
+The type parameter `R` specifies the result type of the
+loss. Default type is double precision `R = Float64`.
 """
-struct MisclassLoss <: SupervisedLoss end
+struct MisclassLoss{R<:AbstractFloat} <: SupervisedLoss end
+
+MisclassLoss() = MisclassLoss{Float64}()
+
+# categorical + numerical type
+const CV = Union{CategoricalValue,Number}
+
+# specialize result type
+result_type(loss::MisclassLoss{R}, t::Type{T}, o::Type{O}) where {R,T,O} = R
 
 # return floating point to avoid big integers in aggregations
-value(::MisclassLoss, agreement::Bool) = ifelse(agreement, 0.0, 1.0)
-deriv(::MisclassLoss, agreement::Bool) = 0.0
-deriv2(::MisclassLoss, agreement::Bool) = 0.0
-
-const CV = Union{CategoricalValue,Number}
+value(::MisclassLoss{R}, agreement::Bool) where R = ifelse(agreement, zero(R), one(R))
+deriv(::MisclassLoss{R}, agreement::Bool) where R = zero(R)
+deriv2(::MisclassLoss{R}, agreement::Bool) where R = zero(R)
 
 value(loss::MisclassLoss, target::CV, output::CV) = value(loss, target == output)
 deriv(loss::MisclassLoss, target::CV, output::CV) = deriv(loss, target == output)
