@@ -13,19 +13,19 @@ struct MisclassLoss{R<:AbstractFloat} <: SupervisedLoss end
 MisclassLoss() = MisclassLoss{Float64}()
 
 # categorical + numerical type
-const CV = Union{CategoricalValue,Number}
+const NUM = Union{CategoricalValue,Number}
 
 # specialize result type
-result_type(loss::MisclassLoss{R}, t::Type{T}, o::Type{O}) where {R,T,O} = R
+result_type(loss::MisclassLoss{R}, t::Type, o::Type) where R = R
 
 # return floating point to avoid big integers in aggregations
 value(::MisclassLoss{R}, agreement::Bool) where R = ifelse(agreement, zero(R), one(R))
 deriv(::MisclassLoss{R}, agreement::Bool) where R = zero(R)
 deriv2(::MisclassLoss{R}, agreement::Bool) where R = zero(R)
 
-value(loss::MisclassLoss, target::CV, output::CV) = value(loss, target == output)
-deriv(loss::MisclassLoss, target::CV, output::CV) = deriv(loss, target == output)
-deriv2(loss::MisclassLoss, target::CV, output::CV) = deriv2(loss, target == output)
+value(loss::MisclassLoss, target::NUM, output::NUM) = value(loss, target == output)
+deriv(loss::MisclassLoss, target::NUM, output::NUM) = deriv(loss, target == output)
+deriv2(loss::MisclassLoss, target::NUM, output::NUM) = deriv2(loss, target == output)
 
 isminimizable(::MisclassLoss) = false
 isdifferentiable(::MisclassLoss) = false
