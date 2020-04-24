@@ -34,6 +34,7 @@ include("plotrecipes.jl")
 
 # deprecations
 @deprecate LogitProbLoss CrossEntropyLoss
+@deprecate PinballLoss QuantileLoss
 @deprecate OrdinalHingeLoss OrdinalMarginLoss{HingeLoss}
 @deprecate weightedloss(l, w) WeightedMarginLoss(l, w)
 @deprecate scaled(l, λ) ScaledLoss(l, λ)
@@ -85,7 +86,6 @@ export
     L2EpsilonInsLoss,
     LogitDistLoss,
     QuantileLoss,
-    PinballLoss,
 
     # other losses
     MisclassLoss,

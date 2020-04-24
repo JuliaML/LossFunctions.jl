@@ -458,8 +458,6 @@ struct QuantileLoss{T <: AbstractFloat} <: DistanceLoss
     τ::T
 end
 
-const PinballLoss = QuantileLoss
-
 function value(loss::QuantileLoss{T1}, diff::T2) where {T1, T2 <: Number}
     T = promote_type(T1, T2)
     diff * (convert(T,diff > 0) - loss.τ)
