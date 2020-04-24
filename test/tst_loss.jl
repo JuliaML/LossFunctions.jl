@@ -218,7 +218,6 @@ end
 # ====================================================================
 
 @testset "Test typealias" begin
-    @test PinballLoss === QuantileLoss
     @test L1DistLoss === LPDistLoss{1}
     @test L2DistLoss === LPDistLoss{2}
     @test HingeLoss === L1HingeLoss
@@ -449,6 +448,12 @@ end
     end
 end
 
+@testset "Test second derivatives of distance-based losses" begin
+    for loss in distance_losses
+        test_deriv2(loss, -10:0.5:10)
+    end
+end
+
 @testset "Test first and second derivatives of other losses" begin
     test_deriv(PoissonLoss(), -10:.2:10, 0:30)
     test_deriv2(PoissonLoss(), -10:.2:10, 0:30)
@@ -456,17 +461,26 @@ end
     test_deriv2(CrossEntropyLoss(), 0:0.01:1, 0.01:0.01:0.99)
 end
 
-@testset "Test second derivatives of distance-based losses" begin
-    for loss in distance_losses
-        test_deriv2(loss, -10:0.5:10)
-    end
-end
-
 @testset "Test distance-based scaled loss" begin
     for loss in distance_losses
         test_scaledloss(loss, -10:.2:10, -10:0.5:10)
         test_scaledloss(loss, -10:0.5:10)
     end
+end
+
+# --------------------------------------------------------------
+
+@testset "Losses with categorical values" begin
+    c = categorical(["Foo","Bar","Baz","Foo"])
+
+    l = MisclassLoss()
+    @test value(l, c[1], c[1]) == 0.0
+    @test value(l, c[1], c[2]) == 1.0
+    @test value(l, c, reverse(c)) == [0.0, 1.0, 1.0, 0.0]
+    @test value(l, c, reverse(c), AggMode.Sum()) == 2.0
+    @test value(l, c, reverse(c), AggMode.Mean()) == 0.5
+    @test value(l, c, reverse(c), AggMode.WeightedSum(2*ones(4))) == 4.0
+    @test value(l, c, reverse(c), AggMode.WeightedMean(2*ones(4))) == 0.5
 end
 
 # --------------------------------------------------------------
