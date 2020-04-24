@@ -1,6 +1,7 @@
 module LossFunctionsTests
 
 using LossFunctions
+using CategoricalArrays
 using SparseArrays
 using DualNumbers
 using Statistics
