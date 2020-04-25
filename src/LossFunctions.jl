@@ -4,7 +4,6 @@ import Base.*
 using Base.Cartesian
 using Markdown
 using SparseArrays
-using CategoricalArrays
 using RecipesBase
 
 import LearnBase.AggMode

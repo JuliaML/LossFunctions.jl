@@ -480,7 +480,8 @@ end
     @test value(l, c, reverse(c), AggMode.Sum()) == 2.0
     @test value(l, c, reverse(c), AggMode.Mean()) == 0.5
     @test value(l, c, reverse(c), AggMode.WeightedSum(2*ones(4))) == 4.0
-    @test value(l, c, reverse(c), AggMode.WeightedMean(2*ones(4))) == 0.5
+    @test value(l, c, reverse(c), AggMode.WeightedMean(2*ones(4),false)) == 1.0
+    @test value(l, c, reverse(c), AggMode.WeightedMean(2*ones(4),true)) == 0.125
 
     lf = MisclassLoss{Float32}()
     @test value(lf, c[1], c[1]) isa Float32
