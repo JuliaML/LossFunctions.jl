@@ -4,7 +4,6 @@ import Base.*
 using Base.Cartesian
 using Markdown
 using SparseArrays
-using InteractiveUtils
 using RecipesBase
 
 import LearnBase.AggMode
@@ -25,9 +24,6 @@ import LearnBase:
     islipschitzcont, islocallylipschitzcont,
     isclipable, isclasscalibrated, issymmetric
 
-# for maintainers
-include("devutils.jl")
-
 # supervised losses
 include("supervised.jl")
 
@@ -36,6 +32,8 @@ include("printing.jl")
 include("plotrecipes.jl")
 
 # deprecations
+@deprecate LogitProbLoss CrossEntropyLoss
+@deprecate PinballLoss QuantileLoss
 @deprecate OrdinalHingeLoss OrdinalMarginLoss{HingeLoss}
 @deprecate weightedloss(l, w) WeightedMarginLoss(l, w)
 @deprecate scaled(l, λ) ScaledLoss(l, λ)
@@ -87,12 +85,10 @@ export
     L2EpsilonInsLoss,
     LogitDistLoss,
     QuantileLoss,
-    PinballLoss,
 
     # other losses
     MisclassLoss,
     PoissonLoss,
-    LogitProbLoss,
     CrossEntropyLoss,
 
     # meta losses

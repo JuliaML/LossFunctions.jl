@@ -680,30 +680,21 @@ end
 compare_losses(PoissonLoss(), 2*PoissonLoss())
 compare_losses(PoissonLoss(), 0.5*PoissonLoss())
 
+@testset "Scaled losses" begin
+    for loss in distance_losses ∪ margin_losses ∪ other_losses
+        @testset "$loss" begin
+            compare_losses(loss, 2*loss)
+            compare_losses(loss, 0.5*loss)
+        end
+    end
+end
+
 @testset "Weighted Margin-based" begin
     for loss in margin_losses
         @testset "$loss" begin
             compare_losses(loss, WeightedMarginLoss(loss,0.2), false)
             compare_losses(loss, WeightedMarginLoss(loss,0.5), true)
             compare_losses(loss, WeightedMarginLoss(loss,0.7), false)
-        end
-    end
-end
-
-@testset "Scaled Margin-based" begin
-    for loss in margin_losses
-        @testset "$loss" begin
-            compare_losses(loss, 2*loss)
-            compare_losses(loss, 0.5*loss)
-        end
-    end
-end
-
-@testset "Scaled Distance-based" begin
-    for loss in distance_losses
-        @testset "$loss" begin
-            compare_losses(loss, 2*loss)
-            compare_losses(loss, 0.5*loss)
         end
     end
 end

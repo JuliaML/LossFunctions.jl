@@ -106,31 +106,31 @@ function test_vector_value(l::DistanceLoss, t, y)
 end
 
 function test_vector_deriv(l::MarginLoss, t, y)
-    ref = [LossFunctions.deriv(l,t[i],y[i]) for i in CartesianIndices(size(y))]
-    @test @inferred(LossFunctions.deriv(l, t, y, AggMode.None())) == ref
-    @test @inferred(LossFunctions.deriv(l, t, y)) == ref
-    @test LossFunctions.deriv.(Ref(l), t, y) == ref
+    ref = [deriv(l,t[i],y[i]) for i in CartesianIndices(size(y))]
+    @test @inferred(deriv(l, t, y, AggMode.None())) == ref
+    @test @inferred(deriv(l, t, y)) == ref
+    @test deriv.(Ref(l), t, y) == ref
 end
 
 function test_vector_deriv(l::DistanceLoss, t, y)
-    ref = [LossFunctions.deriv(l,t[i],y[i]) for i in CartesianIndices(size(y))]
-    @test @inferred(LossFunctions.deriv(l, t, y, AggMode.None())) == ref
-    @test @inferred(LossFunctions.deriv(l, t, y)) == ref
-    @test LossFunctions.deriv.(Ref(l), t, y) == ref
+    ref = [deriv(l,t[i],y[i]) for i in CartesianIndices(size(y))]
+    @test @inferred(deriv(l, t, y, AggMode.None())) == ref
+    @test @inferred(deriv(l, t, y)) == ref
+    @test deriv.(Ref(l), t, y) == ref
 end
 
 function test_vector_deriv2(l::MarginLoss, t, y)
-    ref = [LossFunctions.deriv2(l,t[i],y[i]) for i in CartesianIndices(size(y))]
-    @test @inferred(LossFunctions.deriv2(l, t, y, AggMode.None())) == ref
-    @test @inferred(LossFunctions.deriv2(l, t, y)) == ref
-    @test LossFunctions.deriv2.(Ref(l), t, y) == ref
+    ref = [deriv2(l,t[i],y[i]) for i in CartesianIndices(size(y))]
+    @test @inferred(deriv2(l, t, y, AggMode.None())) == ref
+    @test @inferred(deriv2(l, t, y)) == ref
+    @test deriv2.(Ref(l), t, y) == ref
 end
 
 function test_vector_deriv2(l::DistanceLoss, t, y)
-    ref = [LossFunctions.deriv2(l,t[i],y[i]) for i in CartesianIndices(size(y))]
-    @test @inferred(LossFunctions.deriv2(l, t, y, AggMode.None())) == ref
-    @test @inferred(LossFunctions.deriv2(l, t, y)) == ref
-    @test LossFunctions.deriv2.(Ref(l), t, y) == ref
+    ref = [deriv2(l,t[i],y[i]) for i in CartesianIndices(size(y))]
+    @test @inferred(deriv2(l, t, y, AggMode.None())) == ref
+    @test @inferred(deriv2(l, t, y)) == ref
+    @test deriv2.(Ref(l), t, y) == ref
 end
 
 @testset "Vectorized API" begin
