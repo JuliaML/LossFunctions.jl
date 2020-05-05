@@ -35,6 +35,8 @@ include("plotrecipes.jl")
 @deprecate LogitProbLoss CrossEntropyLoss
 @deprecate PinballLoss QuantileLoss
 @deprecate OrdinalHingeLoss OrdinalMarginLoss{HingeLoss}
+@deprecate ScaledDistanceLoss ScaledLoss
+@deprecate ScaledMarginLoss ScaledLoss
 @deprecate weightedloss(l, w) WeightedMarginLoss(l, w)
 @deprecate scaled(l, λ) ScaledLoss(l, λ)
 @deprecate value_deriv(l,y,ŷ) (value(l,y,ŷ), deriv(l,y,ŷ))
