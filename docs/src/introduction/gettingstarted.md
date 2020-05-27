@@ -198,26 +198,6 @@ julia> deriv2(L2DistLoss(), true_targets, pred_outputs)
  2.0
 ```
 
-Additionally, we provide mutating versions for the subset of
-methods that return an array. These have the same function
-signatures with the only difference of requiring an additional
-parameter as the first argument. This variable should always be
-the preallocated array that is to be used as storage.
-
-```julia-repl
-julia> buffer = zeros(3)
-3-element Array{Float64,1}:
- 0.0
- 0.0
- 0.0
-
-julia> deriv!(buffer, L2DistLoss(), true_targets, pred_outputs)
-3-element Array{Float64,1}:
- -1.0
-  4.0
-  2.0
-```
-
 ## Getting Help
 
 To get help on specific functionality you can either look up the

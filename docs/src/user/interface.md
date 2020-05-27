@@ -157,18 +157,6 @@ julia> buffer .= value.(L1DistLoss(), [1.,2,3], [2,5,-2]) .* [2,1,0.5]
  2.5
 ```
 
-Even though broadcasting is supported, we do expose a vectorized
-method natively. This is done mainly for API consistency reasons.
-Internally it even uses broadcast itself, but it does provide the
-additional benefit of a more reliable type-inference.
-
-We also provide a mutating version for the same reasons. It
-even utilizes `broadcast!` underneath.
-
-```@docs
-value!
-```
-
 ## Computing the 1st Derivatives
 
 Maybe the more interesting aspect of loss functions are their
@@ -219,18 +207,6 @@ julia> buffer .= deriv.(L2DistLoss(), [1.,2,3], [2,5,-2]) .* [2,1,0.5]
   4.0
   6.0
  -5.0
-```
-
-While broadcast is supported, we do expose a vectorized method
-natively. This is done mainly for API consistency reasons.
-Internally it even uses broadcast itself, but it does provide the
-additional benefit of a more reliable type-inference.
-
-We also provide a mutating version for the same reasons. It
-even utilizes ``broadcast!`` underneath.
-
-```@docs
-deriv!
 ```
 
 ## Computing the 2nd Derivatives
