@@ -12,9 +12,7 @@ import LearnBase:
     AggregateMode,
     Loss, SupervisedLoss,
     DistanceLoss, MarginLoss,
-    value, value!,
-    deriv, deriv!,
-    deriv2, deriv2!,
+    value, deriv, deriv2,
     isdistancebased, ismarginbased,
     isminimizable, isdifferentiable,
     istwicedifferentiable,
@@ -40,6 +38,9 @@ include("plotrecipes.jl")
 @deprecate weightedloss(l, w) WeightedMarginLoss(l, w)
 @deprecate scaled(l, λ) ScaledLoss(l, λ)
 @deprecate value_deriv(l,y,ŷ) (value(l,y,ŷ), deriv(l,y,ŷ))
+@deprecate value!(b,l,y,ŷ,args...)  (b .= value(l,y,ŷ,args...))
+@deprecate deriv!(b,l,y,ŷ,args...)  (b .= deriv(l,y,ŷ,args...))
+@deprecate deriv2!(b,l,y,ŷ,args...) (b .= deriv2(l,y,ŷ,args...))
 
 export
     # loss API
@@ -47,9 +48,7 @@ export
     SupervisedLoss,
     MarginLoss,
     DistanceLoss,
-    value, value!,
-    deriv, deriv!,
-    deriv2, deriv2!,
+    value, deriv, deriv2,
     isdistancebased, ismarginbased,
     isminimizable, isdifferentiable,
     istwicedifferentiable,

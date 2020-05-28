@@ -15,7 +15,6 @@ tests = [
 ]
 
 perf = [
-    #"bm_datasource.jl"
 ]
 
 # for deterministic testing

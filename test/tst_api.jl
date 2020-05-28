@@ -1,11 +1,5 @@
 function test_vector_value(l::MarginLoss, t, y)
     ref = [value(l,t[i],y[i]) for i in CartesianIndices(size(y))]
-    buf = fill!(similar(ref), 0)
-    @test @inferred(value!(buf, l, t, y)) == ref
-    @test buf == ref
-    buf2 = fill!(similar(ref), 0)
-    @test @inferred(value!(buf2, l, t, y, AggMode.None())) == ref
-    @test buf2 == ref
     @test @inferred(value(l, t, y, AggMode.None())) == ref
     @test @inferred(value(l, t, y)) == ref
     @test value.(Ref(l), t, y) == ref
@@ -35,10 +29,6 @@ function test_vector_value(l::MarginLoss, t, y)
         # Sum per obs
         sv = vec(sum(ref, dims=1:(ndims(ref)-1)))
         @test @inferred(value(l, t, y, AggMode.Sum(), ObsDim.Last())) ≈ sv
-        buffer1 = fill!(similar(sv), 0)
-        @test @inferred(value!(buffer1, l, t, y, AggMode.Sum(), ObsDim.Last())) ≈ sv
-        @test buffer1 ≈ sv
-        buffer2 = fill!(similar(sv), 0)
         # Weighted sum compare
         @test @inferred(value(l, t, y, AggMode.WeightedSum(1:k), ObsDim.Last())) ≈ sum(sv .* (1:k))
         @test round(@inferred(value(l, t, y, AggMode.WeightedSum(1:k,normalize=true), ObsDim.Last())), digits=3) ≈
@@ -46,9 +36,6 @@ function test_vector_value(l::MarginLoss, t, y)
         # Mean per obs
         mv = vec(mean(ref, dims=1:(ndims(ref)-1)))
         @test @inferred(value(l, t, y, AggMode.Mean(), ObsDim.Last())) ≈ mv
-        buffer3 = fill!(similar(mv), 0)
-        @test @inferred(value!(buffer3, l, t, y, AggMode.Mean(), ObsDim.Last())) ≈ mv
-        @test buffer3 ≈ mv
         # Weighted mean compare
         @test @inferred(value(l, t, y, AggMode.WeightedMean(1:k,normalize=false), ObsDim.Last())) ≈ sum(mv .* (1:k))
     end
@@ -56,12 +43,6 @@ end
 
 function test_vector_value(l::DistanceLoss, t, y)
     ref = [value(l,t[i],y[i]) for i in CartesianIndices(size(y))]
-    buf = fill!(similar(ref), 0)
-    @test @inferred(value!(buf, l, t, y)) == ref
-    @test buf == ref
-    buf2 = fill!(similar(ref), 0)
-    @test @inferred(value!(buf2, l, t, y, AggMode.None())) == ref
-    @test buf2 == ref
     @test @inferred(value(l, t, y, AggMode.None())) == ref
     @test @inferred(value(l, t, y)) == ref
     @test value.(Ref(l), t, y) == ref
@@ -89,17 +70,11 @@ function test_vector_value(l::DistanceLoss, t, y)
         # Sum per obs
         sv = vec(sum(ref, dims=1:(ndims(ref)-1)))
         @test @inferred(value(l, t, y, AggMode.Sum(), ObsDim.Last())) ≈ sv
-        buffer1 = fill!(similar(sv), 0)
-        @test @inferred(value!(buffer1, l, t, y, AggMode.Sum(), ObsDim.Last())) ≈ sv
-        @test buffer1 ≈ sv
         # Weighted sum compare
         @test @inferred(value(l, t, y, AggMode.WeightedSum(1:k,normalize=false), ObsDim.Last())) ≈ sum(sv .* (1:k))
         # Mean per obs
         mv = vec(mean(ref, dims=1:(ndims(ref)-1)))
         @test @inferred(value(l, t, y, AggMode.Mean(), ObsDim.Last())) ≈ mv
-        buffer3 = fill!(copy(mv), 0)
-        @test @inferred(value!(buffer3, l, t, y, AggMode.Mean(), ObsDim.Last())) ≈ mv
-        @test buffer3 ≈ mv
         # Weighted mean compare
         @test @inferred(value(l, t, y, AggMode.WeightedMean(1:k,normalize=false), ObsDim.Last())) ≈ sum(mv .* (1:k))
     end
