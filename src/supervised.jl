@@ -92,7 +92,7 @@ for FUN in (:value, :deriv, :deriv2)
                 loss::SupervisedLoss,
                 target::AbstractArray{Q,N},
                 output::AbstractArray{T,N},
-                avg::AggMode.Sum,
+                agg::AggMode.Sum,
                 obsdim::ObsDim.Constant{O}) where {Q,T,N,O}
             N == 1 && throw(ArgumentError("Sum per observation non sensible for two Vectors. Try omitting the obsdim"))
             O > N && throw(ArgumentError("The specified obsdim is larger as the available dimensions."))
@@ -131,7 +131,7 @@ for FUN in (:value, :deriv, :deriv2)
                 loss::SupervisedLoss,
                 target::AbstractArray{Q,N},
                 output::AbstractArray{T,N},
-                avg::AggMode.Mean,
+                agg::AggMode.Mean,
                 obsdim::ObsDim.Constant{O}) where {Q,T,N,O}
             N == 1 && throw(ArgumentError("Mean per observation non sensible for two Vectors. Try omitting the obsdim"))
             O > N && throw(ArgumentError("The specified obsdim is larger as the available dimensions."))
@@ -187,7 +187,3 @@ for FUN in (:value, :deriv, :deriv2)
         end
     end
 end
-
-# TODO: find way to use normal broadcast for this
-# probably with the new changes in MLMetric and compare modes
-include("sparse.jl")
