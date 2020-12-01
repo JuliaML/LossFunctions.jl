@@ -26,7 +26,7 @@ distance_losses = [
     L2EpsilonInsLoss(0.5), L2EpsilonInsLoss(1.5),
     PeriodicLoss(1), PeriodicLoss(1.5), HuberLoss(1),
     HuberLoss(1.5), QuantileLoss(.2), QuantileLoss(.5),
-    QuantileLoss(.8)
+    QuantileLoss(.8), LogCoshLoss()
 ]
 
 margin_losses = [
