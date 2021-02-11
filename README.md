@@ -1,7 +1,8 @@
 # LossFunctions
 
-_LossFunctions.jl is a Julia package that provides efficient and
-well-tested implementations for a diverse set of loss functions
+_**LossFunctions.jl** is a [Julia package](https://julialang.org/packages/)
+that provides efficient and well-tested implementations for a diverse set of
+[loss functions](https://en.wikipedia.org/wiki/Loss_function)
 that are commonly used in Machine Learning._
 
 [![License](http://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat)](LICENSE.md)
