@@ -345,6 +345,29 @@ end
     @test isdistancebased(l2) == true
 end
 
+@testset "LogCoshLoss" begin
+    loss = LogCoshLoss()
+
+    @test isminimizable(loss)            == true
+
+    @test isdifferentiable(loss)         == true
+    @test isdifferentiable(loss, 0)      == true
+    @test istwicedifferentiable(loss)    == true
+    @test istwicedifferentiable(loss, 0) == true
+
+    @test isstronglyconvex(loss)         == true
+    @test isstrictlyconvex(loss)         == true
+    @test isconvex(loss)                 == true
+
+    #@test isnemitski(loss)              == ?
+    @test islipschitzcont(loss)          == true
+    @test islocallylipschitzcont(loss)   == true
+    @test isclipable(loss)               == true
+    @test ismarginbased(loss)            == false
+    @test isdistancebased(loss)          == true
+    @test issymmetric(loss)              == true
+end
+
 # --------------------------------------------------------------
 
 @testset "ZeroOneLoss" begin

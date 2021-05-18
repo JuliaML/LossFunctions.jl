@@ -478,3 +478,59 @@ islipschitzcont_deriv(::QuantileLoss) = true
 isconvex(::QuantileLoss) = true
 isstrictlyconvex(::QuantileLoss) = false
 isstronglyconvex(::QuantileLoss) = false
+
+# ======================================================
+
+@doc doc"""
+    LogCoshLoss <: DistanceLoss
+
+The log cosh loss is twice differentiable, strongly convex,
+Lipschitz continous function.
+
+```math
+L(r) = log ( cosh ( x ))
+```
+---
+```
+           Lossfunction                     Derivative
+      ┌────────────┬────────────┐      ┌────────────┬────────────┐
+  2.5 │\                       /│    1 │                 .-------│
+      │".                     ."│      │                |        │
+      │ ".                   ." │      │               /         │
+      │  ".                 ."  │      │_           . "         _│
+    L │   ".               ."   │   L' │         /"              │
+      │    '\.           ./'    │      │       ."                │
+      │      \.         ./      │      │       |                 │
+    0 │        "-. _ .-"        │   -1 │------"                  │
+      └────────────┴────────────┘      └────────────┴────────────┘
+      -3                        3      -3                        3
+                 ŷ - y                            ŷ - y
+```
+"""
+
+struct LogCoshLoss <: DistanceLoss end
+
+_softplus(x::T) where T<:Number = x > zero(T) ? x + log1p(exp(-x)) : log1p(exp(x))
+_log_cosh(x::T) where T<:Number = x + _softplus(-2x) - log(convert(T, 2))
+
+function value(loss::LogCoshLoss, diff::T) where {T <: Number}
+  _log_cosh(diff)
+end
+
+function deriv(loss::LogCoshLoss, diff::T) where {T <: Number}
+  tanh.(diff)
+end
+
+function deriv2(::LogCoshLoss, diff::T) where {T <: Number} 
+  (sech.(diff))^2
+end
+
+issymmetric(loss::LogCoshLoss)           = true
+isdifferentiable(::LogCoshLoss)          = true
+isdifferentiable(::LogCoshLoss, at)      = true
+istwicedifferentiable(::LogCoshLoss, at) = true
+istwicedifferentiable(::LogCoshLoss)     = true
+islipschitzcont(::LogCoshLoss)           = true
+isconvex(::LogCoshLoss)                  = true
+isstrictlyconvex(::LogCoshLoss)          = true
+isstronglyconvex(::LogCoshLoss)          = true

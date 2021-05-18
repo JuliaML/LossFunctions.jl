@@ -85,6 +85,7 @@ export
     L2EpsilonInsLoss,
     LogitDistLoss,
     QuantileLoss,
+    LogCoshLoss,
 
     # other losses
     MisclassLoss,

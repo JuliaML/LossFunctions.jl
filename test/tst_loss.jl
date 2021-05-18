@@ -378,6 +378,11 @@ end
         (y - t) * (0.7 - (y - t < 0))
     end
     test_value(QuantileLoss(.7), _quantileloss, yr, tr)
+
+    function _logcoshloss(y, t)
+        log.(cosh(y .- t))
+    end
+    test_value(LogCoshLoss(), _logcoshloss, yr, tr)
 end
 
 const OrdinalSmoothedHingeLoss = OrdinalMarginLoss{<:SmoothedL1HingeLoss}
