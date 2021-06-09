@@ -2,7 +2,8 @@ function test_vector_value(l::MarginLoss, t, y)
     ref = [value(l,t[i],y[i]) for i in CartesianIndices(size(y))]
     @test @inferred(value(l, t, y, AggMode.None())) == ref
     @test @inferred(value(l, t, y)) == ref
-    @test value.(Ref(l), t, y) == ref
+    @test value.(l, t, y) == ref
+    @test @inferred(l(t, y)) == ref
     # Sum
     s = sum(ref)
     @test @inferred(value(l, t, y, AggMode.Sum())) ≈ s
@@ -45,7 +46,8 @@ function test_vector_value(l::DistanceLoss, t, y)
     ref = [value(l,t[i],y[i]) for i in CartesianIndices(size(y))]
     @test @inferred(value(l, t, y, AggMode.None())) == ref
     @test @inferred(value(l, t, y)) == ref
-    @test value.(Ref(l), t, y) == ref
+    @test value.(l, t, y) == ref
+    @test @inferred(l(t, y)) == ref
     # Sum
     s = sum(ref)
     @test @inferred(value(l, t, y, AggMode.Sum())) ≈ s

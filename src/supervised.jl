@@ -187,3 +187,6 @@ for FUN in (:value, :deriv, :deriv2)
         end
     end
 end
+
+# convenient functor interface
+(loss::SupervisedLoss)(target::AbstractArray, output::AbstractArray) = value(loss, target, output)
