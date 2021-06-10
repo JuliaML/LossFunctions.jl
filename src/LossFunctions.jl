@@ -4,6 +4,7 @@ import Base.*
 using Base.Cartesian
 using Markdown
 using RecipesBase
+using InteractiveUtils: subtypes
 
 import LearnBase.AggMode
 import LearnBase.ObsDim

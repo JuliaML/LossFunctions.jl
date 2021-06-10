@@ -189,4 +189,11 @@ for FUN in (:value, :deriv, :deriv2)
 end
 
 # convenient functor interface
-(loss::SupervisedLoss)(target::AbstractArray, output::AbstractArray) = value(loss, target, output)
+if VERSION ≥ v"1.3.0"
+    (loss::SupervisedLoss)(target::AbstractArray, output::AbstractArray) = value(loss, target, output)
+else
+    # add method manually to all subtypes
+    for L in Iterators.flatten([subtypes(DistanceLoss), subtypes(MarginLoss)])
+        (loss::L)(target::AbstractArray, output::AbstractArray) = value(loss, target, output)
+    end
+end
