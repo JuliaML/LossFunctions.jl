@@ -1,14 +1,15 @@
 module LossFunctions
 
-using Base.Cartesian
 using Markdown
-using RecipesBase
+using Base.Cartesian
 using InteractiveUtils: subtypes
+using RecipesBase
+
+using LearnBase.AggMode
+using LearnBase.ObsDim
+using LearnBase: AggregateMode
 
 import Base: *
-import LearnBase.AggMode
-import LearnBase.ObsDim
-import LearnBase: AggregateMode
 
 # trait functions
 include("traits.jl")
