@@ -20,21 +20,8 @@ include("supervised.jl")
 include("printing.jl")
 include("plotrecipes.jl")
 
-# deprecations
-@deprecate LogitProbLoss CrossEntropyLoss
-@deprecate PinballLoss QuantileLoss
-@deprecate OrdinalHingeLoss OrdinalMarginLoss{HingeLoss}
-@deprecate ScaledDistanceLoss ScaledLoss
-@deprecate ScaledMarginLoss ScaledLoss
-@deprecate weightedloss(l, w) WeightedMarginLoss(l, w)
-@deprecate scaled(l, λ) ScaledLoss(l, λ)
-@deprecate value_deriv(l,y,ŷ) (value(l,y,ŷ), deriv(l,y,ŷ))
-@deprecate value!(b,l,y,ŷ,args...)  (b .= value(l,y,ŷ,args...))
-@deprecate deriv!(b,l,y,ŷ,args...)  (b .= deriv(l,y,ŷ,args...))
-@deprecate deriv2!(b,l,y,ŷ,args...) (b .= deriv2(l,y,ŷ,args...))
-
 export
-    # loss API
+    # trait functions
     Loss,
     SupervisedLoss,
     MarginLoss,
