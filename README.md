@@ -4,11 +4,10 @@ _LossFunctions.jl is a Julia package that provides efficient and
 well-tested implementations for a diverse set of loss functions
 that are commonly used in Machine Learning._
 
-[![License](http://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat)](LICENSE.md)
-[![Docs](https://img.shields.io/badge/docs-stable-blue.svg)](https://JuliaML.github.io/LossFunctions.jl/stable)
-[![Build Status](https://travis-ci.org/JuliaML/LossFunctions.jl.svg?branch=master)](https://travis-ci.org/JuliaML/LossFunctions.jl)
-[![Build status](https://ci.appveyor.com/api/projects/status/xbwc2fiel40bajsp?svg=true)](https://ci.appveyor.com/project/Evizero/losses-jl)
-[![Coverage Status](https://coveralls.io/repos/github/JuliaML/LossFunctions.jl/badge.svg?branch=master)](https://coveralls.io/github/JuliaML/LossFunctions.jl?branch=master)
+[![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE.md)
+[![Docs](https://img.shields.io/badge/docs-stable-blue?style=flat-square)](https://JuliaML.github.io/LossFunctions.jl/stable)
+[![Build Status](https://img.shields.io/github/workflow/status/JuliaML/LossFunctions.jl/CI?style=flat-square)](https://github.com/JuliaML/LossFunctions.jl/actions)
+[![Coverage Status](https://img.shields.io/codecov/c/github/JuliaML/LossFunctions.jl?style=flat-square)](https://codecov.io/gh/JuliaML/LossFunctions.jl)
 
 ## Available Losses
 
