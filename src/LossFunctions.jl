@@ -1,11 +1,11 @@
 module LossFunctions
 
-import Base.*
 using Base.Cartesian
 using Markdown
 using RecipesBase
 using InteractiveUtils: subtypes
 
+import Base: *
 import LearnBase.AggMode
 import LearnBase.ObsDim
 import LearnBase:
