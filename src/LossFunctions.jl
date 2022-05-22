@@ -5,11 +5,13 @@ using Base.Cartesian
 using InteractiveUtils: subtypes
 using RecipesBase
 
-using LearnBase.AggMode
-using LearnBase.ObsDim
-using LearnBase: AggregateMode
-
 import Base: *
+
+# aggregation mode
+include("aggmode.jl")
+
+# observation dimension
+include("obsdim.jl")
 
 # trait functions
 include("traits.jl")
