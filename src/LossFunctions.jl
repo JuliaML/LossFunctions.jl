@@ -8,19 +8,10 @@ using InteractiveUtils: subtypes
 import Base: *
 import LearnBase.AggMode
 import LearnBase.ObsDim
-import LearnBase:
-    AggregateMode,
-    Loss, SupervisedLoss,
-    DistanceLoss, MarginLoss,
-    value, deriv, deriv2,
-    isdistancebased, ismarginbased,
-    isminimizable, isdifferentiable,
-    istwicedifferentiable,
-    isconvex, isstrictlyconvex,
-    isstronglyconvex, isnemitski,
-    isunivfishercons, isfishercons,
-    islipschitzcont, islocallylipschitzcont,
-    isclipable, isclasscalibrated, issymmetric
+import LearnBase: AggregateMode
+
+# trait functions
+include("traits.jl")
 
 # supervised losses
 include("supervised.jl")
