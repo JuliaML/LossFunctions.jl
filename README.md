@@ -6,7 +6,7 @@ that are commonly used in Machine Learning._
 
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE.md)
 [![Docs](https://img.shields.io/badge/docs-stable-blue?style=flat-square)](https://JuliaML.github.io/LossFunctions.jl/stable)
-[![Build Status](https://img.shields.io/github/workflow/status/JuliaML/LossFunctions.jl/CI?style=flat-square)](https://github.com/JuliaML/LossFunctions.jl/actions)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/JuliaML/LossFunctions.jl/CI.yml?branch=master&style=flat-square")](https://github.com/JuliaML/LossFunctions.jl/actions)
 [![Coverage Status](https://img.shields.io/codecov/c/github/JuliaML/LossFunctions.jl?style=flat-square)](https://codecov.io/gh/JuliaML/LossFunctions.jl)
 
 ## Available Losses
