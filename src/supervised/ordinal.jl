@@ -19,9 +19,9 @@ function OrdinalMarginLoss(loss::L, N::Int) where {L<:MarginLoss}
     OrdinalMarginLoss{L}(loss, N)
 end
 
-@generated function (::Type{T})(N::Int, args...) where {T<:OrdinalMarginLoss}
-    L = typeof(T) == UnionAll ? T.var.ub : T.parameters[1]
-    :(OrdinalMarginLoss($L(args...), N))
+function (::Type{T})(N::Int, args...) where {T<:OrdinalMarginLoss}
+    L = fieldtype(T, 1)
+    OrdinalMarginLoss(L(args...), N)
 end
 
 for fun in (:value, :deriv, :deriv2)
