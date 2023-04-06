@@ -46,21 +46,3 @@ module ObsDim
     """
     const First = Constant{1}
 end
-
-Base.convert(::Type{ObsDimension}, dim) = throw(ArgumentError("Unknown way to specify a obsdim: $dim"))
-Base.convert(::Type{ObsDimension}, dim::ObsDimension) = dim
-Base.convert(::Type{ObsDimension}, ::Nothing) = ObsDim.Undefined()
-Base.convert(::Type{ObsDimension}, dim::Int) = ObsDim.Constant(dim)
-Base.convert(::Type{ObsDimension}, dim::String) = convert(ObsDimension, Symbol(lowercase(dim)))
-Base.convert(::Type{ObsDimension}, dims::Tuple) = map(d->convert(ObsDimension, d), dims)
-function Base.convert(::Type{ObsDimension}, dim::Symbol)
-    if dim == :first || dim == :begin
-        ObsDim.First()
-    elseif dim == Symbol("end") || dim == :last
-        ObsDim.Last()
-    elseif dim == Symbol("nothing") || dim == :none || dim == :null || dim == :na || dim == :undefined
-        ObsDim.Undefined()
-    else
-        throw(ArgumentError("Unknown way to specify a obsdim: $dim"))
-    end
-end
