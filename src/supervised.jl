@@ -66,8 +66,9 @@ for FUN in (:value, :deriv, :deriv2)
                 output::AbstractVector,
                 ::AggMode.Sum)
             @dimcheck length(target) == length(output)
+            nobs = length(output)
             f(i) = ($FUN)(loss, target[i], output[i])
-            sum(f(i) for i in 1:length(output))
+            sum(f, 1:nobs)
         end
 
         # -------------------
@@ -79,9 +80,9 @@ for FUN in (:value, :deriv, :deriv2)
                 output::AbstractVector,
                 ::AggMode.Mean)
             @dimcheck length(target) == length(output)
-            nrm = inv(length(output))
-            f(i) = nrm * ($FUN)(loss, target[i], output[i])
-            sum(f(i) for i in 1:length(output))
+            nobs = length(output)
+            f(i) = ($FUN)(loss, target[i], output[i])
+            sum(f, 1:nobs) / nobs
         end
 
         # ---------------------------
@@ -93,10 +94,12 @@ for FUN in (:value, :deriv, :deriv2)
                 output::AbstractVector,
                 agg::AggMode.WeightedSum)
             @dimcheck length(target) == length(output)
-            s = sum(agg.weights)
-            nrm = agg.normalize ? inv(s) : inv(one(s))
-            f(i) = nrm * agg.weights[i] * ($FUN)(loss, target[i], output[i])
-            sum(f(i) for i in 1:length(output))
+            @dimcheck length(output) == length(agg.weights)
+            nobs  = length(output)
+            wsum  = sum(agg.weights)
+            denom = agg.normalize ? wsum : one(wsum)
+            f(i)  = agg.weights[i] * ($FUN)(loss, target[i], output[i])
+            sum(f, 1:nobs) / denom
         end
 
         # ----------------------------
@@ -108,11 +111,12 @@ for FUN in (:value, :deriv, :deriv2)
                 output::AbstractVector,
                 agg::AggMode.WeightedMean)
             @dimcheck length(target) == length(output)
-            k = length(output)
-            s = sum(agg.weights)
-            nrm = agg.normalize ? inv(k * s) : inv(k * one(s))
-            f(i) = nrm * agg.weights[i] * ($FUN)(loss, target[i], output[i])
-            sum(f(i) for i in 1:length(output))
+            @dimcheck length(output) == length(agg.weights)
+            nobs  = length(output)
+            wsum  = sum(agg.weights)
+            denom = agg.normalize ? nobs * wsum : nobs * one(wsum)
+            f(i)  = agg.weights[i] * ($FUN)(loss, target[i], output[i])
+            sum(f, 1:nobs) / denom
         end
     end
 end
