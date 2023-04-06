@@ -13,9 +13,6 @@ tests = [
     "tst_properties.jl"
 ]
 
-perf = [
-]
-
 # for deterministic testing
 Random.seed!(1234)
 
@@ -45,12 +42,6 @@ other_losses = [
 for t in tests
     @testset "$t" begin
         include(t)
-    end
-end
-
-for p in perf
-    @testset "$p" begin
-        include(p)
     end
 end
 
