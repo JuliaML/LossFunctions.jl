@@ -64,27 +64,3 @@ function Base.convert(::Type{ObsDimension}, dim::Symbol)
         throw(ArgumentError("Unknown way to specify a obsdim: $dim"))
     end
 end
-
-"""
-    default_obsdim(data)
-
-The specify the default obsdim for a specific type of data.
-Defaults to `ObsDim.Undefined()`
-"""
-default_obsdim(data) = ObsDim.Undefined()
-default_obsdim(A::AbstractArray) = ObsDim.Last()
-default_obsdim(tup::Tuple) = map(default_obsdim, tup)
-
-"""
-     datasubset(data, [idx], [obsdim])
-
-Return a lazy subset of the observations in `data` that correspond
-to the given `idx`. No data should be copied except of the
-indices. Note that `idx` can be of type `Int` or `AbstractVector`.
-Both options must be supported by a custom type.
-
-If it makes sense for the type of `data`, `obsdim` can be used
-to disptach on which dimension of `data` denotes the observations.
-See `?ObsDim`.
-"""
-function datasubset end
