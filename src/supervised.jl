@@ -38,8 +38,8 @@ for FUN in (:value, :deriv, :deriv2)
         # by default compute the element-wise result
         @inline function ($FUN)(
                 loss::SupervisedLoss,
-                targets::AbstractArray,
-                outputs::AbstractArray)
+                targets::AbstractVector,
+                outputs::AbstractVector)
             ($FUN)(loss, targets, outputs, AggMode.None())
         end
 
@@ -48,9 +48,9 @@ for FUN in (:value, :deriv, :deriv2)
         # -------------------
         @generated function ($FUN)(
                 loss::SupervisedLoss,
-                target::AbstractArray{Q,M},
-                output::AbstractArray{T,N},
-                ::AggMode.None) where {Q,M,T,N}
+                target::AbstractVector,
+                output::AbstractVector,
+                ::AggMode.None)
             quote
                 $(Expr(:meta, :inline))
                 ($($FUN)).(loss, target, output)
@@ -60,44 +60,28 @@ for FUN in (:value, :deriv, :deriv2)
         # ------------------
         # AGGREGATION: SUM
         # ------------------
-        @generated function ($FUN)(
+        function ($FUN)(
                 loss::SupervisedLoss,
-                target::AbstractArray{Q,M},
-                output::AbstractArray{T,N},
-                ::AggMode.Sum) where {Q,M,T,N}
-            bigger = M > N ? :target : :output
-            S, B = min(M,N), max(M,N)
-            quote
-                @nexprs $S (n)->@dimcheck(size(target, n) == size(output, n))
-                out = zero(result_type(loss, Q, T))
-                @inbounds @simd for I in CartesianIndices(size($bigger))
-                    @nexprs $B n->(i_n = I[n])
-                    out += ($($FUN))(loss, @nref($M,target,i), @nref($N,output,i))
-                end
-                out
-            end
+                target::AbstractVector,
+                output::AbstractVector,
+                ::AggMode.Sum)
+            @dimcheck length(target) == length(output)
+            f(i) = ($FUN)(loss, target[i], output[i])
+            sum(f(i) for i in 1:length(output))
         end
 
         # -------------------
         # AGGREGATION: MEAN
         # -------------------
-        @generated function ($FUN)(
+        function ($FUN)(
                 loss::SupervisedLoss,
-                target::AbstractArray{Q,M},
-                output::AbstractArray{T,N},
-                ::AggMode.Mean) where {Q,M,T,N}
-            bigger = M > N ? :target : :output
-            S, B = min(M,N), max(M,N)
-            quote
-                @nexprs $S (n)->@dimcheck(size(target, n) == size(output, n))
-                nrm = 1 / length($bigger)
-                out = zero(result_type(loss, Q, T)) * nrm
-                @inbounds @simd for I in CartesianIndices(size($bigger))
-                    @nexprs $B n->(i_n = I[n])
-                    out += ($($FUN))(loss, @nref($M,target,i), @nref($N,output,i)) * nrm
-                end
-                out
-            end
+                target::AbstractVector,
+                output::AbstractVector,
+                ::AggMode.Mean)
+            @dimcheck length(target) == length(output)
+            nrm = inv(length(output))
+            f(i) = nrm * ($FUN)(loss, target[i], output[i])
+            sum(f(i) for i in 1:length(output))
         end
 
         # ---------------------------
@@ -105,11 +89,12 @@ for FUN in (:value, :deriv, :deriv2)
         # ---------------------------
         function ($FUN)(
                 loss::SupervisedLoss,
-                target::AbstractArray{Q,N},
-                output::AbstractArray{T,N},
-                agg::AggMode.WeightedSum) where {Q,T,N}
+                target::AbstractVector,
+                output::AbstractVector,
+                agg::AggMode.WeightedSum)
             @dimcheck length(target) == length(output)
-            nrm = agg.normalize ? inv(sum(agg.weights)) : inv(one(sum(agg.weights)))
+            s = sum(agg.weights)
+            nrm = agg.normalize ? inv(s) : inv(one(s))
             f(i) = nrm * agg.weights[i] * ($FUN)(loss, target[i], output[i])
             sum(f(i) for i in 1:length(output))
         end
@@ -119,12 +104,13 @@ for FUN in (:value, :deriv, :deriv2)
         # ----------------------------
         function ($FUN)(
                 loss::SupervisedLoss,
-                target::AbstractArray{Q,N},
-                output::AbstractArray{T,N},
-                agg::AggMode.WeightedMean) where {Q,T,N}
+                target::AbstractVector,
+                output::AbstractVector,
+                agg::AggMode.WeightedMean)
             @dimcheck length(target) == length(output)
             k = length(output)
-            nrm = agg.normalize ? inv(k * sum(agg.weights)) : inv(k * one(sum(agg.weights)))
+            s = sum(agg.weights)
+            nrm = agg.normalize ? inv(k * s) : inv(k * one(s))
             f(i) = nrm * agg.weights[i] * ($FUN)(loss, target[i], output[i])
             sum(f(i) for i in 1:length(output))
         end
