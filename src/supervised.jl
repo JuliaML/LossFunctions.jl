@@ -43,16 +43,6 @@ for FUN in (:value, :deriv, :deriv2)
             ($FUN)(loss, targets, outputs, AggMode.None())
         end
 
-        # translate ObsDim.Last to the correct ObsDim.Constant (for code reduction)
-        @inline function ($FUN)(
-                loss::SupervisedLoss,
-                targets::AbstractArray,
-                outputs::AbstractArray{T,N},
-                agg::AggregateMode,
-                ::ObsDim.Last = ObsDim.Last()) where {T,N}
-            ($FUN)(loss, targets, outputs, agg, ObsDim.Constant{N}())
-        end
-
         # -------------------
         # AGGREGATION: NONE
         # -------------------
@@ -88,23 +78,6 @@ for FUN in (:value, :deriv, :deriv2)
             end
         end
 
-        function ($FUN)(
-                loss::SupervisedLoss,
-                target::AbstractArray{Q,N},
-                output::AbstractArray{T,N},
-                agg::AggMode.Sum,
-                obsdim::ObsDim.Constant{O}) where {Q,T,N,O}
-            N == 1 && throw(ArgumentError("Sum per observation non sensible for two Vectors. Try omitting the obsdim"))
-            O > N && throw(ArgumentError("The specified obsdim is larger as the available dimensions."))
-            @dimcheck size(target) == size(output)
-            S = result_type(loss, Q, T)
-            out = zeros(S, size(output, O))
-            @inbounds @simd for I in CartesianIndices(size(output))
-                out[I[O]] += ($FUN)(loss, target[I], output[I])
-            end
-            out
-        end
-
         # -------------------
         # AGGREGATION: MEAN
         # -------------------
@@ -127,24 +100,6 @@ for FUN in (:value, :deriv, :deriv2)
             end
         end
 
-        function ($FUN)(
-                loss::SupervisedLoss,
-                target::AbstractArray{Q,N},
-                output::AbstractArray{T,N},
-                agg::AggMode.Mean,
-                obsdim::ObsDim.Constant{O}) where {Q,T,N,O}
-            N == 1 && throw(ArgumentError("Mean per observation non sensible for two Vectors. Try omitting the obsdim"))
-            O > N && throw(ArgumentError("The specified obsdim is larger as the available dimensions."))
-            @dimcheck size(target) == size(output)
-            S = result_type(loss, Q, T)
-            out = zeros(S, size(output, O))
-            nrm = 1 / S(prod(size(output,n) for n in 1:N if n != O))
-            @inbounds @simd for I in CartesianIndices(size(output))
-                out[I[O]] += ($FUN)(loss, target[I], output[I]) * nrm
-            end
-            out
-        end
-
         # ---------------------------
         # AGGREGATION: WEIGHTED SUM
         # ---------------------------
@@ -152,17 +107,11 @@ for FUN in (:value, :deriv, :deriv2)
                 loss::SupervisedLoss,
                 target::AbstractArray{Q,N},
                 output::AbstractArray{T,N},
-                agg::AggMode.WeightedSum,
-                ::ObsDim.Constant{O}) where {Q,T,N,O}
-            O > N && throw(ArgumentError("The specified obsdim is larger as the available dimensions."))
-            @dimcheck size(target) == size(output)
-            @dimcheck size(output, O) == length(agg.weights)
+                agg::AggMode.WeightedSum) where {Q,T,N}
+            @dimcheck length(target) == length(output)
             nrm = agg.normalize ? inv(sum(agg.weights)) : inv(one(sum(agg.weights)))
-            out = zero(result_type(loss, Q, T)) * (agg.weights[1] * nrm)
-            @inbounds @simd for I in CartesianIndices(size(output))
-                out += ($FUN)(loss, target[I], output[I]) * (agg.weights[I[O]] * nrm)
-            end
-            out
+            f(i) = nrm * agg.weights[i] * ($FUN)(loss, target[i], output[i])
+            sum(f(i) for i in 1:length(output))
         end
 
         # ----------------------------
@@ -172,18 +121,12 @@ for FUN in (:value, :deriv, :deriv2)
                 loss::SupervisedLoss,
                 target::AbstractArray{Q,N},
                 output::AbstractArray{T,N},
-                agg::AggMode.WeightedMean,
-                ::ObsDim.Constant{O}) where {Q,T,N,O}
-            O > N && throw(ArgumentError("The specified obsdim is larger as the available dimensions."))
-            @dimcheck size(target) == size(output)
-            @dimcheck size(output, O) == length(agg.weights)
-            k = prod(n != O ? size(output,n) : 1 for n in 1:N)::Int
+                agg::AggMode.WeightedMean) where {Q,T,N}
+            @dimcheck length(target) == length(output)
+            k = length(output)
             nrm = agg.normalize ? inv(k * sum(agg.weights)) : inv(k * one(sum(agg.weights)))
-            out = zero(result_type(loss, Q, T)) * (agg.weights[1] * nrm)
-            @inbounds @simd for I in CartesianIndices(size(output))
-                out += ($FUN)(loss, target[I], output[I]) * (agg.weights[I[O]] * nrm)
-            end
-            out
+            f(i) = nrm * agg.weights[i] * ($FUN)(loss, target[i], output[i])
+            sum(f(i) for i in 1:length(output))
         end
     end
 end
