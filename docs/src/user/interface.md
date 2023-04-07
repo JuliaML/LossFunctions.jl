@@ -34,7 +34,7 @@ not expect any parameters.
 
 ```jldoctest
 julia> L2DistLoss()
-LPDistLoss{2}()
+L2DistLoss()
 
 julia> HingeLoss()
 L1HingeLoss()
@@ -47,7 +47,7 @@ than one place.
 
 ```jldoctest
 julia> loss = L2DistLoss()
-LPDistLoss{2}()
+L2DistLoss()
 
 julia> value(loss, 2, 3)
 1
@@ -131,7 +131,7 @@ the element-wise results.
 
 ```jldoctest bcast1
 julia> value.(L1DistLoss(), [1,2,3], [2,5,-2])
-3-element Array{Int64,1}:
+3-element Vector{Int64}:
  1
  3
  5
@@ -139,7 +139,7 @@ julia> value.(L1DistLoss(), [1,2,3], [2,5,-2])
 julia> buffer = zeros(3); # preallocate a buffer
 
 julia> buffer .= value.(L1DistLoss(), [1.,2,3], [2,5,-2])
-3-element Array{Float64,1}:
+3-element Vector{Float64}:
  1.0
  3.0
  5.0
@@ -151,7 +151,7 @@ observation without allocating a temporary array.
 
 ```jldoctest bcast1
 julia> buffer .= value.(L1DistLoss(), [1.,2,3], [2,5,-2]) .* [2,1,0.5]
-3-element Array{Float64,1}:
+3-element Vector{Float64}:
  2.0
  3.0
  2.5
@@ -183,7 +183,7 @@ element-wise derivatives.
 
 ```jldoctest bcast2
 julia> deriv.(L2DistLoss(), [1,2,3], [2,5,-2])
-3-element Array{Int64,1}:
+3-element Vector{Int64}:
    2
    6
  -10
@@ -191,7 +191,7 @@ julia> deriv.(L2DistLoss(), [1,2,3], [2,5,-2])
 julia> buffer = zeros(3); # preallocate a buffer
 
 julia> buffer .= deriv.(L2DistLoss(), [1.,2,3], [2,5,-2])
-3-element Array{Float64,1}:
+3-element Vector{Float64}:
    2.0
    6.0
  -10.0
@@ -203,7 +203,7 @@ observation without allocating a temporary array.
 
 ```jldoctest bcast2
 julia> buffer .= deriv.(L2DistLoss(), [1.,2,3], [2,5,-2]) .* [2,1,0.5]
-3-element Array{Float64,1}:
+3-element Vector{Float64}:
   4.0
   6.0
  -5.0
@@ -227,17 +227,17 @@ element-wise derivatives.
 
 ```jldoctest
 julia> deriv2.(LogitDistLoss(), [-0.5, 1.2, 3], [0.3, 2.3, -2])
-3-element Array{Float64,1}:
+3-element Vector{Float64}:
  0.42781939304058886
- 0.3747397590950412
+ 0.3747397590950413
  0.013296113341580313
 
 julia> buffer = zeros(3); # preallocate a buffer
 
 julia> buffer .= deriv2.(LogitDistLoss(), [-0.5, 1.2, 3], [0.3, 2.3, -2])
-3-element Array{Float64,1}:
+3-element Vector{Float64}:
  0.42781939304058886
- 0.3747397590950412
+ 0.3747397590950413
  0.013296113341580313
 ```
 

@@ -35,7 +35,7 @@ performance.
 
 ```jldoctest
 julia> value(L1DistLoss(), [1.,2,3], [2,5,-2])
-3-element Array{Float64,1}:
+3-element Vector{Float64}:
  1.0
  3.0
  5.0
@@ -87,80 +87,6 @@ broadcasted) results of [`value`](@ref), [`deriv`](@ref), and
 [`deriv2`](@ref). These methods avoid the allocation of a
 temporary array and instead compute the result directly.
 
-## Sum and Mean per Observation
-
-When the targets and predicted outputs are multi-dimensional
-arrays instead of vectors, we may be interested in accumulating
-the values over all but one dimension. This is typically the case
-when we work in a multi-variable regression setting, where each
-observation has multiple outputs and thus multiple targets. In
-those scenarios we may be more interested in the average loss for
-each observation, rather than the total average over all the
-data.
-
-To be able to accumulate the values for each observation
-separately, we have to know and explicitly specify the dimension
-that denotes the observations. For that purpose we provide the
-types contained in the namespace `ObsDim`.
-
-Consider the following two matrices, `targets` and `outputs`.
-We will fill them with some generated example values in order to
-better understand the effects of later operations.
-
-```jldoctest obsdim
-julia> targets = reshape(1:8, (2, 4)) ./ 8
-2×4 Array{Float64,2}:
- 0.125  0.375  0.625  0.875
- 0.25   0.5    0.75   1.0
-
-julia> outputs = reshape(1:2:16, (2, 4)) ./ 8
-2×4 Array{Float64,2}:
- 0.125  0.625  1.125  1.625
- 0.375  0.875  1.375  1.875
-```
-
-There are two ways to interpret the shape of these arrays if one
-dimension is supposed to denote the observations. The first
-interpretation would be to say that the first dimension denotes
-the observations. Thus this data would consist of two
-observations with four variables each.
-
-```jldoctest obsdim
-julia> value(L1DistLoss(), targets, outputs, AggMode.Sum(), ObsDim.First())
-2-element Array{Float64,1}:
- 1.5
- 2.0
-
-julia> value(L1DistLoss(), targets, outputs, AggMode.Mean(), ObsDim.First())
-2-element Array{Float64,1}:
- 0.375
- 0.5
-```
-
-The second possible interpretation would be to say that the
-second/last dimension denotes the observations. In that case our
-data consists of four observations with two variables each.
-
-```jldoctest obsdim
-julia> value(L1DistLoss(), targets, outputs, AggMode.Sum(), ObsDim.Last())
-4-element Array{Float64,1}:
- 0.125
- 0.625
- 1.125
- 1.625
-
-julia> value(L1DistLoss(), targets, outputs, AggMode.Mean(), ObsDim.Last())
-4-element Array{Float64,1}:
- 0.0625
- 0.3125
- 0.5625
- 0.8125
-```
-
-Because this method returns a vector of values, we also provide a
-mutating version that can make use a preallocated vector to write
-the results into.
-
 ## Weighted Sum and Mean
 
 Up to this point, all the averaging was performed in an
@@ -184,7 +110,7 @@ was effectively counted twice.
 
 ```jldoctest
 julia> result = value.(L1DistLoss(), [1.,2,3], [2,5,-2]) .* [1,2,1]
-3-element Array{Float64,1}:
+3-element Vector{Float64}:
  1.0
  6.0
  5.0
@@ -217,19 +143,19 @@ observations with two target-variables each.
 
 ```jldoctest weight
 julia> targets = reshape(1:8, (2, 4)) ./ 8
-2×4 Array{Float64,2}:
+2×4 Matrix{Float64}:
  0.125  0.375  0.625  0.875
  0.25   0.5    0.75   1.0
 
 julia> outputs = reshape(1:2:16, (2, 4)) ./ 8
-2×4 Array{Float64,2}:
+2×4 Matrix{Float64}:
  0.125  0.625  1.125  1.625
  0.375  0.875  1.375  1.875
 
 julia> # WARNING: BAD CODE - ONLY FOR ILLUSTRATION
 
-julia> tmp = sum(value.(L1DistLoss(), targets, outputs), dims=2) # assuming ObsDim.First()
-2×1 Array{Float64,2}:
+julia> tmp = sum(value.(L1DistLoss(), targets, outputs), dims=2)
+2×1 Matrix{Float64}:
  1.5
  2.0
 
@@ -246,8 +172,8 @@ julia> using Statistics # for access to "mean"
 
 julia> # WARNING: BAD CODE - ONLY FOR ILLUSTRATION
 
-julia> tmp = mean(value.(L1DistLoss(), targets, outputs), dims=2) # ObsDim.First()
-2×1 Array{Float64,2}:
+julia> tmp = mean(value.(L1DistLoss(), targets, outputs), dims=2)
+2×1 Matrix{Float64}:
  0.375
  0.5
 
@@ -273,13 +199,7 @@ julia> value(L1DistLoss(), [1.,2,3], [2,5,-2], AggMode.WeightedSum([1,2,1]))
 12.0
 
 julia> value(L1DistLoss(), [1.,2,3], [2,5,-2], AggMode.WeightedMean([1,2,1]))
-3.0
-
-julia> value(L1DistLoss(), targets, outputs, AggMode.WeightedSum([2,1]), ObsDim.First())
-5.0
-
-julia> value(L1DistLoss(), targets, outputs, AggMode.WeightedMean([2,1]), ObsDim.First())
-0.4166666666666667
+1.0
 ```
 
 We also provide this functionality for [`deriv`](@ref) and
@@ -290,11 +210,5 @@ julia> deriv(L2DistLoss(), [1.,2,3], [2,5,-2], AggMode.WeightedSum([1,2,1]))
 4.0
 
 julia> deriv(L2DistLoss(), [1.,2,3], [2,5,-2], AggMode.WeightedMean([1,2,1]))
-1.0
-
-julia> deriv(L2DistLoss(), targets, outputs, AggMode.WeightedSum([2,1]), ObsDim.First())
-10.0
-
-julia> deriv(L2DistLoss(), targets, outputs, AggMode.WeightedMean([2,1]), ObsDim.First())
-0.8333333333333334
+0.3333333333333333
 ```

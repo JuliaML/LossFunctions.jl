@@ -155,27 +155,6 @@ julia> value(L2DistLoss(), rand(2), rand(2,2), AggMode.Sum())
 0.0860658081865589
 ```
 
-That said, it is possible to explicitly specify which dimension
-denotes the observations. This is particularly useful for
-multivariate regression where one could want to accumulate the
-loss per individual observation.
-
-```julia-repl
-julia> value(L2DistLoss(), A, B, AggMode.Sum(), ObsDim.First())
-2-element Array{Float64,1}:
- 0.227866
- 0.192876
-
-julia> value(L2DistLoss(), A, B, AggMode.Sum(), ObsDim.Last())
-3-element Array{Float64,1}:
- 0.1739
- 0.060434
- 0.186408
-
-julia> value(L2DistLoss(), A, B, AggMode.WeightedSum([2,1]), ObsDim.First())
-0.648608280735
-```
-
 All these function signatures of [`value`](@ref) also apply for
 computing the derivatives using [`deriv`](@ref) and the second
 derivatives using [`deriv2`](@ref).
