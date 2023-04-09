@@ -10,9 +10,6 @@ import Base: *
 # aggregation mode
 include("aggmode.jl")
 
-# observation dimension
-include("obsdim.jl")
-
 # trait functions
 include("traits.jl")
 
@@ -40,7 +37,7 @@ export
     isclipable, isclasscalibrated, issymmetric,
 
     # relevant submodules
-    AggMode, ObsDim,
+    AggMode,
 
     # margin-based losses
     ZeroOneLoss,

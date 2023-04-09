@@ -1,109 +1,29 @@
-function test_vector_value(l::MarginLoss, t, y)
+function test_vector_value(l, t, y)
     ref = [value(l,t[i],y[i]) for i in CartesianIndices(size(y))]
     @test @inferred(value(l, t, y, AggMode.None())) == ref
     @test @inferred(value(l, t, y)) == ref
     @test value.(l, t, y) == ref
     @test @inferred(l(t, y)) == ref
-    # Sum
+    n = length(ref)
     s = sum(ref)
     @test @inferred(value(l, t, y, AggMode.Sum())) ≈ s
-    # Mean
-    m = mean(ref)
-    @test @inferred(value(l, t, y, AggMode.Mean())) ≈ m
-    # Obs specific
-    n = size(t, 1)
-    k = size(t, ndims(t))
-    ## Weighted Mean
-    @test_throws DimensionMismatch value(l, t, y, AggMode.WeightedMean(ones(n-1)), ObsDim.First())
-    @test @inferred(value(l, t, y, AggMode.WeightedMean(ones(n)), ObsDim.First())) ≈ m
-    @test @inferred(value(l, t, y, AggMode.WeightedMean(ones(k)), ObsDim.Last())) ≈ m
-    @test @inferred(value(l, t, y, AggMode.WeightedMean(ones(k)))) ≈ m
+    @test @inferred(value(l, t, y, AggMode.Mean())) ≈ s / n
     ## Weighted Sum
-    @test_throws DimensionMismatch value(l, t, y, AggMode.WeightedSum(ones(n-1)), ObsDim.First())
-    @test @inferred(value(l, t, y, AggMode.WeightedSum(ones(n)), ObsDim.First())) ≈ s
-    @test @inferred(value(l, t, y, AggMode.WeightedSum(ones(k)), ObsDim.Last())) ≈ s
-    @test @inferred(value(l, t, y, AggMode.WeightedSum(ones(k)))) ≈ s
-    if typeof(t) <: AbstractVector
-        @test_throws ArgumentError value(l, t, y, AggMode.Sum(), ObsDim.First())
-        @test_throws ArgumentError value(l, t, y, AggMode.Mean(), ObsDim.First())
-    else
-        # Sum per obs
-        sv = vec(sum(ref, dims=1:(ndims(ref)-1)))
-        @test @inferred(value(l, t, y, AggMode.Sum(), ObsDim.Last())) ≈ sv
-        # Weighted sum compare
-        @test @inferred(value(l, t, y, AggMode.WeightedSum(1:k), ObsDim.Last())) ≈ sum(sv .* (1:k))
-        @test round(@inferred(value(l, t, y, AggMode.WeightedSum(1:k,normalize=true), ObsDim.Last())), digits=3) ≈
-            round(sum(sv .* ((1:k)/(sum(1:k)))), digits=3)
-        # Mean per obs
-        mv = vec(mean(ref, dims=1:(ndims(ref)-1)))
-        @test @inferred(value(l, t, y, AggMode.Mean(), ObsDim.Last())) ≈ mv
-        # Weighted mean compare
-        @test @inferred(value(l, t, y, AggMode.WeightedMean(1:k,normalize=false), ObsDim.Last())) ≈ sum(mv .* (1:k))
-    end
+    @test @inferred(value(l, t, y, AggMode.WeightedSum(ones(n)))) ≈ s
+    @test @inferred(value(l, t, y, AggMode.WeightedSum(ones(n),normalize=true))) ≈ s / n
+    ## Weighted Mean
+    @test @inferred(value(l, t, y, AggMode.WeightedMean(ones(n)))) ≈ (s / n) / n
+    @test @inferred(value(l, t, y, AggMode.WeightedMean(ones(n),normalize=false))) ≈ s / n
 end
 
-function test_vector_value(l::DistanceLoss, t, y)
-    ref = [value(l,t[i],y[i]) for i in CartesianIndices(size(y))]
-    @test @inferred(value(l, t, y, AggMode.None())) == ref
-    @test @inferred(value(l, t, y)) == ref
-    @test value.(l, t, y) == ref
-    @test @inferred(l(t, y)) == ref
-    # Sum
-    s = sum(ref)
-    @test @inferred(value(l, t, y, AggMode.Sum())) ≈ s
-    # Mean
-    m = mean(ref)
-    @test round(@inferred(value(l, t, y, AggMode.Mean())), digits=5) ≈ round(m, digits=5)
-    # Obs specific
-    n = size(t, 1)
-    k = size(t, ndims(t))
-    ## Weighted Mean
-    @test_throws DimensionMismatch value(l, t, y, AggMode.WeightedMean(ones(n-1)), ObsDim.First())
-    @test @inferred(value(l, t, y, AggMode.WeightedMean(ones(n)), ObsDim.First())) ≈ m
-    @test @inferred(value(l, t, y, AggMode.WeightedMean(ones(k)), ObsDim.Last())) ≈ m
-    ## Weighted Sum
-    @test_throws DimensionMismatch value(l, t, y, AggMode.WeightedSum(ones(n-1)), ObsDim.First())
-    @test @inferred(value(l, t, y, AggMode.WeightedSum(ones(n),normalize=false), ObsDim.First())) ≈ s
-    @test @inferred(value(l, t, y, AggMode.WeightedSum(ones(k),normalize=false), ObsDim.Last())) ≈ s
-    if typeof(t) <: AbstractVector
-        @test_throws ArgumentError value(l, t, y, AggMode.Sum(), ObsDim.First())
-        @test_throws ArgumentError value(l, t, y, AggMode.Mean(), ObsDim.First())
-    else
-        # Sum per obs
-        sv = vec(sum(ref, dims=1:(ndims(ref)-1)))
-        @test @inferred(value(l, t, y, AggMode.Sum(), ObsDim.Last())) ≈ sv
-        # Weighted sum compare
-        @test @inferred(value(l, t, y, AggMode.WeightedSum(1:k,normalize=false), ObsDim.Last())) ≈ sum(sv .* (1:k))
-        # Mean per obs
-        mv = vec(mean(ref, dims=1:(ndims(ref)-1)))
-        @test @inferred(value(l, t, y, AggMode.Mean(), ObsDim.Last())) ≈ mv
-        # Weighted mean compare
-        @test @inferred(value(l, t, y, AggMode.WeightedMean(1:k,normalize=false), ObsDim.Last())) ≈ sum(mv .* (1:k))
-    end
-end
-
-function test_vector_deriv(l::MarginLoss, t, y)
+function test_vector_deriv(l, t, y)
     ref = [deriv(l,t[i],y[i]) for i in CartesianIndices(size(y))]
     @test @inferred(deriv(l, t, y, AggMode.None())) == ref
     @test @inferred(deriv(l, t, y)) == ref
     @test deriv.(Ref(l), t, y) == ref
 end
 
-function test_vector_deriv(l::DistanceLoss, t, y)
-    ref = [deriv(l,t[i],y[i]) for i in CartesianIndices(size(y))]
-    @test @inferred(deriv(l, t, y, AggMode.None())) == ref
-    @test @inferred(deriv(l, t, y)) == ref
-    @test deriv.(Ref(l), t, y) == ref
-end
-
-function test_vector_deriv2(l::MarginLoss, t, y)
-    ref = [deriv2(l,t[i],y[i]) for i in CartesianIndices(size(y))]
-    @test @inferred(deriv2(l, t, y, AggMode.None())) == ref
-    @test @inferred(deriv2(l, t, y)) == ref
-    @test deriv2.(Ref(l), t, y) == ref
-end
-
-function test_vector_deriv2(l::DistanceLoss, t, y)
+function test_vector_deriv2(l, t, y)
     ref = [deriv2(l,t[i],y[i]) for i in CartesianIndices(size(y))]
     @test @inferred(deriv2(l, t, y, AggMode.None())) == ref
     @test @inferred(deriv2(l, t, y)) == ref
@@ -116,7 +36,6 @@ end
             @testset "Margin-based $T -> $O" begin
                 for (targets,outputs) in (
                         (rand(T[-1, 1], 4), (rand(O, 4) .- O(.5)) .* O(20)),
-                        (rand(T[-1, 1], 4, 5), (rand(O, 4, 5) .- O(.5)) .* O(20)),
                     )
                     for loss in (LogitMarginLoss(),ModifiedHuberLoss(),
                                  L1HingeLoss(),SigmoidLoss())
@@ -132,7 +51,6 @@ end
             @testset "Distance-based $T -> $O" begin
                 for (targets,outputs) in (
                         ((rand(T, 4) .- T(.5)) .* T(20), (rand(O, 4) .- O(.5)) .* O(20)),
-                        ((rand(T, 4, 5) .- T(.5)) .* T(20), (rand(O, 4, 5) .- O(.5)) .* O(20)),
                     )
                     for loss in (QuantileLoss(0.75),L2DistLoss(),
                                  EpsilonInsLoss(1))
@@ -145,34 +63,6 @@ end
                 end
             end
             println("<HEARTBEAT>")
-        end
-    end
-end
-
-@testset "Broadcasting higher-order arrays" begin
-    for f in (value,deriv,deriv2)
-        @testset "$f" begin
-
-            m,n,k = 100,99,98
-            loss = L2DistLoss()
-
-            targ1 = randn(m)
-            targ2 = repeat(targ1,outer=(1,n))
-            targ3 = repeat(targ1,outer=(1,n,k))
-
-            out1 = randn(m,n)
-            out2 = randn(m,n,k)
-
-            for avg in (AggMode.None(),AggMode.Mean(),AggMode.Sum())
-                @test f(loss,targ1,out1,avg) ≈ f(loss,targ2,out1,avg)
-                @test f(loss,targ1,out2,avg) ≈ f(loss,targ2,out2,avg)
-                @test f(loss,targ1,out2,avg) ≈ f(loss,targ3,out2,avg)
-                @test f(loss,targ2,out2,avg) ≈ f(loss,targ3,out2,avg)
-                @test f(loss,out1,targ1,avg) ≈ f(loss,out1,targ2,avg)
-                @test f(loss,out2,targ1,avg) ≈ f(loss,out2,targ2,avg)
-                @test f(loss,out2,targ1,avg) ≈ f(loss,out2,targ3,avg)
-                @test f(loss,out2,targ2,avg) ≈ f(loss,out2,targ3,avg)
-            end
         end
     end
 end

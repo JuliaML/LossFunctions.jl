@@ -40,7 +40,7 @@ ScaledLoss
 
 ```jldoctest
 julia> lsloss = 1/2 * L2DistLoss()
-ScaledLoss{LPDistLoss{2},0.5}(LPDistLoss{2}())
+ScaledLoss{L2DistLoss, 0.5}(L2DistLoss())
 
 julia> value(L2DistLoss(), 0.0, 4.0)
 16.0
@@ -57,7 +57,7 @@ type-stable manner.
 
 ```jldoctest
 julia> sl = ScaledLoss(L2DistLoss(), Val(0.5))
-ScaledLoss{LPDistLoss{2},0.5}(LPDistLoss{2}())
+ScaledLoss{L2DistLoss, 0.5}(L2DistLoss())
 ```
 
 Storing the scale factor as a type-parameter instead of a member
@@ -100,7 +100,7 @@ WeightedMarginLoss
 
 ```jldoctest weighted
 julia> myloss = WeightedMarginLoss(HingeLoss(), 0.8)
-WeightedMarginLoss{L1HingeLoss,0.8}(L1HingeLoss())
+WeightedMarginLoss{L1HingeLoss, 0.8}(L1HingeLoss())
 
 julia> value(myloss, 1.0, -4.0) # positive class
 4.0
@@ -136,5 +136,5 @@ type-stable manner.
 
 ```jldoctest weighted
 julia> WeightedMarginLoss(HingeLoss(), Val(0.8))
-WeightedMarginLoss{L1HingeLoss,0.8}(L1HingeLoss())
+WeightedMarginLoss{L1HingeLoss, 0.8}(L1HingeLoss())
 ```
