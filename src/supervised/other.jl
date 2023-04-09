@@ -15,87 +15,17 @@ MisclassLoss() = MisclassLoss{Float64}()
 # specialize result type
 result_type(loss::MisclassLoss{R}, t::Type, o::Type) where R = R
 
+# type alias to make code more readable
+NumberOrValue = Union{Number,CategoricalValue}
+
 # return floating point to avoid big integers in aggregations
 value(::MisclassLoss{R}, agreement::Bool) where R = ifelse(agreement, zero(R), one(R))
 deriv(::MisclassLoss{R}, agreement::Bool) where R = zero(R)
 deriv2(::MisclassLoss{R}, agreement::Bool) where R = zero(R)
 
-value(loss::MisclassLoss, target, output) = value(loss, target == output)
-deriv(loss::MisclassLoss, target, output) = deriv(loss, target == output)
-deriv2(loss::MisclassLoss, target, output) = deriv2(loss, target == output)
-
-# specialize aggregation methods (temporary workaround)
-for FUN in (:value, :deriv, :deriv2)
-    @eval begin
-        # by default compute the element-wise result
-        function ($FUN)(
-                loss::MisclassLoss,
-                targets::AbstractVector,
-                outputs::AbstractVector)
-            ($FUN)(loss, targets, outputs, AggMode.None())
-        end
-
-        function ($FUN)(
-                loss::MisclassLoss,
-                targets::AbstractVector,
-                outputs::AbstractVector,
-                ::AggMode.None)
-            ($FUN).(loss, targets, outputs)
-        end
-
-        function ($FUN)(
-                loss::MisclassLoss,
-                targets::AbstractVector{Q},
-                outputs::AbstractVector{T},
-                ::AggMode.Sum) where {Q,T}
-            out = zero(result_type(loss, Q, T))
-            @inbounds @simd for I in CartesianIndices(size(outputs))
-                out += ($FUN)(loss, targets[I], outputs[I])
-            end
-            out
-        end
-
-        function ($FUN)(
-                loss::MisclassLoss,
-                targets::AbstractVector{Q},
-                outputs::AbstractVector{T},
-                ::AggMode.Mean) where {Q,T}
-            nrm = length(targets)
-            out = zero(result_type(loss, Q, T))
-            @inbounds @simd for I in CartesianIndices(size(outputs))
-                out += ($FUN)(loss, targets[I], outputs[I])
-            end
-            out / nrm
-        end
-
-        function ($FUN)(
-                loss::MisclassLoss,
-                targets::AbstractVector{Q},
-                outputs::AbstractVector{T},
-                agg::AggMode.WeightedSum) where {Q,T}
-            nrm = agg.normalize ? inv(sum(agg.weights)) : inv(one(sum(agg.weights)))
-            out = zero(result_type(loss, Q, T)) * (agg.weights[1] * nrm)
-            @inbounds @simd for I in CartesianIndices(size(outputs))
-                out += ($FUN)(loss, targets[I], outputs[I]) * (agg.weights[I] * nrm)
-            end
-            out
-        end
-
-        function ($FUN)(
-                loss::MisclassLoss,
-                targets::AbstractVector{Q},
-                outputs::AbstractVector{T},
-                agg::AggMode.WeightedMean) where {Q,T}
-            k   = length(outputs)
-            nrm = agg.normalize ? inv(k * sum(agg.weights)) : inv(k * one(sum(agg.weights)))
-            out = zero(result_type(loss, Q, T)) * (agg.weights[1] * nrm)
-            @inbounds @simd for I in CartesianIndices(size(outputs))
-                out += ($FUN)(loss, targets[I], outputs[I]) * (agg.weights[I] * nrm)
-            end
-            out
-        end
-    end
-end
+value(loss::MisclassLoss, target::NumberOrValue, output::NumberOrValue) = value(loss, target == output)
+deriv(loss::MisclassLoss, target::NumberOrValue, output::NumberOrValue) = deriv(loss, target == output)
+deriv2(loss::MisclassLoss, target::NumberOrValue, output::NumberOrValue) = deriv2(loss, target == output)
 
 isminimizable(::MisclassLoss) = false
 isdifferentiable(::MisclassLoss) = false
@@ -162,6 +92,3 @@ isdifferentiable(::CrossEntropyLoss, y, t) = t != 0 && t != 1
 istwicedifferentiable(::CrossEntropyLoss) = true
 istwicedifferentiable(::CrossEntropyLoss, y, t) = t != 0 && t != 1
 isconvex(::CrossEntropyLoss) = true
-
-# ===============================================================
-# L(target, output) = sign(agreement) < 0 ? 1 : 0

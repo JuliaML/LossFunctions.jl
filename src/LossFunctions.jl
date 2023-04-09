@@ -2,7 +2,7 @@ module LossFunctions
 
 using Markdown
 using Base.Cartesian
-using InteractiveUtils: subtypes
+using CategoricalArrays: CategoricalValue
 using RecipesBase
 
 import Base: *
