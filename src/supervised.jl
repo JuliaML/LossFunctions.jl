@@ -10,9 +10,6 @@ value(loss::MarginLoss, target::Number, output::Number)  = value(loss, target * 
 deriv(loss::MarginLoss, target::Number, output::Number)  = target * deriv(loss, target * output)
 deriv2(loss::MarginLoss, target::Number, output::Number) = deriv2(loss, target * output)
 
-# result type when applying the loss to a single pair of objects
-result_type(loss::SupervisedLoss, t::Type, o::Type) = typeof(value(loss, zero(t), zero(o)))
-
 # ------------------
 # AVAILABLE LOSSES
 # ------------------

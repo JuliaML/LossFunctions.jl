@@ -12,9 +12,6 @@ struct MisclassLoss{R<:AbstractFloat} <: SupervisedLoss end
 
 MisclassLoss() = MisclassLoss{Float64}()
 
-# specialize result type
-result_type(loss::MisclassLoss{R}, t::Type, o::Type) where R = R
-
 # type alias to make code more readable
 NumberOrValue = Union{Number,CategoricalValue}
 
