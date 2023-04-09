@@ -24,43 +24,28 @@ function (::Type{T})(N::Int, args...) where {T<:OrdinalMarginLoss}
     OrdinalMarginLoss(L(args...), N)
 end
 
-for fun in (:value, :deriv, :deriv2)
-    @eval @fastmath function ($fun)(
+for FUN in (:value, :deriv, :deriv2)
+    @eval @fastmath function ($FUN)(
             l::OrdinalMarginLoss,
-            target::Number,
-            output::Number)
+            output::Number,
+            target::Number)
         not_target = Int(1 != target)
         sgn = sign(target - 1)
-        retval = not_target * ($fun)(l.loss, sgn, output - 1)
+        retval = not_target * ($FUN)(l.loss, output - 1, sgn)
         for t = 2:l.N
             not_target = Int(t != target)
             sgn = sign(target - t)
-            retval += not_target * ($fun)(l.loss, sgn, output - t)
+            retval += not_target * ($FUN)(l.loss, output - t, sgn)
         end
         retval
     end
 end
 
-for prop in [:isminimizable, :isdifferentiable,
+for FUN in [:isminimizable, :isdifferentiable,
              :istwicedifferentiable,
              :isconvex, :isstrictlyconvex,
              :isstronglyconvex, :isnemitski,
              :isunivfishercons, :isfishercons,
              :islipschitzcont, :islocallylipschitzcont]
-    @eval ($prop)(l::OrdinalMarginLoss) = ($prop)(l.loss)
-end
-
-for fun in (:isdifferentiable, :istwicedifferentiable)
-    @eval function ($fun)(
-            l::OrdinalMarginLoss,
-            target::Number,
-            output::Number)
-        for t = 1:target - 1
-            ($fun)(l.loss, output - t) || return false
-        end
-        for t = target + 1:l.N
-            ($fun)(l.loss, t - output) || return false
-        end
-        return true
-    end
+    @eval ($FUN)(l::OrdinalMarginLoss) = ($FUN)(l.loss)
 end
