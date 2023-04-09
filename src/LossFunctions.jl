@@ -1,7 +1,6 @@
 module LossFunctions
 
 using Markdown
-using Base.Cartesian
 using CategoricalArrays: CategoricalValue
 using RecipesBase
 
