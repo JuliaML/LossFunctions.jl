@@ -415,7 +415,7 @@ end
     end
 
     test_deriv(PoissonLoss(), -10:.2:10, 0:30)
-    #test_deriv(CrossEntropyLoss(), 0:0.01:1, 0.01:0.01:0.99)
+    test_deriv(CrossEntropyLoss(), 0.01:0.01:0.99, 0:0.01:1)
 end
 
 # --------------------------------------------------------------
@@ -430,7 +430,7 @@ end
     end
 
     test_deriv2(PoissonLoss(), -10:.2:10, 0:30)
-    #test_deriv2(CrossEntropyLoss(), 0:0.01:1, 0.01:0.01:0.99)
+    test_deriv2(CrossEntropyLoss(), 0.01:0.01:0.99, 0:0.01:1)
 end
 
 # --------------------------------------------------------------
@@ -448,7 +448,7 @@ end
     @test value(l, c, reverse(c), AggMode.WeightedMean(2*ones(4),false)) == 1.0
     @test value(l, c, reverse(c), AggMode.WeightedMean(2*ones(4),true)) == 0.125
 
-    lf = MisclassLoss{Float32}()
-    @test value(lf, c[1], c[1]) isa Float32
-    @test value(lf, c, c) isa Vector{Float32}
+    l = MisclassLoss{Float32}()
+    @test value(l, c[1], c[1]) isa Float32
+    @test value(l, c, c) isa Vector{Float32}
 end
