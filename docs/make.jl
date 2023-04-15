@@ -1,4 +1,4 @@
-using Documenter, LearnBase, LossFunctions
+using Documenter, LossFunctions
 
 istravis = "TRAVIS" ∈ keys(ENV)
 

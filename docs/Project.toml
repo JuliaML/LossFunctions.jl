@@ -1,6 +1,5 @@
 [deps]
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
-LearnBase = "7f8f8fb0-2700-5f03-b4bd-41f8cfc144b6"
 LossFunctions = "30fc2ffe-d236-52d8-8643-a9d8f7c094a7"
 
 [compat]
