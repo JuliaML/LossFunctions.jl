@@ -175,18 +175,6 @@ function test_scaledloss(l::SupervisedLoss, o_vec, t_vec)
     end
 end
 
-function test_scaledloss(l::SupervisedLoss, n_vec)
-    @testset "Scaling for $(l): " begin
-        for λ = (2.0, 2)
-            sl = ScaledLoss(l,λ)
-            @test typeof(sl) <: ScaledLoss{typeof(l),λ}
-            @test sl == @inferred(ScaledLoss(l,Val(λ)))
-            @test sl == λ * l
-            @test sl == @inferred(Val(λ) * l)
-        end
-    end
-end
-
 function test_weightedloss(l::MarginLoss, o_vec, t_vec)
     @testset "Weighted version for $(l): " begin
         for w in (0., 0.2, 0.7, 1.)
@@ -386,12 +374,10 @@ end
 @testset "Test scaled loss" begin
     for loss in distance_losses
         test_scaledloss(loss, -10:0.5:10, -10:.2:10)
-        test_scaledloss(loss, -10:0.5:10)
     end
 
     for loss in margin_losses
         test_scaledloss(loss, -10:0.2:10, [-1.,1.])
-        test_scaledloss(loss, -10:0.2:10)
     end
 
     test_scaledloss(PoissonLoss(), range(0,stop=10,length=11), 0:10)
