@@ -33,37 +33,23 @@ for the simplification `L(x, ŷ)`.
 abstract type UnsupervisedLoss <: Loss end
 
 """
-    value(loss, target, output) -> Number
+    value(loss, output, target) -> Number
 
 Compute the (non-negative) numeric result for the `loss` function.
 Note that `target` and `output` can be of different numeric type,
 in which case promotion is performed in the manner appropriate for
 the given loss.
 
-    value(loss, targets, outputs) -> AbstractVector
+    value(loss, outputs, targets) -> AbstractVector
 
 Compute the result for each pair of values in `targets` and `outputs`.
 
-    value(loss, targets, outputs, aggmode) -> Number
+    value(loss, outputs, targets, aggmode) -> Number
 
 Compute the weighted or unweighted sum or mean (depending on
 aggregation mode `aggmode`) of the individual values of the `loss`
 function for each pair in `targets` and `outputs`. This method
 will not allocate a temporary array.
-
-In the case that the two parameters are arrays with a different
-number of dimensions, broadcast will be performed. Note that the
-given parameters are expected to have the same size in the
-dimensions they share.
-
-    value(loss, targets, outputs, aggmode, obsdim) -> AbstractVector
-
-Compute the aggregated result along dimension with observations `obsdim`.
-This method will not allocate a temporary array, but it will allocate
-the resulting vector.
-
-Both arrays have to be of the same shape and size. Furthermore they have
-to have at least two dimensions (i.e. they must not be vectors).
 
 ## Notes
 
@@ -74,37 +60,23 @@ to have at least two dimensions (i.e. they must not be vectors).
 function value end
 
 """
-    deriv(loss, target, output) -> Number
+    deriv(loss, output, target) -> Number
 
 Compute the analytical derivative with respect to the `output` for the
 `loss` function. Note that `target` and `output` can be of different
 numeric type, in which case promotion is performed in the manner
 appropriate for the given loss.
 
-    deriv(loss, targets, outputs) -> AbstractVector
+    deriv(loss, outputs, targets) -> AbstractVector
 
 Compute the result for each pair of values in `targets` and `outputs`.
 
-    deriv(loss, targets, outputs, aggmode) -> Number
+    deriv(loss, outputs, targets, aggmode) -> Number
 
 Compute the weighted or unweighted sum or mean (depending on
 aggregation mode `aggmode`) of the individual values of the `loss`
 function for each pair in `targets` and `outputs`. This method
 will not allocate a temporary array.
-
-In the case that the two parameters are arrays with a different
-number of dimensions, broadcast will be performed. Note that the
-given parameters are expected to have the same size in the
-dimensions they share.
-
-    deriv(loss, targets, outputs, aggmode, obsdim) -> AbstractVector
-
-Compute the aggregated result along dimension with observations `obsdim`.
-This method will not allocate a temporary array, but it will allocate
-the resulting vector.
-
-Both arrays have to be of the same shape and size. Furthermore they have
-to have at least two dimensions (i.e. they must not be vectors).
 
 ## Notes
 
@@ -115,37 +87,23 @@ to have at least two dimensions (i.e. they must not be vectors).
 function deriv end
 
 """
-    deriv2(loss, target, output) -> Number
+    deriv2(loss, output, target) -> Number
 
 Compute the second derivative with respect to the `output` for the
 `loss` function. Note that `target` and `output` can be of different
 numeric type, in which case promotion is performed in the manner
 appropriate for the given loss.
 
-    deriv2(loss, targets, outputs) -> AbstractVector
+    deriv2(loss, outputs, targets) -> AbstractVector
 
 Compute the result for each pair of values in `targets` and `outputs`.
 
-    deriv2(loss, targets, outputs, aggmode) -> Number
+    deriv2(loss, outputs, targets, aggmode) -> Number
 
 Compute the weighted or unweighted sum or mean (depending on
 aggregation mode `aggmode`) of the individual values of the `loss`
 function for each pair in `targets` and `outputs`. This method
 will not allocate a temporary array.
-
-In the case that the two parameters are arrays with a different
-number of dimensions, broadcast will be performed. Note that the
-given parameters are expected to have the same size in the
-dimensions they share.
-
-    deriv2(loss, targets, outputs, aggmode, obsdim) -> AbstractVector
-
-Compute the aggregated result along dimension with observations `obsdim`.
-This method will not allocate a temporary array, but it will allocate
-the resulting vector.
-
-Both arrays have to be of the same shape and size. Furthermore they have
-to have at least two dimensions (i.e. they must not be vectors).
 
 ## Notes
 
