@@ -2,7 +2,6 @@ module LossFunctions
 
 using Markdown
 using CategoricalArrays: CategoricalValue
-using RecipesBase
 
 import Base: *
 
@@ -15,9 +14,8 @@ include("traits.jl")
 # loss functions
 include("losses.jl")
 
-# IO and plot recipes
+# IO methods
 include("printing.jl")
-include("plotrecipes.jl")
 
 export
     # trait functions
