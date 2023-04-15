@@ -62,6 +62,12 @@ PeriodicLoss
 QuantileLoss
 ```
 
+## LogCoshLoss
+
+```@docs
+LogCoshLoss
+```
+
 !!! note
 
     You may note that our definition of the QuantileLoss looks

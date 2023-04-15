@@ -20,9 +20,9 @@ value(::MisclassLoss{R}, agreement::Bool) where R = ifelse(agreement, zero(R), o
 deriv(::MisclassLoss{R}, agreement::Bool) where R = zero(R)
 deriv2(::MisclassLoss{R}, agreement::Bool) where R = zero(R)
 
-value(loss::MisclassLoss, target::NumberOrValue, output::NumberOrValue) = value(loss, target == output)
-deriv(loss::MisclassLoss, target::NumberOrValue, output::NumberOrValue) = deriv(loss, target == output)
-deriv2(loss::MisclassLoss, target::NumberOrValue, output::NumberOrValue) = deriv2(loss, target == output)
+value(loss::MisclassLoss, output::NumberOrValue, target::NumberOrValue) = value(loss, target == output)
+deriv(loss::MisclassLoss, output::NumberOrValue, target::NumberOrValue) = deriv(loss, target == output)
+deriv2(loss::MisclassLoss, output::NumberOrValue, target::NumberOrValue) = deriv2(loss, target == output)
 
 isminimizable(::MisclassLoss) = false
 isdifferentiable(::MisclassLoss) = false
@@ -42,13 +42,13 @@ isclipable(::MisclassLoss) = false
 
 Loss under a Poisson noise distribution (KL-divergence)
 
-``L(target, output) = exp(output) - target*output``
+``L(output, target) = exp(output) - target*output``
 """
 struct PoissonLoss <: SupervisedLoss end
 
-value(loss::PoissonLoss, target::Number, output::Number) = exp(output) - target*output
-deriv(loss::PoissonLoss, target::Number, output::Number) = exp(output) - target
-deriv2(loss::PoissonLoss, target::Number, output::Number) = exp(output)
+value(loss::PoissonLoss, output::Number, target::Number) = exp(output) - target*output
+deriv(loss::PoissonLoss, output::Number, target::Number) = exp(output) - target
+deriv2(loss::PoissonLoss, output::Number, target::Number) = exp(output)
 
 isdifferentiable(::PoissonLoss) = true
 isdifferentiable(::PoissonLoss, y, t) = true
@@ -64,13 +64,13 @@ isstronglyconvex(::PoissonLoss) = false
 @doc doc"""
     CrossEntropyLoss <: SupervisedLoss
 
-Cross-entropy loss also known as log loss and logistic loss is defined as:
+The cross-entropy loss is defined as:
 
-``L(target, output) = - target*ln(output) - (1-target)*ln(1-output)``
+``L(output, target) = - target*log(output) - (1-target)*log(1-output)``
 """
 struct CrossEntropyLoss <: SupervisedLoss end
 
-function value(loss::CrossEntropyLoss, target::Number, output::Number)
+function value(loss::CrossEntropyLoss, output::Number, target::Number)
     target >= 0 && target <=1 || error("target must be in [0,1]")
     output >= 0 && output <=1 || error("output must be in [0,1]")
     if target == 0
@@ -81,8 +81,8 @@ function value(loss::CrossEntropyLoss, target::Number, output::Number)
         -(target * log(output) + (1-target) * log(1-output))
     end
 end
-deriv(loss::CrossEntropyLoss, target::Number, output::Number) = (1-target) / (1-output) - target / output
-deriv2(loss::CrossEntropyLoss, target::Number, output::Number) = (1-target) / (1-output)^2 + target / output^2
+deriv(loss::CrossEntropyLoss, output::Number, target::Number) = (1-target) / (1-output) - target / output
+deriv2(loss::CrossEntropyLoss, output::Number, target::Number) = (1-target) / (1-output)^2 + target / output^2
 
 isdifferentiable(::CrossEntropyLoss) = true
 isdifferentiable(::CrossEntropyLoss, y, t) = t != 0 && t != 1

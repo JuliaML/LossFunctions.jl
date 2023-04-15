@@ -1,33 +1,33 @@
-function test_vector_value(l, t, y)
-    ref = [value(l,t[i],y[i]) for i in CartesianIndices(size(y))]
-    @test @inferred(value(l, t, y, AggMode.None())) == ref
-    @test @inferred(value(l, t, y)) == ref
-    @test value.(l, t, y) == ref
-    @test @inferred(l(t, y)) == ref
+function test_vector_value(l, o, t)
+    ref = [value(l, o[i], t[i]) for i in 1:length(o)]
+    @test @inferred(value(l, o, t, AggMode.None())) == ref
+    @test @inferred(value(l, o, t)) == ref
+    @test value.(l, o, t) == ref
+    @test @inferred(l(o, t)) == ref
     n = length(ref)
     s = sum(ref)
-    @test @inferred(value(l, t, y, AggMode.Sum())) ≈ s
-    @test @inferred(value(l, t, y, AggMode.Mean())) ≈ s / n
+    @test @inferred(value(l, o, t, AggMode.Sum())) ≈ s
+    @test @inferred(value(l, o, t, AggMode.Mean())) ≈ s / n
     ## Weighted Sum
-    @test @inferred(value(l, t, y, AggMode.WeightedSum(ones(n)))) ≈ s
-    @test @inferred(value(l, t, y, AggMode.WeightedSum(ones(n),normalize=true))) ≈ s / n
+    @test @inferred(value(l, o, t, AggMode.WeightedSum(ones(n)))) ≈ s
+    @test @inferred(value(l, o, t, AggMode.WeightedSum(ones(n),normalize=true))) ≈ s / n
     ## Weighted Mean
-    @test @inferred(value(l, t, y, AggMode.WeightedMean(ones(n)))) ≈ (s / n) / n
-    @test @inferred(value(l, t, y, AggMode.WeightedMean(ones(n),normalize=false))) ≈ s / n
+    @test @inferred(value(l, o, t, AggMode.WeightedMean(ones(n)))) ≈ (s / n) / n
+    @test @inferred(value(l, o, t, AggMode.WeightedMean(ones(n),normalize=false))) ≈ s / n
 end
 
-function test_vector_deriv(l, t, y)
-    ref = [deriv(l,t[i],y[i]) for i in CartesianIndices(size(y))]
-    @test @inferred(deriv(l, t, y, AggMode.None())) == ref
-    @test @inferred(deriv(l, t, y)) == ref
-    @test deriv.(Ref(l), t, y) == ref
+function test_vector_deriv(l, o, t)
+    ref = [deriv(l, o[i], t[i]) for i in 1:length(o)]
+    @test @inferred(deriv(l, o, t, AggMode.None())) == ref
+    @test @inferred(deriv(l, o, t)) == ref
+    @test deriv.(Ref(l), o, t) == ref
 end
 
-function test_vector_deriv2(l, t, y)
-    ref = [deriv2(l,t[i],y[i]) for i in CartesianIndices(size(y))]
-    @test @inferred(deriv2(l, t, y, AggMode.None())) == ref
-    @test @inferred(deriv2(l, t, y)) == ref
-    @test deriv2.(Ref(l), t, y) == ref
+function test_vector_deriv2(l, o, t)
+    ref = [deriv2(l, o[i], t[i]) for i in 1:length(o)]
+    @test @inferred(deriv2(l, o, t, AggMode.None())) == ref
+    @test @inferred(deriv2(l, o, t)) == ref
+    @test deriv2.(Ref(l), o, t) == ref
 end
 
 @testset "Vectorized API" begin
@@ -40,9 +40,9 @@ end
                     for loss in (LogitMarginLoss(),ModifiedHuberLoss(),
                                  L1HingeLoss(),SigmoidLoss())
                         @testset "$(loss): " begin
-                            test_vector_value(loss, targets, outputs)
-                            test_vector_deriv(loss, targets, outputs)
-                            test_vector_deriv2(loss, targets, outputs)
+                            test_vector_value(loss, outputs, targets)
+                            test_vector_deriv(loss, outputs, targets)
+                            test_vector_deriv2(loss, outputs, targets)
                         end
                     end
                 end
@@ -55,9 +55,9 @@ end
                     for loss in (QuantileLoss(0.75),L2DistLoss(),
                                  EpsilonInsLoss(1))
                         @testset "$(loss): " begin
-                            test_vector_value(loss, targets, outputs)
-                            test_vector_deriv(loss, targets, outputs)
-                            test_vector_deriv2(loss, targets, outputs)
+                            test_vector_value(loss, outputs, targets)
+                            test_vector_deriv(loss, outputs, targets)
+                            test_vector_deriv2(loss, outputs, targets)
                         end
                     end
                 end

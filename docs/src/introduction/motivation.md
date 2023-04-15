@@ -160,7 +160,7 @@ non-negative real number. The larger the value of the loss, the
 worse the prediction.
 
 ```math
-L : Y \times \mathbb{R} \rightarrow [0,\infty)
+L : \mathbb{R} \times Y \rightarrow [0,\infty)
 ```
 
 Note a few interesting things about supervised loss functions.
@@ -205,12 +205,12 @@ other formalism, they do not natively provide probabilities as
 output.
 
 More formally, we call a supervised loss function
-``L : Y \times \mathbb{R} \rightarrow [0, \infty)``
+``L : \mathbb{R} \times Y \rightarrow [0, \infty)``
 **margin-based** if there exists a representing function
 ``\psi : \mathbb{R} \rightarrow [0, \infty)`` such that
 
 ```math
-L(y, \hat{y}) = \psi (y \cdot \hat{y}),  \qquad  y \in Y, \hat{y} \in \mathbb{R}
+L(\hat{y}, y) = \psi (y \cdot \hat{y}),  \qquad  y \in Y, \hat{y} \in \mathbb{R}
 ```
 
 !!! note
@@ -229,13 +229,13 @@ target. In such a scenario it is quite sensible to penalize the
 distance between the prediction and the target in some way.
 
 More formally, a supervised loss function
-``L : Y \times \mathbb{R} \rightarrow [0, \infty)`` is said to be
+``L : \mathbb{R} \times Y \rightarrow [0, \infty)`` is said to be
 **distance-based**, if there exists a representing function
 ``\psi : \mathbb{R} \rightarrow [0, \infty)`` satisfying
 ``\psi (0) = 0`` and
 
 ```math
-L(y, \hat{y}) = \psi (\hat{y} - y),  \qquad  y \in Y, \hat{y} \in \mathbb{R}
+L(\hat{y}, y) = \psi (\hat{y} - y),  \qquad  y \in Y, \hat{y} \in \mathbb{R}
 ```
 
 !!! note

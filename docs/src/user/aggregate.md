@@ -34,13 +34,13 @@ say "naive", because it will not give us an acceptable
 performance.
 
 ```jldoctest
-julia> value(L1DistLoss(), [1.,2,3], [2,5,-2])
+julia> value(L1DistLoss(), [2,5,-2], [1.,2,3])
 3-element Vector{Float64}:
  1.0
  3.0
  5.0
 
-julia> sum(value(L1DistLoss(), [1.,2,3], [2,5,-2])) # WARNING: Bad code
+julia> sum(value(L1DistLoss(), [2,5,-2], [1.,2,3])) # WARNING: Bad code
 9.0
 ```
 
@@ -109,7 +109,7 @@ the results, we will see that the loss of the second observation
 was effectively counted twice.
 
 ```jldoctest
-julia> result = value.(L1DistLoss(), [1.,2,3], [2,5,-2]) .* [1,2,1]
+julia> result = value.(L1DistLoss(), [2,5,-2], [1.,2,3]) .* [1,2,1]
 3-element Vector{Float64}:
  1.0
  6.0
@@ -154,7 +154,7 @@ julia> outputs = reshape(1:2:16, (2, 4)) ./ 8
 
 julia> # WARNING: BAD CODE - ONLY FOR ILLUSTRATION
 
-julia> tmp = sum(value.(L1DistLoss(), targets, outputs), dims=2)
+julia> tmp = sum(value.(L1DistLoss(), outputs, targets), dims=2)
 2×1 Matrix{Float64}:
  1.5
  2.0
@@ -172,7 +172,7 @@ julia> using Statistics # for access to "mean"
 
 julia> # WARNING: BAD CODE - ONLY FOR ILLUSTRATION
 
-julia> tmp = mean(value.(L1DistLoss(), targets, outputs), dims=2)
+julia> tmp = mean(value.(L1DistLoss(), outputs, targets), dims=2)
 2×1 Matrix{Float64}:
  0.375
  0.5
@@ -195,10 +195,10 @@ special methods for [`value`](@ref), [`deriv`](@ref),
 [`deriv2`](@ref) and their mutating counterparts.
 
 ```jldoctest weight
-julia> value(L1DistLoss(), [1.,2,3], [2,5,-2], AggMode.WeightedSum([1,2,1]))
+julia> value(L1DistLoss(), [2,5,-2], [1.,2,3], AggMode.WeightedSum([1,2,1]))
 12.0
 
-julia> value(L1DistLoss(), [1.,2,3], [2,5,-2], AggMode.WeightedMean([1,2,1]))
+julia> value(L1DistLoss(), [2,5,-2], [1.,2,3], AggMode.WeightedMean([1,2,1]))
 1.0
 ```
 
@@ -206,9 +206,9 @@ We also provide this functionality for [`deriv`](@ref) and
 [`deriv2`](@ref) respectively.
 
 ```jldoctest weight
-julia> deriv(L2DistLoss(), [1.,2,3], [2,5,-2], AggMode.WeightedSum([1,2,1]))
+julia> deriv(L2DistLoss(), [2,5,-2], [1.,2,3], AggMode.WeightedSum([1,2,1]))
 4.0
 
-julia> deriv(L2DistLoss(), [1.,2,3], [2,5,-2], AggMode.WeightedMean([1,2,1]))
+julia> deriv(L2DistLoss(), [2,5,-2], [1.,2,3], AggMode.WeightedMean([1,2,1]))
 0.3333333333333333
 ```

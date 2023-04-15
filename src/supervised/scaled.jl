@@ -18,19 +18,24 @@ ScaledLoss(loss::T, k::Number) where {T} = ScaledLoss(loss, Val(k))
 
 @generated ScaledLoss(s::ScaledLoss{T,K1}, ::Val{K2}) where {T,K1,K2} = :(ScaledLoss(s.loss, Val($(K1*K2))))
 
-for fun in (:value, :deriv, :deriv2)
-    @eval @fastmath ($fun)(l::ScaledLoss{T,K}, target::Number, output::Number) where {T,K} = K * ($fun)(l.loss, target, output)
+for FUN in (:value, :deriv, :deriv2)
+    @eval @fastmath function ($FUN)(
+        l::ScaledLoss{T,K},
+        output::Number,
+        target::Number) where {T,K}
+        K * ($FUN)(l.loss, output, target)
+    end
 end
 
-for prop in [:isminimizable, :isdifferentiable, :istwicedifferentiable,
+for FUN in [:isminimizable, :isdifferentiable, :istwicedifferentiable,
              :isconvex, :isstrictlyconvex, :isstronglyconvex,
              :isnemitski, :isunivfishercons, :isfishercons,
              :islipschitzcont, :islocallylipschitzcont,
              :isclipable, :ismarginbased, :isclasscalibrated,
              :isdistancebased, :issymmetric]
-    @eval ($prop)(l::ScaledLoss) = ($prop)(l.loss)
+    @eval ($FUN)(l::ScaledLoss) = ($FUN)(l.loss)
 end
 
-for prop_param in (:isdifferentiable, :istwicedifferentiable)
-    @eval ($prop_param)(l::ScaledLoss, at) = ($prop_param)(l.loss, at)
+for FUN in (:isdifferentiable, :istwicedifferentiable)
+    @eval ($FUN)(l::ScaledLoss, at) = ($FUN)(l.loss, at)
 end

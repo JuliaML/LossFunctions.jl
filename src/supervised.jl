@@ -2,13 +2,13 @@
 Broadcast.broadcastable(loss::SupervisedLoss) = Ref(loss)
 
 # fallback to unary evaluation
-value(loss::DistanceLoss, target::Number, output::Number)  = value(loss, output - target)
-deriv(loss::DistanceLoss, target::Number, output::Number)  = deriv(loss, output - target)
-deriv2(loss::DistanceLoss, target::Number, output::Number) = deriv2(loss, output - target)
+value(loss::DistanceLoss, output::Number, target::Number)  = value(loss, output - target)
+deriv(loss::DistanceLoss, output::Number, target::Number)  = deriv(loss, output - target)
+deriv2(loss::DistanceLoss, output::Number, target::Number) = deriv2(loss, output - target)
 
-value(loss::MarginLoss, target::Number, output::Number)  = value(loss, target * output)
-deriv(loss::MarginLoss, target::Number, output::Number)  = target * deriv(loss, target * output)
-deriv2(loss::MarginLoss, target::Number, output::Number) = deriv2(loss, target * output)
+value(loss::MarginLoss, output::Number, target::Number)  = value(loss, target * output)
+deriv(loss::MarginLoss, output::Number, target::Number)  = target * deriv(loss, target * output)
+deriv2(loss::MarginLoss, output::Number, target::Number) = deriv2(loss, target * output)
 
 # ------------------
 # AVAILABLE LOSSES
@@ -35,9 +35,9 @@ for FUN in (:value, :deriv, :deriv2)
         # by default compute the element-wise result
         @inline function ($FUN)(
                 loss::SupervisedLoss,
-                targets::AbstractVector,
-                outputs::AbstractVector)
-            ($FUN)(loss, targets, outputs, AggMode.None())
+                outputs::AbstractVector,
+                targets::AbstractVector)
+            ($FUN)(loss, outputs, targets, AggMode.None())
         end
 
         # -------------------
@@ -45,12 +45,12 @@ for FUN in (:value, :deriv, :deriv2)
         # -------------------
         @generated function ($FUN)(
                 loss::SupervisedLoss,
-                target::AbstractVector,
-                output::AbstractVector,
+                outputs::AbstractVector,
+                targets::AbstractVector,
                 ::AggMode.None)
             quote
                 $(Expr(:meta, :inline))
-                ($($FUN)).(loss, target, output)
+                ($($FUN)).(loss, outputs, targets)
             end
         end
 
@@ -59,12 +59,12 @@ for FUN in (:value, :deriv, :deriv2)
         # ------------------
         function ($FUN)(
                 loss::SupervisedLoss,
-                target::AbstractVector,
-                output::AbstractVector,
+                outputs::AbstractVector,
+                targets::AbstractVector,
                 ::AggMode.Sum)
-            @dimcheck length(target) == length(output)
-            nobs = length(output)
-            f(i) = ($FUN)(loss, target[i], output[i])
+            @dimcheck length(outputs) == length(targets)
+            nobs = length(outputs)
+            f(i) = ($FUN)(loss, outputs[i], targets[i])
             sum(f, 1:nobs)
         end
 
@@ -73,12 +73,12 @@ for FUN in (:value, :deriv, :deriv2)
         # -------------------
         function ($FUN)(
                 loss::SupervisedLoss,
-                target::AbstractVector,
-                output::AbstractVector,
+                outputs::AbstractVector,
+                targets::AbstractVector,
                 ::AggMode.Mean)
-            @dimcheck length(target) == length(output)
-            nobs = length(output)
-            f(i) = ($FUN)(loss, target[i], output[i])
+            @dimcheck length(outputs) == length(targets)
+            nobs = length(outputs)
+            f(i) = ($FUN)(loss, outputs[i], targets[i])
             sum(f, 1:nobs) / nobs
         end
 
@@ -87,15 +87,15 @@ for FUN in (:value, :deriv, :deriv2)
         # ---------------------------
         function ($FUN)(
                 loss::SupervisedLoss,
-                target::AbstractVector,
-                output::AbstractVector,
+                outputs::AbstractVector,
+                targets::AbstractVector,
                 agg::AggMode.WeightedSum)
-            @dimcheck length(target) == length(output)
-            @dimcheck length(output) == length(agg.weights)
-            nobs  = length(output)
+            @dimcheck length(outputs) == length(targets)
+            @dimcheck length(outputs) == length(agg.weights)
+            nobs  = length(outputs)
             wsum  = sum(agg.weights)
             denom = agg.normalize ? wsum : one(wsum)
-            f(i)  = agg.weights[i] * ($FUN)(loss, target[i], output[i])
+            f(i)  = agg.weights[i] * ($FUN)(loss, outputs[i], targets[i])
             sum(f, 1:nobs) / denom
         end
 
@@ -104,19 +104,19 @@ for FUN in (:value, :deriv, :deriv2)
         # ----------------------------
         function ($FUN)(
                 loss::SupervisedLoss,
-                target::AbstractVector,
-                output::AbstractVector,
+                outputs::AbstractVector,
+                targets::AbstractVector,
                 agg::AggMode.WeightedMean)
-            @dimcheck length(target) == length(output)
-            @dimcheck length(output) == length(agg.weights)
-            nobs  = length(output)
+            @dimcheck length(outputs) == length(targets)
+            @dimcheck length(outputs) == length(agg.weights)
+            nobs  = length(outputs)
             wsum  = sum(agg.weights)
             denom = agg.normalize ? nobs * wsum : nobs * one(wsum)
-            f(i)  = agg.weights[i] * ($FUN)(loss, target[i], output[i])
+            f(i)  = agg.weights[i] * ($FUN)(loss, outputs[i], targets[i])
             sum(f, 1:nobs) / denom
         end
     end
 end
 
 # convenient functor interface
-(loss::SupervisedLoss)(target::AbstractArray, output::AbstractArray) = value(loss, target, output)
+(loss::SupervisedLoss)(outputs::AbstractVector, targets::AbstractVector) = value(loss, outputs, targets)

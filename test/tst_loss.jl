@@ -1,20 +1,20 @@
 function test_value_typestable(l::SupervisedLoss)
     @testset "$(l): " begin
-        for y in (-1, 1, Int32(-1), Int32(1), -1.5, 1.5, Float32(-.5), Float32(.5))
+        for o in (-1, 1, Int32(-1), Int32(1), -1.5, 1.5, Float32(-.5), Float32(.5))
             for t in (-2, 2, Int32(-1), Int32(1), -.5, .5, Float32(-1), Float32(1))
                 # check inference
-                @inferred deriv(l, y, t)
-                @inferred deriv2(l, y, t)
+                @inferred deriv(l, o, t)
+                @inferred deriv2(l, o, t)
 
                 # get expected return type
-                T = promote_type(typeof(y), typeof(t))
+                T = promote_type(typeof(o), typeof(t))
 
                 # test basic loss
-                val = @inferred value(l, y, t)
+                val = @inferred value(l, o, t)
                 @test typeof(val) <: T
 
                 # test scaled version of loss
-                @test typeof(value(T(2)*l, y, t)) <: T
+                @test typeof(value(T(2)*l, o, t)) <: T
             end
         end
     end
@@ -22,14 +22,14 @@ end
 
 function test_value_float32_preserving(l::SupervisedLoss)
     @testset "$(l): " begin
-        for y in (-1, 1, Int32(-1), Int32(1), -1.5, 1.5, Float32(-.5), Float32(.5))
+        for o in (-1, 1, Int32(-1), Int32(1), -1.5, 1.5, Float32(-.5), Float32(.5))
             for t in (-2, 2, Int32(-1), Int32(1), -.5, .5, Float32(-1), Float32(1))
                 # check inference
-                @inferred deriv(l, y, t)
-                @inferred deriv2(l, y, t)
+                @inferred deriv(l, o, t)
+                @inferred deriv2(l, o, t)
 
-                val = @inferred value(l, y, t)
-                T = promote_type(typeof(y),typeof(t))
+                val = @inferred value(l, o, t)
+                T = promote_type(typeof(o),typeof(t))
                 if !(T <: AbstractFloat)
                     # cast Integers to a float
                     # (whether its Float32 or Float64 depends on the loss...)
@@ -47,119 +47,116 @@ end
 
 function test_value_float64_forcing(l::SupervisedLoss)
     @testset "$(l): " begin
-        for y in (-1, 1, Int32(-1), Int32(1), -1.5, 1.5, Float32(-.5), Float32(.5))
+        for o in (-1, 1, Int32(-1), Int32(1), -1.5, 1.5, Float32(-.5), Float32(.5))
             for t in (-2, 2, Int32(-1), Int32(1), -.5, .5, Float32(-1), Float32(1))
                 # check inference
-                @inferred deriv(l, y, t)
-                @inferred deriv2(l, y, t)
+                @inferred deriv(l, o, t)
+                @inferred deriv2(l, o, t)
 
-                val = @inferred value(l, y, t)
+                val = @inferred value(l, o, t)
                 @test (typeof(val) <: Float64)
             end
         end
     end
 end
 
-function test_value(l::SupervisedLoss, f::Function, y_vec, t_vec)
+function test_value(l::SupervisedLoss, f::Function, o_vec, t_vec)
     @testset "$(l): " begin
-        for y in y_vec, t in t_vec
-            @test abs(value(l, y, t) - f(y, t)) < 1e-10
+        for o in o_vec, t in t_vec
+            @test abs(value(l, o, t) - f(o, t)) < 1e-10
         end
     end
 end
 
-function test_deriv(l::MarginLoss, t_vec)
+function test_deriv(l::MarginLoss, o_vec)
     @testset "$(l): " begin
-        for y in [-1., 1], t in t_vec
-            if isdifferentiable(l, y*t)
-                d_dual = epsilon(value(l, dual(y, zero(y)), dual(t, one(t))))
-                d_comp = @inferred deriv(l, y, t)
+        for o in o_vec, t in [-1., 1.]
+            if isdifferentiable(l, o*t)
+                d_dual = epsilon(value(l, dual(o, one(o)), dual(t, zero(t))))
+                d_comp = @inferred deriv(l, o, t)
                 @test abs(d_dual - d_comp) < 1e-10
-                val = @inferred value(l, y, t)
-                @test val ≈ value(l, y, t)
-                @test val ≈ value(l, y*t)
-                @test d_comp ≈ y*deriv(l, y*t)
-            else
-                # y*t == 1 ? print(".") : print("(no $(y)*$(t)) ")
-                #print(".")
+                val = @inferred value(l, o, t)
+                @test val ≈ value(l, o, t)
+                @test val ≈ value(l, o*t)
+                @test d_comp ≈ t*deriv(l, o*t)
             end
         end
     end
 end
 
-function test_deriv(l::DistanceLoss, t_vec)
+function test_deriv(l::DistanceLoss, o_vec)
     @testset "$(l): " begin
-        for y in -10:.2:10, t in t_vec
-            if isdifferentiable(l, t-y)
-                d_dual = epsilon(value(l, dual(t-y, one(t-y))))
-                d_comp = @inferred deriv(l, y, t)
+        for o in o_vec, t in -10:.2:10
+            if isdifferentiable(l, o-t)
+                d_dual = epsilon(value(l, dual(o-t, one(o-t))))
+                d_comp = @inferred deriv(l, o, t)
                 @test abs(d_dual - d_comp) < 1e-10
-                val = @inferred value(l, y, t)
-                @test val ≈ value(l, y, t)
-                @test val ≈ value(l, t-y)
-                @test d_comp ≈ deriv(l, t-y)
+                val = @inferred value(l, o, t)
+                @test val ≈ value(l, o, t)
+                @test val ≈ value(l, o-t)
+                @test d_comp ≈ deriv(l, o-t)
             end
         end
     end
 end
 
-function test_deriv(l::SupervisedLoss, y_vec, t_vec)
+function test_deriv(l::SupervisedLoss, o_vec, t_vec)
     @testset "$(l): " begin
-        for y in y_vec, t in t_vec
-            if isdifferentiable(l, y, t)
-                d_dual = epsilon(value(l, y, dual(t, one(t))))
-                d_comp = @inferred deriv(l, y, t)
+        for o in o_vec, t in t_vec
+            if isdifferentiable(l, o, t)
+                d_dual = epsilon(value(l, dual(o, one(o)), dual(t, zero(t))))
+                d_comp = @inferred deriv(l, o, t)
                 @test abs(d_dual - d_comp) < 1e-10
-                val = @inferred value(l, y, t)
-                @test val ≈ value(l, y, t)
-                @test d_comp ≈ deriv(l, y, t)
+                val = @inferred value(l, o, t)
+                @test val ≈ value(l, o, t)
+                @test d_comp ≈ deriv(l, o, t)
             end
         end
     end
 end
 
-function test_deriv2(l::MarginLoss, t_vec)
+function test_deriv2(l::MarginLoss, o_vec)
     @testset "$(l): " begin
-        for y in [-1., 1], t in t_vec
-            if istwicedifferentiable(l, y*t) && isdifferentiable(l, y*t)
-                d2_dual = epsilon(deriv(l, dual(y, zero(y)), dual(t, one(t))))
-                d2_comp = @inferred deriv2(l, y, t)
+        for o in o_vec, t in [-1., 1]
+            if istwicedifferentiable(l, o*t) && isdifferentiable(l, o*t)
+                d2_dual = epsilon(deriv(l, dual(o, one(o)), dual(t, zero(t))))
+                d2_comp = @inferred deriv2(l, o, t)
                 @test abs(d2_dual - d2_comp) < 1e-10
-                @test d2_comp ≈ @inferred deriv2(l, y, t)
-                @test d2_comp ≈ @inferred deriv2(l, y*t)
+                @test d2_comp ≈ @inferred deriv2(l, o, t)
+                @test d2_comp ≈ @inferred deriv2(l, o*t)
             end
         end
     end
 end
 
-function test_deriv2(l::DistanceLoss, t_vec)
+function test_deriv2(l::DistanceLoss, o_vec)
     @testset "$(l): " begin
-        for y in -10:.2:10, t in t_vec
-            if istwicedifferentiable(l, t-y) && isdifferentiable(l, t-y)
-                d2_dual = epsilon(deriv(l, dual(t-y, one(t-y))))
-                d2_comp = @inferred deriv2(l, y, t)
+        for o in o_vec, t in -10:.2:10
+            if istwicedifferentiable(l, o-t) && isdifferentiable(l, o-t)
+                d2_dual = epsilon(deriv(l, dual(o-t, one(o-t))))
+                d2_comp = @inferred deriv2(l, o, t)
                 @test abs(d2_dual - d2_comp) < 1e-10
-                @test d2_comp ≈ @inferred deriv2(l, y, t)
-                @test d2_comp ≈ @inferred deriv2(l, t-y)
+                @test d2_comp ≈ @inferred deriv2(l, o, t)
+                @test d2_comp ≈ @inferred deriv2(l, o-t)
             end
         end
     end
 end
 
-function test_deriv2(l::SupervisedLoss, y_vec, t_vec)
+function test_deriv2(l::SupervisedLoss, o_vec, t_vec)
     @testset "$(l): " begin
-        for y in y_vec, t in t_vec
-            if istwicedifferentiable(l, y, t) && isdifferentiable(l, y, t)
-                d2_dual = epsilon(deriv(l, dual(y, zero(y)), dual(t, one(t))))
-                d2_comp = @inferred deriv2(l, y, t)
+        for o in o_vec, t in t_vec
+            if istwicedifferentiable(l, o, t) && isdifferentiable(l, o, t)
+                d2_dual = epsilon(deriv(l, dual(o, one(o)), dual(t, zero(t))))
+                d2_comp = @inferred deriv2(l, o, t)
                 @test abs(d2_dual - d2_comp) < 1e-10
-                @test d2_comp ≈ @inferred deriv2(l, y, t)
+                @test d2_comp ≈ @inferred deriv2(l, o, t)
             end
         end
     end
 end
 
-function test_scaledloss(l::SupervisedLoss, t_vec, y_vec)
+function test_scaledloss(l::SupervisedLoss, o_vec, t_vec)
     @testset "Scaling for $(l): " begin
         for λ = (2.0, 2)
             sl = ScaledLoss(l,λ)
@@ -169,46 +166,30 @@ function test_scaledloss(l::SupervisedLoss, t_vec, y_vec)
             @test sl == @inferred(ScaledLoss(l,Val(λ)))
             @test sl == λ * l
             @test sl == @inferred(Val(λ) * l)
-            for t in t_vec
-                for y in y_vec
-                    @test @inferred(value(sl,t,y)) == λ*value(l,t,y)
-                    @test @inferred(deriv(sl,t,y)) == λ*deriv(l,t,y)
-                    @test @inferred(deriv2(sl,t,y)) == λ*deriv2(l,t,y)
-                end
+            for o in o_vec, t in t_vec
+                @test @inferred(value(sl, o, t)) == λ * value(l, o, t)
+                @test @inferred(deriv(sl, o, t)) == λ * deriv(l, o, t)
+                @test @inferred(deriv2(sl, o, t)) == λ * deriv2(l, o, t)
             end
         end
     end
 end
 
-function test_scaledloss(l::SupervisedLoss, n_vec)
-    @testset "Scaling for $(l): " begin
-        for λ = (2.0, 2)
-            sl = ScaledLoss(l,λ)
-            @test typeof(sl) <: ScaledLoss{typeof(l),λ}
-            @test sl == @inferred(ScaledLoss(l,Val(λ)))
-            @test sl == λ * l
-            @test sl == @inferred(Val(λ) * l)
-        end
-    end
-end
-
-function test_weightedloss(l::MarginLoss, t_vec, y_vec)
+function test_weightedloss(l::MarginLoss, o_vec, t_vec)
     @testset "Weighted version for $(l): " begin
         for w in (0., 0.2, 0.7, 1.)
             wl = WeightedMarginLoss(l, w)
             @test typeof(wl) <: WeightedMarginLoss{typeof(l),w}
             @test WeightedMarginLoss(l, w * 0.1) == WeightedMarginLoss(wl, 0.1)
-            for t in t_vec
-                for y in y_vec
-                    if t == 1
-                        @test value(wl,t,y) == w*value(l,t,y)
-                        @test deriv(wl,t,y) == w*deriv(l,t,y)
-                        @test deriv2(wl,t,y) == w*deriv2(l,t,y)
-                    else
-                        @test value(wl,t,y) == (1-w)*value(l,t,y)
-                        @test deriv(wl,t,y) == (1-w)*deriv(l,t,y)
-                        @test deriv2(wl,t,y) == (1-w)*deriv2(l,t,y)
-                    end
+            for o in o_vec, t in t_vec
+                if t == 1
+                    @test value(wl, o, t) == w * value(l, o, t)
+                    @test deriv(wl, o, t) == w * deriv(l, o, t)
+                    @test deriv2(wl, o, t) == w * deriv2(l, o, t)
+                else
+                    @test value(wl, o, t) == (1-w) * value(l, o, t)
+                    @test deriv(wl, o, t) == (1-w) * deriv(l, o, t)
+                    @test deriv2(wl, o, t) == (1-w) * deriv2(l, o, t)
                 end
             end
         end
@@ -261,221 +242,186 @@ end
     end
 end
 
-println("<HEARTBEAT>")
-
 @testset "Test margin-based loss against reference function" begin
-    _zerooneloss(y, t) = sign(y*t) < 0 ? 1 : 0
-    test_value(ZeroOneLoss(), _zerooneloss, [-1.,1], -10:0.2:10)
+    _zerooneloss(o, t) = sign(o*t) < 0 ? 1 : 0
+    test_value(ZeroOneLoss(), _zerooneloss, -10:0.2:10, [-1.,1.])
 
-    _hingeloss(y, t) = max(0, 1 - y.*t)
-    test_value(HingeLoss(), _hingeloss, [-1.,1], -10:0.2:10)
+    _hingeloss(o, t) = max(0, 1 - o.*t)
+    test_value(HingeLoss(), _hingeloss, -10:0.2:10, [-1.,1.])
 
-    _l2hingeloss(y, t) = max(0, 1 - y.*t)^2
-    test_value(L2HingeLoss(), _l2hingeloss, [-1.,1], -10:0.2:10)
+    _l2hingeloss(o, t) = max(0, 1 - o.*t)^2
+    test_value(L2HingeLoss(), _l2hingeloss, -10:0.2:10, [-1.,1.])
 
-    _perceptronloss(y, t) = max(0, -y.*t)
-    test_value(PerceptronLoss(), _perceptronloss, [-1.,1], -10:0.2:10)
+    _perceptronloss(o, t) = max(0, -o.*t)
+    test_value(PerceptronLoss(), _perceptronloss, -10:0.2:10, [-1.,1.])
 
-    _logitmarginloss(y, t) = log(1 + exp(-y.*t))
-    test_value(LogitMarginLoss(), _logitmarginloss, [-1.,1], -10:0.2:10)
+    _logitmarginloss(o, t) = log(1 + exp(-o.*t))
+    test_value(LogitMarginLoss(), _logitmarginloss, -10:0.2:10, [-1.,1.])
 
     function _smoothedl1hingeloss(γ)
-        function _value(y, t)
-            if y.*t >= 1 - γ
-                1/(2γ) * max(0, 1- y.*t)^2
+        function _value(o, t)
+            if o.*t >= 1 - γ
+                1/(2γ) * max(0, 1- o.*t)^2
             else
-                1 - γ / 2 - y.*t
+                1 - γ / 2 - o.*t
             end
         end
         _value
     end
-    test_value(SmoothedL1HingeLoss(.5), _smoothedl1hingeloss(.5), [-1.,1], -10:0.2:10)
-    test_value(SmoothedL1HingeLoss(1), _smoothedl1hingeloss(1), [-1.,1], -10:0.2:10)
-    test_value(SmoothedL1HingeLoss(2), _smoothedl1hingeloss(2), [-1.,1], -10:0.2:10)
+    test_value(SmoothedL1HingeLoss(.5), _smoothedl1hingeloss(.5), -10:0.2:10, [-1.,1.])
+    test_value(SmoothedL1HingeLoss(1), _smoothedl1hingeloss(1), -10:0.2:10, [-1.,1.])
+    test_value(SmoothedL1HingeLoss(2), _smoothedl1hingeloss(2), -10:0.2:10, [-1.,1.])
 
-    function _modhuberloss(y, t)
-        if y .* t >= -1
-            max(0, 1 - y .* t)^2
+    function _modhuberloss(o, t)
+        if o .* t >= -1
+            max(0, 1 - o .* t)^2
         else
-            -4 .* y .* t
+            -4 .* o .* t
         end
     end
-    test_value(ModifiedHuberLoss(), _modhuberloss, [-1.,1], -10:0.2:10)
+    test_value(ModifiedHuberLoss(), _modhuberloss, -10:0.2:10, [-1.,1.])
 
-    _l2marginloss(y, t) = (1 - y.*t)^2
-    test_value(L2MarginLoss(), _l2marginloss, [-1.,1], -10:0.2:10)
+    _l2marginloss(o, t) = (1 - o.*t)^2
+    test_value(L2MarginLoss(), _l2marginloss, -10:0.2:10, [-1.,1.])
 
-    _exploss(y, t) = exp(-y.*t)
-    test_value(ExpLoss(), _exploss, [-1.,1], -10:0.2:10)
+    _exploss(o, t) = exp(-o.*t)
+    test_value(ExpLoss(), _exploss, -10:0.2:10, [-1.,1.])
 
-    _sigmoidloss(y, t) = (1-tanh(y.*t))
-    test_value(SigmoidLoss(), _sigmoidloss, [-1., 1], -10:0.2:10)
+    _sigmoidloss(o, t) = (1-tanh(o.*t))
+    test_value(SigmoidLoss(), _sigmoidloss, -10:0.2:10, [-1.,1.])
 
     function _dwdmarginloss(q)
-        function _value(y, t)
-            if y.*t <= q/(q+1)
-                convert(Float64, 1 - y.*t)
+        function _value(o, t)
+            if o.*t <= q/(q+1)
+                convert(Float64, 1 - o.*t)
             else
-                ((q^q)/(q+1)^(q+1)) / (y.*t)^q
+                ((q^q)/(q+1)^(q+1)) / (o.*t)^q
             end
         end
         _value
     end
-    test_value(DWDMarginLoss(0.5), _dwdmarginloss(0.5), [-1., 1], -10:0.2:10)
-    test_value(DWDMarginLoss(1), _dwdmarginloss(1), [-1., 1], -10:0.2:10)
-    test_value(DWDMarginLoss(2), _dwdmarginloss(2), [-1., 1], -10:0.2:10)
-
+    test_value(DWDMarginLoss(0.5), _dwdmarginloss(0.5), -10:0.2:10, [-1.,1.])
+    test_value(DWDMarginLoss(1), _dwdmarginloss(1), -10:0.2:10, [-1.,1.])
+    test_value(DWDMarginLoss(2), _dwdmarginloss(2), -10:0.2:10, [-1.,1.])
 end
 
 @testset "Test distance-based loss against reference function" begin
-    yr, tr = range(-10, stop=20, length=10), range(-30, stop=30, length=10)
+    or = range(-10, stop=20, length=10)
+    tr = range(-30, stop=30, length=10)
 
-    _l1distloss(y, t) = abs(t - y)
-    test_value(L1DistLoss(), _l1distloss, yr, tr)
+    _l1distloss(o, t) = abs(t - o)
+    test_value(L1DistLoss(), _l1distloss, or, tr)
 
-    _l2distloss(y, t) = (t - y)^2
-    test_value(L2DistLoss(), _l2distloss, yr, tr)
+    _l2distloss(o, t) = (t - o)^2
+    test_value(L2DistLoss(), _l2distloss, or, tr)
 
-    _lp15distloss(y, t) = abs(t - y)^(1.5)
-    test_value(LPDistLoss(1.5), _lp15distloss, yr, tr)
+    _lp15distloss(o, t) = abs(t - o)^(1.5)
+    test_value(LPDistLoss(1.5), _lp15distloss, or, tr)
 
     function _periodicloss(c)
-        _value(y, t) = 1 - cos((y-t)*2π/c)
-        _value
+        (o, t) -> 1 - cos((o-t)*2π/c)
     end
-    test_value(PeriodicLoss(0.5), _periodicloss(0.5), yr, tr)
-    test_value(PeriodicLoss(1), _periodicloss(1), yr, tr)
-    test_value(PeriodicLoss(1.5), _periodicloss(1.5), yr, tr)
+    test_value(PeriodicLoss(0.5), _periodicloss(0.5), or, tr)
+    test_value(PeriodicLoss(1), _periodicloss(1), or, tr)
+    test_value(PeriodicLoss(1.5), _periodicloss(1.5), or, tr)
 
     function _huberloss(d)
-        _value(y, t) = abs(y-t)<d ? (abs2(y-t)/2) : (d*(abs(y-t) - (d/2)))
-        _value
+        (o, t) -> abs(o-t)<d ? (abs2(o-t)/2) : (d*(abs(o-t) - (d/2)))
     end
-    test_value(HuberLoss(0.5), _huberloss(0.5), yr, tr)
-    test_value(HuberLoss(1), _huberloss(1), yr, tr)
-    test_value(HuberLoss(1.5), _huberloss(1.5), yr, tr)
+    test_value(HuberLoss(0.5), _huberloss(0.5), or, tr)
+    test_value(HuberLoss(1), _huberloss(1), or, tr)
+    test_value(HuberLoss(1.5), _huberloss(1.5), or, tr)
 
     function _l1epsinsloss(ɛ)
-        _value(y, t) = max(0, abs(t - y) - ɛ)
-        _value
+        (o, t) -> max(0, abs(t - o) - ɛ)
     end
-    test_value(EpsilonInsLoss(0.5), _l1epsinsloss(0.5), yr, tr)
-    test_value(EpsilonInsLoss(1), _l1epsinsloss(1), yr, tr)
-    test_value(EpsilonInsLoss(1.5), _l1epsinsloss(1.5), yr, tr)
+    test_value(EpsilonInsLoss(0.5), _l1epsinsloss(0.5), or, tr)
+    test_value(EpsilonInsLoss(1), _l1epsinsloss(1), or, tr)
+    test_value(EpsilonInsLoss(1.5), _l1epsinsloss(1.5), or, tr)
 
     function _l2epsinsloss(ɛ)
-        _value(y, t) = max(0, abs(t - y) - ɛ)^2
-        _value
+        (o, t) -> max(0, abs(t - o) - ɛ)^2
     end
-    test_value(L2EpsilonInsLoss(0.5), _l2epsinsloss(0.5), yr, tr)
-    test_value(L2EpsilonInsLoss(1), _l2epsinsloss(1), yr, tr)
-    test_value(L2EpsilonInsLoss(1.5), _l2epsinsloss(1.5), yr, tr)
+    test_value(L2EpsilonInsLoss(0.5), _l2epsinsloss(0.5), or, tr)
+    test_value(L2EpsilonInsLoss(1), _l2epsinsloss(1), or, tr)
+    test_value(L2EpsilonInsLoss(1.5), _l2epsinsloss(1.5), or, tr)
 
-    _logitdistloss(y, t) = -log((4*exp(t-y))/(1+exp(t-y))^2)
-    test_value(LogitDistLoss(), _logitdistloss, yr, tr)
+    _logitdistloss(o, t) = -log((4*exp(t-o))/(1+exp(t-o))^2)
+    test_value(LogitDistLoss(), _logitdistloss, or, tr)
 
-    function _quantileloss(y, t)
-        (y - t) * (0.7 - (y - t < 0))
+    function _quantileloss(τ)
+        (o, t) -> (o - t) * ((o - t > 0) - τ)
     end
-    test_value(QuantileLoss(.7), _quantileloss, yr, tr)
+    test_value(QuantileLoss(.7), _quantileloss(.7), or, tr)
 
-    function _logcoshloss(y, t)
-        log.(cosh(y .- t))
+    function _logcoshloss(o, t)
+        log(cosh(o - t))
     end
-    test_value(LogCoshLoss(), _logcoshloss, yr, tr)
+    test_value(LogCoshLoss(), _logcoshloss, or, tr)
 end
 
-const OrdinalSmoothedHingeLoss = OrdinalMarginLoss{<:SmoothedL1HingeLoss}
-@test OrdinalSmoothedHingeLoss(4, 2.1) === OrdinalMarginLoss(SmoothedL1HingeLoss(2.1), 4)
+@testset "Test other loss" begin
+    _misclassloss(o, t) = o == t ? 0 : 1
+    test_value(MisclassLoss(), _misclassloss, vcat(1:5,7:11), 1:10)
 
-@testset "Test ordinal losses against reference function" begin
-    function _ordinalhingeloss(y, t)
-        val = 0
-        for yp = 1:y - 1
-            val += max(0, 1 - t + yp)
-        end
-        for yp = y + 1:5
-            val += max(0, 1 + t - yp)
-        end
-        val
+    _crossentropyloss(o, t) = -t*log(o) - (1-t)*log(1-o)
+    test_value(CrossEntropyLoss(), _crossentropyloss, 0.01:0.01:0.99, 0:0.01:1)
+
+    _poissonloss(o, t) = exp(o) - t*o
+    test_value(PoissonLoss(), _poissonloss, range(0,stop=10,length=11), 0:10)
+end
+
+@testset "Test scaled loss" begin
+    for loss in distance_losses
+        test_scaledloss(loss, -10:0.5:10, -10:.2:10)
     end
-    y = rand(1:5, 10); t = randn(10) .+ 3
-    test_value(OrdinalMarginLoss(HingeLoss(), 5), _ordinalhingeloss, y, t)
-end
 
-
-@testset "Test other loss against reference function" begin
-    _misclassloss(y, t) = y == t ? 0 : 1
-    test_value(MisclassLoss(), _misclassloss, 1:10, vcat(1:5,7:11))
-
-    _crossentropyloss(y, t) = -y*log(t) - (1-y)*log(1-t)
-    test_value(CrossEntropyLoss(), _crossentropyloss, 0:0.01:1, 0.01:0.01:0.99)
-
-    _poissonloss(y, t) = exp(t) - t*y
-    test_value(PoissonLoss(), _poissonloss, 0:10, range(0,stop=10,length=11))
-    test_scaledloss(PoissonLoss(), 0:10, range(0,stop=10,length=11))
-end
-
-println("<HEARTBEAT>")
-
-# --------------------------------------------------------------
-
-@testset "Test first derivatives of margin-based losses" begin
     for loss in margin_losses
-        test_deriv(loss, -10:0.2:10)
+        test_scaledloss(loss, -10:0.2:10, [-1.,1.])
     end
+
+    test_scaledloss(PoissonLoss(), range(0,stop=10,length=11), 0:10)
 end
 
-@testset "Test second derivatives of margin-based losses" begin
+@testset "Test weighted loss" begin
     for loss in margin_losses
-        test_deriv2(loss, -10:0.2:10)
-    end
-end
-
-@testset "Test margin-based scaled loss" begin
-    for loss in margin_losses
-        test_scaledloss(loss, [-1.,1], -10:0.2:10)
-        test_scaledloss(loss, -10:0.2:10)
-    end
-end
-
-@testset "Test margin-based weighted loss" begin
-    for loss in margin_losses
-        test_weightedloss(loss, [-1.,1], -10:0.2:10)
+        test_weightedloss(loss, -10:0.2:10, [-1.,1.])
     end
 end
 
 # --------------------------------------------------------------
 
-@testset "Test first derivatives of distance-based losses" begin
+@testset "Test first derivatives" begin
     for loss in distance_losses
         test_deriv(loss, -10:0.5:10)
     end
-end
 
-@testset "Test second derivatives of distance-based losses" begin
-    for loss in distance_losses
-        test_deriv2(loss, -10:0.5:10)
+    for loss in margin_losses
+        test_deriv(loss, -10:0.2:10)
     end
-end
 
-@testset "Test first and second derivatives of other losses" begin
     test_deriv(PoissonLoss(), -10:.2:10, 0:30)
-    test_deriv2(PoissonLoss(), -10:.2:10, 0:30)
-    test_deriv(CrossEntropyLoss(), 0:0.01:1, 0.01:0.01:0.99)
-    test_deriv2(CrossEntropyLoss(), 0:0.01:1, 0.01:0.01:0.99)
-end
-
-@testset "Test distance-based scaled loss" begin
-    for loss in distance_losses
-        test_scaledloss(loss, -10:.2:10, -10:0.5:10)
-        test_scaledloss(loss, -10:0.5:10)
-    end
+    test_deriv(CrossEntropyLoss(), 0.01:0.01:0.99, 0:0.01:1)
 end
 
 # --------------------------------------------------------------
 
-@testset "Losses with categorical values" begin
+@testset "Test second derivatives" begin
+    for loss in distance_losses
+        test_deriv2(loss, -10:0.5:10)
+    end
+
+    for loss in margin_losses
+        test_deriv2(loss, -10:0.2:10)
+    end
+
+    test_deriv2(PoissonLoss(), -10:.2:10, 0:30)
+    test_deriv2(CrossEntropyLoss(), 0.01:0.01:0.99, 0:0.01:1)
+end
+
+# --------------------------------------------------------------
+
+@testset "Test losses with categorical values" begin
     c = categorical(["Foo","Bar","Baz","Foo"])
 
     l = MisclassLoss()
@@ -488,7 +434,7 @@ end
     @test value(l, c, reverse(c), AggMode.WeightedMean(2*ones(4),false)) == 1.0
     @test value(l, c, reverse(c), AggMode.WeightedMean(2*ones(4),true)) == 0.125
 
-    lf = MisclassLoss{Float32}()
-    @test value(lf, c[1], c[1]) isa Float32
-    @test value(lf, c, c) isa Vector{Float32}
+    l = MisclassLoss{Float32}()
+    @test value(l, c[1], c[1]) isa Float32
+    @test value(l, c, c) isa Vector{Float32}
 end
