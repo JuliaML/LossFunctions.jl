@@ -507,7 +507,6 @@ L(r) = log ( cosh ( x ))
                  ŷ - y                            ŷ - y
 ```
 """
-
 struct LogCoshLoss <: DistanceLoss end
 
 _softplus(x::T) where T<:Number = x > zero(T) ? x + log1p(exp(-x)) : log1p(exp(x))
