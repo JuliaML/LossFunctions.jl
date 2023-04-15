@@ -18,7 +18,6 @@ include("supervised/margin.jl")
 include("supervised/other.jl")
 
 # meta-losses
-include("supervised/ordinal.jl")
 include("supervised/scaled.jl")
 include("supervised/weighted.jl")
 

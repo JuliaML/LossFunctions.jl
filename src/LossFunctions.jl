@@ -72,7 +72,6 @@ export
 
     # meta losses
     ScaledLoss,
-    OrdinalMarginLoss,
     WeightedMarginLoss
 
 end # module
