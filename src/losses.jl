@@ -13,13 +13,13 @@ deriv2(loss::MarginLoss, output::Number, target::Number) = deriv2(loss, target *
 # ------------------
 # AVAILABLE LOSSES
 # ------------------
-include("supervised/distance.jl")
-include("supervised/margin.jl")
-include("supervised/other.jl")
+include("losses/distance.jl")
+include("losses/margin.jl")
+include("losses/other.jl")
 
 # meta-losses
-include("supervised/scaled.jl")
-include("supervised/weighted.jl")
+include("losses/scaled.jl")
+include("losses/weighted.jl")
 
 # helper macro (for devs)
 macro dimcheck(condition)

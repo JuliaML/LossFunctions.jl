@@ -12,8 +12,8 @@ include("aggmode.jl")
 # trait functions
 include("traits.jl")
 
-# supervised losses
-include("supervised.jl")
+# loss functions
+include("losses.jl")
 
 # IO and plot recipes
 include("printing.jl")
