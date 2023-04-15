@@ -15,7 +15,7 @@ include("traits.jl")
 include("losses.jl")
 
 # IO methods
-include("printing.jl")
+include("io.jl")
 
 export
     # trait functions
