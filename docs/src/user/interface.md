@@ -49,7 +49,7 @@ than one place.
 julia> loss = L2DistLoss()
 L2DistLoss()
 
-julia> value(loss, 2, 3)
+julia> value(loss, 3, 2)
 1
 ```
 
@@ -66,11 +66,11 @@ yourself in the code below. As such they are zero-cost
 abstractions.
 
 ```julia-repl
-julia> v1(loss,t,y) = value(loss,t,y)
+julia> v1(loss,y,t) = value(loss,y,t)
 
-julia> v2(t,y) = value(L2DistLoss(),t,y)
+julia> v2(y,t) = value(L2DistLoss(),y,t)
 
-julia> @code_llvm v1(loss, 2, 3)
+julia> @code_llvm v1(loss, 3, 2)
 define i64 @julia_v1_70944(i64, i64) #0 {
 top:
   %2 = sub i64 %1, %0
@@ -78,7 +78,7 @@ top:
   ret i64 %3
 }
 
-julia> @code_llvm v2(2, 3)
+julia> @code_llvm v2(3, 2)
 define i64 @julia_v2_70949(i64, i64) #0 {
 top:
   %2 = sub i64 %1, %0
@@ -130,7 +130,7 @@ it is quite simple to make use of preallocated memory for storing
 the element-wise results.
 
 ```jldoctest bcast1
-julia> value.(L1DistLoss(), [1,2,3], [2,5,-2])
+julia> value.(L1DistLoss(), [2,5,-2], [1,2,3])
 3-element Vector{Int64}:
  1
  3
@@ -138,7 +138,7 @@ julia> value.(L1DistLoss(), [1,2,3], [2,5,-2])
 
 julia> buffer = zeros(3); # preallocate a buffer
 
-julia> buffer .= value.(L1DistLoss(), [1.,2,3], [2,5,-2])
+julia> buffer .= value.(L1DistLoss(), [2,5,-2], [1.,2,3])
 3-element Vector{Float64}:
  1.0
  3.0
@@ -150,7 +150,7 @@ Julia 0.6, one can also easily weight the influence of each
 observation without allocating a temporary array.
 
 ```jldoctest bcast1
-julia> buffer .= value.(L1DistLoss(), [1.,2,3], [2,5,-2]) .* [2,1,0.5]
+julia> buffer .= value.(L1DistLoss(), [2,5,-2], [1.,2,3]) .* [2,1,0.5]
 3-element Vector{Float64}:
  2.0
  3.0
@@ -182,7 +182,7 @@ one can make use of preallocated memory for storing the
 element-wise derivatives.
 
 ```jldoctest bcast2
-julia> deriv.(L2DistLoss(), [1,2,3], [2,5,-2])
+julia> deriv.(L2DistLoss(), [2,5,-2], [1,2,3])
 3-element Vector{Int64}:
    2
    6
@@ -190,7 +190,7 @@ julia> deriv.(L2DistLoss(), [1,2,3], [2,5,-2])
 
 julia> buffer = zeros(3); # preallocate a buffer
 
-julia> buffer .= deriv.(L2DistLoss(), [1.,2,3], [2,5,-2])
+julia> buffer .= deriv.(L2DistLoss(), [2,5,-2], [1.,2,3])
 3-element Vector{Float64}:
    2.0
    6.0
@@ -202,7 +202,7 @@ Julia 0.6, one can also easily weight the influence of each
 observation without allocating a temporary array.
 
 ```jldoctest bcast2
-julia> buffer .= deriv.(L2DistLoss(), [1.,2,3], [2,5,-2]) .* [2,1,0.5]
+julia> buffer .= deriv.(L2DistLoss(), [2,5,-2], [1.,2,3]) .* [2,1,0.5]
 3-element Vector{Float64}:
   4.0
   6.0
@@ -226,7 +226,7 @@ it. Thus, one can make use of preallocated memory for storing the
 element-wise derivatives.
 
 ```jldoctest
-julia> deriv2.(LogitDistLoss(), [-0.5, 1.2, 3], [0.3, 2.3, -2])
+julia> deriv2.(LogitDistLoss(), [0.3, 2.3, -2], [-0.5, 1.2, 3])
 3-element Vector{Float64}:
  0.42781939304058886
  0.3747397590950413
@@ -234,7 +234,7 @@ julia> deriv2.(LogitDistLoss(), [-0.5, 1.2, 3], [0.3, 2.3, -2])
 
 julia> buffer = zeros(3); # preallocate a buffer
 
-julia> buffer .= deriv2.(LogitDistLoss(), [-0.5, 1.2, 3], [0.3, 2.3, -2])
+julia> buffer .= deriv2.(LogitDistLoss(), [0.3, 2.3, -2], [-0.5, 1.2, 3])
 3-element Vector{Float64}:
  0.42781939304058886
  0.3747397590950413
