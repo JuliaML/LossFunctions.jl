@@ -1,4 +1,4 @@
-# LossFunctions
+# LossFunctions.jl
 
 _LossFunctions.jl is a Julia package that provides efficient and
 well-tested implementations for a diverse set of loss functions
