@@ -13,8 +13,8 @@ end
 end
 ScaledLoss(loss::T, ::Val{K}) where {T,K} = ScaledLoss{T,K}(loss)
 ScaledLoss(loss::T, k::Number) where {T} = ScaledLoss(loss, Val(k))
-*(::Val{K}, loss::SupervisedLoss) where {K} = ScaledLoss(loss, Val(K))
-*(k::Number, loss::SupervisedLoss) = ScaledLoss(loss, Val(k))
+Base.:*(::Val{K}, loss::SupervisedLoss) where {K} = ScaledLoss(loss, Val(K))
+Base.:*(k::Number, loss::SupervisedLoss) = ScaledLoss(loss, Val(k))
 
 @generated ScaledLoss(s::ScaledLoss{T,K1}, ::Val{K2}) where {T,K1,K2} = :(ScaledLoss(s.loss, Val($(K1*K2))))
 

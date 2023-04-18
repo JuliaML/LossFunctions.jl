@@ -3,8 +3,6 @@ module LossFunctions
 using Markdown
 using CategoricalArrays: CategoricalValue
 
-import Base: *
-
 # aggregation mode
 include("aggmode.jl")
 
