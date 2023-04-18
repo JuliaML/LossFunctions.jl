@@ -8,9 +8,9 @@ using Random
 using Test
 
 tests = [
-    "loss.jl",
-    "api.jl",
-    "props.jl"
+    "core.jl",
+    "props.jl",
+    "aggmode.jl"
 ]
 
 # for deterministic testing

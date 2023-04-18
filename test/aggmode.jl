@@ -47,7 +47,6 @@ end
                     end
                 end
             end
-            println("<HEARTBEAT>")
             @testset "Distance-based $T -> $O" begin
                 for (targets,outputs) in (
                         ((rand(T, 4) .- T(.5)) .* T(20), (rand(O, 4) .- O(.5)) .* O(20)),
@@ -62,7 +61,6 @@ end
                     end
                 end
             end
-            println("<HEARTBEAT>")
         end
     end
 end
