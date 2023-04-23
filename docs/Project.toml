@@ -3,4 +3,4 @@ Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 LossFunctions = "30fc2ffe-d236-52d8-8643-a9d8f7c094a7"
 
 [compat]
-Documenter = "0.23"
+Documenter = "0.27"
