@@ -29,11 +29,7 @@ for FUN in (:value, :deriv, :deriv2)
         # ------------------
         # AGGREGATION: SUM
         # ------------------
-        function ($FUN)(
-                loss::SupervisedLoss,
-                outputs::AbstractVector,
-                targets::AbstractVector,
-                ::AggMode.Sum)
+        function ($FUN)(loss::SupervisedLoss, outputs, targets, ::AggMode.Sum)
             nobs = length(outputs)
             f(i) = ($FUN)(loss, outputs[i], targets[i])
             sum(f, 1:nobs)
@@ -42,11 +38,7 @@ for FUN in (:value, :deriv, :deriv2)
         # -------------------
         # AGGREGATION: MEAN
         # -------------------
-        function ($FUN)(
-                loss::SupervisedLoss,
-                outputs::AbstractVector,
-                targets::AbstractVector,
-                ::AggMode.Mean)
+        function ($FUN)(loss::SupervisedLoss, outputs, targets, ::AggMode.Mean)
             nobs = length(outputs)
             f(i) = ($FUN)(loss, outputs[i], targets[i])
             sum(f, 1:nobs) / nobs
@@ -55,11 +47,7 @@ for FUN in (:value, :deriv, :deriv2)
         # ---------------------------
         # AGGREGATION: WEIGHTED SUM
         # ---------------------------
-        function ($FUN)(
-                loss::SupervisedLoss,
-                outputs::AbstractVector,
-                targets::AbstractVector,
-                agg::AggMode.WeightedSum)
+        function ($FUN)(loss::SupervisedLoss, outputs, targets, agg::AggMode.WeightedSum)
             nobs  = length(outputs)
             wsum  = sum(agg.weights)
             denom = agg.normalize ? wsum : one(wsum)
@@ -70,11 +58,7 @@ for FUN in (:value, :deriv, :deriv2)
         # ----------------------------
         # AGGREGATION: WEIGHTED MEAN
         # ----------------------------
-        function ($FUN)(
-                loss::SupervisedLoss,
-                outputs::AbstractVector,
-                targets::AbstractVector,
-                agg::AggMode.WeightedMean)
+        function ($FUN)(loss::SupervisedLoss, outputs, targets, agg::AggMode.WeightedMean)
             nobs  = length(outputs)
             wsum  = sum(agg.weights)
             denom = agg.normalize ? nobs * wsum : nobs * one(wsum)
@@ -85,4 +69,4 @@ for FUN in (:value, :deriv, :deriv2)
 end
 
 # convenient functor interface
-(loss::SupervisedLoss)(outputs::AbstractVector, targets::AbstractVector) = value.(loss, outputs, targets)
+(loss::SupervisedLoss)(outputs, targets) = value.(loss, outputs, targets)
