@@ -8,7 +8,6 @@ abstract type AggregateMode end
 
 Types for aggregation of multiple observations.
 
-- `AggMode.None()`
 - `AggMode.Sum()`
 - `AggMode.Mean()`
 - `AggMode.WeightedSum(weights)`
@@ -16,14 +15,6 @@ Types for aggregation of multiple observations.
 """
 module AggMode
     using ..LossFunctions: AggregateMode
-
-    """
-        AggMode.None()
-
-    Opt-out of aggregation. This is usually the default value.
-    Using `None` will cause the element-wise results to be returned.
-    """
-    struct None <: AggregateMode end
 
     """
         AggMode.Sum()

@@ -31,28 +31,6 @@ end
 # ------------------------------
 for FUN in (:value, :deriv, :deriv2)
     @eval begin
-        # by default compute the element-wise result
-        @inline function ($FUN)(
-                loss::SupervisedLoss,
-                outputs::AbstractVector,
-                targets::AbstractVector)
-            ($FUN)(loss, outputs, targets, AggMode.None())
-        end
-
-        # -------------------
-        # AGGREGATION: NONE
-        # -------------------
-        @generated function ($FUN)(
-                loss::SupervisedLoss,
-                outputs::AbstractVector,
-                targets::AbstractVector,
-                ::AggMode.None)
-            quote
-                $(Expr(:meta, :inline))
-                ($($FUN)).(loss, outputs, targets)
-            end
-        end
-
         # ------------------
         # AGGREGATION: SUM
         # ------------------
@@ -118,4 +96,4 @@ for FUN in (:value, :deriv, :deriv2)
 end
 
 # convenient functor interface
-(loss::SupervisedLoss)(outputs::AbstractVector, targets::AbstractVector) = value(loss, outputs, targets)
+(loss::SupervisedLoss)(outputs::AbstractVector, targets::AbstractVector) = value.(loss, outputs, targets)
