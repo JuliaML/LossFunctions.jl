@@ -1,12 +1,18 @@
 using Documenter, LossFunctions
 
-istravis = "TRAVIS" ∈ keys(ENV)
+DocMeta.setdocmeta!(LossFunctions, :DocTestSetup, :(using LossFunctions); recursive=true)
 
 makedocs(
-    format = Documenter.HTML(assets=["assets/style.css","assets/favicon.ico"], prettyurls=istravis),
-    sitename = "LossFunctions.jl",
-    authors = "Christof Stocker, Tom Breloff, Alex Williams",
-    pages = [
+    modules=[LossFunctions],
+    authors="Christof Stocker, Tom Breloff, Alex Williams",
+    repo="https://github.com/JuliaML/LossFunctions.jl/blob/{commit}{path}#{line}",
+    sitename="LossFunctions.jl",
+    format=Documenter.HTML(
+        prettyurls=get(ENV, "CI", "false") == "true",
+        canonical="https://JuliaML.github.io/LossFunctions.jl",
+        assets=["assets/style.css", "assets/favicon.ico"]
+    ),
+    pages=[
         hide("Home" => "index.md"),
         "Introduction" => [
             "introduction/gettingstarted.md",
@@ -28,7 +34,11 @@ makedocs(
         hide("Indices" => "indices.md"),
         "acknowledgements.md",
         "LICENSE.md",
-    ],
+    ]
 )
 
-deploydocs(repo="github.com/JuliaML/LossFunctions.jl.git")
+deploydocs(
+    repo="github.com/JuliaML/LossFunctions.jl.git",
+    devbranch="master",
+    push_preview=true
+)
