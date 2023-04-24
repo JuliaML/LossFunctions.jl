@@ -1,0 +1,47 @@
+/*
+article > h1:not(:nth-child(2)) {
+    margin: 1.0em 0 0;
+}
+h1 { margin: 1.0em 0 0; }
+h2 { margin: 1.0em 0 0; }
+h3 { margin: 1.0em 0 0; }
+article hr {
+    margin-top: 3em;
+    border-top-width: 1px;
+}
+article section.docstring {
+    margin: 0;
+    border: 0;
+    padding: 0;
+    margin-top: 1em;
+}
+*/
+article table {
+    text-align: center;
+}
+article p {
+    text-align: justify;
+}
+article > header .edit-page {
+    margin-left: 1em;
+}
+
+/*
+ * Hide the ASCII plots and formulas of the docstrings
+ * on the margin-based and distance-based pages.
+ */
+.loss-docs .docstring pre:not(:nth-child(1)) {
+    display: none;
+}
+.loss-docs .docstring > div > div {
+    display: none;
+}
+.loss-docs .docstring hr {
+    display: none;
+}
+article .loss-docs table {
+    width: 100%;
+}
+article .loss-docs table td {
+    width: 50%;
+}
