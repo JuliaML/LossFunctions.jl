@@ -47,17 +47,15 @@ isclasscalibrated(l::WeightedMarginLoss{T,W}) where {T,W} = W == 0.5 && isclassc
 # TODO: Think about this semantic
 issymmetric(::WeightedMarginLoss) = false
 
-for prop in [:isminimizable, :isdifferentiable,
-             :istwicedifferentiable,
-             :isconvex, :isstrictlyconvex,
-             :isstronglyconvex, :isnemitski,
-             :isunivfishercons, :isfishercons,
-             :islipschitzcont, :islocallylipschitzcont,
-             :isclipable, :ismarginbased,
-             :isdistancebased]
-    @eval ($prop)(l::WeightedMarginLoss) = ($prop)(l.loss)
+for FUN in (:isminimizable, :isdifferentiable, :istwicedifferentiable,
+            :isconvex, :isstrictlyconvex, :isstronglyconvex,
+            :isnemitski, :isunivfishercons, :isfishercons,
+            :islipschitzcont, :islocallylipschitzcont,
+            :isclipable, :ismarginbased,
+            :isdistancebased)
+    @eval ($FUN)(l::WeightedMarginLoss) = ($FUN)(l.loss)
 end
 
-for prop_param in (:isdifferentiable, :istwicedifferentiable)
-    @eval ($prop_param)(l::WeightedMarginLoss, at) = ($prop_param)(l.loss, at)
+for FUN in (:isdifferentiable, :istwicedifferentiable)
+    @eval ($FUN)(l::WeightedMarginLoss, at) = ($FUN)(l.loss, at)
 end
