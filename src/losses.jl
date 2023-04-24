@@ -21,14 +21,9 @@ include("losses/other.jl")
 include("losses/scaled.jl")
 include("losses/weighted.jl")
 
-# helper macro (for devs)
-macro dimcheck(condition)
-    :(($(esc(condition))) || throw(DimensionMismatch("Dimensions of the parameters don't match: $($(string(condition)))")))
-end
-
-# ------------------------------
-# DEFAULT AGGREGATION BEHAVIOR
-# ------------------------------
+# ----------------------
+# AGGREGATION BEHAVIOR
+# ----------------------
 for FUN in (:value, :deriv, :deriv2)
     @eval begin
         # ------------------
@@ -39,7 +34,6 @@ for FUN in (:value, :deriv, :deriv2)
                 outputs::AbstractVector,
                 targets::AbstractVector,
                 ::AggMode.Sum)
-            @dimcheck length(outputs) == length(targets)
             nobs = length(outputs)
             f(i) = ($FUN)(loss, outputs[i], targets[i])
             sum(f, 1:nobs)
@@ -53,7 +47,6 @@ for FUN in (:value, :deriv, :deriv2)
                 outputs::AbstractVector,
                 targets::AbstractVector,
                 ::AggMode.Mean)
-            @dimcheck length(outputs) == length(targets)
             nobs = length(outputs)
             f(i) = ($FUN)(loss, outputs[i], targets[i])
             sum(f, 1:nobs) / nobs
@@ -67,8 +60,6 @@ for FUN in (:value, :deriv, :deriv2)
                 outputs::AbstractVector,
                 targets::AbstractVector,
                 agg::AggMode.WeightedSum)
-            @dimcheck length(outputs) == length(targets)
-            @dimcheck length(outputs) == length(agg.weights)
             nobs  = length(outputs)
             wsum  = sum(agg.weights)
             denom = agg.normalize ? wsum : one(wsum)
@@ -84,8 +75,6 @@ for FUN in (:value, :deriv, :deriv2)
                 outputs::AbstractVector,
                 targets::AbstractVector,
                 agg::AggMode.WeightedMean)
-            @dimcheck length(outputs) == length(targets)
-            @dimcheck length(outputs) == length(agg.weights)
             nobs  = length(outputs)
             wsum  = sum(agg.weights)
             denom = agg.normalize ? nobs * wsum : nobs * one(wsum)
