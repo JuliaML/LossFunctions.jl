@@ -26,44 +26,39 @@ include("losses/weighted.jl")
 # ----------------------
 for FUN in (:value, :deriv, :deriv2)
     @eval begin
-        # ------------------
-        # AGGREGATION: SUM
-        # ------------------
         function ($FUN)(loss::SupervisedLoss, outputs, targets, ::AggMode.Sum)
-            nobs = length(outputs)
-            f(i) = ($FUN)(loss, outputs[i], targets[i])
-            sum(f, 1:nobs)
+            sum(loss(ŷ, y) for (ŷ, y) in zip(outputs, targets))
         end
 
-        # -------------------
-        # AGGREGATION: MEAN
-        # -------------------
         function ($FUN)(loss::SupervisedLoss, outputs, targets, ::AggMode.Mean)
-            nobs = length(outputs)
-            f(i) = ($FUN)(loss, outputs[i], targets[i])
-            sum(f, 1:nobs) / nobs
+            T = typeof(loss(first(outputs), first(targets)))
+            l = zero(T)
+            n = 0
+            for (ŷ, y) in zip(outputs, targets)
+                l += loss(ŷ, y)
+                n += 1
+            end
+            l / n
         end
 
-        # ---------------------------
-        # AGGREGATION: WEIGHTED SUM
-        # ---------------------------
         function ($FUN)(loss::SupervisedLoss, outputs, targets, agg::AggMode.WeightedSum)
-            nobs  = length(outputs)
-            wsum  = sum(agg.weights)
-            denom = agg.normalize ? wsum : one(wsum)
-            f(i)  = agg.weights[i] * ($FUN)(loss, outputs[i], targets[i])
-            sum(f, 1:nobs) / denom
+            l = sum(w * loss(ŷ, y) for (ŷ, y, w) in zip(outputs, targets, agg.weights))
+            w = sum(agg.weights)
+            d = agg.normalize ? w : one(w)
+            l / d
         end
 
-        # ----------------------------
-        # AGGREGATION: WEIGHTED MEAN
-        # ----------------------------
         function ($FUN)(loss::SupervisedLoss, outputs, targets, agg::AggMode.WeightedMean)
-            nobs  = length(outputs)
-            wsum  = sum(agg.weights)
-            denom = agg.normalize ? nobs * wsum : nobs * one(wsum)
-            f(i)  = agg.weights[i] * ($FUN)(loss, outputs[i], targets[i])
-            sum(f, 1:nobs) / denom
+            T = typeof(loss(first(outputs), first(targets)))
+            l = zero(T)
+            n = 0
+            for (ŷ, y, w) in zip(outputs, targets, agg.weights)
+                l += w * loss(ŷ, y)
+                n += 1
+            end
+            w = sum(agg.weights)
+            d = agg.normalize ? n * w : n * one(w)
+            l / d
         end
     end
 end
