@@ -4,12 +4,12 @@ function test_vector_value(l, o, t)
     @test @inferred(v(l, o, t)) == ref
     n = length(ref)
     s = sum(ref)
-    @test @inferred(value(l, o, t, AggMode.Sum())) ≈ s
-    @test @inferred(value(l, o, t, AggMode.Mean())) ≈ s / n
-    @test @inferred(value(l, o, t, AggMode.WeightedSum(ones(n)))) ≈ s
-    @test @inferred(value(l, o, t, AggMode.WeightedSum(ones(n),normalize=true))) ≈ s / n
-    @test @inferred(value(l, o, t, AggMode.WeightedMean(ones(n)))) ≈ (s / n) / n
-    @test @inferred(value(l, o, t, AggMode.WeightedMean(ones(n),normalize=false))) ≈ s / n
+    @test @inferred(sum(l, o, t)) ≈ s
+    @test @inferred(mean(l, o, t)) ≈ s / n
+    @test @inferred(sum(l, o, t, ones(n), normalize=false)) ≈ s
+    @test @inferred(sum(l, o, t, ones(n), normalize=true)) ≈ s / n
+    @test @inferred(mean(l, o, t, ones(n), normalize=false)) ≈ s / n
+    @test @inferred(mean(l, o, t, ones(n), normalize=true)) ≈ (s / n) / n
 end
 
 function test_vector_deriv(l, o, t)
@@ -57,4 +57,14 @@ end
             end
         end
     end
+end
+
+@testset "Aggregation with categorical values" begin
+    c = categorical(["Foo","Bar","Baz","Foo"])
+    l = MisclassLoss()
+    @test sum(l, c, reverse(c)) == 2.0
+    @test mean(l, c, reverse(c)) == 0.5
+    @test sum(l, c, reverse(c), 2*ones(4), normalize=false) == 4.0
+    @test mean(l, c, reverse(c), 2*ones(4), normalize=false) == 1.0
+    @test mean(l, c, reverse(c), 2*ones(4), normalize=true) == 0.125
 end

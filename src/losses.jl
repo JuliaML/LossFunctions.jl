@@ -19,6 +19,7 @@ Broadcast.broadcastable(loss::SupervisedLoss) = Ref(loss)
 # ------------------
 # AVAILABLE LOSSES
 # ------------------
+
 include("losses/distance.jl")
 include("losses/margin.jl")
 include("losses/other.jl")
@@ -30,41 +31,23 @@ include("losses/weighted.jl")
 # ----------------------
 # AGGREGATION BEHAVIOR
 # ----------------------
-for FUN in (:value, :deriv, :deriv2)
-    @eval begin
-        function ($FUN)(loss::SupervisedLoss, outputs, targets, ::AggMode.Sum)
-            sum(loss(ŷ, y) for (ŷ, y) in zip(outputs, targets))
-        end
 
-        function ($FUN)(loss::SupervisedLoss, outputs, targets, ::AggMode.Mean)
-            T = typeof(loss(first(outputs), first(targets)))
-            l = zero(T)
-            n = 0
-            for (ŷ, y) in zip(outputs, targets)
-                l += loss(ŷ, y)
-                n += 1
-            end
-            l / n
-        end
+function sum(loss::SupervisedLoss, outputs, targets)
+    sum(loss(ŷ, y) for (ŷ, y) in zip(outputs, targets))
+end
 
-        function ($FUN)(loss::SupervisedLoss, outputs, targets, agg::AggMode.WeightedSum)
-            l = sum(w * loss(ŷ, y) for (ŷ, y, w) in zip(outputs, targets, agg.weights))
-            w = sum(agg.weights)
-            d = agg.normalize ? w : one(w)
-            l / d
-        end
+function sum(loss::SupervisedLoss, outputs, targets, weights; normalize=true)
+    s = sum(w * loss(ŷ, y) for (ŷ, y, w) in zip(outputs, targets, weights))
+    n = normalize ? sum(weights) : one(first(weights))
+    s / n
+end
 
-        function ($FUN)(loss::SupervisedLoss, outputs, targets, agg::AggMode.WeightedMean)
-            T = typeof(loss(first(outputs), first(targets)))
-            l = zero(T)
-            n = 0
-            for (ŷ, y, w) in zip(outputs, targets, agg.weights)
-                l += w * loss(ŷ, y)
-                n += 1
-            end
-            w = sum(agg.weights)
-            d = agg.normalize ? n * w : n * one(w)
-            l / d
-        end
-    end
+function mean(loss::SupervisedLoss, outputs, targets)
+    mean(loss(ŷ, y) for (ŷ, y) in zip(outputs, targets))
+end
+
+function mean(loss::SupervisedLoss, outputs, targets, weights; normalize=true)
+    m = mean(w * loss(ŷ, y) for (ŷ, y, w) in zip(outputs, targets, weights))
+    n = normalize ? sum(weights) : one(first(weights))
+    m / n
 end
