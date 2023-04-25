@@ -1,6 +1,7 @@
 function test_vector_value(l, o, t)
     ref = [value(l, o[i], t[i]) for i in 1:length(o)]
-    @test @inferred(l(o, t)) == ref
+    v(l, o, t) = value.(l, o, t)
+    @test @inferred(v(l, o, t)) == ref
     n = length(ref)
     s = sum(ref)
     @test @inferred(value(l, o, t, AggMode.Sum())) ≈ s
