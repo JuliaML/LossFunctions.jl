@@ -32,20 +32,44 @@ include("losses/weighted.jl")
 # AGGREGATION BEHAVIOR
 # ----------------------
 
+"""
+    sum(loss, outputs, targets)
+
+Return sum of `loss` values over the iterables `outputs` and `targets`.
+"""
 function sum(loss::SupervisedLoss, outputs, targets)
     sum(loss(ŷ, y) for (ŷ, y) in zip(outputs, targets))
 end
 
+"""
+    sum(loss, outputs, targets, weights; normalize=true)
+
+Return sum of `loss` values over the iterables `outputs` and `targets`.
+The `weights` determine the importance of each observation. The option
+`normalize` divides the result by the sum of the weights.
+"""
 function sum(loss::SupervisedLoss, outputs, targets, weights; normalize=true)
     s = sum(w * loss(ŷ, y) for (ŷ, y, w) in zip(outputs, targets, weights))
     n = normalize ? sum(weights) : one(first(weights))
     s / n
 end
 
+"""
+    mean(loss, outputs, targets)
+
+Return mean of `loss` values over the iterables `outputs` and `targets`.
+"""
 function mean(loss::SupervisedLoss, outputs, targets)
     mean(loss(ŷ, y) for (ŷ, y) in zip(outputs, targets))
 end
 
+"""
+    mean(loss, outputs, targets, weights; normalize=true)
+
+Return mean of `loss` values over the iterables `outputs` and `targets`.
+The `weights` determine the importance of each observation. The option
+`normalize` divides the result by the sum of the weights.
+"""
 function mean(loss::SupervisedLoss, outputs, targets, weights; normalize=true)
     m = mean(w * loss(ŷ, y) for (ŷ, y, w) in zip(outputs, targets, weights))
     n = normalize ? sum(weights) : one(first(weights))

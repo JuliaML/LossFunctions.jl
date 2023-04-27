@@ -78,8 +78,8 @@ julia> true_targets = [  1,  0, -2];
 
 julia> pred_outputs = [0.5,  2, -1];
 
-julia> value(L2DistLoss(), pred_outputs, true_targets)
-3-element Array{Float64,1}:
+julia> value.(L2DistLoss(), pred_outputs, true_targets)
+3-element Vector{Float64}:
  0.25
  4.0
  1.0
@@ -92,10 +92,10 @@ This will avoid allocating a temporary array and directly
 compute the result.
 
 ```julia-repl
-julia> value(L2DistLoss(), pred_outputs, true_targets, AggMode.Sum())
+julia> sum(L2DistLoss(), pred_outputs, true_targets)
 5.25
 
-julia> value(L2DistLoss(), pred_outputs, true_targets, AggMode.Mean())
+julia> mean(L2DistLoss(), pred_outputs, true_targets)
 1.75
 ```
 
@@ -105,33 +105,11 @@ each observation in the predicted outputs and so allow to give
 certain observations a stronger influence over the result.
 
 ```julia-repl
-julia> value(L2DistLoss(), pred_outputs, true_targets, AggMode.WeightedSum([2,1,1]))
+julia> sum(L2DistLoss(), pred_outputs, true_targets, [2,1,1], normalize=false)
 5.5
 
-julia> value(L2DistLoss(), pred_outputs, true_targets, AggMode.WeightedMean([2,1,1]))
-1.375
-```
-
-All these function signatures of [`value`](@ref) also apply for
-computing the derivatives using [`deriv`](@ref) and the second
-derivatives using [`deriv2`](@ref).
-
-```julia-repl
-julia> true_targets = [  1,  0, -2];
-
-julia> pred_outputs = [0.5,  2, -1];
-
-julia> deriv(L2DistLoss(), pred_outputs, true_targets)
-3-element Array{Float64,1}:
- -1.0
-  4.0
-  2.0
-
-julia> deriv2(L2DistLoss(), pred_outputs, true_targets)
-3-element Array{Float64,1}:
- 2.0
- 2.0
- 2.0
+julia> mean(L2DistLoss(), pred_outputs, true_targets, [2,1,1], normalize=false)
+1.8333333333333333
 ```
 
 ## Getting Help
