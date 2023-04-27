@@ -7,57 +7,30 @@ abstract type Loss end
 
 """
 A loss is considered **supervised**, if all the information needed
-to compute `L(x, y, ŷ)` are contained in `y` and `ŷ`, and thus allows
-for the simplification `L(y, ŷ)`.
+to compute `L(x, ŷ, y)` are contained in `ŷ` and `y`, and thus allows
+for the simplification `L(ŷ, y)`.
 """
 abstract type SupervisedLoss <: Loss end
 
 """
-A supervised loss that can be simplified to `L(y, ŷ) = L(ŷ - y)`
+A supervised loss that can be simplified to `L(ŷ, y) = L(ŷ - y)`
 is considered **distance-based**.
 """
 abstract type DistanceLoss <: SupervisedLoss end
 
 """
 A supervised loss with targets `y ∈ {-1, 1}`, and which
-can be simplified to `L(y, ŷ) = L(y⋅ŷ)` is considered
+can be simplified to `L(ŷ, y) = L(ŷ⋅y)` is considered
 **margin-based**.
 """
 abstract type MarginLoss <: SupervisedLoss end
 
 """
 A loss is considered **unsupervised**, if all the information needed
-to compute `L(x, y, ŷ)` are contained in `x` and `ŷ`, and thus allows
+to compute `L(x, ŷ, y)` are contained in `x` and `ŷ`, and thus allows
 for the simplification `L(x, ŷ)`.
 """
 abstract type UnsupervisedLoss <: Loss end
-
-"""
-    value(loss, output, target) -> Number
-
-Compute the (non-negative) numeric result for the `loss` function.
-Note that `target` and `output` can be of different numeric type,
-in which case promotion is performed in the manner appropriate for
-the given loss.
-
-    value(loss, outputs, targets) -> AbstractVector
-
-Compute the result for each pair of values in `targets` and `outputs`.
-
-    value(loss, outputs, targets, aggmode) -> Number
-
-Compute the weighted or unweighted sum or mean (depending on
-aggregation mode `aggmode`) of the individual values of the `loss`
-function for each pair in `targets` and `outputs`. This method
-will not allocate a temporary array.
-
-## Notes
-
-- New loss functions only need to implement the first method with single
-  `target` and `output`. Fallback implementations are available for other
-  methods in `LossFunctions.jl`.
-"""
-function value end
 
 """
     deriv(loss, output, target) -> Number
@@ -66,23 +39,6 @@ Compute the analytical derivative with respect to the `output` for the
 `loss` function. Note that `target` and `output` can be of different
 numeric type, in which case promotion is performed in the manner
 appropriate for the given loss.
-
-    deriv(loss, outputs, targets) -> AbstractVector
-
-Compute the result for each pair of values in `targets` and `outputs`.
-
-    deriv(loss, outputs, targets, aggmode) -> Number
-
-Compute the weighted or unweighted sum or mean (depending on
-aggregation mode `aggmode`) of the individual values of the `loss`
-function for each pair in `targets` and `outputs`. This method
-will not allocate a temporary array.
-
-## Notes
-
-- New loss functions only need to implement the first method with single
-  `target` and `output`. Fallback implementations are available for other
-  methods in `LossFunctions.jl`.
 """
 function deriv end
 
@@ -93,23 +49,6 @@ Compute the second derivative with respect to the `output` for the
 `loss` function. Note that `target` and `output` can be of different
 numeric type, in which case promotion is performed in the manner
 appropriate for the given loss.
-
-    deriv2(loss, outputs, targets) -> AbstractVector
-
-Compute the result for each pair of values in `targets` and `outputs`.
-
-    deriv2(loss, outputs, targets, aggmode) -> Number
-
-Compute the weighted or unweighted sum or mean (depending on
-aggregation mode `aggmode`) of the individual values of the `loss`
-function for each pair in `targets` and `outputs`. This method
-will not allocate a temporary array.
-
-## Notes
-
-- New loss functions only need to implement the first method with single
-  `target` and `output`. Fallback implementations are available for other
-  methods in `LossFunctions.jl`.
 """
 function deriv2 end
 

@@ -1,17 +1,14 @@
 # type alias to make code more readable
 Scalar = Union{Number,CategoricalValue}
 
-# convenient functor interface
-(loss::SupervisedLoss)(output::Scalar, target::Scalar) = value(loss, output, target)
-
 # fallback to unary evaluation
-value(loss::DistanceLoss, output::Number, target::Number)  = value(loss, output - target)
+(loss::DistanceLoss)(output::Number, target::Number)       = loss(output - target)
 deriv(loss::DistanceLoss, output::Number, target::Number)  = deriv(loss, output - target)
 deriv2(loss::DistanceLoss, output::Number, target::Number) = deriv2(loss, output - target)
 
-value(loss::MarginLoss, output::Number, target::Number)  = value(loss, target * output)
-deriv(loss::MarginLoss, output::Number, target::Number)  = target * deriv(loss, target * output)
-deriv2(loss::MarginLoss, output::Number, target::Number) = deriv2(loss, target * output)
+(loss::MarginLoss)(output::Number, target::Number)         = loss(target * output)
+deriv(loss::MarginLoss, output::Number, target::Number)    = target * deriv(loss, target * output)
+deriv2(loss::MarginLoss, output::Number, target::Number)   = deriv2(loss, target * output)
 
 # broadcasting behavior
 Broadcast.broadcastable(loss::SupervisedLoss) = Ref(loss)

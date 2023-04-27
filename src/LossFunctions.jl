@@ -21,7 +21,7 @@ export
     SupervisedLoss,
     MarginLoss,
     DistanceLoss,
-    value, deriv, deriv2,
+    deriv, deriv2,
     isdistancebased, ismarginbased,
     isminimizable, isdifferentiable,
     istwicedifferentiable,

@@ -1,6 +1,6 @@
 function test_vector_value(l, o, t)
-    ref = [value(l, o[i], t[i]) for i in 1:length(o)]
-    v(l, o, t) = value.(l, o, t)
+    ref = [l(o[i], t[i]) for i in 1:length(o)]
+    v(l, o, t) = l.(o, t)
     @test @inferred(v(l, o, t)) == ref
     n = length(ref)
     s = sum(ref)

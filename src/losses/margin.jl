@@ -34,7 +34,7 @@ struct ZeroOneLoss <: MarginLoss end
 deriv(loss::ZeroOneLoss, target::Number, output::Number) = zero(output)
 deriv2(loss::ZeroOneLoss, target::Number, output::Number) = zero(output)
 
-value(loss::ZeroOneLoss, agreement::T) where {T<:Number} = sign(agreement) < 0 ? one(T) : zero(T)
+(loss::ZeroOneLoss)(agreement::T) where {T<:Number} = sign(agreement) < 0 ? one(T) : zero(T)
 deriv(loss::ZeroOneLoss, agreement::T) where {T<:Number} = zero(T)
 deriv2(loss::ZeroOneLoss, agreement::T) where {T<:Number} = zero(T)
 
@@ -81,7 +81,7 @@ L(a) = \max \{ 0, -a \}
 """
 struct PerceptronLoss <: MarginLoss end
 
-value(loss::PerceptronLoss, agreement::T) where {T<:Number} = max(zero(T), -agreement)
+(loss::PerceptronLoss)(agreement::T) where {T<:Number} = max(zero(T), -agreement)
 deriv(loss::PerceptronLoss, agreement::T) where {T<:Number} = agreement >= 0 ? zero(T) : -one(T)
 deriv2(loss::PerceptronLoss, agreement::T) where {T<:Number} = zero(T)
 
@@ -125,7 +125,7 @@ L(a) = \ln (1 + e^{-a})
 ```
 """
 struct LogitMarginLoss <: MarginLoss end
-value(loss::LogitMarginLoss, agreement::Number) = log1p(exp(-agreement))
+(loss::LogitMarginLoss)(agreement::Number) = log1p(exp(-agreement))
 deriv(loss::LogitMarginLoss, agreement::Number) = -one(agreement) / (one(agreement) + exp(agreement))
 deriv2(loss::LogitMarginLoss, agreement::Number) = (eᵗ = exp(agreement); eᵗ / abs2(one(eᵗ) + eᵗ))
 
@@ -173,7 +173,7 @@ L(a) = \max \{ 0, 1 - a \}
 struct L1HingeLoss <: MarginLoss end
 const HingeLoss = L1HingeLoss
 
-value(loss::L1HingeLoss, agreement::T) where {T<:Number} = max(zero(T), one(T) - agreement)
+(loss::L1HingeLoss)(agreement::T) where {T<:Number} = max(zero(T), one(T) - agreement)
 deriv(loss::L1HingeLoss, agreement::T) where {T<:Number} = agreement >= 1 ? zero(T) : -one(T)
 deriv2(loss::L1HingeLoss, agreement::T) where {T<:Number} = zero(T)
 
@@ -221,7 +221,7 @@ L(a) = \max \{ 0, 1 - a \}^2
 """
 struct L2HingeLoss <: MarginLoss end
 
-value(loss::L2HingeLoss, agreement::T) where {T<:Number} = agreement >= 1 ? zero(T) : abs2(one(T) - agreement)
+(loss::L2HingeLoss)(agreement::T) where {T<:Number} = agreement >= 1 ? zero(T) : abs2(one(T) - agreement)
 deriv(loss::L2HingeLoss, agreement::T) where {T<:Number} = agreement >= 1 ? zero(T) : convert(T,2) * (agreement - one(T))
 deriv2(loss::L2HingeLoss, agreement::T) where {T<:Number} = agreement >= 1 ? zero(T) : convert(T,2)
 
@@ -277,7 +277,7 @@ end
 SmoothedL1HingeLoss(γ::T) where {T<:AbstractFloat} = SmoothedL1HingeLoss{T}(γ)
 SmoothedL1HingeLoss(γ) = SmoothedL1HingeLoss(Float64(γ))
 
-function value(loss::SmoothedL1HingeLoss{R}, agreement::T)::promote_type(R,T) where {R,T<:Number}
+function (loss::SmoothedL1HingeLoss{R})(agreement::T)::promote_type(R,T) where {R,T<:Number}
     if agreement >= 1 - loss.gamma
         R(0.5) / loss.gamma * abs2(max(zero(T), one(T) - agreement))
     else
@@ -338,17 +338,17 @@ L(a) = \begin{cases} \max \{ 0, 1 - a \} ^2 & \quad \text{if } a \ge -1 \\ - 4 a
 """
 struct ModifiedHuberLoss <: MarginLoss end
 
-function value(loss::ModifiedHuberLoss, agreement::T) where T<:Number
+function (loss::ModifiedHuberLoss)(agreement::T) where {T<:Number}
     agreement >= -1 ? abs2(max(zero(T), one(agreement) - agreement)) : -convert(T,4) * agreement
 end
-function deriv(loss::ModifiedHuberLoss, agreement::T) where T<:Number
+function deriv(loss::ModifiedHuberLoss, agreement::T) where {T<:Number}
     if agreement >= -1
         agreement > 1 ? zero(T) : convert(T,2)*agreement - convert(T,2)
     else
         -convert(T,4)
     end
 end
-function deriv2(loss::ModifiedHuberLoss, agreement::T) where T<:Number
+function deriv2(loss::ModifiedHuberLoss, agreement::T) where {T<:Number}
     agreement < -1 || agreement > 1 ? zero(T) : convert(T,2)
 end
 
@@ -395,7 +395,7 @@ L(a) = {\left( 1 - a \right)}^2
 """
 struct L2MarginLoss <: MarginLoss end
 
-value(loss::L2MarginLoss, agreement::T) where {T<:Number} = abs2(one(T) - agreement)
+(loss::L2MarginLoss)(agreement::T) where {T<:Number} = abs2(one(T) - agreement)
 deriv(loss::L2MarginLoss, agreement::T) where {T<:Number} = convert(T,2) * (agreement - one(T))
 deriv2(loss::L2MarginLoss, agreement::T) where {T<:Number} = convert(T,2)
 
@@ -444,7 +444,7 @@ L(a) = e^{-a}
 """
 struct ExpLoss <: MarginLoss end
 
-value(loss::ExpLoss, agreement::Number) = exp(-agreement)
+(loss::ExpLoss)(agreement::Number) = exp(-agreement)
 deriv(loss::ExpLoss, agreement::Number) = -exp(-agreement)
 deriv2(loss::ExpLoss, agreement::Number) = exp(-agreement)
 
@@ -492,7 +492,7 @@ L(a) = 1 - \tanh(a)
 """
 struct SigmoidLoss <: MarginLoss end
 
-value(loss::SigmoidLoss, agreement::Number) = one(agreement) - tanh(agreement)
+(loss::SigmoidLoss)(agreement::Number) = one(agreement) - tanh(agreement)
 deriv(loss::SigmoidLoss, agreement::Number) = -abs2(sech(agreement))
 deriv2(loss::SigmoidLoss, agreement::T) where {T<:Number} = convert(T,2) * tanh(agreement) * abs2(sech(agreement))
 
@@ -550,7 +550,7 @@ end
 DWDMarginLoss(q::T) where {T<:AbstractFloat} = DWDMarginLoss{T}(q)
 DWDMarginLoss(q) = DWDMarginLoss(Float64(q))
 
-function value(loss::DWDMarginLoss{R}, agreement::T)::promote_type(R, T) where {R,T<:Number}
+function (loss::DWDMarginLoss{R})(agreement::T)::promote_type(R, T) where {R,T<:Number}
     q = loss.q
     if agreement <= q/(q+1)
         R(1) - agreement

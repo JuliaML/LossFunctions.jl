@@ -18,8 +18,10 @@ Base.:*(k::Number, loss::SupervisedLoss) = ScaledLoss(loss, Val(k))
 
 @generated ScaledLoss(s::ScaledLoss{T,K1}, ::Val{K2}) where {T,K1,K2} = :(ScaledLoss(s.loss, Val($(K1*K2))))
 
-for FUN in (:value, :deriv, :deriv2)
-    @eval @fastmath function ($FUN)(
+(l::ScaledLoss{T,K})(output::Number, target::Number) where {T,K} = K * l.loss(output, target)
+
+for FUN in (:deriv, :deriv2)
+    @eval function ($FUN)(
         l::ScaledLoss{T,K},
         output::Number,
         target::Number) where {T,K}
