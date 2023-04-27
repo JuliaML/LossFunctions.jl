@@ -10,7 +10,7 @@ using Test
 tests = [
     "core.jl",
     "props.jl",
-    "aggmode.jl"
+    "agg.jl"
 ]
 
 # for deterministic testing

@@ -27,12 +27,12 @@ for FUN in (:value, :deriv, :deriv2)
     end
 end
 
-for FUN in [:isminimizable, :isdifferentiable, :istwicedifferentiable,
-             :isconvex, :isstrictlyconvex, :isstronglyconvex,
-             :isnemitski, :isunivfishercons, :isfishercons,
-             :islipschitzcont, :islocallylipschitzcont,
-             :isclipable, :ismarginbased, :isclasscalibrated,
-             :isdistancebased, :issymmetric]
+for FUN in (:isminimizable, :isdifferentiable, :istwicedifferentiable,
+            :isconvex, :isstrictlyconvex, :isstronglyconvex,
+            :isnemitski, :isunivfishercons, :isfishercons,
+            :islipschitzcont, :islocallylipschitzcont,
+            :isclipable, :ismarginbased, :isclasscalibrated,
+            :isdistancebased, :issymmetric)
     @eval ($FUN)(l::ScaledLoss) = ($FUN)(l.loss)
 end
 

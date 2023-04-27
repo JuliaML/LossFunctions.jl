@@ -3,8 +3,8 @@ module LossFunctions
 using Markdown
 using CategoricalArrays: CategoricalValue
 
-# aggregation mode
-include("aggmode.jl")
+import Base: sum
+import Statistics: mean
 
 # trait functions
 include("traits.jl")
@@ -30,9 +30,6 @@ export
     isunivfishercons, isfishercons,
     islipschitzcont, islocallylipschitzcont,
     isclipable, isclasscalibrated, issymmetric,
-
-    # relevant submodules
-    AggMode,
 
     # margin-based losses
     ZeroOneLoss,
@@ -68,6 +65,9 @@ export
 
     # meta losses
     ScaledLoss,
-    WeightedMarginLoss
+    WeightedMarginLoss,
+
+    # reexport mean
+    mean
 
 end # module

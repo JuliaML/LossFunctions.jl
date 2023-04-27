@@ -12,17 +12,14 @@ struct MisclassLoss{R<:AbstractFloat} <: SupervisedLoss end
 
 MisclassLoss() = MisclassLoss{Float64}()
 
-# type alias to make code more readable
-NumberOrValue = Union{Number,CategoricalValue}
-
 # return floating point to avoid big integers in aggregations
 value(::MisclassLoss{R}, agreement::Bool) where R = ifelse(agreement, zero(R), one(R))
 deriv(::MisclassLoss{R}, agreement::Bool) where R = zero(R)
 deriv2(::MisclassLoss{R}, agreement::Bool) where R = zero(R)
 
-value(loss::MisclassLoss, output::NumberOrValue, target::NumberOrValue) = value(loss, target == output)
-deriv(loss::MisclassLoss, output::NumberOrValue, target::NumberOrValue) = deriv(loss, target == output)
-deriv2(loss::MisclassLoss, output::NumberOrValue, target::NumberOrValue) = deriv2(loss, target == output)
+value(loss::MisclassLoss, output::Scalar, target::Scalar) = value(loss, target == output)
+deriv(loss::MisclassLoss, output::Scalar, target::Scalar) = deriv(loss, target == output)
+deriv2(loss::MisclassLoss, output::Scalar, target::Scalar) = deriv2(loss, target == output)
 
 isminimizable(::MisclassLoss) = false
 isdifferentiable(::MisclassLoss) = false
