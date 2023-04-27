@@ -13,7 +13,7 @@ struct LPDistLoss{P} <: DistanceLoss end
 
 LPDistLoss(p::Number) = LPDistLoss{p}()
 
-value(loss::LPDistLoss{P}, difference::Number) where {P} = abs(difference)^P
+(loss::LPDistLoss{P})(difference::Number) where {P} = abs(difference)^P
 function deriv(loss::LPDistLoss{P}, difference::T)::promote_type(typeof(P),T) where {P,T<:Number}
     if difference == 0
         zero(difference)
@@ -73,7 +73,7 @@ L(r) = |r|
 """
 const L1DistLoss = LPDistLoss{1}
 
-value(loss::L1DistLoss, difference::Number) = abs(difference)
+(loss::L1DistLoss)(difference::Number) = abs(difference)
 deriv(loss::L1DistLoss, difference::T) where {T<:Number} = convert(T, sign(difference))
 deriv2(loss::L1DistLoss, difference::T) where {T<:Number} = zero(T)
 
@@ -118,7 +118,7 @@ L(r) = |r|^2
 """
 const L2DistLoss = LPDistLoss{2}
 
-value(loss::L2DistLoss, difference::Number) = abs2(difference)
+(loss::L2DistLoss)(difference::Number) = abs2(difference)
 deriv(loss::L2DistLoss, difference::T) where {T<:Number} = convert(T,2) * difference
 deriv2(loss::L2DistLoss, difference::T) where {T<:Number} = convert(T,2)
 
@@ -152,7 +152,7 @@ end
 PeriodicLoss(circ::T=1.0) where {T<:AbstractFloat} = PeriodicLoss{T}(circ)
 PeriodicLoss(circ) = PeriodicLoss{Float64}(Float64(circ))
 
-value(loss::PeriodicLoss, difference::T) where {T<:Number} = 1 - cos(difference*loss.k)
+(loss::PeriodicLoss)(difference::T) where {T<:Number} = 1 - cos(difference*loss.k)
 deriv(loss::PeriodicLoss, difference::T) where {T<:Number} = loss.k * sin(difference*loss.k)
 deriv2(loss::PeriodicLoss, difference::T) where {T<:Number} = abs2(loss.k) * cos(difference*loss.k)
 
@@ -207,7 +207,7 @@ end
 HuberLoss(d::T=1.0) where {T<:AbstractFloat} = HuberLoss{T}(d)
 HuberLoss(d) = HuberLoss{Float64}(Float64(d))
 
-function value(loss::HuberLoss{T1}, difference::T2) where {T1,T2<:Number}
+function (loss::HuberLoss{T1})(difference::T2) where {T1,T2<:Number}
     T = promote_type(T1,T2)
     abs_diff = abs(difference)
     if abs_diff <= loss.d
@@ -282,7 +282,7 @@ const EpsilonInsLoss = L1EpsilonInsLoss
 @inline L1EpsilonInsLoss(ε::T) where {T<:AbstractFloat} = L1EpsilonInsLoss{T}(ε)
 @inline L1EpsilonInsLoss(ε::Number) = L1EpsilonInsLoss{Float64}(Float64(ε))
 
-function value(loss::L1EpsilonInsLoss{T1}, difference::T2) where {T1,T2<:Number}
+function (loss::L1EpsilonInsLoss{T1})(difference::T2) where {T1,T2<:Number}
     T = promote_type(T1,T2)
     max(zero(T), abs(difference) - loss.ε)
 end
@@ -344,7 +344,7 @@ end
 L2EpsilonInsLoss(ε::T) where {T<:AbstractFloat} = L2EpsilonInsLoss{T}(ε)
 L2EpsilonInsLoss(ε) = L2EpsilonInsLoss{Float64}(Float64(ε))
 
-function value(loss::L2EpsilonInsLoss{T1}, difference::T2) where {T1,T2<:Number}
+function (loss::L2EpsilonInsLoss{T1})(difference::T2) where {T1,T2<:Number}
     T = promote_type(T1,T2)
     abs2(max(zero(T), abs(difference) - loss.ε))
 end
@@ -399,7 +399,7 @@ L(r) = - \ln \frac{4 e^r}{(1 + e^r)^2}
 """
 struct LogitDistLoss <: DistanceLoss end
 
-function value(loss::LogitDistLoss, difference::Number)
+function (loss::LogitDistLoss)(difference::Number)
     er = exp(difference)
     T = typeof(er)
     -log(convert(T,4)) - difference + 2log(one(T) + er)
@@ -458,7 +458,7 @@ struct QuantileLoss{T <: AbstractFloat} <: DistanceLoss
     τ::T
 end
 
-function value(loss::QuantileLoss{T1}, diff::T2) where {T1, T2 <: Number}
+function (loss::QuantileLoss{T1})(diff::T2) where {T1, T2 <: Number}
     T = promote_type(T1, T2)
     diff * (convert(T,diff > 0) - loss.τ)
 end
@@ -512,7 +512,7 @@ struct LogCoshLoss <: DistanceLoss end
 _softplus(x::T) where T<:Number = x > zero(T) ? x + log1p(exp(-x)) : log1p(exp(x))
 _log_cosh(x::T) where T<:Number = x + _softplus(-2x) - log(convert(T, 2))
 
-function value(loss::LogCoshLoss, diff::T) where {T <: Number}
+function (loss::LogCoshLoss)(diff::T) where {T <: Number}
   _log_cosh(diff)
 end
 

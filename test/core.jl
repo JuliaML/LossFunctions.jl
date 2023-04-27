@@ -10,11 +10,11 @@ function test_value_typestable(l::SupervisedLoss)
                 T = promote_type(typeof(o), typeof(t))
 
                 # test basic loss
-                val = @inferred value(l, o, t)
+                val = @inferred l(o, t)
                 @test typeof(val) <: T
 
                 # test scaled version of loss
-                @test typeof(value(T(2)*l, o, t)) <: T
+                @test typeof((T(2)*l)(o, t)) <: T
             end
         end
     end
@@ -28,7 +28,7 @@ function test_value_float32_preserving(l::SupervisedLoss)
                 @inferred deriv(l, o, t)
                 @inferred deriv2(l, o, t)
 
-                val = @inferred value(l, o, t)
+                val = @inferred l(o, t)
                 T = promote_type(typeof(o),typeof(t))
                 if !(T <: AbstractFloat)
                     # cast Integers to a float
@@ -53,7 +53,7 @@ function test_value_float64_forcing(l::SupervisedLoss)
                 @inferred deriv(l, o, t)
                 @inferred deriv2(l, o, t)
 
-                val = @inferred value(l, o, t)
+                val = @inferred l(o, t)
                 @test (typeof(val) <: Float64)
             end
         end
@@ -63,7 +63,7 @@ end
 function test_value(l::SupervisedLoss, f::Function, o_vec, t_vec)
     @testset "$(l): " begin
         for o in o_vec, t in t_vec
-            @test abs(value(l, o, t) - f(o, t)) < 1e-10
+            @test abs(l(o, t) - f(o, t)) < 1e-10
         end
     end
 end
@@ -72,12 +72,12 @@ function test_deriv(l::MarginLoss, o_vec)
     @testset "$(l): " begin
         for o in o_vec, t in [-1., 1.]
             if isdifferentiable(l, o*t)
-                d_dual = epsilon(value(l, dual(o, one(o)), dual(t, zero(t))))
+                d_dual = epsilon(l(dual(o, one(o)), dual(t, zero(t))))
                 d_comp = @inferred deriv(l, o, t)
                 @test abs(d_dual - d_comp) < 1e-10
-                val = @inferred value(l, o, t)
-                @test val ≈ value(l, o, t)
-                @test val ≈ value(l, o*t)
+                val = @inferred l(o, t)
+                @test val ≈ l(o, t)
+                @test val ≈ l(o*t)
                 @test d_comp ≈ t*deriv(l, o*t)
             end
         end
@@ -88,12 +88,12 @@ function test_deriv(l::DistanceLoss, o_vec)
     @testset "$(l): " begin
         for o in o_vec, t in -10:.2:10
             if isdifferentiable(l, o-t)
-                d_dual = epsilon(value(l, dual(o-t, one(o-t))))
+                d_dual = epsilon(l(dual(o-t, one(o-t))))
                 d_comp = @inferred deriv(l, o, t)
                 @test abs(d_dual - d_comp) < 1e-10
-                val = @inferred value(l, o, t)
-                @test val ≈ value(l, o, t)
-                @test val ≈ value(l, o-t)
+                val = @inferred l(o, t)
+                @test val ≈ l(o, t)
+                @test val ≈ l(o-t)
                 @test d_comp ≈ deriv(l, o-t)
             end
         end
@@ -104,11 +104,11 @@ function test_deriv(l::SupervisedLoss, o_vec, t_vec)
     @testset "$(l): " begin
         for o in o_vec, t in t_vec
             if isdifferentiable(l, o, t)
-                d_dual = epsilon(value(l, dual(o, one(o)), dual(t, zero(t))))
+                d_dual = epsilon(l(dual(o, one(o)), dual(t, zero(t))))
                 d_comp = @inferred deriv(l, o, t)
                 @test abs(d_dual - d_comp) < 1e-10
-                val = @inferred value(l, o, t)
-                @test val ≈ value(l, o, t)
+                val = @inferred l(o, t)
+                @test val ≈ l(o, t)
                 @test d_comp ≈ deriv(l, o, t)
             end
         end
@@ -167,7 +167,7 @@ function test_scaledloss(l::SupervisedLoss, o_vec, t_vec)
             @test sl == λ * l
             @test sl == @inferred(Val(λ) * l)
             for o in o_vec, t in t_vec
-                @test @inferred(value(sl, o, t)) == λ * value(l, o, t)
+                @test @inferred(sl(o, t)) == λ * l(o, t)
                 @test @inferred(deriv(sl, o, t)) == λ * deriv(l, o, t)
                 @test @inferred(deriv2(sl, o, t)) == λ * deriv2(l, o, t)
             end
@@ -183,11 +183,11 @@ function test_weightedloss(l::MarginLoss, o_vec, t_vec)
             @test WeightedMarginLoss(l, w * 0.1) == WeightedMarginLoss(wl, 0.1)
             for o in o_vec, t in t_vec
                 if t == 1
-                    @test value(wl, o, t) == w * value(l, o, t)
+                    @test wl(o, t) == w * l(o, t)
                     @test deriv(wl, o, t) == w * deriv(l, o, t)
                     @test deriv2(wl, o, t) == w * deriv2(l, o, t)
                 else
-                    @test value(wl, o, t) == (1-w) * value(l, o, t)
+                    @test wl(o, t) == (1-w) * l(o, t)
                     @test deriv(wl, o, t) == (1-w) * deriv(l, o, t)
                     @test deriv2(wl, o, t) == (1-w) * deriv2(l, o, t)
                 end
@@ -425,11 +425,11 @@ end
     c = categorical(["Foo","Bar","Baz","Foo"])
 
     l = MisclassLoss()
-    @test value(l, c[1], c[1]) == 0.0
-    @test value(l, c[1], c[2]) == 1.0
-    @test value.(l, c, reverse(c)) == [0.0, 1.0, 1.0, 0.0]
+    @test l(c[1], c[1]) == 0.0
+    @test l(c[1], c[2]) == 1.0
+    @test l.(c, reverse(c)) == [0.0, 1.0, 1.0, 0.0]
 
     l = MisclassLoss{Float32}()
-    @test value(l, c[1], c[1]) isa Float32
-    @test value.(l, c, c) isa Vector{Float32}
+    @test l(c[1], c[1]) isa Float32
+    @test l.(c, c) isa Vector{Float32}
 end

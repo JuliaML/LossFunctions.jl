@@ -29,7 +29,16 @@ function WeightedMarginLoss(s::WeightedMarginLoss{L,W}, w::Number) where {L<:Mar
     WeightedMarginLoss(s.loss, Val(W*w))
 end
 
-for FUN in (:value, :deriv, :deriv2)
+function (l::WeightedMarginLoss{L,W})(output::Number, target::Number) where {L,W}
+    # We interpret the W to be the weight of the positive class
+    if target > 0
+        W * l.loss(output, target)
+    else
+        (1-W) * l.loss(output, target)
+    end
+end
+
+for FUN in (:deriv, :deriv2)
     @eval function ($FUN)(l::WeightedMarginLoss{L,W}, output::Number, target::Number) where {L,W}
         # We interpret the W to be the weight of the positive class
         if target > 0

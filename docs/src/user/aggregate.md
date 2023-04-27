@@ -34,18 +34,21 @@ say "naive", because it will not give us an acceptable
 performance.
 
 ```jldoctest
-julia> value.(L1DistLoss(), [2,5,-2], [1.,2,3])
+julia> loss = L1DistLoss()
+L1DistLoss()
+
+julia> loss.([2,5,-2], [1.,2,3])
 3-element Vector{Float64}:
  1.0
  3.0
  5.0
 
-julia> sum(value.(L1DistLoss(), [2,5,-2], [1.,2,3])) # WARNING: Bad code
+julia> sum(loss.([2,5,-2], [1.,2,3])) # WARNING: Bad code
 9.0
 ```
 
 This works as expected, but there is a price for it. Before the
-sum can be computed, [`value`](@ref) will allocate a temporary
+sum can be computed, the solution will allocate a temporary
 array and fill it with the element-wise results. After that,
 `sum` will iterate over this temporary array and accumulate the
 values accordingly. Bottom line: we allocate temporary memory
@@ -82,7 +85,7 @@ the results, we will see that the loss of the second observation
 was effectively counted twice.
 
 ```jldoctest
-julia> result = value.(L1DistLoss(), [2,5,-2], [1.,2,3]) .* [1,2,1]
+julia> result = L1DistLoss().([2,5,-2], [1.,2,3]) .* [1,2,1]
 3-element Vector{Float64}:
  1.0
  6.0

@@ -49,7 +49,7 @@ than one place.
 julia> loss = L2DistLoss()
 L2DistLoss()
 
-julia> value(loss, 3, 2)
+julia> loss(3, 2)
 1
 ```
 
@@ -66,9 +66,9 @@ yourself in the code below. As such they are zero-cost
 abstractions.
 
 ```julia-repl
-julia> v1(loss,y,t) = value(loss,y,t)
+julia> v1(loss,y,t) = loss(y,t)
 
-julia> v2(y,t) = value(L2DistLoss(),y,t)
+julia> v2(y,t) = L2DistLoss()(y,t)
 
 julia> @code_llvm v1(loss, 3, 2)
 define i64 @julia_v1_70944(i64, i64) #0 {
@@ -115,46 +115,17 @@ performance overhead, and zero memory allocations on the heap.
 
 The first thing we may want to do is compute the loss for some
 observation (singular). In fact, all losses are implemented on
-single observations under the hood. The core function to compute
-the value of a loss is `value`. We will see throughout the
-documentation that this function allows for a lot of different
-method signatures to accomplish a variety of tasks.
-
-```@docs
-value
-```
-
-It may be interesting to note, that this function also supports
-broadcasting and all the syntax benefits that come with it. Thus,
-it is quite simple to make use of preallocated memory for storing
-the element-wise results.
+single observations under the hood, and are functors.
 
 ```jldoctest bcast1
-julia> value.(L1DistLoss(), [2,5,-2], [1,2,3])
+julia> loss = L1DistLoss()
+L1DistLoss()
+
+julia> loss.([2,5,-2], [1,2,3])
 3-element Vector{Int64}:
  1
  3
  5
-
-julia> buffer = zeros(3); # preallocate a buffer
-
-julia> buffer .= value.(L1DistLoss(), [2,5,-2], [1.,2,3])
-3-element Vector{Float64}:
- 1.0
- 3.0
- 5.0
-```
-
-Furthermore, with the loop fusion changes that were introduced in
-Julia 0.6, one can also easily weight the influence of each
-observation without allocating a temporary array.
-
-```jldoctest bcast1
-julia> buffer .= value.(L1DistLoss(), [2,5,-2], [1.,2,3]) .* [2,1,0.5]
-3-element Vector{Float64}:
- 2.0
- 3.0
- 2.5
 ```
 
 ## Computing the 1st Derivatives
@@ -166,47 +137,13 @@ derivatives of the loss in one way or the other during the
 training process.
 
 To compute the derivative of some loss we expose the function
-[`deriv`](@ref). It supports the same exact method signatures as
-[`value`](@ref). It may be interesting to note explicitly, that
+[`deriv`](@ref). It may be interesting to note explicitly, that
 we always compute the derivative in respect to the predicted
 `output`, since we are interested in deducing in which direction
 the output should change.
 
 ```@docs
 deriv
-```
-
-Similar to [`value`](@ref), this function also supports
-broadcasting and all the syntax benefits that come with it. Thus,
-one can make use of preallocated memory for storing the
-element-wise derivatives.
-
-```jldoctest bcast2
-julia> deriv.(L2DistLoss(), [2,5,-2], [1,2,3])
-3-element Vector{Int64}:
-   2
-   6
- -10
-
-julia> buffer = zeros(3); # preallocate a buffer
-
-julia> buffer .= deriv.(L2DistLoss(), [2,5,-2], [1.,2,3])
-3-element Vector{Float64}:
-   2.0
-   6.0
- -10.0
-```
-
-Furthermore, with the loop fusion changes that were introduced in
-Julia 0.6, one can also easily weight the influence of each
-observation without allocating a temporary array.
-
-```jldoctest bcast2
-julia> buffer .= deriv.(L2DistLoss(), [2,5,-2], [1.,2,3]) .* [2,1,0.5]
-3-element Vector{Float64}:
-  4.0
-  6.0
- -5.0
 ```
 
 ## Computing the 2nd Derivatives
@@ -219,30 +156,6 @@ derivative in respect to the predicted `output`.
 ```@docs
 deriv2
 ```
-
-Just like [`deriv`](@ref) and [`value`](@ref), this function also
-supports broadcasting and all the syntax benefits that come with
-it. Thus, one can make use of preallocated memory for storing the
-element-wise derivatives.
-
-```jldoctest
-julia> deriv2.(LogitDistLoss(), [0.3, 2.3, -2], [-0.5, 1.2, 3])
-3-element Vector{Float64}:
- 0.42781939304058886
- 0.3747397590950413
- 0.013296113341580313
-
-julia> buffer = zeros(3); # preallocate a buffer
-
-julia> buffer .= deriv2.(LogitDistLoss(), [0.3, 2.3, -2], [-0.5, 1.2, 3])
-3-element Vector{Float64}:
- 0.42781939304058886
- 0.3747397590950413
- 0.013296113341580313
-```
-
-Furthermore [`deriv2`](@ref) supports all the same method
-signatures as [`deriv`](@ref) does.
 
 ## Properties of a Loss
 

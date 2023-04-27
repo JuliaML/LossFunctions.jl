@@ -42,10 +42,10 @@ ScaledLoss
 julia> lsloss = 1/2 * L2DistLoss()
 ScaledLoss{L2DistLoss, 0.5}(L2DistLoss())
 
-julia> value(L2DistLoss(), 4.0, 0.0)
+julia> L2DistLoss()(4.0, 0.0)
 16.0
 
-julia> value(lsloss, 4.0, 0.0)
+julia> lsloss(4.0, 0.0)
 8.0
 ```
 
@@ -102,16 +102,16 @@ WeightedMarginLoss
 julia> myloss = WeightedMarginLoss(HingeLoss(), 0.8)
 WeightedMarginLoss{L1HingeLoss, 0.8}(L1HingeLoss())
 
-julia> value(myloss, -4.0, 1.0) # positive class
+julia> myloss(-4.0, 1.0) # positive class
 4.0
 
-julia> value(HingeLoss(), -4.0, 1.0)
+julia> HingeLoss()(-4.0, 1.0)
 5.0
 
-julia> value(myloss, 4.0, -1.0) # negative class
+julia> myloss(4.0, -1.0) # negative class
 0.9999999999999998
 
-julia> value(HingeLoss(), 4.0, -1.0)
+julia> HingeLoss()(4.0, -1.0)
 5.0
 ```
 

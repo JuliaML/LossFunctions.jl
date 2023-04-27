@@ -60,12 +60,12 @@ From an implementation perspective, we should point out that all
 the concrete loss "functions" that this package provides are
 actually defined as immutable types, instead of native Julia
 functions. We can compute the value of some type of loss using
-the function [`value`](@ref). Let us start with an example of how
+the functor interface. Let us start with an example of how
 to compute the loss of a single observation (i.e. two numbers).
 
 ```julia-repl
-#                loss       ŷ    y
-julia> value(L2DistLoss(), 0.5, 1.0)
+#         loss       ŷ    y
+julia> L2DistLoss()(0.5, 1.0)
 0.25
 ```
 
@@ -78,7 +78,7 @@ julia> true_targets = [  1,  0, -2];
 
 julia> pred_outputs = [0.5,  2, -1];
 
-julia> value.(L2DistLoss(), pred_outputs, true_targets)
+julia> L2DistLoss().(pred_outputs, true_targets)
 3-element Vector{Float64}:
  0.25
  4.0

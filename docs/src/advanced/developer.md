@@ -60,9 +60,7 @@ MarginLoss
 
 Each of the three abstract types listed above serves a purpose
 other than dispatch. All losses that belong to the same family
-share functionality to some degree. For example all subtypes of
-[`SupervisedLoss`](@ref) share the same implementations for the
-vectorized versions of [`value`](@ref) and [`deriv`](@ref).
+share functionality to some degree.
 
 More interestingly, the abstract types [`DistanceLoss`](@ref) and
 [`MarginLoss`](@ref), serve an additional purpose aside from
