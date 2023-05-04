@@ -5,7 +5,6 @@ Scalar = Union{Number,CategoricalValue}
 (loss::DistanceLoss)(output::Number, target::Number)       = loss(output - target)
 deriv(loss::DistanceLoss, output::Number, target::Number)  = deriv(loss, output - target)
 deriv2(loss::DistanceLoss, output::Number, target::Number) = deriv2(loss, output - target)
-
 (loss::MarginLoss)(output::Number, target::Number)         = loss(target * output)
 deriv(loss::MarginLoss, output::Number, target::Number)    = target * deriv(loss, target * output)
 deriv2(loss::MarginLoss, output::Number, target::Number)   = deriv2(loss, target * output)
