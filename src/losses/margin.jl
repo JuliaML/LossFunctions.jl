@@ -127,7 +127,8 @@ L(a) = \ln (1 + e^{-a})
 struct LogitMarginLoss <: MarginLoss end
 (loss::LogitMarginLoss)(agreement::Number) = log1p(exp(-agreement))
 deriv(loss::LogitMarginLoss, agreement::Number) = -one(agreement) / (one(agreement) + exp(agreement))
-deriv2(loss::LogitMarginLoss, agreement::Number) = (eᵗ = exp(agreement); eᵗ / abs2(one(eᵗ) + eᵗ))
+deriv2(loss::LogitMarginLoss, agreement::Number) = (eᵗ = exp(agreement);
+eᵗ / abs2(one(eᵗ) + eᵗ))
 
 isunivfishercons(::LogitMarginLoss) = true
 isdifferentiable(::LogitMarginLoss) = true
@@ -222,8 +223,9 @@ L(a) = \max \{ 0, 1 - a \}^2
 struct L2HingeLoss <: MarginLoss end
 
 (loss::L2HingeLoss)(agreement::T) where {T<:Number} = agreement >= 1 ? zero(T) : abs2(one(T) - agreement)
-deriv(loss::L2HingeLoss, agreement::T) where {T<:Number} = agreement >= 1 ? zero(T) : convert(T,2) * (agreement - one(T))
-deriv2(loss::L2HingeLoss, agreement::T) where {T<:Number} = agreement >= 1 ? zero(T) : convert(T,2)
+deriv(loss::L2HingeLoss, agreement::T) where {T<:Number} =
+  agreement >= 1 ? zero(T) : convert(T, 2) * (agreement - one(T))
+deriv2(loss::L2HingeLoss, agreement::T) where {T<:Number} = agreement >= 1 ? zero(T) : convert(T, 2)
 
 isunivfishercons(::L2HingeLoss) = true
 isdifferentiable(::L2HingeLoss) = true
@@ -267,32 +269,32 @@ L(a) = \begin{cases} \frac{0.5}{\gamma} \cdot \max \{ 0, 1 - a \} ^2 & \quad \te
 ```
 """
 struct SmoothedL1HingeLoss{T<:AbstractFloat} <: MarginLoss
-    gamma::T
+  gamma::T
 
-    function SmoothedL1HingeLoss{T}(γ::T) where T
-        γ > 0 || error("γ must be strictly positive")
-        new{T}(γ)
-    end
+  function SmoothedL1HingeLoss{T}(γ::T) where {T}
+    γ > 0 || error("γ must be strictly positive")
+    new{T}(γ)
+  end
 end
 SmoothedL1HingeLoss(γ::T) where {T<:AbstractFloat} = SmoothedL1HingeLoss{T}(γ)
 SmoothedL1HingeLoss(γ) = SmoothedL1HingeLoss(Float64(γ))
 
-function (loss::SmoothedL1HingeLoss{R})(agreement::T)::promote_type(R,T) where {R,T<:Number}
-    if agreement >= 1 - loss.gamma
-        R(0.5) / loss.gamma * abs2(max(zero(T), one(T) - agreement))
-    else
-        one(T) - loss.gamma / R(2) - agreement
-    end
+function (loss::SmoothedL1HingeLoss{R})(agreement::T)::promote_type(R, T) where {R,T<:Number}
+  if agreement >= 1 - loss.gamma
+    R(0.5) / loss.gamma * abs2(max(zero(T), one(T) - agreement))
+  else
+    one(T) - loss.gamma / R(2) - agreement
+  end
 end
-function deriv(loss::SmoothedL1HingeLoss{R}, agreement::T)::promote_type(R,T) where {R,T<:Number}
-    if agreement >= 1 - loss.gamma
-        agreement >= 1 ? zero(T) : (agreement - one(T)) / loss.gamma
-    else
-        -one(T)
-    end
+function deriv(loss::SmoothedL1HingeLoss{R}, agreement::T)::promote_type(R, T) where {R,T<:Number}
+  if agreement >= 1 - loss.gamma
+    agreement >= 1 ? zero(T) : (agreement - one(T)) / loss.gamma
+  else
+    -one(T)
+  end
 end
-function deriv2(loss::SmoothedL1HingeLoss{R}, agreement::T)::promote_type(R,T) where {R,T<:Number}
-    agreement < 1 - loss.gamma || agreement > 1 ? zero(T) : one(T) / loss.gamma
+function deriv2(loss::SmoothedL1HingeLoss{R}, agreement::T)::promote_type(R, T) where {R,T<:Number}
+  agreement < 1 - loss.gamma || agreement > 1 ? zero(T) : one(T) / loss.gamma
 end
 
 isdifferentiable(::SmoothedL1HingeLoss) = true
@@ -339,17 +341,17 @@ L(a) = \begin{cases} \max \{ 0, 1 - a \} ^2 & \quad \text{if } a \ge -1 \\ - 4 a
 struct ModifiedHuberLoss <: MarginLoss end
 
 function (loss::ModifiedHuberLoss)(agreement::T) where {T<:Number}
-    agreement >= -1 ? abs2(max(zero(T), one(agreement) - agreement)) : -convert(T,4) * agreement
+  agreement >= -1 ? abs2(max(zero(T), one(agreement) - agreement)) : -convert(T, 4) * agreement
 end
 function deriv(loss::ModifiedHuberLoss, agreement::T) where {T<:Number}
-    if agreement >= -1
-        agreement > 1 ? zero(T) : convert(T,2)*agreement - convert(T,2)
-    else
-        -convert(T,4)
-    end
+  if agreement >= -1
+    agreement > 1 ? zero(T) : convert(T, 2) * agreement - convert(T, 2)
+  else
+    -convert(T, 4)
+  end
 end
 function deriv2(loss::ModifiedHuberLoss, agreement::T) where {T<:Number}
-    agreement < -1 || agreement > 1 ? zero(T) : convert(T,2)
+  agreement < -1 || agreement > 1 ? zero(T) : convert(T, 2)
 end
 
 isdifferentiable(::ModifiedHuberLoss) = true
@@ -396,8 +398,8 @@ L(a) = {\left( 1 - a \right)}^2
 struct L2MarginLoss <: MarginLoss end
 
 (loss::L2MarginLoss)(agreement::T) where {T<:Number} = abs2(one(T) - agreement)
-deriv(loss::L2MarginLoss, agreement::T) where {T<:Number} = convert(T,2) * (agreement - one(T))
-deriv2(loss::L2MarginLoss, agreement::T) where {T<:Number} = convert(T,2)
+deriv(loss::L2MarginLoss, agreement::T) where {T<:Number} = convert(T, 2) * (agreement - one(T))
+deriv2(loss::L2MarginLoss, agreement::T) where {T<:Number} = convert(T, 2)
 
 isunivfishercons(::L2MarginLoss) = true
 isdifferentiable(::L2MarginLoss) = true
@@ -494,7 +496,7 @@ struct SigmoidLoss <: MarginLoss end
 
 (loss::SigmoidLoss)(agreement::Number) = one(agreement) - tanh(agreement)
 deriv(loss::SigmoidLoss, agreement::Number) = -abs2(sech(agreement))
-deriv2(loss::SigmoidLoss, agreement::T) where {T<:Number} = convert(T,2) * tanh(agreement) * abs2(sech(agreement))
+deriv2(loss::SigmoidLoss, agreement::T) where {T<:Number} = convert(T, 2) * tanh(agreement) * abs2(sech(agreement))
 
 isunivfishercons(::SigmoidLoss) = true
 isdifferentiable(::SigmoidLoss) = true
@@ -541,32 +543,32 @@ L(a) = \begin{cases} 1 - a & \quad \text{if } a \ge \frac{q}{q+1} \\ \frac{1}{a^
 ```
 """
 struct DWDMarginLoss{T<:AbstractFloat} <: MarginLoss
-    q::T
-    function DWDMarginLoss{T}(q::T) where T
-        q > 0 || error("q must be strictly positive")
-        new{T}(q)
-    end
+  q::T
+  function DWDMarginLoss{T}(q::T) where {T}
+    q > 0 || error("q must be strictly positive")
+    new{T}(q)
+  end
 end
 DWDMarginLoss(q::T) where {T<:AbstractFloat} = DWDMarginLoss{T}(q)
 DWDMarginLoss(q) = DWDMarginLoss(Float64(q))
 
 function (loss::DWDMarginLoss{R})(agreement::T)::promote_type(R, T) where {R,T<:Number}
-    q = loss.q
-    if agreement <= q/(q+1)
-        R(1) - agreement
-    else
-        (q^q/(q+1)^(q+1)) / agreement^q
-    end
+  q = loss.q
+  if agreement <= q / (q + 1)
+    R(1) - agreement
+  else
+    (q^q / (q + 1)^(q + 1)) / agreement^q
+  end
 end
 
 function deriv(loss::DWDMarginLoss{R}, agreement::T)::promote_type(R, T) where {R,T<:Number}
-    q = loss.q
-    agreement <= q/(q+1) ? -one(T) : -(q/(q+1))^(q+1) / agreement^(q+1)
+  q = loss.q
+  agreement <= q / (q + 1) ? -one(T) : -(q / (q + 1))^(q + 1) / agreement^(q + 1)
 end
 
 function deriv2(loss::DWDMarginLoss{R}, agreement::T)::promote_type(R, T) where {R,T<:Number}
-    q = loss.q
-    agreement <= q/(q+1) ? zero(T) : ( (q^(q+1))/((q+1)^q) ) / agreement^(q+2)
+  q = loss.q
+  agreement <= q / (q + 1) ? zero(T) : ((q^(q + 1)) / ((q + 1)^q)) / agreement^(q + 2)
 end
 
 isdifferentiable(::DWDMarginLoss) = true

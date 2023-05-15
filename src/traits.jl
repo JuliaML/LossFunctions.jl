@@ -134,8 +134,7 @@ such that
 
 Every convex function is locally lipschitz continuous.
 """
-islocallylipschitzcont(loss::SupervisedLoss) =
-    isconvex(loss) || islipschitzcont(loss)
+islocallylipschitzcont(loss::SupervisedLoss) = isconvex(loss) || islipschitzcont(loss)
 
 """
     islipschitzcont(loss) -> Bool
@@ -220,8 +219,7 @@ ismarginbased(loss::MarginLoss) = true
     isclasscalibrated(loss) -> Bool
 """
 isclasscalibrated(loss::SupervisedLoss) = false
-isclasscalibrated(loss::MarginLoss) =
-    isconvex(loss) && isdifferentiable(loss, 0) && deriv(loss, 0) < 0
+isclasscalibrated(loss::MarginLoss) = isconvex(loss) && isdifferentiable(loss, 0) && deriv(loss, 0) < 0
 
 """
     issymmetric(loss) -> Bool
