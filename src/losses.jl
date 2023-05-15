@@ -2,12 +2,12 @@
 Scalar = Union{Number,CategoricalValue}
 
 # fallback to unary evaluation
-(loss::DistanceLoss)(output::Number, target::Number)       = loss(output - target)
-deriv(loss::DistanceLoss, output::Number, target::Number)  = deriv(loss, output - target)
+(loss::DistanceLoss)(output::Number, target::Number) = loss(output - target)
+deriv(loss::DistanceLoss, output::Number, target::Number) = deriv(loss, output - target)
 deriv2(loss::DistanceLoss, output::Number, target::Number) = deriv2(loss, output - target)
-(loss::MarginLoss)(output::Number, target::Number)         = loss(target * output)
-deriv(loss::MarginLoss, output::Number, target::Number)    = target * deriv(loss, target * output)
-deriv2(loss::MarginLoss, output::Number, target::Number)   = deriv2(loss, target * output)
+(loss::MarginLoss)(output::Number, target::Number) = loss(target * output)
+deriv(loss::MarginLoss, output::Number, target::Number) = target * deriv(loss, target * output)
+deriv2(loss::MarginLoss, output::Number, target::Number) = deriv2(loss, target * output)
 
 # broadcasting behavior
 Broadcast.broadcastable(loss::SupervisedLoss) = Ref(loss)
@@ -34,7 +34,7 @@ include("losses/weighted.jl")
 Return sum of `loss` values over the iterables `outputs` and `targets`.
 """
 function sum(loss::SupervisedLoss, outputs, targets)
-    sum(loss(ŷ, y) for (ŷ, y) in zip(outputs, targets))
+  sum(loss(ŷ, y) for (ŷ, y) in zip(outputs, targets))
 end
 
 """
@@ -45,9 +45,9 @@ The `weights` determine the importance of each observation. The option
 `normalize` divides the result by the sum of the weights.
 """
 function sum(loss::SupervisedLoss, outputs, targets, weights; normalize=true)
-    s = sum(w * loss(ŷ, y) for (ŷ, y, w) in zip(outputs, targets, weights))
-    n = normalize ? sum(weights) : one(first(weights))
-    s / n
+  s = sum(w * loss(ŷ, y) for (ŷ, y, w) in zip(outputs, targets, weights))
+  n = normalize ? sum(weights) : one(first(weights))
+  s / n
 end
 
 """
@@ -56,7 +56,7 @@ end
 Return mean of `loss` values over the iterables `outputs` and `targets`.
 """
 function mean(loss::SupervisedLoss, outputs, targets)
-    mean(loss(ŷ, y) for (ŷ, y) in zip(outputs, targets))
+  mean(loss(ŷ, y) for (ŷ, y) in zip(outputs, targets))
 end
 
 """
@@ -67,7 +67,7 @@ The `weights` determine the importance of each observation. The option
 `normalize` divides the result by the sum of the weights.
 """
 function mean(loss::SupervisedLoss, outputs, targets, weights; normalize=true)
-    m = mean(w * loss(ŷ, y) for (ŷ, y, w) in zip(outputs, targets, weights))
-    n = normalize ? sum(weights) : one(first(weights))
-    m / n
+  m = mean(w * loss(ŷ, y) for (ŷ, y, w) in zip(outputs, targets, weights))
+  n = normalize ? sum(weights) : one(first(weights))
+  m / n
 end
