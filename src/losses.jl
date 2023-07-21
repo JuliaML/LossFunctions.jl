@@ -1,6 +1,3 @@
-# type alias to make code more readable
-Scalar = Union{Number,CategoricalValue}
-
 # fallback to unary evaluation
 (loss::DistanceLoss)(output::Number, target::Number) = loss(output - target)
 deriv(loss::DistanceLoss, output::Number, target::Number) = deriv(loss, output - target)
