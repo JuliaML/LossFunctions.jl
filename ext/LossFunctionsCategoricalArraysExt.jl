@@ -1,11 +1,11 @@
 module LossFunctionsCategoricalArraysExt
 
 if isdefined(Base, :get_extension)
-    import LossFunctions: MisclassLoss, deriv, deriv2
-    import CategoricalArrays: CategoricalValue
+  import LossFunctions: MisclassLoss, deriv, deriv2
+  import CategoricalArrays: CategoricalValue
 else
-    import ..LossFunctions: MisclassLoss, deriv, deriv2
-    import ..CategoricalArrays: CategoricalValue
+  import ..LossFunctions: MisclassLoss, deriv, deriv2
+  import ..CategoricalArrays: CategoricalValue
 end
 
 # type alias to make code more readable
