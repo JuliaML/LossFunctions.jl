@@ -17,9 +17,9 @@ MisclassLoss() = MisclassLoss{Float64}()
 deriv(::MisclassLoss{R}, agreement::Bool) where {R} = zero(R)
 deriv2(::MisclassLoss{R}, agreement::Bool) where {R} = zero(R)
 
-(loss::MisclassLoss)(output::Scalar, target::Scalar) = loss(target == output)
-deriv(loss::MisclassLoss, output::Scalar, target::Scalar) = deriv(loss, target == output)
-deriv2(loss::MisclassLoss, output::Scalar, target::Scalar) = deriv2(loss, target == output)
+(loss::MisclassLoss)(output::Number, target::Number) = loss(target == output)
+deriv(loss::MisclassLoss, output::Number, target::Number) = deriv(loss, target == output)
+deriv2(loss::MisclassLoss, output::Number, target::Number) = deriv2(loss, target == output)
 
 isminimizable(::MisclassLoss) = false
 isdifferentiable(::MisclassLoss) = false
