@@ -17,3 +17,6 @@ LossFunctionsCategoricalArraysExt = "CategoricalArrays"
 CategoricalArrays = "0.10"
 Requires = "1"
 julia = "1.6"
+
+[extras]
+CategoricalArrays = "324d7699-5711-5eae-9e2f-1d82baa6b597"
