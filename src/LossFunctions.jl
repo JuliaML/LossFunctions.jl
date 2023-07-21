@@ -17,7 +17,9 @@ include("io.jl")
 
 # Extensions
 if !isdefined(Base, :get_extension)
-  @init @require CategoricalArrays = "324d7699-5711-5eae-9e2f-1d82baa6b597" include("../ext/LossFunctionsCategoricalArraysExt.jl")
+  @init @require CategoricalArrays = "324d7699-5711-5eae-9e2f-1d82baa6b597" include(
+    "../ext/LossFunctionsCategoricalArraysExt.jl"
+  )
 end
 
 export
