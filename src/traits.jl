@@ -1,3 +1,9 @@
+# ------------------------------------------------------------------
+# Licensed under the MIT License. See LICENCE in the project root.
+# ------------------------------------------------------------------
+
+module Traits
+
 """
 Baseclass for all losses. A loss is some (possibly simplified)
 function `L(x, y, ŷ)`, of features `x`, targets `y` and outputs
@@ -240,3 +246,53 @@ issymmetric(loss::SupervisedLoss) = false
 Return `true` if the given `loss` is a minimizable loss.
 """
 isminimizable(loss::SupervisedLoss) = isconvex(loss)
+
+export
+  Loss,
+  SupervisedLoss,
+  MarginLoss,
+  DistanceLoss,
+  deriv,
+  deriv2,
+  isdistancebased,
+  ismarginbased,
+  isminimizable,
+  isdifferentiable,
+  istwicedifferentiable,
+  isconvex,
+  isstrictlyconvex,
+  isstronglyconvex,
+  isnemitski,
+  isunivfishercons,
+  isfishercons,
+  islipschitzcont,
+  islocallylipschitzcont,
+  isclipable,
+  isclasscalibrated,
+  issymmetric
+
+end
+
+import .Traits:
+  Loss,
+  SupervisedLoss,
+  MarginLoss,
+  DistanceLoss,
+  deriv,
+  deriv2,
+  isdistancebased,
+  ismarginbased,
+  isminimizable,
+  isdifferentiable,
+  istwicedifferentiable,
+  isconvex,
+  isstrictlyconvex,
+  isstronglyconvex,
+  isnemitski,
+  isunivfishercons,
+  isfishercons,
+  islipschitzcont,
+  islocallylipschitzcont,
+  isclipable,
+  isclasscalibrated,
+  issymmetric

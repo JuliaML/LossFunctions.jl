@@ -1,3 +1,7 @@
+# ------------------------------------------------------------------
+# Licensed under the MIT License. See LICENCE in the project root.
+# ------------------------------------------------------------------
+
 module LossFunctions
 
 using Markdown
@@ -23,30 +27,6 @@ if !isdefined(Base, :get_extension)
 end
 
 export
-  # trait functions
-  Loss,
-  SupervisedLoss,
-  MarginLoss,
-  DistanceLoss,
-  deriv,
-  deriv2,
-  isdistancebased,
-  ismarginbased,
-  isminimizable,
-  isdifferentiable,
-  istwicedifferentiable,
-  isconvex,
-  isstrictlyconvex,
-  isstronglyconvex,
-  isnemitski,
-  isunivfishercons,
-  isfishercons,
-  islipschitzcont,
-  islocallylipschitzcont,
-  isclipable,
-  isclasscalibrated,
-  issymmetric,
-
   # margin-based losses
   ZeroOneLoss,
   LogitMarginLoss,

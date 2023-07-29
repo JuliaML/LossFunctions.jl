@@ -1,3 +1,7 @@
+# ------------------------------------------------------------------
+# Licensed under the MIT License. See LICENCE in the project root.
+# ------------------------------------------------------------------
+
 # fallback to unary evaluation
 (loss::DistanceLoss)(output::Number, target::Number) = loss(output - target)
 deriv(loss::DistanceLoss, output::Number, target::Number) = deriv(loss, output - target)

@@ -1,3 +1,7 @@
+# ------------------------------------------------------------------
+# Licensed under the MIT License. See LICENCE in the project root.
+# ------------------------------------------------------------------
+
 Base.print(io::IO, loss::SupervisedLoss, args...) = print(io, typeof(loss).name.name, args...)
 Base.print(io::IO, loss::L1DistLoss, args...) = print(io, "L1DistLoss", args...)
 Base.print(io::IO, loss::L2DistLoss, args...) = print(io, "L2DistLoss", args...)
