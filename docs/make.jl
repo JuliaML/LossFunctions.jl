@@ -1,9 +1,7 @@
 using Documenter, LossFunctions
 
-DocMeta.setdocmeta!(LossFunctions, :DocTestSetup, :(using LossFunctions); recursive=true)
-
 makedocs(
-  modules=[LossFunctions],
+  modules=[LossFunctions, LossFunctions.Traits],
   authors="Christof Stocker, Tom Breloff, Alex Williams",
   repo="https://github.com/JuliaML/LossFunctions.jl/blob/{commit}{path}#{line}",
   sitename="LossFunctions.jl",

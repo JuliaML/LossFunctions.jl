@@ -1,6 +1,7 @@
 ```@meta
 DocTestSetup = quote
     using LossFunctions
+    using LossFunctions.Traits
 end
 ```
 
