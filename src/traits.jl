@@ -247,8 +247,7 @@ Return `true` if the given `loss` is a minimizable loss.
 """
 isminimizable(loss::SupervisedLoss) = isconvex(loss)
 
-export
-  Loss,
+export Loss,
   SupervisedLoss,
   MarginLoss,
   DistanceLoss,
