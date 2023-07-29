@@ -252,6 +252,7 @@ export
   # using LossFunctions.Traits
   Loss,
   SupervisedLoss,
+  UnsupervisedLoss,
   MarginLoss,
   DistanceLoss,
   deriv,
@@ -280,6 +281,7 @@ import .Traits:
   # to add method definitions
   Loss,
   SupervisedLoss,
+  UnsupervisedLoss,
   MarginLoss,
   DistanceLoss,
   deriv,
