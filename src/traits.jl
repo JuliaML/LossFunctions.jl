@@ -248,6 +248,8 @@ Return `true` if the given `loss` is a minimizable loss.
 isminimizable(loss::SupervisedLoss) = isconvex(loss)
 
 export
+  # export traits whenever users type:
+  # using LossFunctions.Traits
   Loss,
   SupervisedLoss,
   MarginLoss,
@@ -274,6 +276,8 @@ export
 end
 
 import .Traits:
+  # import traits into current module
+  # to add method definitions
   Loss,
   SupervisedLoss,
   MarginLoss,
