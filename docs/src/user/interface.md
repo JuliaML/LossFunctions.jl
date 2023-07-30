@@ -1,6 +1,7 @@
 ```@meta
 DocTestSetup = quote
     using LossFunctions
+    using LossFunctions.Traits
 end
 ```
 
@@ -25,6 +26,12 @@ section will provide an overview of the basic functionality that
 is available for all the different types of losses. We will
 discuss how to create a loss, how to compute its value and
 derivative, and how to query its properties.
+
+```@docs
+Loss
+SupervisedLoss
+UnsupervisedLoss
+```
 
 ## Instantiating a Loss
 
@@ -180,17 +187,20 @@ a loss. It follows a list of implemented property-functions
 defined in [LearnBase.jl](https://github.com/JuliaML/LearnBase.jl).
 
 ```@docs
+isdistancebased
+ismarginbased
+isminimizable
+isdifferentiable
+istwicedifferentiable
 isconvex
 isstrictlyconvex
 isstronglyconvex
-isdifferentiable
-istwicedifferentiable
-islocallylipschitzcont
-islipschitzcont
 isnemitski
+isunivfishercons
+isfishercons
+islipschitzcont
+islocallylipschitzcont
 isclipable
-ismarginbased
 isclasscalibrated
-isdistancebased
 issymmetric
 ```
