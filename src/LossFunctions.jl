@@ -8,7 +8,10 @@ using Markdown
 
 import Base: sum
 import Statistics: mean
-import Requires: @init, @require
+
+if !isdefined(Base, :get_extension)
+  import Requires: @require
+end
 
 # trait functions
 include("traits.jl")
@@ -20,10 +23,12 @@ include("losses.jl")
 include("io.jl")
 
 # Extensions
-if !isdefined(Base, :get_extension)
-  @init @require CategoricalArrays = "324d7699-5711-5eae-9e2f-1d82baa6b597" include(
-    "../ext/LossFunctionsCategoricalArraysExt.jl"
-  )
+@static if !isdefined(Base, :get_extension)
+  function __init__()
+    @require CategoricalArrays = "324d7699-5711-5eae-9e2f-1d82baa6b597" include(
+      "../ext/LossFunctionsCategoricalArraysExt.jl"
+    )
+  end
 end
 
 export
