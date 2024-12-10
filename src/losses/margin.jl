@@ -526,7 +526,7 @@ different than the [SmoothedL1HingeLoss](@ref). It is Lipschitz
 continuous and convex, but not strictly convex.
 
 ```math
-L(a) = \begin{cases} 1 - a & \quad \text{if } a \ge \frac{q}{q+1} \\ \frac{1}{a^q} \frac{q^q}{(q+1)^{q+1}} & \quad \text{otherwise}\\ \end{cases}
+L(a) = \begin{cases} 1 - a & \quad \text{if } a \le \frac{q}{q+1} \\ \frac{1}{a^q} \frac{q^q}{(q+1)^{q+1}} & \quad \text{otherwise}\\ \end{cases}
 ```
 
 ---
