@@ -131,8 +131,7 @@ L(a) = \ln (1 + e^{-a})
 struct LogitMarginLoss <: MarginLoss end
 (loss::LogitMarginLoss)(agreement::Number) = log1p(exp(-agreement))
 deriv(loss::LogitMarginLoss, agreement::Number) = -one(agreement) / (one(agreement) + exp(agreement))
-deriv2(loss::LogitMarginLoss, agreement::Number) = (eᵗ = exp(agreement);
-eᵗ / abs2(one(eᵗ) + eᵗ))
+deriv2(loss::LogitMarginLoss, agreement::Number) = (eᵗ=exp(agreement); eᵗ / abs2(one(eᵗ) + eᵗ))
 
 isunivfishercons(::LogitMarginLoss) = true
 isdifferentiable(::LogitMarginLoss) = true
