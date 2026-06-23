@@ -9,15 +9,6 @@ that are commonly used in Machine Learning._
 [![Build Status](https://img.shields.io/github/actions/workflow/status/JuliaML/LossFunctions.jl/CI.yml?branch=master&style=flat-square")](https://github.com/JuliaML/LossFunctions.jl/actions)
 [![Coverage Status](https://img.shields.io/codecov/c/github/JuliaML/LossFunctions.jl?style=flat-square)](https://codecov.io/gh/JuliaML/LossFunctions.jl)
 
-## Available Losses
-
- **Distance-based (Regression)** | **Margin-based (Classification)**
-:-------------------------------:|:----------------------------------:
-![distance_losses](https://rawgithub.com/JuliaML/FileStorage/master/LossFunctions/distance.svg) | ![margin_losses](https://rawgithub.com/JuliaML/FileStorage/master/LossFunctions/margin.svg)
-
-Please consult the [documentation](https://JuliaML.github.io/LossFunctions.jl/stable)
-for other losses.
-
 ## Introduction
 
 Typically, the loss functions we work with in Machine Learning

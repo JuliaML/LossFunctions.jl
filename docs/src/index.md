@@ -85,23 +85,9 @@ difference between the predicted output and the true target as a
 proxy variable to quantify the quality of individual predictions.
 
 
-```@raw html
-<table><tbody><tr><td style="text-align: left;">
-```
-
 ```@contents
 Pages = ["losses/distance.md"]
 Depth = 2
-```
-
-```@raw html
-</td><td>
-```
-
-![distance-based losses](https://rawgithub.com/JuliaML/FileStorage/master/LossFunctions/distance.svg)
-
-```@raw html
-</td></tr></tbody></table>
 ```
 
 ### Loss Functions for Classification
@@ -112,23 +98,9 @@ do not care about the difference between true target and
 prediction. Instead they penalize predictions based on how well
 they agree with the sign of the target.
 
-```@raw html
-<table><tbody><tr><td style="text-align: left;">
-```
-
 ```@contents
 Pages = ["losses/margin.md"]
 Depth = 2
-```
-
-```@raw html
-</td><td>
-```
-
-![margin-based losses](https://rawgithub.com/JuliaML/FileStorage/master/LossFunctions/margin.svg)
-
-```@raw html
-</td></tr></tbody></table>
 ```
 
 ## Advanced Topics
