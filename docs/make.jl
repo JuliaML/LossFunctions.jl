@@ -1,6 +1,5 @@
 using Documenter, LossFunctions
 
-# import loss traits
 using LossFunctions.Traits
 
 makedocs(
@@ -23,4 +22,7 @@ makedocs(
   ]
 )
 
-deploydocs(repo="github.com/JuliaML/LossFunctions.jl.git")
+deploydocs(;
+  repo="github.com/JuliaML/LossFunctions.jl.git",
+  versions=["stable" => "v^", "dev" => "dev"]
+)
