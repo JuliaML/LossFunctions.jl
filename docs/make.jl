@@ -22,4 +22,4 @@ makedocs(
   ]
 )
 
-deploydocs(; repo="github.com/JuliaML/LossFunctions.jl.git", versions=["stable" => "v^", "dev" => "dev"])
+deploydocs(repo="github.com/JuliaML/LossFunctions.jl.git", versions=["stable" => "v^", "dev" => "dev"])
