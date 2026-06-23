@@ -27,12 +27,6 @@ is available for all the different types of losses. We will
 discuss how to create a loss, how to compute its value and
 derivative, and how to query its properties.
 
-```@docs
-Loss
-SupervisedLoss
-UnsupervisedLoss
-```
-
 ## Instantiating a Loss
 
 Losses are immutable types. As such, one has to instantiate one
@@ -162,6 +156,18 @@ derivative in respect to the predicted `output`.
 
 ```@docs
 deriv2
+```
+
+## Aggregating losses over collections
+
+The [`sum`](@ref) and [`mean`](@ref) of losses over collections
+can be computed efficiently with the following methods:
+
+```@docs
+sum(::SupervisedLoss, ::Any, ::Any)
+sum(::SupervisedLoss, ::Any, ::Any, ::Any)
+mean(::SupervisedLoss, ::Any, ::Any)
+mean(::SupervisedLoss, ::Any, ::Any, ::Any)
 ```
 
 ## Properties of a Loss

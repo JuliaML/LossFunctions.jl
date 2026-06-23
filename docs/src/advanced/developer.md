@@ -34,7 +34,9 @@ supervised losses. As such, we barely mention other types of
 losses anywhere in this documentation.
 
 ```@docs
+Loss
 SupervisedLoss
+UnsupervisedLoss
 ```
 
 There are two interesting sub-families of supervised loss
