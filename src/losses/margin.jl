@@ -10,7 +10,7 @@ observation with a loss of `1` while every correctly classified
 observation has a loss of `0`.
 It is not convex nor continuous and thus seldom used directly.
 Instead one usually works with some classification-calibrated
-surrogate loss, such as [L1HingeLoss](@ref).
+surrogate loss, such as [`L1HingeLoss`](@ref).
 
 ```math
 L(a) = \begin{cases} 1 & \quad \text{if } a < 0 \\ 0 & \quad \text{if } a >= 0\\ \end{cases}
@@ -520,8 +520,8 @@ isclipable(::SigmoidLoss) = false
     DWDMarginLoss <: MarginLoss
 
 The distance weighted discrimination margin loss. It is a
-differentiable generalization of the [L1HingeLoss](@ref) that is
-different than the [SmoothedL1HingeLoss](@ref). It is Lipschitz
+differentiable generalization of the [`L1HingeLoss`](@ref) that is
+different than the [`SmoothedL1HingeLoss`](@ref). It is Lipschitz
 continuous and convex, but not strictly convex.
 
 ```math
